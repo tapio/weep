@@ -5,7 +5,7 @@
 namespace
 {
 	static SDL_Window* s_window = nullptr;
-	static SDL_Renderer* s_renderer = nullptr;
+	static SDL_GLContext s_glcontext = nullptr;
 }
 
 void Platform::panic(const char* fmt, ...)
@@ -21,6 +21,12 @@ void Platform::init()
 		panic(SDL_GetError());
 	}
 
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
 	const int w = 1280, h = 720;
 	s_window = SDL_CreateWindow("App",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h,
@@ -29,8 +35,8 @@ void Platform::init()
 		panic(SDL_GetError());
 	}
 
-	s_renderer = SDL_CreateRenderer(s_window, -1, SDL_RENDERER_ACCELERATED);
-	if (!s_renderer){
+	s_glcontext = SDL_GL_CreateContext(s_window);
+	if (!s_glcontext){
 		panic(SDL_GetError());
 	}
 
@@ -39,7 +45,7 @@ void Platform::init()
 
 void Platform::deinit()
 {
-	SDL_DestroyRenderer(s_renderer);
+	SDL_GL_DeleteContext(s_glcontext);
 	SDL_DestroyWindow(s_window);
 	SDL_Quit();
 }
