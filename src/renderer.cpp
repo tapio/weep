@@ -2,8 +2,7 @@
 #include "shader.hpp"
 #include "geometry.hpp"
 #include "platform.hpp"
-
-#include <GL/glcorearb.h>
+#include "glutil.hpp"
 
 namespace
 {
@@ -16,6 +15,9 @@ Renderer::Renderer()
 	logInfo("OpenGL Vendor:   %s", glGetString(GL_VENDOR));
 	logInfo("OpenGL Version:  %s", glGetString(GL_VERSION));
 	logInfo("GLSL Version:    %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
 	shader.compile(VERTEX_SHADER, readFile("shaders/core.vert"));
 	shader.compile(VERTEX_SHADER, readFile("shaders/core.frag"));
 	shader.link();
@@ -34,11 +36,14 @@ void Renderer::addGeometry(Geometry* geometry)
 
 void Renderer::render()
 {
+	glClear(GL_COLOR_BUFFER_BIT);
 	for (auto geom : geometries) {
 		glBindVertexArray(geom->vao);
 		glDrawArrays(GL_TRIANGLES, 0, geom->vertices.size());
+		glutil::checkGL("Post draw");
 	}
 	glBindVertexArray(0);
+	glutil::checkGL("Post render");
 }
 
 

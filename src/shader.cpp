@@ -67,6 +67,13 @@ bool ShaderProgram::link()
 		logError("Failed to link program:\n%s", infoLog.c_str());
 		return false;
 	}
+	// Check validation status
+	glValidateProgram(id);
+	glGetProgramiv(id, GL_VALIDATE_STATUS, &status);
+	if (!status) {
+		logError("Failed to validate program:\n%s", infoLog.c_str());
+		return false;
+	}
 	if (!infoLog.empty()) {
 		logWarning("Warning(s) linking program:\n%s", infoLog.c_str());
 	}

@@ -1,6 +1,6 @@
 #include "geometry.hpp"
 #include "platform.hpp"
-#include <GL/glcorearb.h>
+#include "glutil.hpp"
 
 Geometry::~Geometry()
 {
@@ -14,6 +14,7 @@ bool Geometry::upload()
 		logError("Cannot upload empty geometry");
 		return false;
 	}
+	glutil::checkGL("Pre geometry upload");
 
 	if (!vbo) glGenBuffers(1, &vbo);
 	if (!vao) glGenVertexArrays(1, &vao);
@@ -30,8 +31,9 @@ bool Geometry::upload()
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normal));
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glutil::checkGL("Post geometry upload");
 	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	return true;
 }
 
