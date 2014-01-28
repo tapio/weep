@@ -1,6 +1,8 @@
 #include "platform.hpp"
+#include "common.hpp"
 
 #include <SDL2/SDL.h>
+#include <fstream>
 
 namespace
 {
@@ -27,10 +29,18 @@ void Platform::init()
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-	const int w = 1280, h = 720;
+	std::string err;
+	Json settings = Json::parse(Platform::readFile("../data/settings.json"), err);
+	if (!err.empty())
+		panic(err.c_str());
+
+	int w = settings["screen"]["width"].int_value();
+	int h = settings["screen"]["height"].int_value();
+	int fullscreen = settings["screen"]["fullscreen"].bool_value() ? SDL_WINDOW_FULLSCREEN : 0;
+
 	s_window = SDL_CreateWindow("App",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h,
-		SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+		SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | fullscreen);
 	if (!s_window) {
 		panic(SDL_GetError());
 	}
@@ -59,6 +69,12 @@ void Platform::run()
 				return;
 		}
 	}
+}
+
+string Platform::readFile(const string& path)
+{
+	std::ifstream f(path);
+	return std::string(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
 }
 
 void Log::debug(const char* fmt, ...)

@@ -1,4 +1,5 @@
 #pragma once
+#include "common.hpp"
 
 namespace Platform
 {
@@ -8,6 +9,8 @@ void deinit();
 void run();
 
 void panic(const char* fmt, ...);
+
+string readFile(const string& path);
 
 }
 

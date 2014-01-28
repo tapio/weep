@@ -27,10 +27,10 @@ ShaderProgram::~ShaderProgram()
 	glDeleteProgram(id);
 }
 
-void ShaderProgram::compile(ShaderType type, const String& text)
+void ShaderProgram::compile(ShaderType type, const string& text)
 {
 	GLsizei lengths[] = { (GLsizei)text.length() };
-	const GLchar* strings[] = { (const GLchar*) text.c_str() };
+	const GLchar* strings[] = { (const GLchar*)text.c_str() };
 	unsigned& shaderId = shaderIds[type];
 	shaderId = glCreateShader(convertToGL(type));
 	glShaderSource(shaderId, 1, strings, lengths);
