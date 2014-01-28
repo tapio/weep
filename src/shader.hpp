@@ -1,5 +1,4 @@
 #pragma once
-
 #include "common.hpp"
 
 enum ShaderType
@@ -19,8 +18,8 @@ struct ShaderProgram
 	void compile(ShaderType type, const string& text);
 	void link();
 
-	unsigned id = 0;
+	uint id = 0;
 
 private:
-	std::vector<unsigned> shaderIds = { 0, 0, 0, 0, 0 };
+	std::vector<uint> shaderIds = { 0, 0, 0, 0, 0 };
 };
