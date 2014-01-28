@@ -38,6 +38,7 @@ void Renderer::render()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
 	for (auto geom : geometries) {
+		ASSERT(geom->vao && geom->vbo);
 		glBindVertexArray(geom->vao);
 		glDrawArrays(GL_TRIANGLES, 0, geom->vertices.size());
 		glutil::checkGL("Post draw");

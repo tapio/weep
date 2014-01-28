@@ -8,6 +8,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#define SDL_ASSERT_LEVEL 2
+#include <SDL2/SDL_assert.h>
 
 using std::string;
 using json11::Json;
@@ -23,3 +25,5 @@ void logError(const char* format, ...);
 void panic(const char* format, ...);
 
 string readFile(const string& path);
+
+#define ASSERT SDL_assert
