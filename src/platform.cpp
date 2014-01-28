@@ -1,5 +1,4 @@
 #include "platform.hpp"
-#include "common.hpp"
 
 #include <SDL2/SDL.h>
 #include <fstream>
@@ -30,7 +29,7 @@ void Platform::init()
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
 	std::string err;
-	Json settings = Json::parse(Platform::readFile("../data/settings.json"), err);
+	Json settings = Json::parse(Platform::readFile("settings.json"), err);
 	if (!err.empty())
 		panic(err.c_str());
 
@@ -73,7 +72,7 @@ void Platform::run()
 
 string Platform::readFile(const string& path)
 {
-	std::ifstream f(path);
+	std::ifstream f("../data/" + path);
 	return std::string(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
 }
 
