@@ -1,20 +1,20 @@
 #pragma once
 
 #include <vector>
-#include <map>
 #include <memory>
 #include <string>
-using std::string;
-
+#include <cstdarg>
 #include <json11/json11.hpp>
-using json11::Json;
-
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-using namespace glm;
 
+using std::string;
+using json11::Json;
+using namespace glm;
 typedef unsigned uint;
+
+string vlformat(const char* format, va_list vl);
 
 void logDebug(const char* format, ...);
 void logInfo(const char* format, ...);

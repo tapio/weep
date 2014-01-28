@@ -1,7 +1,6 @@
 #include "common.hpp"
 #include <iostream>
 #include <fstream>
-#include <cstdarg>
 
 string vlformat(const char* format, va_list vl)
 {
