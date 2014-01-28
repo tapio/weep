@@ -12,8 +12,8 @@ namespace
 
 Renderer::Renderer()
 {
-	shader.compile(VERTEX_SHADER, Platform::readFile("shaders/core.vert"));
-	shader.compile(VERTEX_SHADER, Platform::readFile("shaders/core.frag"));
+	shader.compile(VERTEX_SHADER, readFile("shaders/core.vert"));
+	shader.compile(VERTEX_SHADER, readFile("shaders/core.frag"));
 	shader.link();
 	shader.use();
 }

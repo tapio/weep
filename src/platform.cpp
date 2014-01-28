@@ -2,19 +2,11 @@
 #include "renderer.hpp"
 
 #include <SDL2/SDL.h>
-#include <fstream>
 
 namespace
 {
 	static SDL_Window* s_window = nullptr;
 	static SDL_GLContext s_glcontext = nullptr;
-}
-
-void Platform::panic(const char* fmt, ...)
-{
-	Log::error(fmt);
-	SDL_ShowSimpleMessageBox(0, "Fatal Error", fmt, s_window);
-	exit(EXIT_FAILURE);
 }
 
 void Platform::init()
@@ -30,7 +22,7 @@ void Platform::init()
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
 	std::string err;
-	Json settings = Json::parse(Platform::readFile("settings.json"), err);
+	Json settings = Json::parse(readFile("settings.json"), err);
 	if (!err.empty())
 		panic(err.c_str());
 
@@ -71,30 +63,4 @@ void Platform::run()
 		GetRenderer().render();
 		SDL_GL_SwapWindow(s_window);
 	}
-}
-
-string Platform::readFile(const string& path)
-{
-	std::ifstream f("../data/" + path);
-	return std::string(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
-}
-
-void Log::debug(const char* fmt, ...)
-{
-	SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, fmt);
-}
-
-void Log::info(const char* fmt, ...)
-{
-	SDL_Log(fmt);
-}
-
-void Log::warn(const char* fmt, ...)
-{
-	SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, fmt);
-}
-
-void Log::error(const char* fmt, ...)
-{
-	SDL_LogError(SDL_LOG_CATEGORY_ERROR, fmt);
 }

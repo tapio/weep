@@ -11,7 +11,7 @@ Geometry::~Geometry()
 bool Geometry::upload()
 {
 	if (vertices.empty()) {
-		Log::error("Cannot upload empty geometry");
+		logError("Cannot upload empty geometry");
 		return false;
 	}
 

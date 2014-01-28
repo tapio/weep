@@ -15,3 +15,11 @@ using json11::Json;
 using namespace glm;
 
 typedef unsigned uint;
+
+void logDebug(const char* format, ...);
+void logInfo(const char* format, ...);
+void logWarning(const char* format, ...);
+void logError(const char* format, ...);
+void panic(const char* format, ...);
+
+string readFile(const string& path);
