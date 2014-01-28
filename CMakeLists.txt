@@ -13,10 +13,14 @@ if(NOT CMAKE_BUILD_TYPE)
 	SET(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif()
 
-# Set default compile flags for GCC
-if(CMAKE_COMPILER_IS_GNUCXX)
+# Enable C++11 support and other compiler flags...
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	message(STATUS "GCC detected, adding compile flags")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++11 -Wall -Wextra")
+endif()
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	message(STATUS "Clang detected, adding compile flags")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
 endif()
 
 find_package(PkgConfig)
@@ -34,6 +38,8 @@ add_definitions(-DGL_GLEXT_PROTOTYPES)
 
 file(GLOB SOURCE_FILES "src/*.cpp")
 file(GLOB HEADER_FILES "src/*.hpp")
+
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 
 add_executable(app ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(app ${LIBS})
