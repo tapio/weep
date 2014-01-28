@@ -36,7 +36,7 @@ include_directories(third-party)
 
 add_definitions(-DGL_GLEXT_PROTOTYPES)
 
-file(GLOB SOURCE_FILES "src/*.cpp")
+file(GLOB SOURCE_FILES "src/*.cpp" "third-party/json11/*.cpp")
 file(GLOB HEADER_FILES "src/*.hpp")
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
