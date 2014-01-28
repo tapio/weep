@@ -16,11 +16,11 @@ bool Geometry::upload()
 	}
 	glutil::checkGL("Pre geometry upload");
 
-	if (!vbo) glGenBuffers(1, &vbo);
 	if (!vao) glGenVertexArrays(1, &vao);
+	if (!vbo) glGenBuffers(1, &vbo);
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices.front(), GL_STATIC_DRAW);
 	// Position
 	ASSERT(offsetof(Vertex, position) == 0);
 	glEnableVertexAttribArray(0);

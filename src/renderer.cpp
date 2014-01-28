@@ -19,7 +19,7 @@ Renderer::Renderer()
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	shader.compile(VERTEX_SHADER, readFile("shaders/core.vert"));
-	shader.compile(VERTEX_SHADER, readFile("shaders/core.frag"));
+	shader.compile(FRAGMENT_SHADER, readFile("shaders/core.frag"));
 	shader.link();
 	shader.use();
 }
@@ -36,7 +36,7 @@ void Renderer::addGeometry(Geometry* geometry)
 
 void Renderer::render()
 {
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	for (auto geom : geometries) {
 		ASSERT(geom->vao && geom->vbo);
 		glBindVertexArray(geom->vao);
