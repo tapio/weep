@@ -12,6 +12,10 @@ namespace
 
 Renderer::Renderer()
 {
+	logInfo("OpenGL Renderer: %s", glGetString(GL_RENDERER));
+	logInfo("OpenGL Vendor:   %s", glGetString(GL_VENDOR));
+	logInfo("OpenGL Version:  %s", glGetString(GL_VERSION));
+	logInfo("GLSL Version:    %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 	shader.compile(VERTEX_SHADER, readFile("shaders/core.vert"));
 	shader.compile(VERTEX_SHADER, readFile("shaders/core.frag"));
 	shader.link();
