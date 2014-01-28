@@ -1,4 +1,5 @@
 #include "platform.hpp"
+#include "renderer.hpp"
 
 #include <SDL2/SDL.h>
 #include <fstream>
@@ -67,6 +68,8 @@ void Platform::run()
 			if (e.type == SDL_QUIT)
 				return;
 		}
+		GetRenderer().render();
+		SDL_GL_SwapWindow(s_window);
 	}
 }
 

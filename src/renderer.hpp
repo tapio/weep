@@ -12,7 +12,7 @@ public:
 };
 
 
-Renderer& GetRenderer() {
+inline Renderer& GetRenderer() {
 	static Renderer s_renderer;
 	return s_renderer;
 }
