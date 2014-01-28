@@ -1,14 +1,20 @@
 #pragma once
+#include "common.hpp"
+
+struct Geometry;
 
 class Renderer
 {
-	friend Renderer& GetRenderer();
+public:
+	void addGeometry(Geometry* geometry);
+	void render();
 
+private:
+	friend Renderer& GetRenderer();
 	Renderer();
 	~Renderer();
 
-public:
-	void render();
+	std::vector<Geometry*> geometries;
 };
 
 

@@ -15,8 +15,9 @@ struct ShaderProgram
 	ShaderProgram();
 	~ShaderProgram();
 
-	void compile(ShaderType type, const string& text);
-	void link();
+	bool compile(ShaderType type, const string& text);
+	bool link();
+	void use() const;
 
 	uint id = 0;
 

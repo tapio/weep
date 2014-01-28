@@ -27,23 +27,33 @@ ShaderProgram::~ShaderProgram()
 	glDeleteProgram(id);
 }
 
-void ShaderProgram::compile(ShaderType type, const string& text)
+bool ShaderProgram::compile(ShaderType type, const string& text)
 {
+	if (text.empty()) return false;
 	GLsizei lengths[] = { (GLsizei)text.length() };
 	const GLchar* strings[] = { (const GLchar*)text.c_str() };
 	uint& shaderId = shaderIds[type];
 	shaderId = glCreateShader(convertToGL(type));
+	if (!shaderId) return false;
 	glShaderSource(shaderId, 1, strings, lengths);
 	glCompileShader(shaderId);
+	return true;
 }
 
-void ShaderProgram::link()
+bool ShaderProgram::link()
 {
 	id = glCreateProgram();
+	if (!id) return false;
 
 	for (auto i : shaderIds) {
 		if (i > 0) glAttachShader(id, i);
 	}
 
 	glLinkProgram(id);
+	return true;
+}
+
+void ShaderProgram::use() const
+{
+	glUseProgram(id);
 }
