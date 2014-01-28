@@ -25,6 +25,13 @@ pkg_check_modules(SDL2 REQUIRED sdl2)
 include_directories(${SDL2_INCLUDE_DIRS})
 list(APPEND LIBS ${SDL2_LIBRARIES})
 
+pkg_check_modules(GL REQUIRED gl)
+list(APPEND LIBS ${GL_LIBRARIES})
+
+include_directories(third-party)
+
+add_definitions(-DGL_GLEXT_PROTOTYPES)
+
 file(GLOB SOURCE_FILES "src/*.cpp")
 file(GLOB HEADER_FILES "src/*.hpp")
 
