@@ -9,8 +9,8 @@ endif()
 
 # Add a sensible build type default and warning because empty means no optimization and no debug info.
 if(NOT CMAKE_BUILD_TYPE)
-	message("WARNING: CMAKE_BUILD_TYPE is not defined!\n         Defaulting to CMAKE_BUILD_TYPE=Release.\n         Use ccmake to set a proper value.")
-	SET(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
+	message("WARNING: CMAKE_BUILD_TYPE is not defined!\n         Defaulting to CMAKE_BUILD_TYPE=RelWithDebInfo.\n         Use ccmake to set a proper value.")
+	SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif()
 
 # Enable C++11 support and other compiler flags...
@@ -32,14 +32,20 @@ list(APPEND LIBS ${SDL2_LIBRARIES})
 pkg_check_modules(GL REQUIRED gl)
 list(APPEND LIBS ${GL_LIBRARIES})
 
+include_directories(engine)
 include_directories(third-party)
 
 add_definitions(-DGL_GLEXT_PROTOTYPES)
 
-file(GLOB SOURCE_FILES "src/*.cpp" "third-party/json11/*.cpp")
-file(GLOB HEADER_FILES "src/*.hpp")
+file(GLOB DEPS_SOURCES "third-party/json11/*.cpp" "third-party/json11/*.hpp")
+file(GLOB ENGINE_SOURCES "engine/*.cpp" "engine/*.hpp")
+file(GLOB GAME_SOURCES "game/*.cpp" "game/*.hpp")
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
+set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR})
+link_directories(${PROJECT_BINARY_DIR})
 
-add_executable(app ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries(app ${LIBS})
+add_library(deps STATIC ${DEPS_SOURCES})
+add_library(engine STATIC ${ENGINE_SOURCES})
+add_executable(app ${GAME_SOURCES})
+target_link_libraries(app engine deps ${LIBS})
