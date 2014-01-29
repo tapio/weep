@@ -14,10 +14,17 @@ layout(location = 0) in vec3 position;
 layout(location = 1) in vec2 texcoord;
 layout(location = 2) in vec3 normal;
 
+out VertexData {
+	vec2 texcoord;
+	vec3 normal;
+} output;
+
 void main()
 {
+	output.texcoord = texcoord;
+	output.normal = normal;
 	//vec4 pos = modelViewMatrix * vec4(position, 1.0);
-    //gl_Position = projectionMatrix * pos;
+	//gl_Position = projectionMatrix * pos;
 	gl_Position = vec4(position.x, position.z, position.y, 1.0);
 }
 

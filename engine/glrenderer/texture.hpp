@@ -6,6 +6,7 @@ class Texture
 {
 public:
 	NONCOPYABLE(Texture);
+	Texture() {}
 
 	uint id = 0;
 	uint wrapS = GL_REPEAT;

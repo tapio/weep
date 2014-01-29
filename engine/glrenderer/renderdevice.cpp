@@ -3,6 +3,7 @@
 #include "model.hpp"
 #include "geometry.hpp"
 #include "material.hpp"
+#include "texture.hpp"
 #include "camera.hpp"
 
 RenderDevice::RenderDevice()
@@ -82,8 +83,13 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 
 bool RenderDevice::uploadMaterial(Material& material)
 {
-	// TODO
 	material.shaderId = shaders.front();
+	if (material.diffuseMap && !material.diffuseTex) {
+		Texture tex;
+		tex.create();
+		tex.upload(*material.diffuseMap);
+		material.diffuseTex = tex.id;
+	}
 	return true;
 }
 
@@ -109,6 +115,11 @@ void RenderDevice::render(Model& model)
 	colorBlock.uniforms.diffuse = mat.diffuse;
 	colorBlock.uniforms.specular = mat.specular;
 	colorBlock.upload();
+	if (mat.diffuseTex) {
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, mat.diffuseTex);
+		//glUniform1i(0, 0);
+	}
 	glBindVertexArray(geom.vao);
 	glDrawArrays(GL_TRIANGLES, 0, geom.vertices.size());
 	glutil::checkGL("Post draw");
