@@ -3,6 +3,7 @@
 #include "model.hpp"
 #include "geometry.hpp"
 #include "material.hpp"
+#include "camera.hpp"
 
 RenderDevice::RenderDevice()
 {
@@ -18,12 +19,16 @@ RenderDevice::RenderDevice()
 	shader.compile(FRAGMENT_SHADER, readFile("shaders/core.frag"));
 	shader.link();
 	shaders.push_back(shader.id);
+
+	commonBlock.create(0);
+	colorBlock.create(1);
 }
 
 
 RenderDevice::~RenderDevice()
 {
-
+	commonBlock.destroy();
+	colorBlock.destroy();
 }
 
 bool RenderDevice::uploadModel(Model& model)
@@ -82,11 +87,13 @@ bool RenderDevice::uploadMaterial(Material& material)
 	return true;
 }
 
-void RenderDevice::preRender()
+void RenderDevice::preRender(Camera& camera)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	program = 0;
 	glUseProgram(0);
+	commonBlock.uniforms.projectionMatrix = camera.projectionMatrix;
+	commonBlock.upload();
 }
 
 void RenderDevice::render(Model& model)
@@ -98,6 +105,10 @@ void RenderDevice::render(Model& model)
 		program = mat.shaderId;
 		glUseProgram(program);
 	}
+	colorBlock.uniforms.ambient = mat.ambient;
+	colorBlock.uniforms.diffuse = mat.diffuse;
+	colorBlock.uniforms.specular = mat.specular;
+	colorBlock.upload();
 	glBindVertexArray(geom.vao);
 	glDrawArrays(GL_TRIANGLES, 0, geom.vertices.size());
 	glutil::checkGL("Post draw");

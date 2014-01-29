@@ -32,4 +32,5 @@ public:
 	}
 
 	mat4 projectionMatrix = mat4();
+	mat4 transform = mat4();
 };

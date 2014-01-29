@@ -27,9 +27,9 @@ void Renderer::addModel(Model* model)
 	models.push_back(model);
 }
 
-void Renderer::render()
+void Renderer::render(Camera& camera)
 {
-	device->preRender();
+	device->preRender(camera);
 	for (auto model : models) {
 		device->render(*model);
 	}

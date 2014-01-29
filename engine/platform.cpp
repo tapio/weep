@@ -1,5 +1,6 @@
 #include "platform.hpp"
 #include "renderer.hpp"
+#include "camera.hpp"
 
 #include <SDL2/SDL.h>
 
@@ -61,13 +62,15 @@ void Platform::deinit()
 
 void Platform::run()
 {
+	Camera camera;
+	camera.makePerspective(0.5, 1280.0f / 720.0f, 0.1, 1000);
 	SDL_Event e;
 	while (true) {
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT)
 				return;
 		}
-		GetRenderer().render();
+		GetRenderer().render(camera);
 		SDL_GL_SwapWindow(s_window);
 	}
 }

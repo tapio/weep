@@ -1,8 +1,16 @@
 #version 330
+#extension GL_ARB_shading_language_420pack : enable
 
-out vec4 fragment;
+layout(binding = 1, std140) uniform ColorBlock {
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+};
+
+layout(location = 0) out vec4 fragment;
 
 void main()
 {
-	fragment = vec4(0.0, 0.5, 0.0, 1.0);
+	vec3 color = ambient + diffuse;
+	fragment = vec4(color, 1.0);
 }
