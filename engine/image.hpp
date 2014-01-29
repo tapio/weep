@@ -3,6 +3,9 @@
 
 class Image {
 public:
+	Image() {}
+	Image(const std::string& path, int forceChannels = 0) { load(path, forceChannels); }
+
 	bool load(const std::string& path, int forceChannels = 0);
 
 	int width = 0;
