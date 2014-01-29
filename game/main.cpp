@@ -13,6 +13,8 @@ int main(int argc, char* argv[])
 	model.geometry = std::shared_ptr<Geometry>(new Geometry());
 	*model.geometry = Geometry::createPlane(1, 1);
 	model.material = std::shared_ptr<Material>(new Material());
+	model.material->ambient = vec3(0.2f, 0.2f, 0.2f);
+	model.material->diffuse = vec3(0.0f, 0.0f, 0.3f);
 
 	GetRenderer().addModel(&model);
 
