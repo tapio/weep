@@ -33,7 +33,7 @@ pkg_check_modules(GL REQUIRED gl)
 list(APPEND LIBS ${GL_LIBRARIES})
 
 include_directories(engine)
-include_directories(third-party)
+include_directories(SYSTEM third-party)
 
 add_definitions(-DGL_GLEXT_PROTOTYPES)
 
