@@ -2,12 +2,16 @@
 #include "geometry.hpp"
 #include "material.hpp"
 #include "model.hpp"
+#include "image.hpp"
 #include "renderer.hpp"
 #include "glrenderer/shader.hpp"
 
 int main(int argc, char* argv[])
 {
 	Engine::init();
+
+	Image image;
+	image.load("../data/debug/uvtestgrid.png", 4);
 
 	Model model;
 	model.geometry = std::shared_ptr<Geometry>(new Geometry());
