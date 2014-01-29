@@ -1,4 +1,4 @@
-#include "platform.hpp"
+#include "engine.hpp"
 #include "geometry.hpp"
 #include "material.hpp"
 #include "model.hpp"
@@ -7,7 +7,7 @@
 
 int main(int argc, char* argv[])
 {
-	Platform::init();
+	Engine::init();
 
 	Model model;
 	model.geometry = std::shared_ptr<Geometry>(new Geometry());
@@ -18,8 +18,8 @@ int main(int argc, char* argv[])
 
 	GetRenderer().addModel(&model);
 
-	Platform::run();
-	Platform::deinit();
+	Engine::run();
+	Engine::deinit();
 
 	return 0;
 }

@@ -1,4 +1,4 @@
-#include "platform.hpp"
+#include "engine.hpp"
 #include "renderer.hpp"
 #include "camera.hpp"
 
@@ -10,7 +10,7 @@ namespace
 	static SDL_GLContext s_glcontext = nullptr;
 }
 
-void Platform::init()
+void Engine::init()
 {
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		panic(SDL_GetError());
@@ -49,10 +49,10 @@ void Platform::init()
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
 	logInfo("OpenGL Context:  %d.%d", major, minor);
 
-	//atexit(Platform::deinit);
+	//atexit(Engine::deinit);
 }
 
-void Platform::deinit()
+void Engine::deinit()
 {
 	Renderer::destroy();
 	SDL_GL_DeleteContext(s_glcontext);
@@ -60,7 +60,7 @@ void Platform::deinit()
 	SDL_Quit();
 }
 
-void Platform::run()
+void Engine::run()
 {
 	Camera camera;
 	camera.makePerspective(0.5, 1280.0f / 720.0f, 0.1, 1000);
