@@ -37,8 +37,10 @@ include_directories(third-party)
 
 add_definitions(-DGL_GLEXT_PROTOTYPES)
 
-file(GLOB DEPS_SOURCES "third-party/json11/*.cpp" "third-party/json11/*.hpp")
-file(GLOB ENGINE_SOURCES "engine/*.cpp" "engine/*.hpp")
+file(GLOB DEPS_SOURCES "third-party/*/*.cpp" "third-party/*/*.hpp")
+file(GLOB ENGINE_SOURCES
+	"engine/*.cpp" "engine/*.hpp"
+	"engine/*/*.cpp" "engine/*/*.hpp")
 file(GLOB GAME_SOURCES "game/*.cpp" "game/*.hpp")
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})

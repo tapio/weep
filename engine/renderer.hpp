@@ -1,6 +1,7 @@
 #pragma once
 #include "common.hpp"
 
+class RenderDevice;
 struct Model;
 
 class Renderer
@@ -17,6 +18,7 @@ private:
 	Renderer();
 	~Renderer();
 
+	RenderDevice* device = nullptr;
 	std::vector<Model*> models;
 
 	static Renderer* instance;

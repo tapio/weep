@@ -1,41 +1,8 @@
 #include "geometry.hpp"
-#include "platform.hpp"
-#include "glutil.hpp"
 
 Geometry::~Geometry()
 {
-	if (vbo) glDeleteBuffers(1, &vbo);
-	if (vao) glDeleteVertexArrays(1, &vao);
-}
-
-bool Geometry::upload()
-{
-	if (vertices.empty()) {
-		logError("Cannot upload empty geometry");
-		return false;
-	}
-	glutil::checkGL("Pre geometry upload");
-
-	if (!vao) glGenVertexArrays(1, &vao);
-	if (!vbo) glGenBuffers(1, &vbo);
-	glBindVertexArray(vao);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices.front(), GL_STATIC_DRAW);
-	// Position
-	ASSERT(offsetof(Vertex, position) == 0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, position));
-	// TexCoords
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, texcoord));
-	// Normals
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normal));
-
-	glutil::checkGL("Post geometry upload");
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	return true;
+	ASSERT(!vao && !vbo);
 }
 
 Geometry Geometry::createPlane(float width, float height)

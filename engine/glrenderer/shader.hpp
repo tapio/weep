@@ -15,6 +15,9 @@ struct ShaderProgram
 	ShaderProgram();
 	~ShaderProgram();
 
+	ShaderProgram(const ShaderProgram&) = delete;
+	ShaderProgram& operator=(const ShaderProgram&) = delete;
+
 	bool compile(ShaderType type, const string& text);
 	bool link();
 	void use() const;
