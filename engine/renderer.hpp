@@ -9,7 +9,7 @@ public:
 	static void create();
 	static void destroy();
 
-	void addModel(std::shared_ptr<Model> model);
+	void addModel(Model* model);
 	void render();
 
 private:
@@ -17,7 +17,7 @@ private:
 	Renderer();
 	~Renderer();
 
-	std::vector<std::shared_ptr<Model>> models;
+	std::vector<Model*> models;
 
 	static Renderer* instance;
 };

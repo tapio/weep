@@ -42,7 +42,7 @@ void Platform::init()
 		panic(SDL_GetError());
 	}
 
-	GetRenderer(); // Init
+	Renderer::create();
 	int major, minor;
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
@@ -53,6 +53,7 @@ void Platform::init()
 
 void Platform::deinit()
 {
+	Renderer::destroy();
 	SDL_GL_DeleteContext(s_glcontext);
 	SDL_DestroyWindow(s_window);
 	SDL_Quit();

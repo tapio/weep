@@ -25,7 +25,7 @@ Renderer::~Renderer()
 {
 }
 
-void Renderer::addModel(std::shared_ptr<Model> model)
+void Renderer::addModel(Model* model)
 {
 	model->geometry->upload();
 	models.push_back(model);
