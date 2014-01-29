@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
 
 	Model model;
 	model.geometry = std::shared_ptr<Geometry>(new Geometry());
-	*model.geometry = Geometry::createPlane(100, 100);
+	*model.geometry = Geometry::createPlane(1, 1);
 	model.material = std::shared_ptr<Material>(new Material());
 	model.material->shaderId = shader.id;
 
