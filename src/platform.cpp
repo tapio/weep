@@ -42,6 +42,7 @@ void Platform::init()
 		panic(SDL_GetError());
 	}
 
+	GetRenderer(); // Init
 	int major, minor;
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);

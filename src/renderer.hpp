@@ -1,12 +1,12 @@
 #pragma once
 #include "common.hpp"
 
-struct Geometry;
+struct Model;
 
 class Renderer
 {
 public:
-	void addGeometry(Geometry* geometry);
+	void addModel(std::shared_ptr<Model> model);
 	void render();
 
 private:
@@ -14,7 +14,7 @@ private:
 	Renderer();
 	~Renderer();
 
-	std::vector<Geometry*> geometries;
+	std::vector<std::shared_ptr<Model>> models;
 };
 
 
