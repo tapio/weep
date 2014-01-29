@@ -27,3 +27,7 @@ void panic(const char* format, ...);
 string readFile(const string& path);
 
 #define ASSERT SDL_assert
+
+#define NONCOPYABLE(T) \
+	T(const T&) = delete; \
+	T& operator=(const T&) = delete
