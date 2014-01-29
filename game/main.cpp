@@ -8,6 +8,7 @@
 int main(int argc, char* argv[])
 {
 	Platform::init();
+	Renderer::create();
 
 	Geometry geom = Geometry::createPlane(100, 100);
 
@@ -25,6 +26,9 @@ int main(int argc, char* argv[])
 	GetRenderer().addModel(std::shared_ptr<Model>(&model));
 
 	Platform::run();
+
+	Renderer::destroy();
+	Platform::deinit();
 
 	return 0;
 }

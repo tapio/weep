@@ -6,6 +6,11 @@
 #include "platform.hpp"
 #include "glutil.hpp"
 
+Renderer* Renderer::instance = nullptr;
+void Renderer::create() { instance = new Renderer(); }
+void Renderer::destroy() { if (instance) delete instance; }
+
+
 Renderer::Renderer()
 {
 	logInfo("OpenGL Renderer: %s", glGetString(GL_RENDERER));

@@ -6,6 +6,9 @@ struct Model;
 class Renderer
 {
 public:
+	static void create();
+	static void destroy();
+
 	void addModel(std::shared_ptr<Model> model);
 	void render();
 
@@ -15,10 +18,11 @@ private:
 	~Renderer();
 
 	std::vector<std::shared_ptr<Model>> models;
+
+	static Renderer* instance;
 };
 
 
 inline Renderer& GetRenderer() {
-	static Renderer s_renderer;
-	return s_renderer;
+	return *Renderer::instance;
 }
