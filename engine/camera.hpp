@@ -23,14 +23,14 @@ public:
 
 	void makePerspective(float fov, float aspect, float near, float far)
 	{
-		perspective(fov, aspect, near, far);
+		projection = perspective(fov, aspect, near, far);
 	}
 
 	void makeOrtho(float left, float right, float top, float bottom, float near, float far)
 	{
-		ortho(left, right, bottom, top, near, far);
+		projection = ortho(left, right, bottom, top, near, far);
 	}
 
-	mat4 projectionMatrix = mat4();
-	mat4 transform = mat4();
+	mat4 projection = mat4();
+	mat4 view = mat4();
 };

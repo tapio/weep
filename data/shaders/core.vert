@@ -23,8 +23,6 @@ void main()
 {
 	output.texcoord = texcoord;
 	output.normal = normal;
-	//vec4 pos = modelViewMatrix * vec4(position, 1.0);
-	//gl_Position = projectionMatrix * pos;
-	gl_Position = vec4(position.x, position.z, position.y, 1.0);
+	gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
 }
 

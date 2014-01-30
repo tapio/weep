@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
 	model.material->ambient = vec3(0.2f, 0.2f, 0.2f);
 	model.material->diffuse = vec3(0.0f, 0.0f, 0.3f);
 	model.material->diffuseMap.reset(new Image("../data/debug/uvtestgrid.png", 4));
+	model.transform = translate(model.transform, vec3(0.1f, 0.1f, -10.0f));
 
 	GetRenderer().addModel(&model);
 

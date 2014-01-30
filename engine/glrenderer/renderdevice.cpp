@@ -98,8 +98,9 @@ void RenderDevice::preRender(Camera& camera)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	program = 0;
 	glUseProgram(0);
-	commonBlock.uniforms.projectionMatrix = camera.projectionMatrix;
-	commonBlock.upload();
+	commonBlock.uniforms.projectionMatrix = camera.projection;
+	commonBlock.uniforms.viewMatrix = camera.view;
+
 }
 
 void RenderDevice::render(Model& model)
@@ -115,6 +116,9 @@ void RenderDevice::render(Model& model)
 	colorBlock.uniforms.diffuse = mat.diffuse;
 	colorBlock.uniforms.specular = mat.specular;
 	colorBlock.upload();
+	commonBlock.uniforms.modelMatrix = model.transform;
+	commonBlock.uniforms.modelViewMatrix = commonBlock.uniforms.modelMatrix * commonBlock.uniforms.viewMatrix;
+	commonBlock.upload();
 	if (mat.diffuseTex) {
 		//glActiveTexture(GL_TEXTURE0);
 		//glBindTexture(GL_TEXTURE_2D, mat.diffuseTex);

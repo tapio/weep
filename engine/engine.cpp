@@ -63,7 +63,8 @@ void Engine::deinit()
 void Engine::run()
 {
 	Camera camera;
-	camera.makePerspective(0.5, 1280.0f / 720.0f, 0.1, 1000);
+	camera.makePerspective(45, 1280.0f / 720.0f, 0.1, 1000);
+	camera.view; // = lookAt(vec3(0, 1, 0), vec3(0, 0, 0), vec3(0, 1, 0));
 	SDL_Event e;
 	while (true) {
 		while (SDL_PollEvent(&e)) {
