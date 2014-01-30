@@ -20,6 +20,7 @@ struct ShaderProgram
 	bool compile(ShaderType type, const string& text);
 	bool link();
 	void use() const;
+	void destroy();
 
 	uint id = 0;
 

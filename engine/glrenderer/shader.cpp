@@ -7,10 +7,6 @@ ShaderProgram::ShaderProgram()
 
 ShaderProgram::~ShaderProgram()
 {
-	/*for (auto i : shaderIds) {
-		if (i > 0) glDeleteShader(i);
-	}
-	glDeleteProgram(id);*/
 }
 
 bool ShaderProgram::compile(ShaderType type, const string& text)
@@ -87,4 +83,12 @@ void ShaderProgram::use() const
 {
 	ASSERT(id);
 	glUseProgram(id);
+}
+
+void ShaderProgram::destroy()
+{
+	for (auto i : shaderIds) {
+		if (i > 0) glDeleteShader(i);
+	}
+	glDeleteProgram(id);
 }
