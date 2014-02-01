@@ -5,11 +5,12 @@
 #include "image.hpp"
 #include "camera.hpp"
 #include "renderer.hpp"
-#include "glrenderer/shader.hpp"
+#include "resources.hpp"
 
 int main(int, char*[])
 {
 	Engine::init();
+	Resources resources;
 
 	Camera camera;
 	camera.makePerspective(45, 1280.0f / 720.0f, 0.1, 1000);
@@ -21,7 +22,7 @@ int main(int, char*[])
 	model.material.reset(new Material());
 	model.material->ambient = vec3(0.2f, 0.2f, 0.2f);
 	model.material->diffuse = vec3(0.0f, 0.0f, 0.3f);
-	model.material->diffuseMap.reset(new Image("../data/debug/uvtestgrid.png", 4));
+	model.material->diffuseMap = resources.getImage("data/debug/uvtestgrid.png");
 	model.transform = translate(model.transform, vec3(0.1f, 0.1f, -10.0f));
 
 	Renderer renderer;
