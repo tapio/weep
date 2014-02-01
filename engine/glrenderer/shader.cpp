@@ -13,7 +13,7 @@ bool ShaderProgram::compile(ShaderType type, const string& text)
 {
 	GLsizei lengths[] = { (GLsizei)text.length() };
 	const GLchar* strings[] = { (const GLchar*)text.c_str() };
-	uint& shaderId = shaderIds[type];
+	uint& shaderId = m_shaderIds[type];
 	shaderId = glCreateShader(glutil::toGL(type));
 	ASSERT(shaderId);
 	glShaderSource(shaderId, 1, strings, lengths);
@@ -45,7 +45,7 @@ bool ShaderProgram::link()
 {
 	id = glCreateProgram();
 	ASSERT(id);
-	for (auto i : shaderIds) {
+	for (auto i : m_shaderIds) {
 		if (i > 0) glAttachShader(id, i);
 	}
 	glLinkProgram(id);
@@ -87,7 +87,7 @@ void ShaderProgram::use() const
 
 void ShaderProgram::destroy()
 {
-	for (auto i : shaderIds) {
+	for (auto i : m_shaderIds) {
 		if (i > 0) glDeleteShader(i);
 	}
 	glDeleteProgram(id);

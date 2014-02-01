@@ -24,8 +24,8 @@ public:
 	void postRender();
 
 private:
-	uint program = 0;
-	UBO<UniformCommonBlock> commonBlock;
-	UBO<UniformColorBlock> colorBlock;
-	std::vector<uint> shaders;
+	uint m_program = 0;
+	UBO<UniformCommonBlock> m_commonBlock;
+	UBO<UniformColorBlock> m_colorBlock;
+	std::vector<uint> m_shaders;
 };

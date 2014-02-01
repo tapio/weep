@@ -15,6 +15,6 @@ public:
 	void render(Camera& camera);
 
 private:
-	RenderDevice* device = nullptr;
-	std::vector<Model*> models;
+	RenderDevice* m_device = nullptr;
+	std::vector<Model*> m_models;
 };

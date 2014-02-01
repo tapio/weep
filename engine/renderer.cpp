@@ -6,30 +6,30 @@
 
 Renderer::Renderer()
 {
-	device = new RenderDevice();
+	m_device = new RenderDevice();
 }
 
 Renderer::~Renderer()
 {
-	for (auto model : models) {
-		device->destroyModel(*model);
+	for (auto model : m_models) {
+		m_device->destroyModel(*model);
 	}
-	delete device;
+	delete m_device;
 }
 
 void Renderer::addModel(Model* model)
 {
-	device->uploadModel(*model);
-	models.push_back(model);
+	m_device->uploadModel(*model);
+	m_models.push_back(model);
 }
 
 void Renderer::render(Camera& camera)
 {
-	device->preRender(camera);
-	for (auto model : models) {
-		device->render(*model);
+	m_device->preRender(camera);
+	for (auto model : m_models) {
+		m_device->render(*model);
 	}
-	device->postRender();
+	m_device->postRender();
 }
 
 
