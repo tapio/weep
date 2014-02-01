@@ -4,11 +4,6 @@
 #include "material.hpp"
 #include "glrenderer/renderdevice.hpp"
 
-Renderer* Renderer::instance = nullptr;
-void Renderer::create() { instance = new Renderer(); }
-void Renderer::destroy() { if (instance) delete instance; }
-
-
 Renderer::Renderer()
 {
 	device = new RenderDevice();

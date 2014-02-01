@@ -1,5 +1,4 @@
 #include "engine.hpp"
-#include "renderer.hpp"
 
 #include <SDL2/SDL.h>
 
@@ -42,7 +41,6 @@ void Engine::init()
 		panic(SDL_GetError());
 	}
 
-	Renderer::create();
 	int major, minor;
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
@@ -53,7 +51,6 @@ void Engine::init()
 
 void Engine::deinit()
 {
-	Renderer::destroy();
 	SDL_GL_DeleteContext(s_glcontext);
 	SDL_DestroyWindow(s_window);
 	SDL_Quit();
