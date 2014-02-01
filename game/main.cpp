@@ -11,8 +11,6 @@ int main(int, char*[])
 {
 	Engine::init();
 
-	Renderer renderer;
-
 	Camera camera;
 	camera.makePerspective(45, 1280.0f / 720.0f, 0.1, 1000);
 	//camera.view = lookAt(vec3(0, 1, 0), vec3(0, 0, 0), vec3(0, 1, 0));
@@ -26,6 +24,7 @@ int main(int, char*[])
 	model.material->diffuseMap.reset(new Image("../data/debug/uvtestgrid.png", 4));
 	model.transform = translate(model.transform, vec3(0.1f, 0.1f, -10.0f));
 
+	Renderer renderer;
 	renderer.addModel(&model);
 
 	Engine::run([&renderer, &camera]() {

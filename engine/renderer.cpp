@@ -14,6 +14,7 @@ Renderer::~Renderer()
 	for (auto model : models) {
 		device->destroyModel(*model);
 	}
+	delete device;
 }
 
 void Renderer::addModel(Model* model)
