@@ -1,8 +1,7 @@
 #pragma once
 #include "common.hpp"
 
-class Image {
-public:
+struct Image {
 	Image() {}
 	Image(const std::string& path, int forceChannels = 0) { load(path, forceChannels); }
 

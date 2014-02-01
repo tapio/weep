@@ -2,7 +2,7 @@
 #include "common.hpp"
 
 class RenderDevice;
-class Camera;
+struct Camera;
 struct Model;
 
 class Renderer
