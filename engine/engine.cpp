@@ -1,6 +1,5 @@
 #include "engine.hpp"
 #include "renderer.hpp"
-#include "camera.hpp"
 
 #include <SDL2/SDL.h>
 
@@ -60,18 +59,15 @@ void Engine::deinit()
 	SDL_Quit();
 }
 
-void Engine::run()
+void Engine::run(const FrameFunc& callback)
 {
-	Camera camera;
-	camera.makePerspective(45, 1280.0f / 720.0f, 0.1, 1000);
-	camera.view; // = lookAt(vec3(0, 1, 0), vec3(0, 0, 0), vec3(0, 1, 0));
 	SDL_Event e;
 	while (true) {
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT)
 				return;
 		}
-		GetRenderer().render(camera);
+		callback();
 		SDL_GL_SwapWindow(s_window);
 	}
 }

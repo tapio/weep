@@ -4,7 +4,9 @@
 class Engine
 {
 public:
+	typedef std::function<void()> FrameFunc;
+
 	static void init();
 	static void deinit();
-	static void run();
+	static void run(const FrameFunc& callback);
 };

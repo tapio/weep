@@ -3,12 +3,17 @@
 #include "material.hpp"
 #include "model.hpp"
 #include "image.hpp"
+#include "camera.hpp"
 #include "renderer.hpp"
 #include "glrenderer/shader.hpp"
 
-int main(int argc, char* argv[])
+int main(int, char*[])
 {
 	Engine::init();
+
+	Camera camera;
+	camera.makePerspective(45, 1280.0f / 720.0f, 0.1, 1000);
+	//camera.view = lookAt(vec3(0, 1, 0), vec3(0, 0, 0), vec3(0, 1, 0));
 
 	Model model;
 	model.geometry.reset(new Geometry());
@@ -21,7 +26,10 @@ int main(int argc, char* argv[])
 
 	GetRenderer().addModel(&model);
 
-	Engine::run();
+	Engine::run([&camera]() {
+		GetRenderer().render(camera);
+	});
+
 	Engine::deinit();
 
 	return 0;
