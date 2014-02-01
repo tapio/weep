@@ -100,7 +100,6 @@ void RenderDevice::preRender(Camera& camera)
 	glUseProgram(0);
 	commonBlock.uniforms.projectionMatrix = camera.projection;
 	commonBlock.uniforms.viewMatrix = camera.view;
-
 }
 
 void RenderDevice::render(Model& model)
@@ -117,7 +116,7 @@ void RenderDevice::render(Model& model)
 	colorBlock.uniforms.specular = mat.specular;
 	colorBlock.upload();
 	commonBlock.uniforms.modelMatrix = model.transform;
-	commonBlock.uniforms.modelViewMatrix = commonBlock.uniforms.modelMatrix * commonBlock.uniforms.viewMatrix;
+	commonBlock.uniforms.modelViewMatrix = commonBlock.uniforms.viewMatrix * commonBlock.uniforms.modelMatrix;
 	commonBlock.upload();
 	if (mat.diffuseTex) {
 		//glActiveTexture(GL_TEXTURE0);
