@@ -8,5 +8,5 @@ public:
 
 	static void init();
 	static void deinit();
-	static void run(const FrameFunc& callback);
+	static void swap();
 };

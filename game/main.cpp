@@ -2,10 +2,12 @@
 #include "geometry.hpp"
 #include "material.hpp"
 #include "model.hpp"
-#include "image.hpp"
 #include "camera.hpp"
 #include "renderer.hpp"
 #include "resources.hpp"
+
+#include <SDL2/SDL.h>
+
 
 int main(int, char*[])
 {
@@ -28,11 +30,22 @@ int main(int, char*[])
 	Renderer renderer;
 	renderer.addModel(&model);
 
-	Engine::run([&renderer, &camera]() {
+	bool running = true;
+	SDL_Event e;
+	while (running) {
+		while (SDL_PollEvent(&e)) {
+			if (e.type == SDL_QUIT)
+			{
+				running = false;
+				break;
+			}
+		}
+
 		renderer.render(camera);
-	});
+		Engine::swap();
+	}
 
 	Engine::deinit();
 
-	return 0;
+	return EXIT_SUCCESS;
 }

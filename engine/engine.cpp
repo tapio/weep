@@ -56,15 +56,7 @@ void Engine::deinit()
 	SDL_Quit();
 }
 
-void Engine::run(const FrameFunc& callback)
+void Engine::swap()
 {
-	SDL_Event e;
-	while (true) {
-		while (SDL_PollEvent(&e)) {
-			if (e.type == SDL_QUIT)
-				return;
-		}
-		callback();
-		SDL_GL_SwapWindow(s_window);
-	}
+	SDL_GL_SwapWindow(s_window);
 }
