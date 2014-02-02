@@ -5,6 +5,7 @@
 #include "material.hpp"
 #include "texture.hpp"
 #include "camera.hpp"
+#include "engine.hpp"
 
 RenderDevice::RenderDevice()
 {
@@ -14,6 +15,9 @@ RenderDevice::RenderDevice()
 	logInfo("GLSL Version:    %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glViewport(0, 0, Engine::width(), Engine::height());
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 
 	ShaderProgram shader;
 	shader.compile(VERTEX_SHADER, readFile("shaders/core.vert"));
