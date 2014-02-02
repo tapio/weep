@@ -12,7 +12,7 @@ public:
 	~Renderer();
 
 	void addModel(Model* model);
-	void render(Camera& camera);
+	void render(const Camera& camera);
 
 private:
 	RenderDevice* m_device = nullptr;

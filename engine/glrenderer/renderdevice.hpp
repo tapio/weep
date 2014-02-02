@@ -19,7 +19,7 @@ public:
 	bool uploadGeometry(Geometry& geometry);
 	bool uploadMaterial(Material& material);
 
-	void preRender(Camera& camera);
+	void preRender(const Camera& camera);
 	void render(Model& model);
 	void postRender();
 

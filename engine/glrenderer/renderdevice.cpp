@@ -93,7 +93,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 	return true;
 }
 
-void RenderDevice::preRender(Camera& camera)
+void RenderDevice::preRender(const Camera& camera)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_program = 0;
