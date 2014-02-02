@@ -16,7 +16,7 @@ int main(int, char*[])
 
 	Camera camera;
 	camera.makePerspective(45, 1280.0f / 720.0f, 0.1, 1000);
-	//camera.view = lookAt(vec3(0, 1, 0), vec3(0, 0, 0), vec3(0, 1, 0));
+	camera.view = lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
 
 	Model model;
 	model.geometry.reset(new Geometry());
@@ -33,15 +33,40 @@ int main(int, char*[])
 	bool running = true;
 	SDL_Event e;
 	while (running) {
+		renderer.render(camera);
 		while (SDL_PollEvent(&e)) {
-			if (e.type == SDL_QUIT)
+			if (e.type == SDL_QUIT || e.key.keysym.sym == SDLK_ESCAPE)
 			{
 				running = false;
 				break;
 			}
-		}
 
-		renderer.render(camera);
+			if (e.type == SDL_KEYDOWN) {
+				vec3 input;
+				switch (e.key.keysym.scancode) {
+					case SDL_SCANCODE_UP:
+					case SDL_SCANCODE_W:
+						input.z = 1;
+						break;
+					case SDL_SCANCODE_DOWN:
+					case SDL_SCANCODE_S:
+						input.z = -1;
+						break;
+					case SDL_SCANCODE_LEFT:
+					case SDL_SCANCODE_A:
+						input.x = -1;
+						break;
+					case SDL_SCANCODE_RIGHT:
+					case SDL_SCANCODE_D:
+						input.x = 1;
+						break;
+					default:
+						break;
+				}
+				camera.view = translate(camera.view, input);
+			}
+
+		}
 		Engine::swap();
 	}
 
