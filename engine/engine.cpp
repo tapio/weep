@@ -6,6 +6,8 @@ namespace
 {
 	static SDL_Window* s_window = nullptr;
 	static SDL_GLContext s_glcontext = nullptr;
+	static int s_width = 0;
+	static int s_height = 0;
 }
 
 void Engine::init()
@@ -25,12 +27,12 @@ void Engine::init()
 	if (!err.empty())
 		panic(err.c_str());
 
-	int w = settings["screen"]["width"].int_value();
-	int h = settings["screen"]["height"].int_value();
+	s_width = settings["screen"]["width"].int_value();
+	s_height = settings["screen"]["height"].int_value();
 	int fullscreen = settings["screen"]["fullscreen"].bool_value() ? SDL_WINDOW_FULLSCREEN : 0;
 
 	s_window = SDL_CreateWindow("App",
-		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, w, h,
+		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, s_width, s_height,
 		SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | fullscreen);
 	if (!s_window) {
 		panic(SDL_GetError());
@@ -59,4 +61,14 @@ void Engine::deinit()
 void Engine::swap()
 {
 	SDL_GL_SwapWindow(s_window);
+}
+
+int Engine::width()
+{
+	return s_width;
+}
+
+int Engine::height()
+{
+	return s_height;
 }
