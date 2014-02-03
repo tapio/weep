@@ -13,24 +13,50 @@ int main(int, char*[])
 {
 	Engine::init();
 	Resources resources;
+	Renderer renderer;
 
 	float ar = Engine::width() / (float)Engine::height();
 	Camera camera;
 	camera.makePerspective(45, ar, 0.1, 1000);
 	camera.view = lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
 
-	Model model;
-	model.geometry.reset(new Geometry());
-	*model.geometry = Geometry::createPlane(1, 1);
-	model.material.reset(new Material());
-	model.material->ambient = vec3(0.2f, 0.2f, 0.2f);
-	model.material->diffuse = vec3(0.0f, 0.0f, 0.3f);
-	model.material->diffuseMap = resources.getImage("data/debug/uvtestgrid.png");
-	model.material->shaderName = "basic";
-	model.transform = translate(model.transform, vec3(0.1f, 0.1f, -10.0f));
+	std::vector<Model> models;
 
-	Renderer renderer;
-	renderer.addModel(&model);
+	std::string err;
+	Json jsonScene = Json::parse(readFile("testscene.json"), err);
+	if (!err.empty())
+		panic("Failed to read scene: %s", err.c_str());
+	ASSERT(jsonScene.is_array());
+	for (uint i = 0; i < jsonScene.array_items().size(); ++i) {
+		const Json& def = jsonScene[i];
+		ASSERT(def.is_object());
+		models.emplace_back(Model());
+		Model& model = models.back();
+		if (!def["material"].is_null()) {
+			const Json& materialDef = def["material"];
+			ASSERT(materialDef.is_object());
+			model.material.reset(new Material());
+			//model.material->ambient = vec3(0.2f, 0.2f, 0.2f);
+			//model.material->diffuse = vec3(0.0f, 0.0f, 0.3f);
+			if (!materialDef["diffuseMap"].is_null())
+				model.material->diffuseMap = resources.getImage(materialDef["diffuseMap"].string_value());
+			model.material->shaderName = materialDef["shaderName"].string_value();
+		}
+		if (!def["geometry"].is_null()) {
+			const string& geomPath = def["geometry"].string_value();
+			model.geometry.reset(new Geometry());
+			if (geomPath == "plane")
+				*model.geometry = Geometry::createPlane(1, 1);
+		}
+		if (!def["position"].is_null()) {
+			const Json& posDef = def["position"];
+			ASSERT(posDef.is_array());
+			vec3 pos(posDef[0].number_value(), posDef[1].number_value(), posDef[2].number_value());
+			model.transform = translate(model.transform, pos);
+		}
+		renderer.addModel(&model);
+	}
+	logDebug("Loaded scene with %d models", models.size());
 
 	bool running = true;
 	SDL_Event e;
@@ -77,6 +103,7 @@ int main(int, char*[])
 		Engine::swap();
 	}
 
+	renderer.reset();
 	Engine::deinit();
 
 	return EXIT_SUCCESS;

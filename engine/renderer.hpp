@@ -13,6 +13,7 @@ public:
 
 	void addModel(Model* model);
 	void render(Camera& camera);
+	void reset();
 
 private:
 	RenderDevice* m_device = nullptr;

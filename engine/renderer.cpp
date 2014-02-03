@@ -10,10 +10,15 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
+	reset();
+	delete m_device;
+}
+
+void Renderer::reset()
+{
 	for (auto model : m_models) {
 		m_device->destroyModel(*model);
 	}
-	delete m_device;
 }
 
 void Renderer::addModel(Model* model)
@@ -31,5 +36,3 @@ void Renderer::render(Camera& camera)
 	}
 	m_device->postRender();
 }
-
-

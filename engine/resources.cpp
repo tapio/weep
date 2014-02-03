@@ -3,7 +3,7 @@
 
 Image* Resources::getImage(string path)
 {
-	path = "../" + path;
+	path = "../data/" + path;
 	auto it = m_images.find(path);
 	if (it != m_images.end()) return it->second;
 	auto img = new Image(path, 4);
