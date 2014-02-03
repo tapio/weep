@@ -138,7 +138,7 @@ void RenderDevice::preRender(const Camera& camera)
 
 void RenderDevice::render(Model& model)
 {
-	Geometry& geom = *model.geometry.get();
+	Geometry& geom = *model.geometry;
 	Material& mat = *model.material.get();
 	ASSERT(geom.vao && geom.vbo);
 	ASSERT(mat.shaderId >= 0);

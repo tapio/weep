@@ -44,9 +44,7 @@ int main(int, char*[])
 		}
 		if (!def["geometry"].is_null()) {
 			const string& geomPath = def["geometry"].string_value();
-			model.geometry.reset(new Geometry());
-			if (geomPath == "plane")
-				*model.geometry = Geometry::createPlane(1, 1);
+			model.geometry = resources.getGeometry(geomPath);
 		}
 		if (!def["position"].is_null()) {
 			const Json& posDef = def["position"];

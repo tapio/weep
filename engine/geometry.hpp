@@ -16,6 +16,7 @@ struct Triangle
 struct Geometry
 {
 	Geometry() {}
+	Geometry(const string& path);
 	~Geometry();
 
 	bool upload();

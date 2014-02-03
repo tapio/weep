@@ -5,7 +5,7 @@
 			"diffuseMap": "debug/uvtestgrid.png"
 		},
 		"position": [ 0.1, 0.1, -10.0 ],
-		"geometry": "plane",
+		"geometry": "debug/cube.obj",
 		"scale": 1.0
 	}
 ]

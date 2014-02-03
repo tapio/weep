@@ -7,6 +7,6 @@ struct Material;
 struct Model
 {
 	mat4 transform = mat4();
-	std::shared_ptr<Geometry> geometry;
+	Geometry* geometry = nullptr;
 	std::shared_ptr<Material> material;
 };
