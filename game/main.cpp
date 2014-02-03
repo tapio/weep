@@ -48,11 +48,11 @@ int main(int, char*[])
 				switch (e.key.keysym.scancode) {
 					case SDL_SCANCODE_UP:
 					case SDL_SCANCODE_W:
-						input.z = 1;
+						input.z = -1;
 						break;
 					case SDL_SCANCODE_DOWN:
 					case SDL_SCANCODE_S:
-						input.z = -1;
+						input.z = 1;
 						break;
 					case SDL_SCANCODE_LEFT:
 					case SDL_SCANCODE_A:
@@ -65,7 +65,12 @@ int main(int, char*[])
 					default:
 						break;
 				}
-				camera.position += input;
+				vec3 dir = camera.rotation * input;
+				camera.position += dir * 0.1f;
+			}
+			else if (e.type == SDL_MOUSEMOTION) {
+				const vec3 axis(0, 1, 0);
+				camera.rotation = rotate(camera.rotation, -0.01f * e.motion.xrel, axis);
 			}
 
 		}
