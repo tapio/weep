@@ -7,6 +7,7 @@ ShaderProgram::ShaderProgram()
 
 ShaderProgram::~ShaderProgram()
 {
+	destroy();
 }
 
 bool ShaderProgram::compile(ShaderType type, const string& text)

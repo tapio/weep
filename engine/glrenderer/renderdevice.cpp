@@ -19,11 +19,35 @@ RenderDevice::RenderDevice()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
-	ShaderProgram shader;
-	shader.compile(VERTEX_SHADER, readFile("shaders/core.vert"));
-	shader.compile(FRAGMENT_SHADER, readFile("shaders/core.frag"));
-	shader.link();
-	m_shaders.push_back(shader.id);
+	std::string err;
+	Json jsonShaders = Json::parse(readFile("shaders.json"), err);
+	if (!err.empty())
+		panic("Failed to read shader config: %s", err.c_str());
+
+	ASSERT(jsonShaders.is_object());
+	const Json::object& shaders = jsonShaders.object_items();
+	for (auto& it : shaders) {
+		const Json& shaderFiles = it.second["shaders"];
+		string file;
+		m_shaders.emplace_back(ShaderProgram());
+		ShaderProgram& program = m_shaders.back();
+		file = shaderFiles["vert"].string_value();
+		if (!file.empty()) program.compile(VERTEX_SHADER, readFile(file));
+		file = shaderFiles["frag"].string_value();
+		if (!file.empty()) program.compile(FRAGMENT_SHADER, readFile(file));
+		file = shaderFiles["geom"].string_value();
+		if (!file.empty()) program.compile(GEOMETRY_SHADER, readFile(file));
+		file = shaderFiles["tesc"].string_value();
+		if (!file.empty()) program.compile(TESS_CONTROL_SHADER, readFile(file));
+		file = shaderFiles["tese"].string_value();
+		if (!file.empty()) program.compile(TESS_EVALUATION_SHADER, readFile(file));
+
+		if (!program.link())
+			continue;
+
+		m_shaderNames[it.first] = m_shaders.size() - 1;
+		logDebug("Shader \"%s\" initialized", it.first.c_str());
+	}
 
 	m_commonBlock.create(0);
 	m_colorBlock.create(1);
@@ -87,7 +111,13 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 
 bool RenderDevice::uploadMaterial(Material& material)
 {
-	material.shaderId = m_shaders.front();
+	auto it = m_shaderNames.find(material.shaderName);
+	if (it == m_shaderNames.end()) {
+		logError("Failed to find shader \"%s\"", material.shaderName.c_str());
+		return false;
+	}
+	material.shaderId = it->second;
+
 	if (material.diffuseMap && !material.diffuseTex) {
 		Texture tex;
 		tex.create();
@@ -111,8 +141,11 @@ void RenderDevice::render(Model& model)
 	Geometry& geom = *model.geometry.get();
 	Material& mat = *model.material.get();
 	ASSERT(geom.vao && geom.vbo);
-	if (m_program != mat.shaderId) {
-		m_program = mat.shaderId;
+	ASSERT(mat.shaderId >= 0);
+
+	uint programId = m_shaders[mat.shaderId].id;
+	if (m_program != programId) {
+		m_program = programId;
 		glUseProgram(m_program);
 	}
 	m_colorBlock.uniforms.ambient = mat.ambient;

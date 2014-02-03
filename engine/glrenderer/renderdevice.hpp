@@ -1,6 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include "uniforms.hpp"
+#include "shader.hpp"
 
 struct Model;
 struct Geometry;
@@ -27,5 +28,6 @@ private:
 	uint m_program = 0;
 	UBO<UniformCommonBlock> m_commonBlock;
 	UBO<UniformColorBlock> m_colorBlock;
-	std::vector<uint> m_shaders;
+	std::vector<ShaderProgram> m_shaders;
+	std::map<string, int> m_shaderNames;
 };
