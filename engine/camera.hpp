@@ -14,6 +14,13 @@ struct Camera
 		projection = ortho(left, right, bottom, top, near, far);
 	}
 
+	void updateViewMatrix() {
+		view = mat4_cast(inverse(rotation));
+		view = translate(view, -position);
+	}
+
 	mat4 projection = mat4();
 	mat4 view = mat4();
+	vec3 position = vec3();
+	quat rotation = quat();
 };

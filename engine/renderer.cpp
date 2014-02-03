@@ -1,8 +1,7 @@
 #include "renderer.hpp"
-#include "model.hpp"
-#include "geometry.hpp"
-#include "material.hpp"
 #include "glrenderer/renderdevice.hpp"
+#include "model.hpp"
+#include "camera.hpp"
 
 Renderer::Renderer()
 {
@@ -23,8 +22,9 @@ void Renderer::addModel(Model* model)
 	m_models.push_back(model);
 }
 
-void Renderer::render(const Camera& camera)
+void Renderer::render(Camera& camera)
 {
+	camera.updateViewMatrix();
 	m_device->preRender(camera);
 	for (auto model : m_models) {
 		m_device->render(*model);

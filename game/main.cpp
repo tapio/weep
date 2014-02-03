@@ -65,7 +65,7 @@ int main(int, char*[])
 					default:
 						break;
 				}
-				camera.view = translate(camera.view, input);
+				camera.position += input;
 			}
 
 		}
