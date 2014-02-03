@@ -31,5 +31,6 @@ string readFile(const string& path);
 #define ASSERT SDL_assert
 
 #define NONCOPYABLE(T) \
+	T(T&&) = default; \
 	T(const T&) = delete; \
 	T& operator=(const T&) = delete
