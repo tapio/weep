@@ -86,6 +86,14 @@ int main(int, char*[])
 					case SDL_SCANCODE_D:
 						input.x = 1;
 						break;
+					case SDL_SCANCODE_PAGEUP:
+					case SDL_SCANCODE_Q:
+						input.y = 1;
+						break;
+					case SDL_SCANCODE_PAGEDOWN:
+					case SDL_SCANCODE_Z:
+						input.y = -1;
+						break;
 					default:
 						break;
 				}
