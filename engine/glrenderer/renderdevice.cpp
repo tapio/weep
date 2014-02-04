@@ -151,6 +151,7 @@ void RenderDevice::render(Model& model)
 		m_program = programId;
 		glUseProgram(m_program);
 	}
+	model.updateMatrix();
 	m_colorBlock.uniforms.ambient = mat.ambient;
 	m_colorBlock.uniforms.diffuse = mat.diffuse;
 	m_colorBlock.uniforms.specular = mat.specular;

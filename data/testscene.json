@@ -4,8 +4,49 @@
 			"shaderName": "basic",
 			"diffuseMap": "debug/uvtestgrid.png"
 		},
-		"position": [ 0.1, 0.1, -10.0 ],
 		"geometry": "debug/cube.obj",
+		"position": [ 0, -0.5, -10 ],
+		"scale": [ 15, 0, 15 ]
+	},{
+		"material": {
+			"shaderName": "basic",
+			"diffuseMap": "debug/uvtestgrid.png"
+		},
+		"geometry": "debug/cube.obj",
+		"position": [ 0, 0, -10 ],
+		"rotation": [ 0, -1, 0 ],
 		"scale": 1.0
+	},{
+		"material": {
+			"shaderName": "basic",
+			"diffuseMap": "debug/uvtestgrid.png"
+		},
+		"geometry": "debug/cube.obj",
+		"position": [ 5, -0.25, -15 ],
+		"scale": 0.5
+	},{
+		"material": {
+			"shaderName": "basic",
+			"diffuseMap": "debug/uvtestgrid.png"
+		},
+		"geometry": "debug/cube.obj",
+		"position": [ -5, -0.25, -15 ],
+		"scale": 0.5
+	},{
+		"material": {
+			"shaderName": "basic",
+			"diffuseMap": "debug/uvtestgrid.png"
+		},
+		"geometry": "debug/cube.obj",
+		"position": [ 5, -0.25, -5 ],
+		"scale": 0.5
+	},{
+		"material": {
+			"shaderName": "basic",
+			"diffuseMap": "debug/uvtestgrid.png"
+		},
+		"geometry": "debug/cube.obj",
+		"position": [ -5, -0.25, -5 ],
+		"scale": 0.5
 	}
 ]

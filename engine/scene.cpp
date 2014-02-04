@@ -3,6 +3,13 @@
 #include "geometry.hpp"
 #include "resources.hpp"
 
+namespace {
+	vec3 toVec3(const Json& arr) {
+		ASSERT(arr.is_array());
+		return vec3(arr[0].number_value(), arr[1].number_value(), arr[2].number_value());
+	}
+}
+
 void Scene::load(const string& path, Resources& resources)
 {
 	std::string err;
@@ -30,10 +37,14 @@ void Scene::load(const string& path, Resources& resources)
 			model.geometry = resources.getGeometry(geomPath);
 		}
 		if (!def["position"].is_null()) {
-			const Json& posDef = def["position"];
-			ASSERT(posDef.is_array());
-			vec3 pos(posDef[0].number_value(), posDef[1].number_value(), posDef[2].number_value());
-			model.transform = translate(model.transform, pos);
+			model.position = toVec3(def["position"]);
+		}
+		if (!def["rotation"].is_null()) {
+			model.rotation = quat(toVec3(def["rotation"]));
+		}
+		if (!def["scale"].is_null()) {
+			const Json& scaleDef = def["scale"];
+			model.scale = scaleDef.is_number() ? vec3(scaleDef.number_value()) : toVec3(scaleDef);
 		}
 	}
 	logDebug("Loaded scene with %d models", m_models.size());
