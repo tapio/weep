@@ -13,7 +13,7 @@ public:
 	~Renderer();
 
 	void render(Scene& scene, Camera& camera);
-	void reset();
+	void reset(Scene& scene);
 
 private:
 	RenderDevice* m_device = nullptr;

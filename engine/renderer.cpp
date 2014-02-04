@@ -11,15 +11,15 @@ Renderer::Renderer()
 
 Renderer::~Renderer()
 {
-	reset();
+	//reset();
 	delete m_device;
 }
 
-void Renderer::reset()
+void Renderer::reset(Scene& scene)
 {
-	//for (auto model : m_models) {
-	//	m_device->destroyModel(*model);
-	//}
+	for (auto& model : scene.getChildren()) {
+		m_device->destroyModel(model);
+	}
 }
 
 void Renderer::render(Scene& scene, Camera& camera)

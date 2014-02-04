@@ -62,13 +62,6 @@ RenderDevice::~RenderDevice()
 	m_colorBlock.destroy();
 }
 
-bool RenderDevice::uploadModel(Model& model)
-{
-	bool success = uploadMaterial(*model.material);
-	if (!success) return false;
-	return uploadGeometry(*model.geometry);
-}
-
 void RenderDevice::destroyModel(Model& model)
 {
 	if (model.geometry->vbo) {

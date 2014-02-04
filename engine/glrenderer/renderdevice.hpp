@@ -14,15 +14,14 @@ public:
 	RenderDevice();
 	~RenderDevice();
 
-	bool uploadModel(Model& model);
-	void destroyModel(Model& model);
-
 	bool uploadGeometry(Geometry& geometry);
 	bool uploadMaterial(Material& material);
 
 	void preRender(const Camera& camera);
 	void render(Model& model);
 	void postRender();
+
+	void destroyModel(Model& model);
 
 	struct Caps {
 		float maxAnisotropy;

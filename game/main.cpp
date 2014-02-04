@@ -74,7 +74,7 @@ int main(int, char*[])
 		Engine::swap();
 	}
 
-	renderer.reset();
+	renderer.reset(scene);
 	Engine::deinit();
 
 	return EXIT_SUCCESS;
