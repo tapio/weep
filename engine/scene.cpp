@@ -26,15 +26,21 @@ void Scene::load(const string& path, Resources& resources)
 			const Json& materialDef = def["material"];
 			ASSERT(materialDef.is_object());
 			model.material.reset(new Material());
-			//model.material->ambient = vec3(0.2f, 0.2f, 0.2f);
-			//model.material->diffuse = vec3(0.0f, 0.0f, 0.3f);
+			if (!materialDef["ambient"].is_null())
+				model.material->ambient = toVec3(materialDef["ambient"]);
+			if (!materialDef["diffuse"].is_null())
+				model.material->diffuse = toVec3(materialDef["diffuse"]);
+			if (!materialDef["specular"].is_null())
+				model.material->specular = toVec3(materialDef["specular"]);
 			if (!materialDef["diffuseMap"].is_null())
 				model.material->diffuseMap = resources.getImage(materialDef["diffuseMap"].string_value());
 			model.material->shaderName = materialDef["shaderName"].string_value();
 		}
 		if (!def["geometry"].is_null()) {
-			const string& geomPath = def["geometry"].string_value();
-			model.geometry = resources.getGeometry(geomPath);
+			const Json& defGeom = def["geometry"];
+			if (defGeom.is_string())
+				model.geometry = resources.getGeometry(defGeom.string_value());
+			else model.geometry = resources.getHeightmap(defGeom["heightmap"].string_value());
 		}
 		if (!def["position"].is_null()) {
 			model.position = toVec3(def["position"]);

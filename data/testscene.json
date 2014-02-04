@@ -4,9 +4,11 @@
 			"shaderName": "basic",
 			"diffuseMap": "debug/uvtestgrid.png"
 		},
-		"geometry": "debug/cube.obj",
+		"geometry": {
+			"heightmap": "debug/uvtestgrid.png"
+		},
 		"position": [ 0, -0.5, -10 ],
-		"scale": [ 15, 0, 15 ]
+		"scale": [ 0.1, 0.5, 0.1 ]
 	},{
 		"material": {
 			"shaderName": "basic",
@@ -19,10 +21,11 @@
 	},{
 		"material": {
 			"shaderName": "basic",
-			"diffuseMap": "debug/uvtestgrid.png"
+			"diffuse": [ 1, 0, 1 ],
+			"XXXdiffuseMap": "debug/uvtestgrid.png"
 		},
 		"geometry": "debug/cube.obj",
-		"position": [ 5, -0.25, -15 ],
+		"position": [ 5, -0.25, -12 ],
 		"scale": 0.5
 	},{
 		"material": {
@@ -30,7 +33,7 @@
 			"diffuseMap": "debug/uvtestgrid.png"
 		},
 		"geometry": "debug/cube.obj",
-		"position": [ -5, -0.25, -15 ],
+		"position": [ -5, -0.25, -12 ],
 		"scale": 0.5
 	},{
 		"material": {
@@ -38,7 +41,7 @@
 			"diffuseMap": "debug/uvtestgrid.png"
 		},
 		"geometry": "debug/cube.obj",
-		"position": [ 5, -0.25, -5 ],
+		"position": [ 3, -0.25, -5 ],
 		"scale": 0.5
 	},{
 		"material": {
@@ -46,7 +49,7 @@
 			"diffuseMap": "debug/uvtestgrid.png"
 		},
 		"geometry": "debug/cube.obj",
-		"position": [ -5, -0.25, -5 ],
+		"position": [ -3, -0.25, -5 ],
 		"scale": 0.5
 	}
 ]

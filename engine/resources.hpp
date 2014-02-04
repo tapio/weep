@@ -13,6 +13,7 @@ public:
 
 	Image* getImage(const string& path);
 	Geometry* getGeometry(const string& path);
+	Geometry* getHeightmap(const string& path);
 
 private:
 	std::map<string, std::unique_ptr<Image>> m_images;

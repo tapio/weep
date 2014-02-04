@@ -69,6 +69,10 @@ RenderDevice::~RenderDevice()
 
 void RenderDevice::destroyModel(Model& model)
 {
+	if (model.geometry->ebo) {
+		glDeleteBuffers(1, &model.geometry->ebo);
+		model.geometry->ebo = 0;
+	}
 	if (model.geometry->vbo) {
 		glDeleteBuffers(1, &model.geometry->vbo);
 		model.geometry->vbo = 0;
@@ -89,6 +93,7 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 
 	if (!geometry.vao) glGenVertexArrays(1, &geometry.vao);
 	if (!geometry.vbo) glGenBuffers(1, &geometry.vbo);
+	if (!geometry.ebo && !geometry.indices.empty()) glGenBuffers(1, &geometry.ebo);
 	glBindVertexArray(geometry.vao);
 	glBindBuffer(GL_ARRAY_BUFFER, geometry.vbo);
 	glBufferData(GL_ARRAY_BUFFER, geometry.vertices.size() * sizeof(Vertex), &geometry.vertices.front(), GL_STATIC_DRAW);
@@ -102,7 +107,11 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 	// Normals
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normal));
-
+	// Elements
+	if (geometry.ebo) {
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry.ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, geometry.indices.size() * sizeof(uint), &geometry.indices.front(), GL_STATIC_DRAW);
+	}
 	glutil::checkGL("Post geometry upload");
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -165,7 +174,10 @@ void RenderDevice::render(Model& model)
 		//glUniform1i(0, 0);
 	}
 	glBindVertexArray(geom.vao);
-	glDrawArrays(GL_TRIANGLES, 0, geom.vertices.size());
+	if (geom.ebo) {
+		glDrawElements(GL_TRIANGLES, geom.indices.size(), GL_UNSIGNED_INT, 0);
+	} else glDrawArrays(GL_TRIANGLES, 0, geom.vertices.size());
+	glBindVertexArray(0);
 	glutil::checkGL("Post draw");
 }
 

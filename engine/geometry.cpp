@@ -1,4 +1,5 @@
 #include "geometry.hpp"
+#include "image.hpp"
 #include <sstream>
 #include <fstream>
 
@@ -63,7 +64,34 @@ Geometry::Geometry(const string& path)
 	}
 }
 
+Geometry::Geometry(const Image& heightmap)
+{
+	int wpoints = heightmap.width + 1;
+	for (int j = 0; j <= heightmap.height; ++j) {
+		for (int i = 0; i <= heightmap.width; ++i) {
+			// Create the vertex
+			float x = i - heightmap.width * 0.5f;
+			float z = j - heightmap.height * 0.5f;
+			float y = heightmap.data[heightmap.channels * (j * heightmap.width + i)] / 255.0f;
+			vertices.emplace_back(Vertex());
+			Vertex& v = vertices.back();
+			v.position = vec3(x, y, z);
+			v.texcoord = vec2((float)i / heightmap.width, (float)j / heightmap.height);
+			v.normal = vec3(0, 1, 0);
+			// Indexed faces
+			if (i == heightmap.width || j == heightmap.height)
+				continue;
+			uint a = i + wpoints * j;
+			uint b = i + wpoints * (j + 1);
+			uint c = (i + 1) + wpoints * (j + 1);
+			uint d = (i + 1) + wpoints * j;
+			uint triangles[] = { a, b, d, b, c, d };
+			indices.insert(indices.end(), triangles, triangles + 6);
+		}
+	}
+}
+
 Geometry::~Geometry()
 {
-	ASSERT(!vao && !vbo);
+	ASSERT(!vao && !vbo && !ebo);
 }

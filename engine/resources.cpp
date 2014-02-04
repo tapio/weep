@@ -32,3 +32,10 @@ Geometry* Resources::getGeometry(const string& path)
 	if (!ptr) ptr.reset(new Geometry("../data/" + path));
 	return ptr.get();
 }
+
+Geometry*Resources::getHeightmap(const string& path)
+{
+	auto& ptr = m_geoms[path];
+	if (!ptr) ptr.reset(new Geometry(*getImage(path)));
+	return ptr.get();
+}
