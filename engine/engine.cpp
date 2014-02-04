@@ -47,8 +47,6 @@ void Engine::init()
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
 	logInfo("OpenGL Context:  %d.%d", major, minor);
-
-	//atexit(Engine::deinit);
 }
 
 void Engine::deinit()

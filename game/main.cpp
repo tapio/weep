@@ -93,7 +93,7 @@ int main(int, char*[])
 				Engine::grabMouse(true);
 			}
 			else if (e.type == SDL_MOUSEMOTION && active) {
-				const vec3 xaxis(1, 0, 0), yaxis(0, 1, 0);
+				const vec3 yaxis(0, 1, 0);
 				camera.rotation = rotate(camera.rotation, -0.005f * e.motion.xrel, yaxis);
 			}
 
