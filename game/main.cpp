@@ -23,23 +23,39 @@ int main(int, char*[])
 	scene.load(scenePath, resources);
 
 	bool running = true;
+	bool active = false;
 	SDL_Event e;
 	while (running) {
 		renderer.render(scene, camera);
 		while (SDL_PollEvent(&e)) {
-			SDL_Keysym keysym = e.key.keysym;
-			if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && keysym.sym == SDLK_ESCAPE)) {
+			if (e.type == SDL_QUIT) {
 				running = false;
 				break;
 			}
-			if (e.type == SDL_KEYDOWN && keysym.mod == KMOD_LCTRL && keysym.sym == SDLK_r) {
-				renderer.reset(scene);
-				scene.reset();
-				resources.reset();
-				scene.load(scenePath, resources);
+
+			if (e.type == SDL_KEYUP) {
+				SDL_Keysym keysym = e.key.keysym;
+
+				if (keysym.sym == SDLK_ESCAPE) {
+					if (active) {
+						active = false;
+						Engine::grabMouse(false);
+					} else running = false;
+					break;
+				}
+
+				if (keysym.mod == KMOD_LCTRL && keysym.sym == SDLK_r) {
+					renderer.reset(scene);
+					scene.reset();
+					resources.reset();
+					scene.load(scenePath, resources);
+					continue;
+				}
 			}
 
 			if (e.type == SDL_KEYDOWN) {
+				SDL_Keysym keysym = e.key.keysym;
+
 				vec3 input;
 				switch (keysym.scancode) {
 					case SDL_SCANCODE_UP:
@@ -72,9 +88,13 @@ int main(int, char*[])
 				vec3 dir = camera.rotation * input;
 				camera.position += dir * 0.1f;
 			}
-			else if (e.type == SDL_MOUSEMOTION) {
-				const vec3 axis(0, 1, 0);
-				camera.rotation = rotate(camera.rotation, -0.01f * e.motion.xrel, axis);
+			else if (e.type == SDL_MOUSEBUTTONDOWN && !active) {
+				active = true;
+				Engine::grabMouse(true);
+			}
+			else if (e.type == SDL_MOUSEMOTION && active) {
+				const vec3 xaxis(1, 0, 0), yaxis(0, 1, 0);
+				camera.rotation = rotate(camera.rotation, -0.005f * e.motion.xrel, yaxis);
 			}
 
 		}

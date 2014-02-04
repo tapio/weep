@@ -72,3 +72,8 @@ int Engine::height()
 {
 	return s_height;
 }
+
+void Engine::grabMouse(bool grab)
+{
+	SDL_SetRelativeMouseMode(grab ? SDL_TRUE : SDL_FALSE);
+}

@@ -10,4 +10,6 @@ public:
 
 	static int width();
 	static int height();
+
+	static void grabMouse(bool grab);
 };
