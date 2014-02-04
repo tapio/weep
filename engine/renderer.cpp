@@ -2,6 +2,7 @@
 #include "glrenderer/renderdevice.hpp"
 #include "model.hpp"
 #include "camera.hpp"
+#include "scene.hpp"
 
 Renderer::Renderer()
 {
@@ -16,23 +17,17 @@ Renderer::~Renderer()
 
 void Renderer::reset()
 {
-	for (auto model : m_models) {
-		m_device->destroyModel(*model);
-	}
+	//for (auto model : m_models) {
+	//	m_device->destroyModel(*model);
+	//}
 }
 
-void Renderer::addModel(Model* model)
-{
-	m_device->uploadModel(*model);
-	m_models.push_back(model);
-}
-
-void Renderer::render(Camera& camera)
+void Renderer::render(Scene& scene, Camera& camera)
 {
 	camera.updateViewMatrix();
 	m_device->preRender(camera);
-	for (auto model : m_models) {
-		m_device->render(*model);
+	for (auto& model : scene.getChildren()) {
+		m_device->render(model);
 	}
 	m_device->postRender();
 }

@@ -143,8 +143,10 @@ void RenderDevice::render(Model& model)
 {
 	Geometry& geom = *model.geometry;
 	Material& mat = *model.material.get();
-	ASSERT(geom.vao && geom.vbo);
-	ASSERT(mat.shaderId >= 0);
+	if (!geom.vao || !geom.vbo)
+		uploadGeometry(geom);
+	if (mat.shaderId < 0)
+		uploadMaterial(mat);
 
 	uint programId = m_shaders[mat.shaderId].id;
 	if (m_program != programId) {

@@ -2,6 +2,7 @@
 #include "common.hpp"
 
 class RenderDevice;
+class Scene;
 struct Camera;
 struct Model;
 
@@ -11,8 +12,7 @@ public:
 	Renderer();
 	~Renderer();
 
-	void addModel(Model* model);
-	void render(Camera& camera);
+	void render(Scene& scene, Camera& camera);
 	void reset();
 
 private:

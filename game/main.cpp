@@ -1,7 +1,5 @@
 #include "engine.hpp"
-#include "geometry.hpp"
-#include "material.hpp"
-#include "model.hpp"
+#include "scene.hpp"
 #include "camera.hpp"
 #include "renderer.hpp"
 #include "resources.hpp"
@@ -20,46 +18,13 @@ int main(int, char*[])
 	camera.makePerspective(45, ar, 0.1, 1000);
 	camera.view = lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
 
-	std::vector<Model> models;
-
-	std::string err;
-	Json jsonScene = Json::parse(readFile("testscene.json"), err);
-	if (!err.empty())
-		panic("Failed to read scene: %s", err.c_str());
-	ASSERT(jsonScene.is_array());
-	for (uint i = 0; i < jsonScene.array_items().size(); ++i) {
-		const Json& def = jsonScene[i];
-		ASSERT(def.is_object());
-		models.emplace_back(Model());
-		Model& model = models.back();
-		if (!def["material"].is_null()) {
-			const Json& materialDef = def["material"];
-			ASSERT(materialDef.is_object());
-			model.material.reset(new Material());
-			//model.material->ambient = vec3(0.2f, 0.2f, 0.2f);
-			//model.material->diffuse = vec3(0.0f, 0.0f, 0.3f);
-			if (!materialDef["diffuseMap"].is_null())
-				model.material->diffuseMap = resources.getImage(materialDef["diffuseMap"].string_value());
-			model.material->shaderName = materialDef["shaderName"].string_value();
-		}
-		if (!def["geometry"].is_null()) {
-			const string& geomPath = def["geometry"].string_value();
-			model.geometry = resources.getGeometry(geomPath);
-		}
-		if (!def["position"].is_null()) {
-			const Json& posDef = def["position"];
-			ASSERT(posDef.is_array());
-			vec3 pos(posDef[0].number_value(), posDef[1].number_value(), posDef[2].number_value());
-			model.transform = translate(model.transform, pos);
-		}
-		renderer.addModel(&model);
-	}
-	logDebug("Loaded scene with %d models", models.size());
+	Scene scene;
+	scene.load("testscene.json", resources);
 
 	bool running = true;
 	SDL_Event e;
 	while (running) {
-		renderer.render(camera);
+		renderer.render(scene, camera);
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT || e.key.keysym.sym == SDLK_ESCAPE)
 			{
