@@ -16,6 +16,12 @@ void Engine::init()
 		panic(SDL_GetError());
 	}
 
+	logInfo("Logical CPU cores: %d", SDL_GetCPUCount());
+	//logInfo("System RAM: %dMB", SDL_GetSystemRAM());
+	logInfo("L1 cache line size: %dkB", SDL_GetCPUCacheLineSize());
+	logInfo("SSE: %d, SSE2: %d, SSE3: %d, SSE4.1: %d, SSE4.2: %d",
+			SDL_HasSSE(), SDL_HasSSE2(), SDL_HasSSE3(), SDL_HasSSE41(), SDL_HasSSE42());
+
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
