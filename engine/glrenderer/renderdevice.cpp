@@ -21,6 +21,15 @@ RenderDevice::RenderDevice()
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
+	loadShaders();
+
+	m_commonBlock.create(0);
+	m_colorBlock.create(1);
+}
+
+void RenderDevice::loadShaders()
+{
+	m_shaders.clear();
 	std::string err;
 	Json jsonShaders = Json::parse(readFile("shaders.json"), err);
 	if (!err.empty())
@@ -50,11 +59,7 @@ RenderDevice::RenderDevice()
 		m_shaderNames[it.first] = m_shaders.size() - 1;
 		logDebug("Shader \"%s\" initialized", it.first.c_str());
 	}
-
-	m_commonBlock.create(0);
-	m_colorBlock.create(1);
 }
-
 
 RenderDevice::~RenderDevice()
 {

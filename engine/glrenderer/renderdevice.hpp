@@ -14,6 +14,7 @@ public:
 	RenderDevice();
 	~RenderDevice();
 
+	void loadShaders();
 	bool uploadGeometry(Geometry& geometry);
 	bool uploadMaterial(Material& material);
 
