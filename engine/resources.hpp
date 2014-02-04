@@ -14,6 +14,6 @@ public:
 	Geometry* getGeometry(const string& path);
 
 private:
-	std::map<string, Image*> m_images;
-	std::map<string, Geometry*> m_geoms;
+	std::map<string, std::unique_ptr<Image>> m_images;
+	std::map<string, std::unique_ptr<Geometry>> m_geoms;
 };
