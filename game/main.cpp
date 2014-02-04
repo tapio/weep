@@ -18,23 +18,29 @@ int main(int, char*[])
 	camera.makePerspective(45, ar, 0.1, 1000);
 	camera.view = lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
 
+	const string scenePath = "testscene.json";
 	Scene scene;
-	scene.load("testscene.json", resources);
+	scene.load(scenePath, resources);
 
 	bool running = true;
 	SDL_Event e;
 	while (running) {
 		renderer.render(scene, camera);
 		while (SDL_PollEvent(&e)) {
-			if (e.type == SDL_QUIT || e.key.keysym.sym == SDLK_ESCAPE)
-			{
+			SDL_Keysym keysym = e.key.keysym;
+			if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && keysym.sym == SDLK_ESCAPE)) {
 				running = false;
 				break;
+			}
+			if (e.type == SDL_KEYDOWN && keysym.mod == KMOD_LCTRL && keysym.sym == SDLK_r) {
+				renderer.reset(scene);
+				scene.reset();
+				scene.load(scenePath, resources);
 			}
 
 			if (e.type == SDL_KEYDOWN) {
 				vec3 input;
-				switch (e.key.keysym.scancode) {
+				switch (keysym.scancode) {
 					case SDL_SCANCODE_UP:
 					case SDL_SCANCODE_W:
 						input.z = -1;
