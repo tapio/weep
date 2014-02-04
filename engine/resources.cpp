@@ -12,6 +12,13 @@ Resources::~Resources()
 
 }
 
+void Resources::reset()
+{
+	m_images.clear();
+	m_geoms.clear();
+	logDebug("Resource cache dropped");
+}
+
 Image* Resources::getImage(const string& path)
 {
 	auto& ptr = m_images[path];

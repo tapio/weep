@@ -9,6 +9,7 @@ class Resources
 public:
 	Resources();
 	~Resources();
+	void reset();
 
 	Image* getImage(const string& path);
 	Geometry* getGeometry(const string& path);

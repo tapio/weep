@@ -35,6 +35,7 @@ int main(int, char*[])
 			if (e.type == SDL_KEYDOWN && keysym.mod == KMOD_LCTRL && keysym.sym == SDLK_r) {
 				renderer.reset(scene);
 				scene.reset();
+				resources.reset();
 				scene.load(scenePath, resources);
 			}
 
