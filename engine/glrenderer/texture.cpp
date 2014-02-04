@@ -17,6 +17,9 @@ void Texture::upload(Image& image)
 	glTexImage2D(GL_TEXTURE_2D, 0, formats[image.channels], image.width, image.height,
 		0, formats[image.channels], GL_UNSIGNED_BYTE, &image.data.front());
 	update();
+	if (minFilter == GL_LINEAR_MIPMAP_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST
+		|| minFilter == GL_NEAREST_MIPMAP_LINEAR || minFilter == GL_NEAREST_MIPMAP_NEAREST)
+			glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 void Texture::update()
@@ -26,6 +29,7 @@ void Texture::update()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
 }
 
 void Texture::destroy()

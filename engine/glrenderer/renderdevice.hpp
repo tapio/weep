@@ -24,6 +24,10 @@ public:
 	void render(Model& model);
 	void postRender();
 
+	struct Caps {
+		float maxAnisotropy;
+	} caps;
+
 private:
 	uint m_program = 0;
 	UBO<UniformCommonBlock> m_commonBlock;

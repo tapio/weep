@@ -14,6 +14,8 @@ RenderDevice::RenderDevice()
 	logInfo("OpenGL Version:  %s", glGetString(GL_VERSION));
 	logInfo("GLSL Version:    %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &caps.maxAnisotropy);
+
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glViewport(0, 0, Engine::width(), Engine::height());
 	glEnable(GL_DEPTH_TEST);
@@ -120,6 +122,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 
 	if (material.diffuseMap && !material.diffuseTex) {
 		Texture tex;
+		tex.anisotropy = caps.maxAnisotropy;
 		tex.create();
 		tex.upload(*material.diffuseMap);
 		material.diffuseTex = tex.id;
