@@ -10,6 +10,12 @@ struct Vertex
 	vec3 normal;
 };
 
+struct BoundingBox
+{
+	vec3 min = vec3(INFINITY, INFINITY, INFINITY);
+	vec3 max = vec3(INFINITY, INFINITY, INFINITY);
+};
+
 struct Geometry
 {
 	Geometry() {}
@@ -17,10 +23,16 @@ struct Geometry
 	Geometry(const Image& heightmap);
 	~Geometry();
 
-	bool upload();
+	void calculateBoundingSphere();
+	void calculateBoundingBox();
+	void calculateNormals();
+	void normalizeNormals();
 
 	std::vector<Vertex> vertices;
 	std::vector<uint> indices;
+
+	BoundingBox boundingBox;
+	float boundingRadius;
 
 	uint vao = 0;
 	uint vbo = 0;

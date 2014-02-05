@@ -62,6 +62,8 @@ Geometry::Geometry(const string& path)
 			}
 		}
 	}
+	calculateBoundingSphere();
+	calculateBoundingBox();
 }
 
 Geometry::Geometry(const Image& heightmap)
@@ -89,9 +91,82 @@ Geometry::Geometry(const Image& heightmap)
 			indices.insert(indices.end(), triangles, triangles + 6);
 		}
 	}
+	calculateBoundingSphere();
+	calculateBoundingBox();
+	calculateNormals();
 }
 
 Geometry::~Geometry()
 {
 	ASSERT(!vao && !vbo && !ebo);
+}
+
+void Geometry::calculateBoundingSphere()
+{
+	float maxRadiusSq = 0;
+	for (auto& v : vertices) {
+		maxRadiusSq = glm::max(maxRadiusSq, glm::length2(v.position));
+	}
+	boundingRadius = glm::sqrt(maxRadiusSq);
+}
+
+void Geometry::calculateBoundingBox()
+{
+	BoundingBox& bb = boundingBox;
+	if (vertices.empty()) {
+		bb.min = vec3();
+		bb.max = vec3();
+		return;
+	}
+
+	bb.min.x = bb.max.x = vertices[0].position.x;
+	bb.min.y = bb.max.y = vertices[0].position.y;
+	bb.min.z = bb.max.z = vertices[0].position.z;
+
+	for (uint i = 1, len = vertices.size(); i < len; ++i) {
+		float x = vertices[i].position.x;
+		float y = vertices[i].position.y;
+		float z = vertices[i].position.z;
+		if (x < bb.min.x) bb.min.x = x;
+		else if ( x > bb.max.x ) bb.max.x = x;
+		if (y < bb.min.y) bb.min.y = y;
+		else if ( y > bb.max.y ) bb.max.y = y;
+		if (z < bb.min.z) bb.min.z = z;
+		else if (z > bb.max.z) bb.max.z = z;
+	}
+}
+
+void Geometry::calculateNormals()
+{
+	// Reset existing normals
+	for (auto& v : vertices)
+		v.normal = vec3();
+
+	// Indexed elements
+	if (!indices.empty()) {
+		for (uint i = 0, len = indices.size(); i < len; i += 3) {
+			Vertex& v1 = vertices[indices[i]];
+			Vertex& v2 = vertices[indices[i+1]];
+			Vertex& v3 = vertices[indices[i+2]];
+			vec3 normal = glm::triangleNormal(v1.position, v2.position, v3.position);
+			v1.normal += normal;
+			v2.normal += normal;
+			v3.normal += normal;
+		}
+		normalizeNormals();
+	// Non-indexed elements
+	} else {
+		for (uint i = 0, len = vertices.size(); i < len; i += 3) {
+			vec3 normal = glm::triangleNormal(vertices[i].position, vertices[i+1].position, vertices[i+2].position);
+			vertices[i+0].normal = normal;
+			vertices[i+1].normal = normal;
+			vertices[i+2].normal = normal;
+		}
+	}
+}
+
+void Geometry::normalizeNormals()
+{
+	for (auto& v : vertices)
+		v.normal = normalize(v.normal);
 }
