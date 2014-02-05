@@ -53,7 +53,7 @@ Geometry::Geometry(const string& path)
 					logError("Invalid face definition in %s:%d", path.c_str(), lineNumber);
 					continue;
 				}
-				vertices.emplace_back(Vertex());
+				vertices.emplace_back();
 				Vertex& v = vertices.back();
 				// Vertex indices are 1-based in the file
 				if (!indices[0].empty()) v.position = verts.at(std::stoi(indices[0]) - 1);
@@ -73,7 +73,7 @@ Geometry::Geometry(const Image& heightmap)
 			float x = i - heightmap.width * 0.5f;
 			float z = j - heightmap.height * 0.5f;
 			float y = heightmap.data[heightmap.channels * (j * heightmap.width + i)] / 255.0f;
-			vertices.emplace_back(Vertex());
+			vertices.emplace_back();
 			Vertex& v = vertices.back();
 			v.position = vec3(x, y, z);
 			v.texcoord = vec2((float)i / heightmap.width, (float)j / heightmap.height);

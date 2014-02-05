@@ -24,7 +24,7 @@ void Scene::load(const string& path, Resources& resources)
 		// Parse light
 		const Json& lightDef = def["light"];
 		if (!lightDef.is_null()) {
-			m_lights.emplace_back(Light());
+			m_lights.emplace_back();
 			Light& light = m_lights.back();
 			string lightType = lightDef["type"].string_value();
 			if (lightType == "ambient") light.type = Light::AMBIENT_LIGHT;
@@ -48,7 +48,7 @@ void Scene::load(const string& path, Resources& resources)
 			continue;
 
 		// We have geometry, so create a model
-		m_models.emplace_back(Model());
+		m_models.emplace_back();
 		Model& model = m_models.back();
 
 		// Parse geometry
@@ -64,6 +64,8 @@ void Scene::load(const string& path, Resources& resources)
 			const Json& materialDef = def["material"];
 			ASSERT(materialDef.is_object());
 			model.material.reset(new Material());
+			if (materialDef["tessellate"].bool_value())
+				model.material->tessellate = true;
 			if (!materialDef["ambient"].is_null())
 				model.material->ambient = toVec3(materialDef["ambient"]);
 			if (!materialDef["diffuse"].is_null())

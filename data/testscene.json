@@ -1,8 +1,9 @@
 [
 	{
 		"material": {
-			"shaderName": "basic",
-			"diffuseMap": "debug/uvtestgrid.png"
+			"shaderName": "terrain_tess",
+			"diffuseMap": "debug/uvtestgrid.png",
+			"tessellate": true
 		},
 		"geometry": {
 			"heightmap": "debug/uvtestgrid.png"

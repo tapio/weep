@@ -7,7 +7,8 @@ ShaderProgram::ShaderProgram()
 
 ShaderProgram::~ShaderProgram()
 {
-	destroy();
+	// TODO: Somehow loadShaders emplace_back calls destructor
+	//destroy();
 }
 
 bool ShaderProgram::compile(ShaderType type, const string& text)
@@ -88,8 +89,10 @@ void ShaderProgram::use() const
 
 void ShaderProgram::destroy()
 {
-	for (auto i : m_shaderIds) {
-		if (i > 0) glDeleteShader(i);
+	logDebug("Shader destructing");
+	for (auto& i : m_shaderIds) {
+		if (i > 0) { glDeleteShader(i); i = 0; }
 	}
 	glDeleteProgram(id);
+	id = 0;
 }

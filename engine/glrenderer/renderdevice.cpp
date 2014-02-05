@@ -8,12 +8,20 @@
 #include "engine.hpp"
 #include "light.hpp"
 
+static void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *msg, const void *data)
+{
+	logDebug("OpenGL: %s", msg);
+}
+
 RenderDevice::RenderDevice()
 {
 	logInfo("OpenGL Renderer: %s", glGetString(GL_RENDERER));
 	logInfo("OpenGL Vendor:   %s", glGetString(GL_VENDOR));
 	logInfo("OpenGL Version:  %s", glGetString(GL_VERSION));
 	logInfo("GLSL Version:    %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+	glPatchParameteri(GL_PATCH_VERTICES, 3);
+	glDebugMessageCallback(debugCallback, NULL);
 
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &caps.maxAnisotropy);
 
@@ -31,6 +39,7 @@ RenderDevice::RenderDevice()
 void RenderDevice::loadShaders()
 {
 	m_shaders.clear();
+	m_shaderNames.clear();
 	std::string err;
 	Json jsonShaders = Json::parse(readFile("shaders.json"), err);
 	if (!err.empty())
@@ -41,7 +50,7 @@ void RenderDevice::loadShaders()
 	for (auto& it : shaders) {
 		const Json& shaderFiles = it.second["shaders"];
 		string file;
-		m_shaders.emplace_back(ShaderProgram());
+		m_shaders.emplace_back();
 		ShaderProgram& program = m_shaders.back();
 		file = shaderFiles["vert"].string_value();
 		if (!file.empty()) program.compile(VERTEX_SHADER, readFile(file));
@@ -175,9 +184,10 @@ void RenderDevice::render(Model& model)
 		//glUniform1i(0, 0);
 	}
 	glBindVertexArray(geom.vao);
+	uint mode = mat.tessellate ? GL_PATCHES : GL_TRIANGLES;
 	if (geom.ebo) {
-		glDrawElements(GL_TRIANGLES, geom.indices.size(), GL_UNSIGNED_INT, 0);
-	} else glDrawArrays(GL_TRIANGLES, 0, geom.vertices.size());
+		glDrawElements(mode, geom.indices.size(), GL_UNSIGNED_INT, 0);
+	} else glDrawArrays(mode, 0, geom.vertices.size());
 	glBindVertexArray(0);
 	glutil::checkGL("Post draw");
 }

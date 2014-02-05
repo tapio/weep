@@ -4,5 +4,13 @@
 			"vert": "shaders/core.vert",
 			"frag": "shaders/core.frag"
 		}
+	},
+	"terrain_tess": {
+		"shaders" : {
+			"vert": "shaders/terrain.vert",
+			"tesc": "shaders/pntri.tesc",
+			"tese": "shaders/pntri.tese",
+			"frag": "shaders/terrain.frag"
+		}
 	}
 }

@@ -17,6 +17,7 @@ Renderer::~Renderer()
 
 void Renderer::reset(Scene& scene)
 {
+	logDebug("Reseting renderer");
 	for (auto& model : scene.getChildren()) {
 		m_device->destroyModel(model);
 	}

@@ -18,6 +18,7 @@ struct Material
 	uint normalTex = 0;
 	uint specularTex = 0;
 
+	bool tessellate = false;
 	string shaderName = "";
 	int shaderId = -1; // Automatic
 };
