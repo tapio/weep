@@ -19,6 +19,13 @@
 		"rotation": [ 0, -1, 0 ],
 		"scale": 1.0
 	},{
+		"light": {
+			"type": "point",
+			"diffuse": [ 1.0, 0, 1.0 ],
+			"distance": 10
+		},
+		"position": [ 0, 5, -5 ]
+	},{
 		"material": {
 			"shaderName": "basic",
 			"diffuse": [ 1, 0, 1 ],
