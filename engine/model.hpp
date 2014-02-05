@@ -12,9 +12,9 @@ struct Model
 	mat4 transform = mat4();
 
 	void updateMatrix() {
-		transform = translate(mat4(), position);
+		transform = glm::translate(position);
 		transform = glm::scale(transform, scale);
-		transform *= mat4_cast(rotation);
+		transform *= glm::mat4_cast(rotation);
 	}
 
 	Geometry* geometry = nullptr;
