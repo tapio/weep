@@ -16,7 +16,7 @@ int main(int, char*[])
 	float ar = Engine::width() / (float)Engine::height();
 	Camera camera;
 	camera.makePerspective(45, ar, 0.1, 1000);
-	camera.view = lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
+	camera.view = glm::lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
 
 	const string scenePath = "testscene.json";
 	Scene scene;
@@ -94,7 +94,7 @@ int main(int, char*[])
 			}
 			else if (e.type == SDL_MOUSEMOTION && active) {
 				const vec3 yaxis(0, 1, 0);
-				camera.rotation = rotate(camera.rotation, -0.005f * e.motion.xrel, yaxis);
+				camera.rotation = glm::rotate(camera.rotation, -0.005f * e.motion.xrel, yaxis);
 			}
 
 		}

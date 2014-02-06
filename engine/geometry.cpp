@@ -39,7 +39,7 @@ Geometry::Geometry(const string& path)
 			uvs.push_back(vec2(x, y));
 		} else if (row.substr(0,2) == "vn") {  // Normals
 			srow >> tempst >> x >> y >> z;
-			normals.push_back(normalize(vec3(x, y, z)));
+			normals.push_back(glm::normalize(vec3(x, y, z)));
 		} else if (row.substr(0,2) == "f ") {  // Faces
 			srow >> tempst; // Eat away prefix
 			// Parse face point's coordinate references

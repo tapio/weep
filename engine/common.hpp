@@ -19,7 +19,13 @@
 
 using std::string;
 using json11::Json;
-using namespace glm;
+using glm::vec2;
+using glm::vec2;
+using glm::vec3;
+using glm::mat2;
+using glm::mat3;
+using glm::mat4;
+using glm::quat;
 typedef unsigned uint;
 
 string vlformat(const char* format, va_list vl);

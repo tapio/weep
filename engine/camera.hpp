@@ -6,17 +6,17 @@ struct Camera
 
 	void makePerspective(float fov, float aspect, float near, float far)
 	{
-		projection = perspective(fov, aspect, near, far);
+		projection = glm::perspective(fov, aspect, near, far);
 	}
 
 	void makeOrtho(float left, float right, float top, float bottom, float near, float far)
 	{
-		projection = ortho(left, right, bottom, top, near, far);
+		projection = glm::ortho(left, right, bottom, top, near, far);
 	}
 
 	void updateViewMatrix() {
-		view = mat4_cast(inverse(rotation));
-		view = translate(view, -position);
+		view = glm::mat4_cast(glm::inverse(rotation));
+		view = glm::translate(view, -position);
 	}
 
 	mat4 projection = mat4();
