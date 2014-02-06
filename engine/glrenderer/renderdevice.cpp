@@ -154,6 +154,7 @@ void RenderDevice::preRender(const Camera& camera)
 	glUseProgram(0);
 	m_commonBlock.uniforms.projectionMatrix = camera.projection;
 	m_commonBlock.uniforms.viewMatrix = camera.view;
+	m_commonBlock.uniforms.cameraPosition = camera.position;
 }
 
 void RenderDevice::render(Model& model)
@@ -177,6 +178,7 @@ void RenderDevice::render(Model& model)
 	m_colorBlock.upload();
 	m_commonBlock.uniforms.modelMatrix = model.transform;
 	m_commonBlock.uniforms.modelViewMatrix = m_commonBlock.uniforms.viewMatrix * m_commonBlock.uniforms.modelMatrix;
+	m_commonBlock.uniforms.normalMatrix = glm::inverseTranspose(mat3(m_commonBlock.uniforms.modelViewMatrix));
 	m_commonBlock.upload();
 	if (mat.diffuseTex) {
 		//glActiveTexture(GL_TEXTURE0);
