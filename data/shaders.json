@@ -1,4 +1,10 @@
 {
+	"normal": {
+		"shaders" : {
+			"vert": "shaders/normal.vert",
+			"frag": "shaders/normal.frag"
+		}
+	},
 	"basic": {
 		"shaders" : {
 			"vert": "shaders/core.vert",
