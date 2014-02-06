@@ -138,12 +138,11 @@ void Geometry::calculateBoundingBox()
 
 void Geometry::calculateNormals()
 {
-	// Reset existing normals
-	for (auto& v : vertices)
-		v.normal = vec3();
-
 	// Indexed elements
 	if (!indices.empty()) {
+		// Reset existing normals
+		for (auto& v : vertices)
+			v.normal = vec3();
 		for (uint i = 0, len = indices.size(); i < len; i += 3) {
 			Vertex& v1 = vertices[indices[i]];
 			Vertex& v2 = vertices[indices[i+1]];
@@ -168,5 +167,5 @@ void Geometry::calculateNormals()
 void Geometry::normalizeNormals()
 {
 	for (auto& v : vertices)
-		v.normal = normalize(v.normal);
+		v.normal = glm::normalize(v.normal);
 }
