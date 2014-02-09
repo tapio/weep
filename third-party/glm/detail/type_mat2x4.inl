@@ -131,29 +131,6 @@ namespace detail
 		this->value[1] = v1;
 	}
 
-#if(GLM_HAS_INITIALIZER_LISTS)
-	template <typename T, precision P>
-	template <typename U>
-	GLM_FUNC_QUALIFIER tmat2x4<T, P>::tmat2x4(std::initializer_list<U> l)
-	{
-		assert(l.size() == this->length() * this->value[0].length());
-
-		typename std::initializer_list<U>::iterator p = l.begin();
-
-		this->value[0] = tvec4<T, P>(*(p +  0), *(p +  1), *(p +  2), *(p +  3));
-		this->value[1] = tvec4<T, P>(*(p +  4), *(p +  5), *(p +  6), *(p +  7));
-	}
-
-	template <typename T, precision P>
-	GLM_FUNC_QUALIFIER tmat2x4<T, P>::tmat2x4(std::initializer_list<tvec4<T, P> > l)
-	{
-		assert(l.size() == this->length());
-
-		this->value[0] = l.begin()[0];
-		this->value[1] = l.begin()[1];
-	}
-#endif//GLM_HAS_INITIALIZER_LISTS
-
 	//////////////////////////////////////
 	// Conversion constructors
 	template <typename T, precision P>
@@ -508,7 +485,7 @@ namespace detail
 		T SrcB30 = m2[3][0];
 		T SrcB31 = m2[3][1];
 
-		tmat4x4<T, P> Result(tmat4x4<T, P>::null);
+		tmat4x4<T, P> Result(tmat4x4<T, P>::_null);
 		Result[0][0] = SrcA00 * SrcB00 + SrcA10 * SrcB01;
 		Result[0][1] = SrcA01 * SrcB00 + SrcA11 * SrcB01;
 		Result[0][2] = SrcA02 * SrcB00 + SrcA12 * SrcB01;

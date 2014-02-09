@@ -37,6 +37,20 @@ More informations in GLM manual:
 http://glm.g-truc.net/glm.pdf
 
 ================================================================================
+GLM 0.9.5.2: 2014-02-08
+--------------------------------------------------------------------------------
+- Fixed initializer list ambiguity (#159, #160)
+- Fixed warnings with the Android NDK 9c
+- Fixed non power of two matrix products
+- Fixed mix function link error
+- Fixed SSE code included in GLM tests on "pure" platforms
+- Fixed undefined reference to fastInverseSqrt (#161)
+- Fixed GLM_FORCE_RADIANS with <glm/ext.hpp> build error (#165)
+- Fix dot product clamp range for vector angle functions. (#163)
+- Tentative fix for strict aliasing warning in GCC 4.8.1 / Android NDK 9c (#152)
+- Fixed GLM_GTC_constants description brief (#162)
+
+================================================================================
 GLM 0.9.5.1: 2014-01-11
 --------------------------------------------------------------------------------
 - Fixed angle and orientedAngle that sometimes return NaN values (#145)
