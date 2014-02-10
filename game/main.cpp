@@ -3,6 +3,7 @@
 #include "camera.hpp"
 #include "renderer.hpp"
 #include "resources.hpp"
+#include "controller.hpp"
 
 #include <SDL2/SDL.h>
 
@@ -18,6 +19,8 @@ int main(int, char*[])
 	camera.makePerspective(45, ar, 0.1, 1000);
 	camera.view = glm::lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
 
+	Controller controller(camera.position, camera.rotation);
+
 	const string scenePath = "testscene.json";
 	Scene scene;
 	scene.load(scenePath, resources);
@@ -26,7 +29,6 @@ int main(int, char*[])
 	bool active = false;
 	SDL_Event e;
 	while (running) {
-		renderer.render(scene, camera);
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) {
 				running = false;
@@ -57,53 +59,20 @@ int main(int, char*[])
 				}
 			}
 
-			if (e.type == SDL_KEYDOWN) {
-				SDL_Keysym keysym = e.key.keysym;
-				if (keysym.mod != KMOD_NONE)
-					continue;
-
-				vec3 input;
-				switch (keysym.scancode) {
-					case SDL_SCANCODE_UP:
-					case SDL_SCANCODE_W:
-						input.z = -1;
-						break;
-					case SDL_SCANCODE_DOWN:
-					case SDL_SCANCODE_S:
-						input.z = 1;
-						break;
-					case SDL_SCANCODE_LEFT:
-					case SDL_SCANCODE_A:
-						input.x = -1;
-						break;
-					case SDL_SCANCODE_RIGHT:
-					case SDL_SCANCODE_D:
-						input.x = 1;
-						break;
-					case SDL_SCANCODE_PAGEUP:
-					case SDL_SCANCODE_Q:
-						input.y = 1;
-						break;
-					case SDL_SCANCODE_PAGEDOWN:
-					case SDL_SCANCODE_Z:
-						input.y = -1;
-						break;
-					default:
-						break;
-				}
-				vec3 dir = camera.rotation * input;
-				camera.position += dir * 0.1f;
-			}
-			else if (e.type == SDL_MOUSEBUTTONDOWN && !active) {
+			if (e.type == SDL_MOUSEBUTTONDOWN && !active) {
 				active = true;
 				Engine::grabMouse(true);
 			}
 			else if (e.type == SDL_MOUSEMOTION && active) {
 				const vec3 yaxis(0, 1, 0);
-				camera.rotation = glm::rotate(camera.rotation, -0.005f * e.motion.xrel, yaxis);
+				controller.rotation = glm::rotate(controller.rotation, -0.005f * e.motion.xrel, yaxis);
 			}
-
 		}
+
+		controller.update(0.01667f); // TODO: Proper frame time
+
+		renderer.render(scene, camera);
+
 		Engine::swap();
 	}
 
