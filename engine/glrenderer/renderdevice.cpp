@@ -157,6 +157,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 void RenderDevice::preRender(const Camera& camera)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	stats = Stats();
 	m_program = 0;
 	glUseProgram(0);
 	m_commonBlock.uniforms.projectionMatrix = camera.projection;
@@ -177,6 +178,7 @@ void RenderDevice::render(Model& model)
 	if (m_program != programId) {
 		m_program = programId;
 		glUseProgram(m_program);
+		++stats.programs;
 	}
 	model.updateMatrix();
 	m_colorBlock.uniforms.ambient = mat.ambient;
@@ -196,7 +198,12 @@ void RenderDevice::render(Model& model)
 	uint mode = mat.tessellate ? GL_PATCHES : GL_TRIANGLES;
 	if (geom.ebo) {
 		glDrawElements(mode, geom.indices.size(), GL_UNSIGNED_INT, 0);
-	} else glDrawArrays(mode, 0, geom.vertices.size());
+		stats.triangles += geom.indices.size() / 3;
+	} else {
+		glDrawArrays(mode, 0, geom.vertices.size());
+		stats.triangles += geom.vertices.size() / 3;
+	}
+	++stats.drawCalls;
 	glBindVertexArray(0);
 	glutil::checkGL("Post draw");
 }

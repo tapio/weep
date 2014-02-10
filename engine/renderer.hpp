@@ -15,6 +15,8 @@ public:
 	void render(Scene& scene, Camera& camera);
 	void reset(Scene& scene);
 
+	void dumpStats() const;
+
 private:
 	RenderDevice* m_device = nullptr;
 	std::vector<Model*> m_models;

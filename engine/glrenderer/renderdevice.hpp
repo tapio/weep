@@ -28,6 +28,13 @@ public:
 		float maxAnisotropy;
 	} caps;
 
+	struct Stats
+	{
+		uint drawCalls = 0;
+		uint programs = 0;
+		uint triangles = 0;
+	} stats;
+
 private:
 	uint m_program = 0;
 	UBO<UniformCommonBlock> m_commonBlock;

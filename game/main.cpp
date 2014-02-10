@@ -51,6 +51,10 @@ int main(int, char*[])
 					scene.load(scenePath, resources);
 					continue;
 				}
+				if (keysym.mod == KMOD_LCTRL && keysym.sym == SDLK_d) {
+					renderer.dumpStats();
+					continue;
+				}
 			}
 
 			if (e.type == SDL_KEYDOWN) {

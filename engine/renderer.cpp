@@ -24,6 +24,16 @@ void Renderer::reset(Scene& scene)
 	m_device->loadShaders();
 }
 
+void Renderer::dumpStats() const
+{
+	RenderDevice::Stats& stats = m_device->stats;
+	logDebug("RenderDevice frame stats:\n"
+		"\ttriangles:  %d\n"
+		"\tprograms:   %d\n"
+		"\tdraw calls: %d",
+		stats.triangles, stats.programs, stats.drawCalls);
+}
+
 void Renderer::render(Scene& scene, Camera& camera)
 {
 	camera.updateViewMatrix();
