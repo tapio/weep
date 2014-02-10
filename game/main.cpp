@@ -59,6 +59,8 @@ int main(int, char*[])
 
 			if (e.type == SDL_KEYDOWN) {
 				SDL_Keysym keysym = e.key.keysym;
+				if (keysym.mod != KMOD_NONE)
+					continue;
 
 				vec3 input;
 				switch (keysym.scancode) {
