@@ -1,6 +1,7 @@
 #include "common.hpp"
 #include <iostream>
 #include <fstream>
+#include <SDL2/SDL.h>
 
 string vlformat(const char* format, va_list vl)
 {
@@ -62,6 +63,9 @@ void panic(const char* format, ...)
 	string message = vlformat(format, vl);
 	va_end(vl);
 	std::cerr << "PANIC: " << message << std::endl;
+
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+		"Fatal Error", message.c_str(), NULL);
 
 	exit(EXIT_FAILURE);
 }
