@@ -19,6 +19,7 @@ struct ShaderProgram
 
 	bool compile(ShaderType type, const string& text);
 	bool link();
+	bool has(ShaderType type) const;
 	void use() const;
 	void destroy();
 

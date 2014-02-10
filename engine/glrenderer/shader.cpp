@@ -81,6 +81,11 @@ bool ShaderProgram::link()
 	return true;
 }
 
+bool ShaderProgram::has(ShaderType type) const
+{
+	return m_shaderIds[type] > 0;
+}
+
 void ShaderProgram::use() const
 {
 	ASSERT(id);

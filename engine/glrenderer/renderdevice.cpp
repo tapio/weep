@@ -67,7 +67,14 @@ void RenderDevice::loadShaders()
 			continue;
 
 		m_shaderNames[it.first] = m_shaders.size() - 1;
-		logDebug("Shader \"%s\" initialized", it.first.c_str());
+		logDebug("Shader \"%s\" initialized (shader mask: %d%d%d%d%d)",
+			it.first.c_str(),
+			program.has(VERTEX_SHADER),
+			program.has(FRAGMENT_SHADER),
+			program.has(GEOMETRY_SHADER),
+			program.has(TESS_CONTROL_SHADER),
+			program.has(TESS_EVALUATION_SHADER)
+		);
 	}
 }
 
