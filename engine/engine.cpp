@@ -8,7 +8,10 @@ namespace
 	static SDL_GLContext s_glcontext = nullptr;
 	static int s_width = 0;
 	static int s_height = 0;
+	static Uint64 prevTime = 0;
 }
+
+float Engine::dt = 0;
 
 void Engine::init()
 {
@@ -21,6 +24,8 @@ void Engine::init()
 	logInfo("L1 cache line size: %dkB", SDL_GetCPUCacheLineSize());
 	logInfo("SSE: %d, SSE2: %d, SSE3: %d, SSE4.1: %d, SSE4.2: %d",
 			SDL_HasSSE(), SDL_HasSSE2(), SDL_HasSSE3(), SDL_HasSSE41(), SDL_HasSSE42());
+
+	prevTime = SDL_GetPerformanceCounter();
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
@@ -66,6 +71,9 @@ void Engine::deinit()
 void Engine::swap()
 {
 	SDL_GL_SwapWindow(s_window);
+	Uint64 curTime = SDL_GetPerformanceCounter();
+	dt = (curTime - prevTime) / (float)SDL_GetPerformanceFrequency();
+	prevTime = curTime;
 }
 
 int Engine::width()

@@ -12,4 +12,6 @@ public:
 	static int height();
 
 	static void grabMouse(bool grab);
+
+	static float dt;
 };
