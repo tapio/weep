@@ -1,8 +1,31 @@
 #include "renderer.hpp"
 #include "glrenderer/renderdevice.hpp"
 #include "model.hpp"
+#include "geometry.hpp"
 #include "camera.hpp"
 #include "scene.hpp"
+
+
+class Frustum
+{
+public:
+	Frustum(const Camera& camera) {
+		m_radius = camera.far * 0.5f;
+		vec3 dir = camera.rotation * vec3(0, 0, -1);
+		m_center = camera.position + dir * m_radius;
+	}
+
+	bool visible(const Model& model) {
+		float maxDist = model.geometry->boundingRadius + m_radius;
+		return glm::distance2(m_center, model.position) < maxDist * maxDist;
+	}
+
+private:
+	float m_radius;
+	vec3 m_center;
+};
+
+
 
 Renderer::Renderer()
 {
@@ -37,9 +60,11 @@ void Renderer::dumpStats() const
 void Renderer::render(Scene& scene, Camera& camera)
 {
 	camera.updateViewMatrix();
+	Frustum frustum(camera);
 	m_device->preRender(camera);
 	for (auto& model : scene.getChildren()) {
-		m_device->render(model);
+		if (frustum.visible(model))
+			m_device->render(model);
 	}
 	m_device->postRender();
 }
