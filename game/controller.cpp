@@ -27,6 +27,9 @@ void Controller::update(float dt)
 	else if (keys[SDL_SCANCODE_PAGEDOWN] || keys[SDL_SCANCODE_Z])
 		input.y = -1;
 
+	if (keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT])
+		input *= fast;
+
 	vec3 dir = rotation * input;
 	position += dir * dt * speed;
 }

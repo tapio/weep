@@ -10,4 +10,5 @@ public:
 	vec3& position;
 	quat& rotation;
 	float speed = 2.0f;
+	float fast = 4.0f;
 };
