@@ -28,6 +28,10 @@ using glm::mat4;
 using glm::quat;
 typedef unsigned uint;
 
+static const vec3 xaxis(1, 0, 0);
+static const vec3 yaxis(0, 1, 0);
+static const vec3 zaxis(0, 0, 1);
+
 string vlformat(const char* format, va_list vl);
 
 void logDebug(const char* format, ...);

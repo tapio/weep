@@ -65,8 +65,8 @@ int main(int, char*[])
 				Engine::grabMouse(true);
 			}
 			else if (e.type == SDL_MOUSEMOTION && active) {
-				const vec3 yaxis(0, 1, 0);
 				controller.rotation = glm::rotate(controller.rotation, -0.005f * e.motion.xrel, yaxis);
+				controller.rotation = glm::rotate(controller.rotation, -0.005f * e.motion.yrel, xaxis);
 			}
 		}
 
