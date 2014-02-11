@@ -16,6 +16,7 @@ public:
 	void reset(Scene& scene);
 
 	void dumpStats() const;
+	void toggleWireframe();
 
 private:
 	RenderDevice* m_device = nullptr;

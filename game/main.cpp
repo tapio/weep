@@ -53,9 +53,13 @@ int main(int, char*[])
 					scene.load(scenePath, resources);
 					continue;
 				}
-				if (keysym.sym == SDLK_F1) {
+				else if (keysym.sym == SDLK_F1) {
 					renderer.dumpStats();
 					logDebug("Last frame took %fms", Engine::dt * 1000);
+					continue;
+				}
+				else if (keysym.sym == SDLK_F2) {
+					renderer.toggleWireframe();
 					continue;
 				}
 			}

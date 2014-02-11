@@ -24,6 +24,8 @@ public:
 
 	void destroyModel(Model& model);
 
+	void toggleWireframe();
+
 	struct Caps {
 		float maxAnisotropy;
 	} caps;

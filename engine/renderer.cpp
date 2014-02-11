@@ -57,6 +57,11 @@ void Renderer::dumpStats() const
 		stats.triangles, stats.programs, stats.drawCalls);
 }
 
+void Renderer::toggleWireframe()
+{
+	m_device->toggleWireframe();
+}
+
 void Renderer::render(Scene& scene, Camera& camera)
 {
 	camera.updateViewMatrix();

@@ -16,7 +16,7 @@ out TessCtrlData {
 
 #define ID gl_InvocationID
 
-const float tessLevel = 4;
+const float tessLevel = 2;
 
 void main()
 {

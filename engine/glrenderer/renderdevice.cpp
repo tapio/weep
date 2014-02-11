@@ -20,7 +20,6 @@ RenderDevice::RenderDevice()
 	logInfo("OpenGL Version:  %s", glGetString(GL_VERSION));
 	logInfo("GLSL Version:    %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-	glPatchParameteri(GL_PATCH_VERTICES, 3);
 	glDebugMessageCallback(debugCallback, NULL);
 
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &caps.maxAnisotropy);
@@ -98,6 +97,13 @@ void RenderDevice::destroyModel(Model& model)
 		glDeleteVertexArrays(1, &model.geometry->vao);
 		model.geometry->vao = 0;
 	}
+}
+
+void RenderDevice::toggleWireframe()
+{
+	GLint mode;
+	glGetIntegerv(GL_POLYGON_MODE, &mode);
+	glPolygonMode(GL_FRONT_AND_BACK, mode == GL_LINE ? GL_FILL : GL_LINE);
 }
 
 bool RenderDevice::uploadGeometry(Geometry& geometry)
