@@ -72,8 +72,15 @@ void Scene::load(const string& path, Resources& resources)
 				model.material->diffuse = toVec3(materialDef["diffuse"]);
 			if (!materialDef["specular"].is_null())
 				model.material->specular = toVec3(materialDef["specular"]);
+
 			if (!materialDef["diffuseMap"].is_null())
-				model.material->diffuseMap = resources.getImage(materialDef["diffuseMap"].string_value());
+				model.material->map[Material::DIFFUSE_MAP] = resources.getImage(materialDef["diffuseMap"].string_value());
+			if (!materialDef["normalMap"].is_null())
+				model.material->map[Material::NORMAL_MAP] = resources.getImage(materialDef["normalMap"].string_value());
+			if (!materialDef["specularMap"].is_null())
+				model.material->map[Material::SPECULAR_MAP] = resources.getImage(materialDef["specularMap"].string_value());
+			if (!materialDef["heightMap"].is_null())
+				model.material->map[Material::HEIGHT_MAP] = resources.getImage(materialDef["heightMap"].string_value());
 			model.material->shaderName = materialDef["shaderName"].string_value();
 		}
 

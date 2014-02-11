@@ -150,12 +150,14 @@ bool RenderDevice::uploadMaterial(Material& material)
 	}
 	material.shaderId = it->second;
 
-	if (material.diffuseMap && !material.diffuseTex) {
+	for (uint i = 0; i < material.map.size(); ++i) {
+		if (!material.map[i] || material.tex[i])
+			continue;
 		Texture tex;
 		tex.anisotropy = caps.maxAnisotropy;
 		tex.create();
-		tex.upload(*material.diffuseMap);
-		material.diffuseTex = tex.id;
+		tex.upload(*material.map[i]);
+		material.tex[i] = tex.id;
 	}
 	return true;
 }
@@ -195,10 +197,12 @@ void RenderDevice::render(Model& model)
 	m_commonBlock.uniforms.modelViewMatrix = m_commonBlock.uniforms.viewMatrix * m_commonBlock.uniforms.modelMatrix;
 	m_commonBlock.uniforms.normalMatrix = glm::inverseTranspose(mat3(m_commonBlock.uniforms.modelViewMatrix));
 	m_commonBlock.upload();
-	if (mat.diffuseTex) {
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, mat.diffuseTex);
-		//glUniform1i(0, 0);
+	for (uint i = 0; i < mat.map.size(); ++i) {
+		uint tex = mat.tex[i];
+		if (!tex) continue;
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		//glUniform1i(i, i);
 	}
 	glBindVertexArray(geom.vao);
 	uint mode = mat.tessellate ? GL_PATCHES : GL_TRIANGLES;

@@ -10,13 +10,12 @@ struct Material
 	vec3 specular = vec3(1, 1, 1);
 	vec3 emissive = vec3(0, 0, 0);
 
-	Image* diffuseMap = nullptr;
-	Image* normalMap = nullptr;
-	Image* specularMap = nullptr;
+	enum MapTypes {
+		DIFFUSE_MAP, NORMAL_MAP, SPECULAR_MAP, HEIGHT_MAP, MAX_MAPS
+	};
 
-	uint diffuseTex = 0;
-	uint normalTex = 0;
-	uint specularTex = 0;
+	std::vector<Image*> map = { nullptr, nullptr, nullptr, nullptr };
+	std::vector<uint> tex = { 0, 0, 0, 0 };
 
 	bool tessellate = false;
 	string shaderName = "";
