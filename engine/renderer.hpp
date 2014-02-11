@@ -19,6 +19,6 @@ public:
 	void toggleWireframe();
 
 private:
-	RenderDevice* m_device = nullptr;
+	std::unique_ptr<RenderDevice> m_device;
 	std::vector<Model*> m_models;
 };

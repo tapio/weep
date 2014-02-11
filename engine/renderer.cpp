@@ -29,13 +29,12 @@ private:
 
 Renderer::Renderer()
 {
-	m_device = new RenderDevice();
+	m_device.reset(new RenderDevice());
 }
 
 Renderer::~Renderer()
 {
 	//reset();
-	delete m_device;
 }
 
 void Renderer::reset(Scene& scene)
