@@ -23,6 +23,5 @@ void main()
 {
 	outp.texcoord = texcoord;
 	outp.normal = (modelViewMatrix * vec4(normal, 0.0)).xyz;
-	outp.position = (modelViewMatrix * vec4(position, 1.0)).xyz;
+	outp.position = (modelViewMatrix * vec4(position.x, 0.0, position.z, 1.0)).xyz;
 }
-

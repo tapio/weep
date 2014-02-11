@@ -14,8 +14,8 @@
 	"terrain_tess": {
 		"shaders" : {
 			"vert": "shaders/terrain.vert",
-			"tesc": "shaders/pntri.tesc",
-			"tese": "shaders/pntri.tese",
+			"tesc": "shaders/terrain.tesc",
+			"tese": "shaders/terrain.tese",
 			"frag": "shaders/terrain.frag"
 		}
 	}
