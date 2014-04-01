@@ -8,7 +8,7 @@
 #include "engine.hpp"
 #include "light.hpp"
 
-static void debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *msg, const void *data)
+static void debugCallback(GLenum /*source*/, GLenum /*type*/, GLuint /*id*/, GLenum /*severity*/, GLsizei /*length*/, const GLchar* msg, const void* /*data*/)
 {
 	logDebug("OpenGL: %s", msg);
 }
