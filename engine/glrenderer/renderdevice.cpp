@@ -85,18 +85,22 @@ RenderDevice::~RenderDevice()
 
 void RenderDevice::destroyModel(Model& model)
 {
-	if (model.geometry->ebo) {
-		glDeleteBuffers(1, &model.geometry->ebo);
-		model.geometry->ebo = 0;
+	if (model.geometry->renderId == -1)
+		return;
+	GPUModel& m = m_models[model.geometry->renderId];
+	if (m.ebo) {
+		glDeleteBuffers(1, &m.ebo);
+		m.ebo = 0;
 	}
-	if (model.geometry->vbo) {
-		glDeleteBuffers(1, &model.geometry->vbo);
-		model.geometry->vbo = 0;
+	if (m.vbo) {
+		glDeleteBuffers(1, &m.vbo);
+		m.vbo = 0;
 	}
-	if (model.geometry->vao) {
-		glDeleteVertexArrays(1, &model.geometry->vao);
-		model.geometry->vao = 0;
+	if (m.vao) {
+		glDeleteVertexArrays(1, &m.vao);
+		m.vao = 0;
 	}
+	model.geometry->renderId = -1;
 }
 
 void RenderDevice::toggleWireframe()
@@ -113,12 +117,15 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 		return false;
 	}
 	glutil::checkGL("Pre geometry upload");
+	geometry.renderId = m_models.size();
+	m_models.emplace_back(GPUModel());
+	GPUModel& model = m_models.back();
 
-	if (!geometry.vao) glGenVertexArrays(1, &geometry.vao);
-	if (!geometry.vbo) glGenBuffers(1, &geometry.vbo);
-	if (!geometry.ebo && !geometry.indices.empty()) glGenBuffers(1, &geometry.ebo);
-	glBindVertexArray(geometry.vao);
-	glBindBuffer(GL_ARRAY_BUFFER, geometry.vbo);
+	if (!model.vao) glGenVertexArrays(1, &model.vao);
+	if (!model.vbo) glGenBuffers(1, &model.vbo);
+	if (!model.ebo && !geometry.indices.empty()) glGenBuffers(1, &model.ebo);
+	glBindVertexArray(model.vao);
+	glBindBuffer(GL_ARRAY_BUFFER, model.vbo);
 	glBufferData(GL_ARRAY_BUFFER, geometry.vertices.size() * sizeof(Vertex), &geometry.vertices.front(), GL_STATIC_DRAW);
 	// Position
 	ASSERT(offsetof(Vertex, position) == 0);
@@ -131,8 +138,8 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normal));
 	// Elements
-	if (geometry.ebo) {
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geometry.ebo);
+	if (model.ebo) {
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.ebo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, geometry.indices.size() * sizeof(uint), &geometry.indices.front(), GL_STATIC_DRAW);
 	}
 	glutil::checkGL("Post geometry upload");
@@ -177,8 +184,9 @@ void RenderDevice::render(Model& model)
 {
 	Geometry& geom = *model.geometry;
 	Material& mat = *model.material.get();
-	if (!geom.vao || !geom.vbo)
+	if (geom.renderId == -1)
 		uploadGeometry(geom);
+	GPUModel& gpuData = m_models[geom.renderId];
 	if (mat.shaderId < 0)
 		uploadMaterial(mat);
 
@@ -204,9 +212,9 @@ void RenderDevice::render(Model& model)
 		glBindTexture(GL_TEXTURE_2D, tex);
 		//glUniform1i(i, i);
 	}
-	glBindVertexArray(geom.vao);
+	glBindVertexArray(gpuData.vao);
 	uint mode = mat.tessellate ? GL_PATCHES : GL_TRIANGLES;
-	if (geom.ebo) {
+	if (gpuData.ebo) {
 		glDrawElements(mode, geom.indices.size(), GL_UNSIGNED_INT, 0);
 		stats.triangles += geom.indices.size() / 3;
 	} else {

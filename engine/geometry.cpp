@@ -98,7 +98,7 @@ Geometry::Geometry(const Image& heightmap)
 
 Geometry::~Geometry()
 {
-	ASSERT(!vao && !vbo && !ebo);
+	ASSERT(renderId == -1);
 }
 
 void Geometry::calculateBoundingSphere()

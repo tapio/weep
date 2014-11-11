@@ -32,9 +32,7 @@ struct Geometry
 	std::vector<uint> indices;
 
 	BoundingBox boundingBox;
-	float boundingRadius;
+	float boundingRadius = 0.f;
 
-	uint vao = 0;
-	uint vbo = 0;
-	uint ebo = 0;
+	int renderId = -1;
 };

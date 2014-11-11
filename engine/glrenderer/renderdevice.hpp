@@ -38,9 +38,17 @@ public:
 	} stats;
 
 private:
+	struct GPUModel
+	{
+		uint vao = 0;
+		uint vbo = 0;
+		uint ebo = 0;
+	};
+
 	uint m_program = 0;
 	UBO<UniformCommonBlock> m_commonBlock;
 	UBO<UniformColorBlock> m_colorBlock;
 	std::vector<ShaderProgram> m_shaders;
 	std::map<string, int> m_shaderNames;
+	std::vector<GPUModel> m_models;
 };
