@@ -3,11 +3,12 @@
 
 struct Image;
 
-struct Vertex
-{
-	vec3 position;
-	vec2 texcoord;
-	vec3 normal;
+enum GeometryAttributeIndex {
+	ATTR_POSITION = 0,
+	ATTR_TEXCOORD,
+	ATTR_NORMAL,
+	ATTR_COLOR,
+	ATTR_MAX
 };
 
 struct BoundingBox
@@ -27,9 +28,21 @@ struct Geometry
 	void calculateBoundingBox();
 	void calculateNormals();
 	void normalizeNormals();
+	void setupAttributes();
 
-	std::vector<Vertex> vertices;
+	struct Attribute {
+		int components = 0;
+		int offset = 0;
+	} attributes[ATTR_MAX];
+	int vertexSize = 0;
+	uint numVertices = 0;
+
+	std::vector<vec3> positions;
+	std::vector<vec2> positions2d;
+	std::vector<vec2> texcoords;
+	std::vector<vec3> normals;
 	std::vector<uint> indices;
+	std::vector<char> vertexData;
 
 	BoundingBox boundingBox;
 	float boundingRadius = 0.f;

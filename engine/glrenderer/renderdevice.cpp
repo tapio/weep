@@ -112,7 +112,7 @@ void RenderDevice::toggleWireframe()
 
 bool RenderDevice::uploadGeometry(Geometry& geometry)
 {
-	if (geometry.vertices.empty()) {
+	if (geometry.vertexData.empty()) {
 		logError("Cannot upload empty geometry");
 		return false;
 	}
@@ -126,17 +126,17 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 	if (!model.ebo && !geometry.indices.empty()) glGenBuffers(1, &model.ebo);
 	glBindVertexArray(model.vao);
 	glBindBuffer(GL_ARRAY_BUFFER, model.vbo);
-	glBufferData(GL_ARRAY_BUFFER, geometry.vertices.size() * sizeof(Vertex), &geometry.vertices.front(), GL_STATIC_DRAW);
-	// Position
-	ASSERT(offsetof(Vertex, position) == 0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, position));
-	// TexCoords
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, texcoord));
-	// Normals
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normal));
+	glBufferData(GL_ARRAY_BUFFER, geometry.vertexData.size(), &geometry.vertexData.front(), GL_STATIC_DRAW);
+	// Setup attributes
+	for (int i = 0; i < ATTR_MAX; ++i) {
+		Geometry::Attribute& attr = geometry.attributes[i];
+		if (attr.components) {
+			glEnableVertexAttribArray(i);
+			glVertexAttribPointer(i, attr.components, GL_FLOAT, GL_FALSE, geometry.vertexSize, (GLvoid*)attr.offset);
+		} else {
+			glDisableVertexAttribArray(i);
+		}
+	}
 	// Elements
 	if (model.ebo) {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.ebo);
@@ -218,8 +218,8 @@ void RenderDevice::render(Model& model)
 		glDrawElements(mode, geom.indices.size(), GL_UNSIGNED_INT, 0);
 		stats.triangles += geom.indices.size() / 3;
 	} else {
-		glDrawArrays(mode, 0, geom.vertices.size());
-		stats.triangles += geom.vertices.size() / 3;
+		glDrawArrays(mode, 0, geom.numVertices);
+		stats.triangles += geom.numVertices / 3;
 	}
 	++stats.drawCalls;
 	glBindVertexArray(0);

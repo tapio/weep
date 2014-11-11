@@ -23,9 +23,9 @@ Geometry::Geometry(const string& path)
 		logError("Failed to load object %s", path.c_str());
 		return;
 	}
-	std::vector<vec3> verts;
-	std::vector<vec2> uvs;
-	std::vector<vec3> normals;
+	std::vector<vec3> tmpVerts;
+	std::vector<vec2> tmpUvs;
+	std::vector<vec3> tmpNormals;
 	while (std::getline(file, row)) {
 		++lineNumber;
 		std::istringstream srow(row);
@@ -33,13 +33,13 @@ Geometry::Geometry(const string& path)
 		std::string tempst;
 		if (row.substr(0,2) == "v ") {  // Vertices
 			srow >> tempst >> x >> y >> z;
-			verts.push_back(vec3(x, y, z));
+			tmpVerts.push_back(vec3(x, y, z));
 		} else if (row.substr(0,2) == "vt") {  // Texture Coordinates
 			srow >> tempst >> x >> y;
-			uvs.push_back(vec2(x, y));
+			tmpUvs.push_back(vec2(x, y));
 		} else if (row.substr(0,2) == "vn") {  // Normals
 			srow >> tempst >> x >> y >> z;
-			normals.push_back(glm::normalize(vec3(x, y, z)));
+			tmpNormals.push_back(glm::normalize(vec3(x, y, z)));
 		} else if (row.substr(0,2) == "f ") {  // Faces
 			srow >> tempst; // Eat away prefix
 			// Parse face point's coordinate references
@@ -53,33 +53,35 @@ Geometry::Geometry(const string& path)
 					logError("Invalid face definition in %s:%d", path.c_str(), lineNumber);
 					continue;
 				}
-				vertices.emplace_back();
-				Vertex& v = vertices.back();
 				// Vertex indices are 1-based in the file
-				if (!indices[0].empty()) v.position = verts.at(std::stoi(indices[0]) - 1);
-				if (!indices[1].empty()) v.texcoord = uvs.at(std::stoi(indices[1]) - 1);
-				if (!indices[2].empty()) v.normal = normals.at(std::stoi(indices[2]) - 1);
+				if (!indices[0].empty()) positions.push_back(tmpVerts.at(std::stoi(indices[0]) - 1));
+				if (!indices[1].empty()) texcoords.push_back(tmpUvs.at(std::stoi(indices[1]) - 1));
+				if (!indices[2].empty()) normals.push_back(tmpNormals.at(std::stoi(indices[2]) - 1));
 			}
 		}
 	}
 	calculateBoundingSphere();
 	calculateBoundingBox();
+	setupAttributes();
 }
 
 Geometry::Geometry(const Image& heightmap)
 {
 	int wpoints = heightmap.width + 1;
+	int numVerts = wpoints * (heightmap.height + 1);
+	positions.resize(numVerts);
+	texcoords.resize(numVerts);
+	normals.resize(numVerts);
 	for (int j = 0; j <= heightmap.height; ++j) {
 		for (int i = 0; i <= heightmap.width; ++i) {
 			// Create the vertex
 			float x = i - heightmap.width * 0.5f;
 			float z = j - heightmap.height * 0.5f;
 			float y = heightmap.data[heightmap.channels * (j * heightmap.width + i)] / 255.0f;
-			vertices.emplace_back();
-			Vertex& v = vertices.back();
-			v.position = vec3(x, y, z);
-			v.texcoord = vec2((float)i / heightmap.width, (float)j / heightmap.height);
-			v.normal = vec3(0, 1, 0);
+			int vert = j * wpoints + i;
+			positions[vert] = vec3(x, y, z);
+			texcoords[vert] = vec2((float)i / heightmap.width, (float)j / heightmap.height);
+			normals[vert] = vec3(0, 1, 0);
 			// Indexed faces
 			if (i == heightmap.width || j == heightmap.height)
 				continue;
@@ -94,6 +96,7 @@ Geometry::Geometry(const Image& heightmap)
 	calculateBoundingSphere();
 	calculateBoundingBox();
 	calculateNormals();
+	setupAttributes();
 }
 
 Geometry::~Geometry()
@@ -101,11 +104,59 @@ Geometry::~Geometry()
 	ASSERT(renderId == -1);
 }
 
+void Geometry::setupAttributes()
+{
+	ASSERT(positions.empty() || positions2d.empty());
+	int offset = 0;
+	const char* dataArrays[ATTR_MAX] = {0};
+	if (!positions.empty()) {
+		Attribute& attr = attributes[ATTR_POSITION];
+		attr.components = 3;
+		attr.offset = offset;
+		offset += sizeof(positions[0]);
+		numVertices = positions.size();
+		dataArrays[ATTR_POSITION] = (char*)&positions[0];
+	}
+	if (!positions2d.empty()) {
+		Attribute& attr = attributes[ATTR_POSITION];
+		attr.components = 2;
+		attr.offset = offset;
+		offset += sizeof(positions2d[0]);
+		numVertices = positions2d.size();
+		dataArrays[ATTR_POSITION] = (char*)&positions2d[0];
+	}
+	if (!texcoords.empty()) {
+		Attribute& attr = attributes[ATTR_TEXCOORD];
+		attr.components = 2;
+		attr.offset = offset;
+		offset += sizeof(texcoords[0]);
+		dataArrays[ATTR_TEXCOORD] = (char*)&texcoords[0];
+	}
+	if (!normals.empty()) {
+		Attribute& attr = attributes[ATTR_NORMAL];
+		attr.components = 3;
+		attr.offset = offset;
+		offset += sizeof(normals[0]);
+		dataArrays[ATTR_NORMAL] = (char*)&normals[0];
+	}
+	vertexSize = offset;
+	vertexData.resize(numVertices * vertexSize);
+	for (uint i = 0; i < numVertices; ++i) {
+		char* dst = &vertexData[i * vertexSize];
+		for (uint a = 0; a < ATTR_MAX; ++a) {
+			if (dataArrays[a]) {
+				uint elementSize = attributes[a].components * sizeof(float);
+				std::memcpy(dst + attributes[a].offset, dataArrays[a] + i * elementSize, elementSize);
+			}
+		}
+	}
+}
+
 void Geometry::calculateBoundingSphere()
 {
 	float maxRadiusSq = 0;
-	for (auto& v : vertices) {
-		maxRadiusSq = glm::max(maxRadiusSq, glm::length2(v.position));
+	for (auto& pos : positions) {
+		maxRadiusSq = glm::max(maxRadiusSq, glm::length2(pos));
 	}
 	boundingRadius = glm::sqrt(maxRadiusSq);
 }
@@ -113,20 +164,20 @@ void Geometry::calculateBoundingSphere()
 void Geometry::calculateBoundingBox()
 {
 	BoundingBox& bb = boundingBox;
-	if (vertices.empty()) {
+	if (positions.empty()) {
 		bb.min = vec3();
 		bb.max = vec3();
 		return;
 	}
 
-	bb.min.x = bb.max.x = vertices[0].position.x;
-	bb.min.y = bb.max.y = vertices[0].position.y;
-	bb.min.z = bb.max.z = vertices[0].position.z;
+	bb.min.x = bb.max.x = positions[0].x;
+	bb.min.y = bb.max.y = positions[0].y;
+	bb.min.z = bb.max.z = positions[0].z;
 
-	for (uint i = 1, len = vertices.size(); i < len; ++i) {
-		float x = vertices[i].position.x;
-		float y = vertices[i].position.y;
-		float z = vertices[i].position.z;
+	for (uint i = 1, len = positions.size(); i < len; ++i) {
+		float x = positions[i].x;
+		float y = positions[i].y;
+		float z = positions[i].z;
 		if (x < bb.min.x) bb.min.x = x;
 		else if ( x > bb.max.x ) bb.max.x = x;
 		if (y < bb.min.y) bb.min.y = y;
@@ -141,31 +192,28 @@ void Geometry::calculateNormals()
 	// Indexed elements
 	if (!indices.empty()) {
 		// Reset existing normals
-		for (auto& v : vertices)
-			v.normal = vec3();
+		for (auto& normal : normals)
+			normal = vec3();
 		for (uint i = 0, len = indices.size(); i < len; i += 3) {
-			Vertex& v1 = vertices[indices[i]];
-			Vertex& v2 = vertices[indices[i+1]];
-			Vertex& v3 = vertices[indices[i+2]];
-			vec3 normal = glm::triangleNormal(v1.position, v2.position, v3.position);
-			v1.normal += normal;
-			v2.normal += normal;
-			v3.normal += normal;
+			vec3 normal = glm::triangleNormal(positions[indices[i]], positions[indices[i+1]], positions[indices[i+2]]);
+			normals[indices[i+0]] += normal;
+			normals[indices[i+1]] += normal;
+			normals[indices[i+2]] += normal;
 		}
 		normalizeNormals();
 	// Non-indexed elements
 	} else {
-		for (uint i = 0, len = vertices.size(); i < len; i += 3) {
-			vec3 normal = glm::triangleNormal(vertices[i].position, vertices[i+1].position, vertices[i+2].position);
-			vertices[i+0].normal = normal;
-			vertices[i+1].normal = normal;
-			vertices[i+2].normal = normal;
+		for (uint i = 0, len = positions.size(); i < len; i += 3) {
+			vec3 normal = glm::triangleNormal(positions[i], positions[i+1], positions[i+2]);
+			normals[i+0] = normal;
+			normals[i+1] = normal;
+			normals[i+2] = normal;
 		}
 	}
 }
 
 void Geometry::normalizeNormals()
 {
-	for (auto& v : vertices)
-		v.normal = glm::normalize(v.normal);
+	for (auto& normal : normals)
+		normal = glm::normalize(normal);
 }
