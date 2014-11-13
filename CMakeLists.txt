@@ -37,7 +37,7 @@ include_directories(SYSTEM third-party)
 
 add_definitions(-DGL_GLEXT_PROTOTYPES)
 
-file(GLOB_RECURSE DEPS_SOURCES "third-party/*.cpp" "third-party/*.hpp")
+file(GLOB_RECURSE DEPS_SOURCES "third-party/*.cpp" "third-party/*.hpp" "third-party/*.h")
 file(GLOB_RECURSE ENGINE_SOURCES "engine/*.cpp" "engine/*.hpp")
 file(GLOB_RECURSE GAME_SOURCES "game/*.cpp" "game/*.hpp")
 file(GLOB_RECURSE SHADER_SOURCES "data/shaders/*.*")
