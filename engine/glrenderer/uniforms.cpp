@@ -28,3 +28,4 @@ void UBO<T>::destroy()
 
 template class UBO<UniformCommonBlock>;
 template class UBO<UniformColorBlock>;
+template class UBO<UniformLightBlock>;

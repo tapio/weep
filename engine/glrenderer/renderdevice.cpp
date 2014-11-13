@@ -33,6 +33,7 @@ RenderDevice::RenderDevice()
 
 	m_commonBlock.create(0);
 	m_colorBlock.create(1);
+	m_lightBlock.create(2);
 }
 
 void RenderDevice::loadShaders()
@@ -81,6 +82,7 @@ RenderDevice::~RenderDevice()
 {
 	m_commonBlock.destroy();
 	m_colorBlock.destroy();
+	m_lightBlock.destroy();
 }
 
 void RenderDevice::destroyModel(Model& model)
@@ -169,7 +171,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 	return true;
 }
 
-void RenderDevice::preRender(const Camera& camera)
+void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lights)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	stats = Stats();
@@ -178,6 +180,16 @@ void RenderDevice::preRender(const Camera& camera)
 	m_commonBlock.uniforms.projectionMatrix = camera.projection;
 	m_commonBlock.uniforms.viewMatrix = camera.view;
 	m_commonBlock.uniforms.cameraPosition = camera.position;
+
+	// TODO: More lights
+	if (!lights.empty()) {
+		const Light& light = lights.front();
+		m_lightBlock.uniforms.color = light.color;
+		m_lightBlock.uniforms.position = light.color;
+		m_lightBlock.uniforms.direction = light.color;
+		m_lightBlock.uniforms.params.x = light.distance;
+		m_lightBlock.upload();
+	}
 }
 
 void RenderDevice::render(Model& model)

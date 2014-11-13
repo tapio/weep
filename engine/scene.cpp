@@ -34,12 +34,12 @@ void Scene::load(const string& path, Resources& resources)
 			else if (lightType == "area") light.type = Light::AREA_LIGHT;
 			else if (lightType == "hemisphere") light.type = Light::HEMISPHERE_LIGHT;
 			else logError("Unknown light type \"%s\"", lightType.c_str());
+			if (!lightDef["color"].is_null())
+				light.color = toVec3(lightDef["color"]);
 			if (!def["position"].is_null())
 				light.position = toVec3(def["position"]);
-			if (!lightDef["diffuse"].is_null())
-				light.diffuse = toVec3(lightDef["diffuse"]);
-			if (!lightDef["specular"].is_null())
-				light.specular = toVec3(lightDef["specular"]);
+			if (!lightDef["direction"].is_null())
+				light.direction = toVec3(lightDef["direction"]);
 			if (!lightDef["distance"].is_null())
 				light.distance = lightDef["distance"].number_value();
 		}

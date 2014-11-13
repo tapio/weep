@@ -17,12 +17,14 @@ layout(location = 2) in vec3 normal;
 out VertexData {
 	vec2 texcoord;
 	vec3 normal;
+	vec3 eye;
 } output;
 
 void main()
 {
 	output.texcoord = texcoord;
 	output.normal = normal;
+	output.eye = -(modelViewMatrix * vec4(position, 1.0)).xyz;
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 

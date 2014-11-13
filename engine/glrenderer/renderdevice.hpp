@@ -2,6 +2,7 @@
 #include "common.hpp"
 #include "uniforms.hpp"
 #include "shader.hpp"
+#include "light.hpp"
 
 struct Model;
 struct Geometry;
@@ -18,7 +19,7 @@ public:
 	bool uploadGeometry(Geometry& geometry);
 	bool uploadMaterial(Material& material);
 
-	void preRender(const Camera& camera);
+	void preRender(const Camera& camera, const std::vector<Light>& lights);
 	void render(Model& model);
 	void postRender();
 
@@ -48,6 +49,7 @@ private:
 	uint m_program = 0;
 	UBO<UniformCommonBlock> m_commonBlock;
 	UBO<UniformColorBlock> m_colorBlock;
+	UBO<UniformLightBlock> m_lightBlock;
 	std::vector<ShaderProgram> m_shaders;
 	std::map<string, int> m_shaderNames;
 	std::vector<GPUModel> m_models;

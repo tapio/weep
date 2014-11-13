@@ -4,7 +4,8 @@
 			"shaderName": "basic",
 			"diffuseMap": "debug/uvtestgrid.png",
 			"heightMap": "debug/uvtestgrid.png",
-			"tessellate": false
+			"tessellate": false,
+			"ambient": [ 0.1, 0.1, 0.1 ]
 		},
 		"geometry": {
 			"heightmap": "debug/uvtestgrid.png"
@@ -22,8 +23,9 @@
 		"scale": 1.0
 	},{
 		"light": {
-			"type": "point",
-			"diffuse": [ 1.0, 0, 1.0 ],
+			"type": "directional",
+			"color": [ 1.0, 1.0, 1.0 ],
+			"direction": [ 0.577, 0.577, 0.577 ],
 			"distance": 10
 		},
 		"position": [ 0, 5, -5 ]

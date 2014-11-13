@@ -65,7 +65,7 @@ void Renderer::render(Scene& scene, Camera& camera)
 {
 	camera.updateViewMatrix();
 	Frustum frustum(camera);
-	m_device->preRender(camera);
+	m_device->preRender(camera, scene.getLights());
 	for (auto& model : scene.getChildren()) {
 		if (frustum.visible(model))
 			m_device->render(model);

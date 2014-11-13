@@ -14,8 +14,8 @@ struct Light
 		HEMISPHERE_LIGHT
 	} type = AMBIENT_LIGHT;
 
+	vec3 color = vec3(1, 1, 1);
 	vec3 position = vec3();
-	vec3 diffuse = vec3(1, 1, 1);
-	vec3 specular = vec3(1, 1, 1);
+	vec3 direction = vec3();
 	float distance = 0.0f;
 };

@@ -16,6 +16,13 @@ struct UniformColorBlock {
 	vec3 specular = vec3();
 };
 
+struct UniformLightBlock {
+	vec3 color = vec3(1, 1, 1);
+	vec3 position = vec3();
+	vec3 direction = vec3();
+	vec3 params = vec3();
+};
+
 template<typename T>
 class UBO
 {
