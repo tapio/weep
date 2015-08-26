@@ -33,7 +33,7 @@
 		"material": {
 			"shaderName": "basic",
 			"diffuse": [ 1, 0, 1 ],
-			"XXXdiffuseMap": "debug/uvtestgrid.png"
+			"diffuseMap": "debug/uvtestgrid.png"
 		},
 		"geometry": "debug/cube.obj",
 		"position": [ 5, -0.25, -12 ],

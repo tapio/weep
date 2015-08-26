@@ -9,6 +9,7 @@ struct Material
 	vec3 diffuse = vec3(1, 1, 1);
 	vec3 specular = vec3(1, 1, 1);
 	vec3 emissive = vec3(0, 0, 0);
+	float shininess = 32.0f;
 
 	enum MapTypes {
 		DIFFUSE_MAP, NORMAL_MAP, SPECULAR_MAP, HEIGHT_MAP, MAX_MAPS

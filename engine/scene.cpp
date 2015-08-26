@@ -72,6 +72,8 @@ void Scene::load(const string& path, Resources& resources)
 				model.material->diffuse = toVec3(materialDef["diffuse"]);
 			if (!materialDef["specular"].is_null())
 				model.material->specular = toVec3(materialDef["specular"]);
+			if (!materialDef["shininess"].is_null())
+				model.material->shininess = materialDef["shininess"].number_value();
 
 			if (!materialDef["diffuseMap"].is_null())
 				model.material->map[Material::DIFFUSE_MAP] = resources.getImage(materialDef["diffuseMap"].string_value());

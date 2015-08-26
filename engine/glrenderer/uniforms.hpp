@@ -14,6 +14,7 @@ struct UniformColorBlock {
 	vec3 ambient = vec3();
 	vec3 diffuse = vec3();
 	vec3 specular = vec3();
+	float shininess = 0.f;
 };
 
 struct UniformLightBlock {

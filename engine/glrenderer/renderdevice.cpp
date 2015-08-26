@@ -212,6 +212,7 @@ void RenderDevice::render(Model& model)
 	m_colorBlock.uniforms.ambient = mat.ambient;
 	m_colorBlock.uniforms.diffuse = mat.diffuse;
 	m_colorBlock.uniforms.specular = mat.specular;
+	m_colorBlock.uniforms.shininess = mat.shininess;
 	m_colorBlock.upload();
 	m_commonBlock.uniforms.modelMatrix = model.transform;
 	m_commonBlock.uniforms.modelViewMatrix = m_commonBlock.uniforms.viewMatrix * m_commonBlock.uniforms.modelMatrix;

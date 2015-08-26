@@ -4,6 +4,7 @@ layout(binding = 1, std140) uniform ColorBlock {
 	vec3 ambient;
 	vec3 diffuse;
 	vec3 specular;
+	float shininess;
 };
 
 layout(location = 0) uniform sampler2D diffuseMap;
