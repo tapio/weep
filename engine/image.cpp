@@ -5,7 +5,7 @@
 #define STBI_ONLY_PNG
 #define STBI_ONLY_TGA
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image/stb_image.c>
+#include <stb_image/stb_image.h>
 
 bool Image::load(const std::string& path, int forceChannels)
 {
