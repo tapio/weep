@@ -6,14 +6,15 @@ layout(binding = 0, std140) uniform CommonBlock {
 	mat4 modelViewMatrix;
 	mat4 projectionMatrix;
 	mat4 viewMatrix;
-	mat3 normalMatrix;
-	vec3 cameraPosition;
+	mat4 normalMatrix; // Problems with alignment if sent as mat3
+	vec3 cameraPosition; float pad1;
 };
 
 in VertexData {
 	vec3 position;
 	vec2 texcoord;
 	vec3 normal;
+	vec3 eye;
 } inp[];
 
 out TessCtrlData {
@@ -31,8 +32,7 @@ void main()
 	outp[ID].normal = inp[ID].normal;
 
 	if (ID == 0) {
-		vec3 diff = cameraPosition - inp[0].position;
-		float dist2 = dot(diff, diff);
+		float dist2 = dot(inp[0].eye, inp[0].eye);
 
 		float tessLevel = 1;
 		if (dist2 < 1 * 1) tessLevel = 8;

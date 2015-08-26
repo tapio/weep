@@ -17,11 +17,13 @@ out VertexData {
 	vec3 position;
 	vec2 texcoord;
 	vec3 normal;
+	vec3 eye;
 } outp;
 
 void main()
 {
 	outp.texcoord = texcoord;
-	outp.normal = (modelViewMatrix * vec4(normal, 0.0)).xyz;
+	outp.normal = mat3(normalMatrix) * normal;
+	outp.eye = (modelMatrix * vec4(position.x, 0.0, position.z, 1.0)).xyz - cameraPosition;
 	outp.position = (modelViewMatrix * vec4(position.x, 0.0, position.z, 1.0)).xyz;
 }
