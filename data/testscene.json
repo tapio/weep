@@ -1,7 +1,7 @@
 [
 	{
 		"material": {
-			"shaderName": "basic",
+			"shaderName": "specularmap",
 			"diffuseMap": "debug/uvtestgrid.png",
 			"specularMap": "debug/uvtestgrid_specular.png",
 			"normalMap": "debug/uvtestgrid_normal.png",
@@ -17,8 +17,9 @@
 		"scale": [ 0.1, 0.5, 0.1 ]
 	},{
 		"material": {
-			"shaderName": "basic",
-			"diffuseMap": "debug/uvtestgrid.png"
+			"shaderName": "specularmap",
+			"diffuseMap": "debug/uvtestgrid.png",
+			"specularMap": "debug/uvtestgrid_specular.png"
 		},
 		"geometry": "debug/cube.obj",
 		"position": [ 0, 0, -10 ],
@@ -35,7 +36,7 @@
 		"position": [ 0, 2, -15 ]
 	},{
 		"material": {
-			"shaderName": "basic",
+			"shaderName": "diffusemap",
 			"diffuse": [ 1, 0, 1 ],
 			"diffuseMap": "debug/uvtestgrid.png"
 		},
@@ -44,16 +45,17 @@
 		"scale": 0.5
 	},{
 		"material": {
-			"shaderName": "basic",
-			"diffuseMap": "debug/uvtestgrid.png"
+			"shaderName": "specularmap",
+			"diffuseMap": "debug/uvtestgrid.png",
+			"specularMap": "debug/uvtestgrid_specular.png",
+			"shininess": 48
 		},
 		"geometry": "debug/cube.obj",
 		"position": [ -5, -0.25, -12 ],
 		"scale": 0.5
 	},{
 		"material": {
-			"shaderName": "normal",
-			"diffuseMap": "debug/uvtestgrid.png"
+			"shaderName": "normal"
 		},
 		"geometry": "debug/cube.obj",
 		"position": [ 3, -0.25, -5 ],
@@ -61,6 +63,7 @@
 	},{
 		"material": {
 			"shaderName": "basic",
+			"ambient": [ 1, 1, 1 ],
 			"diffuseMap": "debug/uvtestgrid.png"
 		},
 		"geometry": "debug/cube.obj",

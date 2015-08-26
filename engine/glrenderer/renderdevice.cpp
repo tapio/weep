@@ -38,6 +38,7 @@ RenderDevice::RenderDevice()
 
 void RenderDevice::loadShaders()
 {
+	const char* magicDefines = "// DEFINES //";
 	m_shaders.clear();
 	m_shaderNames.clear();
 	std::string err;
@@ -52,16 +53,28 @@ void RenderDevice::loadShaders()
 		string file;
 		m_shaders.emplace_back();
 		ShaderProgram& program = m_shaders.back();
+
+		const Json& defines = it.second["defines"];
+		string defineText;
+		if (!defines.is_null()) {
+			ASSERT(defines.is_array());
+			for (uint i = 0; i < defines.array_items().size(); ++i) {
+				const Json& def = defines[i];
+				ASSERT(def.is_string());
+				defineText += "#define " + def.string_value() + " 1\n";
+			}
+		}
+
 		file = shaderFiles["vert"].string_value();
-		if (!file.empty()) program.compile(VERTEX_SHADER, readFile(file));
+		if (!file.empty()) program.compile(VERTEX_SHADER, replace(readFile(file), magicDefines, defineText));
 		file = shaderFiles["frag"].string_value();
-		if (!file.empty()) program.compile(FRAGMENT_SHADER, readFile(file));
+		if (!file.empty()) program.compile(FRAGMENT_SHADER, replace(readFile(file), magicDefines, defineText));
 		file = shaderFiles["geom"].string_value();
-		if (!file.empty()) program.compile(GEOMETRY_SHADER, readFile(file));
+		if (!file.empty()) program.compile(GEOMETRY_SHADER, replace(readFile(file), magicDefines, defineText));
 		file = shaderFiles["tesc"].string_value();
-		if (!file.empty()) program.compile(TESS_CONTROL_SHADER, readFile(file));
+		if (!file.empty()) program.compile(TESS_CONTROL_SHADER, replace(readFile(file), magicDefines, defineText));
 		file = shaderFiles["tese"].string_value();
-		if (!file.empty()) program.compile(TESS_EVALUATION_SHADER, readFile(file));
+		if (!file.empty()) program.compile(TESS_EVALUATION_SHADER, replace(readFile(file), magicDefines, defineText));
 
 		if (!program.link())
 			continue;

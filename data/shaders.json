@@ -6,6 +6,32 @@
 		}
 	},
 	"basic": {
+		"defines": [
+			"ENABLE_DIFFUSE_MAP"
+		],
+		"shaders" : {
+			"vert": "shaders/core.vert",
+			"frag": "shaders/core.frag"
+		}
+	},
+	"diffusemap": {
+		"defines": [
+			"ENABLE_DIFFUSE",
+			"ENABLE_SPECULAR",
+			"ENABLE_DIFFUSE_MAP"
+		],
+		"shaders" : {
+			"vert": "shaders/core.vert",
+			"frag": "shaders/core.frag"
+		}
+	},
+	"specularmap": {
+		"defines": [
+			"ENABLE_DIFFUSE",
+			"ENABLE_SPECULAR",
+			"ENABLE_DIFFUSE_MAP",
+			"ENABLE_SPECULAR_MAP"
+		],
 		"shaders" : {
 			"vert": "shaders/core.vert",
 			"frag": "shaders/core.frag"

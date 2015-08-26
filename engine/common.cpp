@@ -75,3 +75,13 @@ string readFile(const string& path)
 	std::ifstream f("../data/" + path);
 	return std::string(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
 }
+
+string replace(string str, const string& search, const string& replace)
+{
+	for (size_t pos = 0, len = replace.length(); ; pos += len) {
+		pos = str.find(search, pos);
+		if (pos == string::npos) break;
+		str.replace(pos, search.length(), replace);
+	}
+	return str;
+}

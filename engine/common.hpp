@@ -42,6 +42,7 @@ void logError(const char* format, ...);
 void panic(const char* format, ...);
 
 string readFile(const string& path);
+string replace(string str, const string& search, const string& replace);
 
 #define ASSERT SDL_assert
 

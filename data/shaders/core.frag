@@ -2,6 +2,8 @@
 #extension GL_ARB_shading_language_420pack : enable
 #extension GL_ARB_explicit_uniform_location : enable
 
+// DEFINES //
+
 #define MAX_LIGHTS 4
 
 layout(binding = 0, std140) uniform CommonBlock {
@@ -41,28 +43,43 @@ layout(location = 0) out vec4 fragment;
 
 void main()
 {
-	vec4 diffuseTex = texture(diffuseMap, input.texcoord);
-	vec4 specularTex = texture(specularMap, input.texcoord);
-
 	// Ambient
-	vec3 ambientComp = material.ambient * diffuseTex.rgb;
+	vec3 ambientComp = material.ambient;
 
 	// Attenuation
 	float distance = length(light.position - input.fragPosition);
 	float attenuation = 1.0 / (light.params.x + light.params.y * distance +
 		light.params.z * (distance * distance));
 
-	// Diffuse
 	vec3 norm = normalize(input.normal);
 	vec3 lightDir = normalize(light.position - input.fragPosition);
+
+	// Diffuse
+	vec3 diffuseComp = vec3(0);
+#ifdef ENABLE_DIFFUSE
 	float diff = max(dot(norm, lightDir), 0.0);
-	vec3 diffuseComp = attenuation * diff * material.diffuse * light.color * diffuseTex.rgb;
+	diffuseComp = attenuation * diff * material.diffuse * light.color;
+#endif
+
+#ifdef ENABLE_DIFFUSE_MAP
+	vec4 diffuseTex = texture(diffuseMap, input.texcoord);
+	ambientComp *= diffuseTex.rgb;
+	diffuseComp *= diffuseTex.rgb;
+#endif
 
 	// Specular
+	vec3 specularComp = vec3(0);
+#ifdef ENABLE_SPECULAR
 	vec3 viewDir = normalize(cameraPosition - input.fragPosition);
 	vec3 reflectDir = reflect(-lightDir, norm);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	vec3 specularComp = attenuation * spec * material.specular * light.color * specularTex.rgb;
+	specularComp = attenuation * spec * material.specular * light.color;
+#endif
+
+#ifdef ENABLE_SPECULAR_MAP
+	vec4 specularTex = texture(specularMap, input.texcoord);
+	specularComp *= specularTex.rgb;
+#endif
 
 	fragment = vec4(ambientComp + diffuseComp + specularComp, 1.0);
 }
