@@ -76,6 +76,8 @@ int main(int, char*[])
 
 		controller.update(Engine::dt);
 
+		scene.getLights()[0].position.x = 5.f * glm::sin(SDL_GetTicks() / 1000.f);
+
 		renderer.render(scene, camera);
 
 		Engine::swap();
