@@ -4,6 +4,15 @@
 
 #define MAX_LIGHTS 4
 
+layout(binding = 0, std140) uniform CommonBlock {
+	mat4 modelMatrix;
+	mat4 modelViewMatrix;
+	mat4 projectionMatrix;
+	mat4 viewMatrix;
+	mat3 normalMatrix;
+	vec3 cameraPosition;
+};
+
 layout(binding = 1, std140) uniform ColorBlock {
 	vec3 ambient;
 	vec3 diffuse;
@@ -22,13 +31,31 @@ layout(location = 0) uniform sampler2D diffuseMap;
 in VertexData {
 	vec2 texcoord;
 	vec3 normal;
-	vec3 eye;
+	vec3 fragPosition;
 } input;
 
 layout(location = 0) out vec4 fragment;
 
 void main()
 {
+	// Ambient
+	vec3 ambientComp = ambient * light.color;
+
+	// Diffuse
+	vec3 norm = normalize(input.normal);
+	vec3 lightDir = normalize(light.position - input.fragPosition);
+	float diff = max(dot(norm, lightDir), 0.0);
+	vec3 diffuseComp = diff * light.color;
+
+	// Specular
+	float specularStrength = 0.5;
+	vec3 viewDir = normalize(cameraPosition - input.fragPosition);
+	vec3 reflectDir = reflect(-lightDir, norm);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+	vec3 specularComp = specularStrength * spec * light.color;
+
+	vec4 tex = texture(diffuseMap, input.texcoord);
+	fragment = vec4(ambientComp + diffuseComp /*+ specularComp*/, 1.0) * tex;
 /*
 	vec3 spec = vec3(0.0);
 	vec3 n = normalize(input.normal);
@@ -45,7 +72,4 @@ void main()
 	}
 
 	fragment = vec4(max(intensity * diffuse + spec, ambient), 1.0);*/
-
-	vec4 tex = texture(diffuseMap, input.texcoord);
-	fragment = vec4(ambient, 0.0) + tex * vec4(diffuse, 1.0);
 }

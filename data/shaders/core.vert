@@ -17,14 +17,15 @@ layout(location = 2) in vec3 normal;
 out VertexData {
 	vec2 texcoord;
 	vec3 normal;
-	vec3 eye;
+	vec3 fragPosition;
 } output;
 
 void main()
 {
 	output.texcoord = texcoord;
-	output.normal = normal;
-	output.eye = -(modelViewMatrix * vec4(position, 1.0)).xyz;
+	output.normal = transpose(inverse(mat3(modelMatrix))) * normal;
+	//output.normal = normalMatrix * normal; // TODO: Why does this not work?
+	output.fragPosition = (modelMatrix * vec4(position, 1.0)).xyz;
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 
