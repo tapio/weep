@@ -17,5 +17,6 @@ struct Light
 	vec3 color = vec3(1, 1, 1);
 	vec3 position = vec3();
 	vec3 direction = vec3();
+	vec3 attenuation = vec3(1, 0, 0);
 	float distance = 0.0f;
 };

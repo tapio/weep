@@ -42,19 +42,24 @@ void main()
 	vec4 diffuseTex = texture(diffuseMap, input.texcoord);
 
 	// Ambient
-	vec3 ambientComp = material.ambient * light.color * diffuseTex.rgb;
+	vec3 ambientComp = material.ambient * diffuseTex.rgb;
+
+	// Attenuation
+	float distance = length(light.position - input.fragPosition);
+	float attenuation = 1.0 / (light.params.x + light.params.y * distance +
+		light.params.z * (distance * distance));
 
 	// Diffuse
 	vec3 norm = normalize(input.normal);
 	vec3 lightDir = normalize(light.position - input.fragPosition);
 	float diff = max(dot(norm, lightDir), 0.0);
-	vec3 diffuseComp = diff * material.diffuse * light.color * diffuseTex.rgb;
+	vec3 diffuseComp = attenuation * diff * material.diffuse * light.color * diffuseTex.rgb;
 
 	// Specular
 	vec3 viewDir = normalize(cameraPosition - input.fragPosition);
 	vec3 reflectDir = reflect(-lightDir, norm);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0 /*TODO: material.shininess*/);
-	vec3 specularComp = spec * material.specular * light.color;
+	vec3 specularComp = attenuation * spec * material.specular * light.color;
 
 	fragment = vec4(ambientComp + diffuseComp + specularComp, 1.0);
 }
