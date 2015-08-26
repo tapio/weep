@@ -216,7 +216,7 @@ void RenderDevice::render(Model& model)
 	m_colorBlock.upload();
 	m_commonBlock.uniforms.modelMatrix = model.transform;
 	m_commonBlock.uniforms.modelViewMatrix = m_commonBlock.uniforms.viewMatrix * m_commonBlock.uniforms.modelMatrix;
-	m_commonBlock.uniforms.normalMatrix = glm::inverseTranspose(mat3(model.transform));
+	m_commonBlock.uniforms.normalMatrix = glm::inverseTranspose(model.transform);
 	m_commonBlock.upload();
 	for (uint i = 0; i < mat.map.size(); ++i) {
 		uint tex = mat.tex[i];
