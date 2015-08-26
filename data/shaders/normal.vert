@@ -20,7 +20,7 @@ out VertexData {
 
 void main()
 {
-	output.normal = normalize(normalMatrix * normal);
+	output.normal = mat3(normalMatrix) * normal;
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 

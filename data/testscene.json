@@ -50,7 +50,7 @@
 		"scale": 0.5
 	},{
 		"material": {
-			"shaderName": "basic",
+			"shaderName": "normal",
 			"diffuseMap": "debug/uvtestgrid.png"
 		},
 		"geometry": "debug/cube.obj",
