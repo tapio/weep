@@ -47,7 +47,7 @@ void main()
 	outp.normal = normalize(n0 + n1 + n2);
 
 	// Displace
-	float height = texture(heightMap, outp.texcoord);
+	float height = texture(heightMap, outp.texcoord).r;
 	position.y += height;
 
 	// Project
