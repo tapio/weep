@@ -104,4 +104,5 @@ void Scene::load(const string& path, Resources& resources)
 void Scene::reset()
 {
 	m_models.clear();
+	m_lights.clear();
 }
