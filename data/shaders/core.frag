@@ -28,6 +28,8 @@ layout(binding = 2, std140) uniform LightBlock {
 } light/*[MAX_LIGHTS]*/;
 
 layout(location = 0) uniform sampler2D diffuseMap;
+layout(location = 1) uniform sampler2D normalMap;
+layout(location = 2) uniform sampler2D specularMap;
 
 in VertexData {
 	vec2 texcoord;
@@ -40,6 +42,7 @@ layout(location = 0) out vec4 fragment;
 void main()
 {
 	vec4 diffuseTex = texture(diffuseMap, input.texcoord);
+	vec4 specularTex = texture(specularMap, input.texcoord);
 
 	// Ambient
 	vec3 ambientComp = material.ambient * diffuseTex.rgb;
@@ -59,7 +62,7 @@ void main()
 	vec3 viewDir = normalize(cameraPosition - input.fragPosition);
 	vec3 reflectDir = reflect(-lightDir, norm);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-	vec3 specularComp = attenuation * spec * material.specular * light.color;
+	vec3 specularComp = attenuation * spec * material.specular * light.color * specularTex.rgb;
 
 	fragment = vec4(ambientComp + diffuseComp + specularComp, 1.0);
 }
