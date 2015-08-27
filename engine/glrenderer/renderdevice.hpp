@@ -47,9 +47,9 @@ private:
 	};
 
 	uint m_program = 0;
-	UBO<UniformCommonBlock> m_commonBlock;
-	UBO<UniformColorBlock> m_colorBlock;
-	UBO<UniformLightBlock> m_lightBlock;
+	UBO<UniformCommonBlock, 1> m_commonBlock;
+	UBO<UniformColorBlock, 1> m_colorBlock;
+	UBO<UniformLightBlock, MAX_LIGHTS> m_lightBlock;
 	std::vector<ShaderProgram> m_shaders;
 	std::map<string, int> m_shaderNames;
 	std::vector<GPUModel> m_models;

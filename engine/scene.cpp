@@ -100,7 +100,7 @@ void Scene::load(const string& path, Resources& resources)
 			model.scale = scaleDef.is_number() ? vec3(scaleDef.number_value()) : toVec3(scaleDef);
 		}
 	}
-	logDebug("Loaded scene with %d models", m_models.size());
+	logDebug("Loaded scene with %d models, %d lights", m_models.size(), m_lights.size());
 }
 
 void Scene::reset()

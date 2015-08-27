@@ -5,7 +5,7 @@ layout(binding = 0, std140) uniform CommonBlock {
 	mat4 projectionMatrix;
 	mat4 viewMatrix;
 	mat4 normalMatrix; // Problems with alignment if sent as mat3
-	vec3 cameraPosition; float pad1;
+	vec3 cameraPosition; float numLights;
 };
 
 layout(location = 0) in vec3 position;

@@ -16,6 +16,30 @@
 		"position": [ 0, -0.5, -10 ],
 		"scale": [ 0.1, 0.5, 0.1 ]
 	},{
+		"light": {
+			"type": "point",
+			"color": [ 1.0, 1.0, 1.0 ],
+			"attenuation": [ 1.0, 0.4, 0.1 ],
+			"distance": 10
+		},
+		"position": [ 0, 2, -15 ]
+	},{
+		"light": {
+			"type": "point",
+			"color": [ 1.0, 1.0, 1.0 ],
+			"attenuation": [ 1.0, 0.4, 0.1 ],
+			"distance": 10
+		},
+		"position": [ 0, 2, -6 ]
+	},{
+		"light": {
+			"type": "point",
+			"color": [ 1.0, 0.0, 0.0 ],
+			"attenuation": [ 1.0, 0.4, 0.1 ],
+			"distance": 10
+		},
+		"position": [ 0, 3, -13 ]
+	},{
 		"material": {
 			"shaderName": "specularmap",
 			"diffuseMap": "debug/uvtestgrid.png",
@@ -25,15 +49,6 @@
 		"position": [ 0, 0, -10 ],
 		"rotation": [ 0, -1, 0 ],
 		"scale": 1.0
-	},{
-		"light": {
-			"type": "point",
-			"color": [ 1.0, 1.0, 1.0 ],
-			"direction": [ 0.577, 0.577, 0.577 ],
-			"attenuation": [ 1.0, 0.4, 0.1 ],
-			"distance": 10
-		},
-		"position": [ 0, 2, -15 ]
 	},{
 		"material": {
 			"shaderName": "diffusemap",

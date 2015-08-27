@@ -200,13 +200,16 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 	m_commonBlock.uniforms.viewMatrix = camera.view;
 	m_commonBlock.uniforms.cameraPosition = camera.position;
 
-	// TODO: More lights
 	if (!lights.empty()) {
-		const Light& light = lights.front();
-		m_lightBlock.uniforms.color = light.color;
-		m_lightBlock.uniforms.position = light.position;
-		m_lightBlock.uniforms.direction = light.direction;
-		m_lightBlock.uniforms.params = light.attenuation;
+		uint numLights = std::min((uint)lights.size(), MAX_LIGHTS);
+		m_commonBlock.uniforms.numLights = numLights;
+		for (uint i = 0; i < numLights; i++) {
+			const Light& light = lights[i];
+			m_lightBlock.uniformArray[i].color = light.color;
+			m_lightBlock.uniformArray[i].position = light.position;
+			m_lightBlock.uniformArray[i].direction = light.direction;
+			m_lightBlock.uniformArray[i].params = light.attenuation;
+		}
 		m_lightBlock.upload();
 	}
 }
