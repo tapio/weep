@@ -41,7 +41,9 @@ file(GLOB_RECURSE DEPS_SOURCES "third-party/*.cpp" "third-party/*.hpp" "third-pa
 file(GLOB_RECURSE ENGINE_SOURCES "engine/*.cpp" "engine/*.hpp")
 file(GLOB_RECURSE GAME_SOURCES "game/*.cpp" "game/*.hpp")
 file(GLOB_RECURSE SHADER_SOURCES "data/shaders/*.*")
+file(GLOB_RECURSE CONFIG_SOURCES "data/*.json")
 set_source_files_properties(${SHADER_SOURCES} PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties(${CONFIG_SOURCES} PROPERTIES HEADER_FILE_ONLY TRUE)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR})
@@ -49,5 +51,5 @@ link_directories(${PROJECT_BINARY_DIR})
 
 add_library(deps STATIC ${DEPS_SOURCES})
 add_library(engine STATIC ${ENGINE_SOURCES})
-add_executable(app ${GAME_SOURCES} ${SHADER_SOURCES})
+add_executable(app ${GAME_SOURCES} ${SHADER_SOURCES} ${CONFIG_SOURCES})
 target_link_libraries(app engine deps ${LIBS})
