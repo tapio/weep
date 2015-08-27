@@ -12,6 +12,7 @@ int main(int, char*[])
 {
 	Engine::init();
 	Resources resources;
+	resources.addPath("../data/");
 	Renderer renderer;
 
 	float ar = Engine::width() / (float)Engine::height();

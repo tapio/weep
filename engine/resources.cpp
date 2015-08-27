@@ -1,41 +1,65 @@
 #include "resources.hpp"
 #include "image.hpp"
 #include "geometry.hpp"
+#include <fstream>
+
+static bool fileExists(const string& path)
+{
+	std::ifstream f(path);
+	return f.good();
+}
 
 Resources::Resources()
 {
-
 }
 
 Resources::~Resources()
 {
-
 }
 
 void Resources::reset()
 {
+	// Paths are not dropped
 	m_images.clear();
 	m_geoms.clear();
 	logDebug("Resource cache dropped");
 }
 
+void Resources::addPath(const string& path)
+{
+	// TODO: Not portable
+	m_paths.push_back(path.back() == '/' ? path : (path + "/"));
+}
+
+string Resources::findPath(const string& path)
+{
+	for (auto& it : m_paths) {
+		string fullPath = it + path;
+		if (fileExists(fullPath))
+			return fullPath;
+	}
+	logError("Could not find file \"%s\" from any of the resource paths", path.c_str());
+	ASSERT(0);
+	return "";
+}
+
 Image* Resources::getImage(const string& path)
 {
 	auto& ptr = m_images[path];
-	if (!ptr) ptr.reset(new Image("../data/" + path, 4));
+	if (!ptr) ptr.reset(new Image(findPath(path), 4));
 	return ptr.get();
 }
 
 Geometry* Resources::getGeometry(const string& path)
 {
 	auto& ptr = m_geoms[path];
-	if (!ptr) ptr.reset(new Geometry("../data/" + path));
+	if (!ptr) ptr.reset(new Geometry(findPath(path)));
 	return ptr.get();
 }
 
 Geometry*Resources::getHeightmap(const string& path)
 {
 	auto& ptr = m_geoms[path];
-	if (!ptr) ptr.reset(new Geometry(*getImage(path)));
+	if (!ptr) ptr.reset(new Geometry(*getImage(findPath(path))));
 	return ptr.get();
 }
