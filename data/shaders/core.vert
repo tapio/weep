@@ -1,5 +1,3 @@
-#version 330
-#extension GL_ARB_shading_language_420pack : enable
 
 layout(binding = 0, std140) uniform CommonBlock {
 	mat4 modelMatrix;

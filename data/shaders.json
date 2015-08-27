@@ -38,6 +38,7 @@
 		}
 	},
 	"terrain_tess": {
+		"version": "430",
 		"shaders" : {
 			"vert": "shaders/terrain.vert",
 			"tesc": "shaders/terrain.tesc",

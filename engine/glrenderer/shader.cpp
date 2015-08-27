@@ -11,14 +11,14 @@ ShaderProgram::~ShaderProgram()
 	//destroy();
 }
 
-bool ShaderProgram::compile(ShaderType type, const string& text)
+bool ShaderProgram::compile(ShaderType type, const string& text, const std::string& defines)
 {
-	GLsizei lengths[] = { (GLsizei)text.length() };
-	const GLchar* strings[] = { (const GLchar*)text.c_str() };
+	GLsizei lengths[] = { (GLsizei)defines.length(), (GLsizei)text.length() };
+	const GLchar* strings[] = { (const GLchar*)defines.c_str(), (const GLchar*)text.c_str() };
 	uint& shaderId = m_shaderIds[type];
 	shaderId = glCreateShader(glutil::toGL(type));
 	ASSERT(shaderId);
-	glShaderSource(shaderId, 1, strings, lengths);
+	glShaderSource(shaderId, 2, strings, lengths);
 	glCompileShader(shaderId);
 
 	// Get shader log

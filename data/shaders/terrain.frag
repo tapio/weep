@@ -1,4 +1,3 @@
-#version 430
 
 layout(binding = 1, std140) uniform ColorBlock {
 	vec3 ambient; float pad1;

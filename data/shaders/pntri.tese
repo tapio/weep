@@ -1,4 +1,3 @@
-#version 430
 
 layout(triangles, equal_spacing, ccw) in;
 

@@ -1,4 +1,4 @@
-#version 430
+
 layout(vertices = 3) out;
 
 in VertexData {

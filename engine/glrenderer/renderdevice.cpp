@@ -38,7 +38,6 @@ RenderDevice::RenderDevice()
 
 void RenderDevice::loadShaders()
 {
-	const char* magicDefines = "// DEFINES //";
 	m_shaders.clear();
 	m_shaderNames.clear();
 	std::string err;
@@ -54,8 +53,15 @@ void RenderDevice::loadShaders()
 		m_shaders.emplace_back();
 		ShaderProgram& program = m_shaders.back();
 
-		const Json& defines = it.second["defines"];
 		string defineText;
+		if (it.second["version"].is_string())
+			defineText = "#version " + it.second["version"].string_value() + "\n";
+		else defineText =
+			"#version 330\n"
+			"#extension GL_ARB_shading_language_420pack : enable\n"
+			"#extension GL_ARB_explicit_uniform_location : enable\n";
+
+		const Json& defines = it.second["defines"];
 		if (!defines.is_null()) {
 			ASSERT(defines.is_array());
 			for (uint i = 0; i < defines.array_items().size(); ++i) {
@@ -66,15 +72,15 @@ void RenderDevice::loadShaders()
 		}
 
 		file = shaderFiles["vert"].string_value();
-		if (!file.empty()) program.compile(VERTEX_SHADER, replace(readFile(file), magicDefines, defineText));
+		if (!file.empty()) program.compile(VERTEX_SHADER, readFile(file), defineText);
 		file = shaderFiles["frag"].string_value();
-		if (!file.empty()) program.compile(FRAGMENT_SHADER, replace(readFile(file), magicDefines, defineText));
+		if (!file.empty()) program.compile(FRAGMENT_SHADER, readFile(file), defineText);
 		file = shaderFiles["geom"].string_value();
-		if (!file.empty()) program.compile(GEOMETRY_SHADER, replace(readFile(file), magicDefines, defineText));
+		if (!file.empty()) program.compile(GEOMETRY_SHADER, readFile(file), defineText);
 		file = shaderFiles["tesc"].string_value();
-		if (!file.empty()) program.compile(TESS_CONTROL_SHADER, replace(readFile(file), magicDefines, defineText));
+		if (!file.empty()) program.compile(TESS_CONTROL_SHADER, readFile(file), defineText);
 		file = shaderFiles["tese"].string_value();
-		if (!file.empty()) program.compile(TESS_EVALUATION_SHADER, replace(readFile(file), magicDefines, defineText));
+		if (!file.empty()) program.compile(TESS_EVALUATION_SHADER, readFile(file), defineText);
 
 		if (!program.link())
 			continue;

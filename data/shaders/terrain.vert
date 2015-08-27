@@ -1,4 +1,3 @@
-#version 430
 
 layout(binding = 0, std140) uniform CommonBlock {
 	mat4 modelMatrix;

@@ -17,7 +17,7 @@ struct ShaderProgram
 
 	NONCOPYABLE(ShaderProgram);
 
-	bool compile(ShaderType type, const string& text);
+	bool compile(ShaderType type, const string& text, const string& defines = "");
 	bool link();
 	bool has(ShaderType type) const;
 	void use() const;
