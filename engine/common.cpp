@@ -72,7 +72,7 @@ void panic(const char* format, ...)
 
 string readFile(const string& path)
 {
-	std::ifstream f("../data/" + path);
+	std::ifstream f(path);
 	return std::string(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
 }
 

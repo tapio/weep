@@ -3,13 +3,14 @@
 
 class RenderDevice;
 class Scene;
+class Resources;
 struct Camera;
 struct Model;
 
 class Renderer
 {
 public:
-	Renderer();
+	Renderer(Resources& resources);
 	~Renderer();
 
 	void render(Scene& scene, Camera& camera);

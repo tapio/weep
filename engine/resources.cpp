@@ -31,7 +31,7 @@ void Resources::addPath(const string& path)
 	m_paths.push_back(path.back() == '/' ? path : (path + "/"));
 }
 
-string Resources::findPath(const string& path)
+string Resources::findPath(const string& path) const
 {
 	for (auto& it : m_paths) {
 		string fullPath = it + path;
@@ -41,6 +41,12 @@ string Resources::findPath(const string& path)
 	logError("Could not find file \"%s\" from any of the resource paths", path.c_str());
 	ASSERT(0);
 	return "";
+}
+
+string Resources::getText(const string& path) const
+{
+	std::ifstream f(findPath(path));
+	return std::string(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
 }
 
 Image* Resources::getImage(const string& path)

@@ -27,9 +27,9 @@ private:
 
 
 
-Renderer::Renderer()
+Renderer::Renderer(Resources& resources)
 {
-	m_device.reset(new RenderDevice());
+	m_device.reset(new RenderDevice(resources));
 }
 
 Renderer::~Renderer()

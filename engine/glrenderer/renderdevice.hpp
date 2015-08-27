@@ -4,6 +4,7 @@
 #include "shader.hpp"
 #include "light.hpp"
 
+class Resources;
 struct Model;
 struct Geometry;
 struct Material;
@@ -12,7 +13,7 @@ struct Camera;
 class RenderDevice
 {
 public:
-	RenderDevice();
+	RenderDevice(Resources& resources);
 	~RenderDevice();
 
 	void loadShaders();
@@ -53,4 +54,5 @@ private:
 	std::vector<ShaderProgram> m_shaders;
 	std::map<string, int> m_shaderNames;
 	std::vector<GPUModel> m_models;
+	Resources& m_resources;
 };

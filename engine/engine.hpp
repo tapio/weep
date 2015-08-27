@@ -4,7 +4,7 @@
 class Engine
 {
 public:
-	static void init();
+	static void init(const string& configPath);
 	static void deinit();
 	static void swap();
 
@@ -14,4 +14,5 @@ public:
 	static void grabMouse(bool grab);
 
 	static float dt;
+	static Json settings;
 };

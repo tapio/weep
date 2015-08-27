@@ -12,8 +12,9 @@ namespace
 }
 
 float Engine::dt = 0;
+Json Engine::settings = Json();
 
-void Engine::init()
+void Engine::init(const string& configPath)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		panic(SDL_GetError());
@@ -28,9 +29,9 @@ void Engine::init()
 	prevTime = SDL_GetPerformanceCounter();
 
 	std::string err;
-	Json settings = Json::parse(readFile("settings.json"), err);
+	settings = Json::parse(readFile(configPath), err);
 	if (!err.empty())
-		panic(err.c_str());
+		panic("Error reading config from \"%s\": %s", configPath.c_str(), err.c_str());
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);

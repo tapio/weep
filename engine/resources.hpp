@@ -12,8 +12,9 @@ public:
 	void reset();
 
 	void addPath(const string& path);
-	string findPath(const string& path);
+	string findPath(const string& path) const;
 
+	string getText(const string& path) const; // Not cached
 	Image* getImage(const string& path);
 	Geometry* getGeometry(const string& path);
 	Geometry* getHeightmap(const string& path);

@@ -10,10 +10,10 @@
 
 int main(int, char*[])
 {
-	Engine::init();
 	Resources resources;
 	resources.addPath("../data/");
-	Renderer renderer;
+	Engine::init(resources.findPath("settings.json"));
+	Renderer renderer(resources);
 
 	float ar = Engine::width() / (float)Engine::height();
 	Camera camera;

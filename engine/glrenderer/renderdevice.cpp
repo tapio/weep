@@ -7,13 +7,15 @@
 #include "camera.hpp"
 #include "engine.hpp"
 #include "light.hpp"
+#include "resources.hpp"
 
 static void debugCallback(GLenum /*source*/, GLenum /*type*/, GLuint /*id*/, GLenum /*severity*/, GLsizei /*length*/, const GLchar* msg, const void* /*data*/)
 {
 	logDebug("OpenGL: %s", msg);
 }
 
-RenderDevice::RenderDevice()
+RenderDevice::RenderDevice(Resources& resources)
+	: m_resources(resources)
 {
 	logInfo("OpenGL Renderer: %s", glGetString(GL_RENDERER));
 	logInfo("OpenGL Vendor:   %s", glGetString(GL_VENDOR));
@@ -41,7 +43,7 @@ void RenderDevice::loadShaders()
 	m_shaders.clear();
 	m_shaderNames.clear();
 	std::string err;
-	Json jsonShaders = Json::parse(readFile("shaders.json"), err);
+	Json jsonShaders = Json::parse(m_resources.getText("shaders.json"), err);
 	if (!err.empty())
 		panic("Failed to read shader config: %s", err.c_str());
 
@@ -72,15 +74,15 @@ void RenderDevice::loadShaders()
 		}
 
 		file = shaderFiles["vert"].string_value();
-		if (!file.empty()) program.compile(VERTEX_SHADER, readFile(file), defineText);
+		if (!file.empty()) program.compile(VERTEX_SHADER, m_resources.getText(file), defineText);
 		file = shaderFiles["frag"].string_value();
-		if (!file.empty()) program.compile(FRAGMENT_SHADER, readFile(file), defineText);
+		if (!file.empty()) program.compile(FRAGMENT_SHADER, m_resources.getText(file), defineText);
 		file = shaderFiles["geom"].string_value();
-		if (!file.empty()) program.compile(GEOMETRY_SHADER, readFile(file), defineText);
+		if (!file.empty()) program.compile(GEOMETRY_SHADER, m_resources.getText(file), defineText);
 		file = shaderFiles["tesc"].string_value();
-		if (!file.empty()) program.compile(TESS_CONTROL_SHADER, readFile(file), defineText);
+		if (!file.empty()) program.compile(TESS_CONTROL_SHADER, m_resources.getText(file), defineText);
 		file = shaderFiles["tese"].string_value();
-		if (!file.empty()) program.compile(TESS_EVALUATION_SHADER, readFile(file), defineText);
+		if (!file.empty()) program.compile(TESS_EVALUATION_SHADER, m_resources.getText(file), defineText);
 
 		if (!program.link())
 			continue;
@@ -153,7 +155,7 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 		Geometry::Attribute& attr = geometry.attributes[i];
 		if (attr.components) {
 			glEnableVertexAttribArray(i);
-			glVertexAttribPointer(i, attr.components, GL_FLOAT, GL_FALSE, geometry.vertexSize, (GLvoid*)attr.offset);
+			glVertexAttribPointer(i, attr.components, GL_FLOAT, GL_FALSE, geometry.vertexSize, (GLvoid*)(uintptr_t)attr.offset);
 		} else {
 			glDisableVertexAttribArray(i);
 		}
