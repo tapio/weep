@@ -1,7 +1,12 @@
 #include "shader.hpp"
 #include "glutil.hpp"
 
-ShaderProgram::ShaderProgram()
+static const char* s_shaderTypeNames[] = {
+	"vertex", "fragment", "geometry", "tess control", "tess eval"
+};
+
+ShaderProgram::ShaderProgram(const std::string& debugName)
+	: name(debugName)
 {
 }
 
@@ -33,11 +38,11 @@ bool ShaderProgram::compile(ShaderType type, const string& text, const std::stri
 	GLint status;
 	glGetShaderiv(shaderId, GL_COMPILE_STATUS, &status);
 	if (!status) {
-		logError("Failed to compile shader: %s", infoLog.c_str());
+		logError("Failed to compile %s shader \"%s\":\n%s", s_shaderTypeNames[type], name.c_str(), infoLog.c_str());
 		return false;
 	}
 	if (!infoLog.empty()) {
-		logWarning("Warning(s) compiling shader:\n%s", infoLog.c_str());
+		logWarning("Warning(s) compiling %s shader \"%s\":\n%s", s_shaderTypeNames[type], name.c_str(), infoLog.c_str());
 	}
 
 	return true;
@@ -64,18 +69,18 @@ bool ShaderProgram::link()
 	int status;
 	glGetProgramiv(id, GL_LINK_STATUS, &status);
 	if (!status) {
-		logError("Failed to link program:\n%s", infoLog.c_str());
+		logError("Failed to link program \"%s\":\n%s", name.c_str(), infoLog.c_str());
 		return false;
 	}
 	// Check validation status
 	glValidateProgram(id);
 	glGetProgramiv(id, GL_VALIDATE_STATUS, &status);
 	if (!status) {
-		logError("Failed to validate program:\n%s", infoLog.c_str());
+		logError("Failed to validate program \"%s\":\n%s", name.c_str(), infoLog.c_str());
 		return false;
 	}
 	if (!infoLog.empty()) {
-		logWarning("Warning(s) linking program:\n%s", infoLog.c_str());
+		logWarning("Warning(s) linking program \"%s\":\n%s", name.c_str(), infoLog.c_str());
 	}
 
 	return true;

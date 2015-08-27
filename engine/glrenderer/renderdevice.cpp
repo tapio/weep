@@ -50,7 +50,7 @@ void RenderDevice::loadShaders()
 	for (auto& it : shaders) {
 		const Json& shaderFiles = it.second["shaders"];
 		string file;
-		m_shaders.emplace_back();
+		m_shaders.emplace_back(it.first);
 		ShaderProgram& program = m_shaders.back();
 
 		string defineText;

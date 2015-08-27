@@ -12,7 +12,7 @@ enum ShaderType
 
 struct ShaderProgram
 {
-	ShaderProgram();
+	ShaderProgram(const string& debugName = "unknown");
 	~ShaderProgram();
 
 	NONCOPYABLE(ShaderProgram);
@@ -24,6 +24,7 @@ struct ShaderProgram
 	void destroy();
 
 	uint id = 0;
+	string name;
 
 private:
 	std::vector<uint> m_shaderIds = { 0, 0, 0, 0, 0 };
