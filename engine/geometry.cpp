@@ -36,7 +36,7 @@ Geometry::Geometry(const string& path)
 			tmpVerts.push_back(vec3(x, y, z));
 		} else if (row.substr(0,2) == "vt") {  // Texture Coordinates
 			srow >> tempst >> x >> y;
-			tmpUvs.push_back(vec2(x, y));
+			tmpUvs.push_back(vec2(x, -y));
 		} else if (row.substr(0,2) == "vn") {  // Normals
 			srow >> tempst >> x >> y >> z;
 			tmpNormals.push_back(glm::normalize(vec3(x, y, z)));
@@ -44,8 +44,8 @@ Geometry::Geometry(const string& path)
 			srow >> tempst; // Eat away prefix
 			// Parse face point's coordinate references
 			for (int i = 1; srow >> tempst; ++i) {
-				if (i > 3) {
-					logError("Only triangle faces are supported in %s:%d", path.c_str(), lineNumber);
+				if (i > 4) {
+					logError("Only triangle and quad faces are supported in %s:%d", path.c_str(), lineNumber);
 					break;
 				}
 				std::vector<std::string> indices = split(tempst, '/');
@@ -54,9 +54,31 @@ Geometry::Geometry(const string& path)
 					continue;
 				}
 				// Vertex indices are 1-based in the file
-				if (!indices[0].empty()) positions.push_back(tmpVerts.at(std::stoi(indices[0]) - 1));
-				if (!indices[1].empty()) texcoords.push_back(tmpUvs.at(std::stoi(indices[1]) - 1));
-				if (!indices[2].empty()) normals.push_back(tmpNormals.at(std::stoi(indices[2]) - 1));
+				if (i <= 3) {
+					if (!indices[0].empty()) positions.push_back(tmpVerts.at(std::stoi(indices[0]) - 1));
+					if (!indices[1].empty()) texcoords.push_back(tmpUvs.at(std::stoi(indices[1]) - 1));
+					if (!indices[2].empty()) normals.push_back(tmpNormals.at(std::stoi(indices[2]) - 1));
+				} else if (i == 4) {
+					// Manually create a new triangle
+					if (!indices[0].empty()) {
+						size_t lastPos = positions.size();
+						positions.push_back(tmpVerts.at(std::stoi(indices[0]) - 1));
+						positions.push_back(positions.at(lastPos - 3));
+						positions.push_back(positions.at(lastPos - 1));
+					}
+					if (!indices[1].empty()) {
+						size_t lastPos = texcoords.size();
+						texcoords.push_back(tmpUvs.at(std::stoi(indices[1]) - 1));
+						texcoords.push_back(texcoords.at(lastPos - 3));
+						texcoords.push_back(texcoords.at(lastPos - 1));
+					}
+					if (!indices[2].empty()) {
+						size_t lastPos = normals.size();
+						normals.push_back(tmpNormals.at(std::stoi(indices[2]) - 1));
+						normals.push_back(normals.at(lastPos - 3));
+						normals.push_back(normals.at(lastPos - 1));
+					}
+				}
 			}
 		}
 	}
