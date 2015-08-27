@@ -8,6 +8,11 @@ namespace {
 		ASSERT(arr.is_array());
 		return vec3(arr[0].number_value(), arr[1].number_value(), arr[2].number_value());
 	}
+	vec3 colorToVec3(const Json& color) {
+		if (color.is_number()) return vec3(color.number_value());
+		//if (color.is_string()) return TODO;
+		return toVec3(color);
+	}
 }
 
 void Scene::load(const string& path, Resources& resources)
@@ -35,7 +40,7 @@ void Scene::load(const string& path, Resources& resources)
 			else if (lightType == "hemisphere") light.type = Light::HEMISPHERE_LIGHT;
 			else logError("Unknown light type \"%s\"", lightType.c_str());
 			if (!lightDef["color"].is_null())
-				light.color = toVec3(lightDef["color"]);
+				light.color = colorToVec3(lightDef["color"]);
 			if (!def["position"].is_null())
 				light.position = toVec3(def["position"]);
 			if (!lightDef["direction"].is_null())
@@ -69,11 +74,11 @@ void Scene::load(const string& path, Resources& resources)
 			if (materialDef["tessellate"].bool_value())
 				model.material->tessellate = true;
 			if (!materialDef["ambient"].is_null())
-				model.material->ambient = toVec3(materialDef["ambient"]);
+				model.material->ambient = colorToVec3(materialDef["ambient"]);
 			if (!materialDef["diffuse"].is_null())
-				model.material->diffuse = toVec3(materialDef["diffuse"]);
+				model.material->diffuse = colorToVec3(materialDef["diffuse"]);
 			if (!materialDef["specular"].is_null())
-				model.material->specular = toVec3(materialDef["specular"]);
+				model.material->specular = colorToVec3(materialDef["specular"]);
 			if (!materialDef["shininess"].is_null())
 				model.material->shininess = materialDef["shininess"].number_value();
 
