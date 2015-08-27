@@ -69,6 +69,10 @@ int main(int, char*[])
 				active = true;
 				Engine::grabMouse(true);
 			}
+			else if (e.type == SDL_MOUSEBUTTONDOWN && active) {
+				active = false;
+				Engine::grabMouse(false);
+			}
 			else if (e.type == SDL_MOUSEMOTION && active) {
 				controller.rotation = glm::rotate(controller.rotation, -0.005f * e.motion.xrel, yaxis);
 				controller.rotation = glm::rotate(controller.rotation, -0.005f * e.motion.yrel, xaxis);
