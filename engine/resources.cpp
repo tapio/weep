@@ -28,7 +28,7 @@ void Resources::reset()
 void Resources::addPath(const string& path)
 {
 	// TODO: Not portable
-	m_paths.push_back(path.back() == '/' ? path : (path + "/"));
+	m_paths.insert(m_paths.begin(), path.back() == '/' ? path : (path + "/"));
 }
 
 string Resources::findPath(const string& path) const

@@ -13,6 +13,8 @@ int main(int, char*[])
 	Resources resources;
 	resources.addPath("../data/");
 	Engine::init(resources.findPath("settings.json"));
+	if (Engine::settings["moddir"].is_string())
+		resources.addPath(Engine::settings["moddir"].string_value());
 	Renderer renderer(resources);
 
 	float ar = Engine::width() / (float)Engine::height();
