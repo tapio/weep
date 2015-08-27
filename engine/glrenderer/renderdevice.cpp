@@ -245,7 +245,7 @@ void RenderDevice::render(Model& model)
 	for (uint i = 0; i < mat.map.size(); ++i) {
 		uint tex = mat.tex[i];
 		if (!tex) continue;
-		glActiveTexture(GL_TEXTURE0 + i);
+		glActiveTexture(GL_TEXTURE10 + i);
 		glBindTexture(GL_TEXTURE_2D, tex);
 		//glUniform1i(i, i);
 	}

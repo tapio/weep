@@ -28,9 +28,9 @@ layout(binding = 2, std140) uniform LightBlock {
 	LightData lights[MAX_LIGHTS];
 };
 
-layout(location = 0) uniform sampler2D diffuseMap;
-layout(location = 1) uniform sampler2D normalMap;
-layout(location = 2) uniform sampler2D specularMap;
+layout(binding = 10) uniform sampler2D diffuseMap;
+layout(binding = 11) uniform sampler2D normalMap;
+layout(binding = 12) uniform sampler2D specularMap;
 
 in VertexData {
 	vec2 texcoord;
@@ -78,14 +78,14 @@ void main()
 		// Diffuse
 #ifdef ENABLE_DIFFUSE
 		float diff = max(dot(norm, lightDir), 0.0);
-		diffuseComp += attenuation * diff * material.diffuse * light.color * diffuseTex.xyz;
+		diffuseComp += attenuation * diff * material.diffuse * light.color * diffuseTex.rgb;
 #endif
 
 		// Specular
 #ifdef ENABLE_SPECULAR
 		vec3 reflectDir = reflect(-lightDir, norm);
 		float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-		specularComp += attenuation * spec * material.specular * light.color * specularTex.xyz;
+		specularComp += attenuation * spec * material.specular * light.color * specularTex.rgb;
 #endif
 	}
 
