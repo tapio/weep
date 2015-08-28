@@ -7,7 +7,7 @@
 			"normalMap": "debug/uvtestgrid_normal.png",
 			"heightMap": "debug/uvtestgrid.png",
 			"tessellate": false,
-			"ambient": [ 0.05, 0.05, 0.05 ],
+			"ambient": [ 0.005, 0.005, 0.005 ],
 			"shininess": 8
 		},
 		"geometry": {
@@ -19,31 +19,32 @@
 		"light": {
 			"type": "point",
 			"color": [ 1.0, 1.0, 1.0 ],
-			"attenuation": [ 1.0, 0.4, 0.1 ],
-			"distance": 10
+			"distance": 6,
+			"decay": 2
 		},
 		"position": [ 0, 2, -15 ]
 	},{
 		"light": {
 			"type": "point",
 			"color": [ 1.0, 1.0, 1.0 ],
-			"attenuation": [ 1.0, 0.4, 0.1 ],
-			"distance": 10
+			"distance": 6,
+			"decay": 2
 		},
 		"position": [ 0, 2, -6 ]
 	},{
 		"light": {
 			"type": "point",
 			"color": [ 1.0, 0.0, 0.0 ],
-			"attenuation": [ 1.0, 0.4, 0.1 ],
-			"distance": 10
+			"distance": 6,
+			"decay": 2
 		},
 		"position": [ 0, 3, -13 ]
 	},{
 		"material": {
-			"shaderName": "specularmap",
+			"shaderName": "nsmap",
 			"diffuseMap": "debug/uvtestgrid.png",
-			"specularMap": "debug/uvtestgrid_specular.png"
+			"specularMap": "debug/uvtestgrid_specular.png",
+			"normalMap": "debug/uvtestgrid_normal.png"
 		},
 		"geometry": "debug/cube.obj",
 		"position": [ 0, 0, -10 ],
