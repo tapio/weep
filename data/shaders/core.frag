@@ -13,6 +13,35 @@ layout(location = 0) out vec4 fragment;
 
 #define PI 3.14159265
 
+// http://www.thetenthplanet.de/archives/1180
+mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv)
+{
+	// get edge vectors of the pixel triangle
+	vec3 dp1 = dFdx(p);
+	vec3 dp2 = dFdy(p);
+	vec2 duv1 = dFdx(uv);
+	vec2 duv2 = dFdy(uv);
+
+	// solve the linear system
+	vec3 dp2perp = cross(dp2, N);
+	vec3 dp1perp = cross(N, dp1);
+	vec3 T = dp2perp * duv1.x + dp1perp * duv2.x;
+	vec3 B = dp2perp * duv1.y + dp1perp * duv2.y;
+
+	// construct a scale-invariant frame
+	float invmax = inversesqrt(max(dot(T, T), dot(B, B)));
+	return mat3(T * invmax, B * invmax, N);
+}
+
+vec3 perturb_normal(vec3 normal, vec3 eye)
+{
+	vec3 normalTex = texture(normalMap, input.texcoord).xyz * 2.0 - 1.0;
+	normalTex.y = -normalTex.y;
+	normalTex.xy *= 2.0; // TODO: Scale
+	mat3 TBN = cotangent_frame(normal, -eye, input.texcoord);
+	return normalize(TBN * normalTex);
+}
+
 void main()
 {
 	// Accumulators
@@ -20,8 +49,11 @@ void main()
 	vec3 diffuseComp = vec3(0);
 	vec3 specularComp = vec3(0);
 
-	vec3 normal = normalize(input.normal);
 	vec3 viewDir = normalize(cameraPosition - input.fragPosition);
+	vec3 normal = normalize(input.normal);
+#ifdef USE_NORMAL_MAP
+	normal = perturb_normal(normal, viewDir);
+#endif
 
 #ifdef USE_DIFFUSE_MAP
 	vec4 diffuseTex = texture(diffuseMap, input.texcoord);
