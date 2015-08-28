@@ -23,14 +23,14 @@ void main()
 	vec3 normal = normalize(input.normal);
 	vec3 viewDir = normalize(cameraPosition - input.fragPosition);
 
-#ifdef ENABLE_DIFFUSE_MAP
+#ifdef USE_DIFFUSE_MAP
 	vec4 diffuseTex = texture(diffuseMap, input.texcoord);
 	ambientComp *= diffuseTex.rgb;
 #else
 	vec4 diffuseTex = vec4(1.0);
 #endif
 
-#ifdef ENABLE_SPECULAR_MAP
+#ifdef USE_SPECULAR_MAP
 	vec4 specularTex = texture(specularMap, input.texcoord);
 #else
 	vec4 specularTex = vec4(1.0);
@@ -49,14 +49,14 @@ void main()
 		vec3 lightDir = normalize(light.position - input.fragPosition);
 
 		// Diffuse
-#ifdef ENABLE_DIFFUSE
+#ifdef USE_DIFFUSE
 		float diff = max(dot(normal, lightDir), 0.0);
 		diffuseComp += attenuation * diff * material.diffuse * light.color * diffuseTex.rgb;
 #endif
 
 		// Specular
-#ifdef ENABLE_SPECULAR
-#ifdef ENABLE_PHONG
+#ifdef USE_SPECULAR
+#ifdef USE_PHONG
 		const float energy = (2.0 + material.shininess) / (2.0 * PI);
 		vec3 reflectDir = reflect(-lightDir, normal);
 		float spec = energy * pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
