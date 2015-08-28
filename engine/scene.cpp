@@ -14,6 +14,62 @@ namespace {
 		//if (color.is_string()) return TODO;
 		return toVec3(color);
 	}
+
+	void parseModel(Model& model, const Json& def, Resources& resources) {
+		// Parse geometry
+		if (!def["geometry"].is_null()) {
+			const Json& defGeom = def["geometry"];
+			if (defGeom.is_string())
+				model.geometry = resources.getGeometry(defGeom.string_value());
+			else model.geometry = resources.getHeightmap(defGeom["heightmap"].string_value());
+		}
+
+		// Parse material
+		if (!def["material"].is_null()) {
+			const Json& materialDef = def["material"];
+			ASSERT(materialDef.is_object());
+			if (!model.material)
+				model.material.reset(new Material());
+			else model.material.reset(new Material(*model.material));
+			if (materialDef["shaderName"].is_string())
+				model.material->shaderName = materialDef["shaderName"].string_value();
+			if (materialDef["tessellate"].bool_value())
+				model.material->tessellate = true;
+			if (!materialDef["ambient"].is_null())
+				model.material->ambient = colorToVec3(materialDef["ambient"]);
+			if (!materialDef["diffuse"].is_null())
+				model.material->diffuse = colorToVec3(materialDef["diffuse"]);
+			if (!materialDef["specular"].is_null())
+				model.material->specular = colorToVec3(materialDef["specular"]);
+			if (!materialDef["shininess"].is_null())
+				model.material->shininess = materialDef["shininess"].number_value();
+
+			if (!materialDef["diffuseMap"].is_null()) {
+				model.material->map[Material::DIFFUSE_MAP] = resources.getImage(materialDef["diffuseMap"].string_value());
+				model.material->map[Material::DIFFUSE_MAP]->srgb = true;
+			}
+			if (!materialDef["normalMap"].is_null())
+				model.material->map[Material::NORMAL_MAP] = resources.getImage(materialDef["normalMap"].string_value());
+			if (!materialDef["specularMap"].is_null()) {
+				model.material->map[Material::SPECULAR_MAP] = resources.getImage(materialDef["specularMap"].string_value());
+				model.material->map[Material::SPECULAR_MAP]->srgb = true;
+			}
+			if (!materialDef["heightMap"].is_null())
+				model.material->map[Material::HEIGHT_MAP] = resources.getImage(materialDef["heightMap"].string_value());
+		}
+
+		// Parse transform
+		if (!def["position"].is_null()) {
+			model.position = toVec3(def["position"]);
+		}
+		if (!def["rotation"].is_null()) {
+			model.rotation = quat(toVec3(def["rotation"]));
+		}
+		if (!def["scale"].is_null()) {
+			const Json& scaleDef = def["scale"];
+			model.scale = scaleDef.is_number() ? vec3(scaleDef.number_value()) : toVec3(scaleDef);
+		}
+	}
 }
 
 void Scene::load(const string& path, Resources& resources)
@@ -22,9 +78,20 @@ void Scene::load(const string& path, Resources& resources)
 	Json jsonScene = Json::parse(resources.getText(path), err);
 	if (!err.empty())
 		panic("Failed to read scene %s: %s", path.c_str(), err.c_str());
-	ASSERT(jsonScene.is_array());
-	for (uint i = 0; i < jsonScene.array_items().size(); ++i) {
-		const Json& def = jsonScene[i];
+
+	// Parse prefabs
+	if (jsonScene.is_object() && jsonScene["prefabs"].is_object()) {
+		const Json::object& prefabs = jsonScene["prefabs"].object_items();
+		for (auto& it : prefabs)
+		{
+			parseModel(m_prefabs[it.first], it.second, resources);
+		}
+	}
+
+	// Parse objects
+	const Json::array& objects = jsonScene.is_array() ? jsonScene.array_items() : jsonScene["objects"].array_items();
+	for (uint i = 0; i < objects.size(); ++i) {
+		const Json& def = objects[i];
 		ASSERT(def.is_object());
 
 		// Parse light
@@ -52,63 +119,23 @@ void Scene::load(const string& path, Resources& resources)
 				light.decay = lightDef["decay"].number_value();
 		}
 
-		if (def["geometry"].is_null())
-			continue;
+		Model* model = nullptr;
 
-		// We have geometry, so create a model
-		m_models.emplace_back();
-		Model& model = m_models.back();
-
-		// Parse geometry
-		{
-			const Json& defGeom = def["geometry"];
-			if (defGeom.is_string())
-				model.geometry = resources.getGeometry(defGeom.string_value());
-			else model.geometry = resources.getHeightmap(defGeom["heightmap"].string_value());
-		}
-
-		// Parse material
-		if (!def["material"].is_null()) {
-			const Json& materialDef = def["material"];
-			ASSERT(materialDef.is_object());
-			model.material.reset(new Material());
-			if (materialDef["tessellate"].bool_value())
-				model.material->tessellate = true;
-			if (!materialDef["ambient"].is_null())
-				model.material->ambient = colorToVec3(materialDef["ambient"]);
-			if (!materialDef["diffuse"].is_null())
-				model.material->diffuse = colorToVec3(materialDef["diffuse"]);
-			if (!materialDef["specular"].is_null())
-				model.material->specular = colorToVec3(materialDef["specular"]);
-			if (!materialDef["shininess"].is_null())
-				model.material->shininess = materialDef["shininess"].number_value();
-
-			if (!materialDef["diffuseMap"].is_null()) {
-				model.material->map[Material::DIFFUSE_MAP] = resources.getImage(materialDef["diffuseMap"].string_value());
-				model.material->map[Material::DIFFUSE_MAP]->srgb = true;
+		if (def["prefab"].is_string()) {
+			auto prefabIter = m_prefabs.find(def["prefab"].string_value());
+			if (prefabIter != m_prefabs.end()) {
+				m_models.push_back(prefabIter->second);
+				model = &m_models.back();
+			} else {
+				logWarning("Could not find prefab \"%s\"", def["prefab"].string_value().c_str());
 			}
-			if (!materialDef["normalMap"].is_null())
-				model.material->map[Material::NORMAL_MAP] = resources.getImage(materialDef["normalMap"].string_value());
-			if (!materialDef["specularMap"].is_null()) {
-				model.material->map[Material::SPECULAR_MAP] = resources.getImage(materialDef["specularMap"].string_value());
-				model.material->map[Material::SPECULAR_MAP]->srgb = true;
-			}
-			if (!materialDef["heightMap"].is_null())
-				model.material->map[Material::HEIGHT_MAP] = resources.getImage(materialDef["heightMap"].string_value());
-			model.material->shaderName = materialDef["shaderName"].string_value();
+		} else if (!def["geometry"].is_null()) {
+			m_models.emplace_back();
+			model = &m_models.back();
 		}
 
-		// Parse transform
-		if (!def["position"].is_null()) {
-			model.position = toVec3(def["position"]);
-		}
-		if (!def["rotation"].is_null()) {
-			model.rotation = quat(toVec3(def["rotation"]));
-		}
-		if (!def["scale"].is_null()) {
-			const Json& scaleDef = def["scale"];
-			model.scale = scaleDef.is_number() ? vec3(scaleDef.number_value()) : toVec3(scaleDef);
-		}
+		if (model)
+			parseModel(*model, def, resources);
 	}
 	logDebug("Loaded scene with %d models, %d lights", m_models.size(), m_lights.size());
 }
@@ -117,4 +144,5 @@ void Scene::reset()
 {
 	m_models.clear();
 	m_lights.clear();
+	m_prefabs.clear();
 }
