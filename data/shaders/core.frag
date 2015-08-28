@@ -11,7 +11,9 @@ in VertexData {
 
 layout(location = 0) out vec4 fragment;
 
+// TODO: Create utils file
 #define PI 3.14159265
+#define saturate(x) clamp(x, 0.0, 1.0)
 
 // http://www.thetenthplanet.de/archives/1180
 mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv)
@@ -75,8 +77,9 @@ void main()
 
 		// Attenuation
 		float distance = length(light.position - input.fragPosition);
-		float attenuation = 1.0 / (light.params.x + light.params.y * distance +
-			light.params.z * (distance * distance));
+		if (distance >= light.params.x)
+			continue;
+		float attenuation = pow(saturate(1.0 - distance / light.params.x), light.params.y);
 
 		vec3 lightDir = normalize(light.position - input.fragPosition);
 

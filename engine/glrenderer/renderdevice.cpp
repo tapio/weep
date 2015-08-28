@@ -214,7 +214,7 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 			m_lightBlock.uniforms.lights[i].color = light.color;
 			m_lightBlock.uniforms.lights[i].position = light.position;
 			m_lightBlock.uniforms.lights[i].direction = light.direction;
-			m_lightBlock.uniforms.lights[i].params = light.attenuation;
+			m_lightBlock.uniforms.lights[i].params = vec4(light.distance, light.decay, 0.0f, 0.0f);
 		}
 		m_lightBlock.upload();
 	}

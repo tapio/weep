@@ -45,10 +45,10 @@ void Scene::load(const string& path, Resources& resources)
 				light.position = toVec3(def["position"]);
 			if (!lightDef["direction"].is_null())
 				light.direction = toVec3(lightDef["direction"]);
-			if (!lightDef["attenuation"].is_null())
-				light.attenuation = toVec3(lightDef["attenuation"]);
 			if (!lightDef["distance"].is_null())
 				light.distance = lightDef["distance"].number_value();
+			if (!lightDef["decay"].is_null())
+				light.decay = lightDef["decay"].number_value();
 		}
 
 		if (def["geometry"].is_null())

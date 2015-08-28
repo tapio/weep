@@ -29,7 +29,7 @@ struct UniformLightData {
 	vec3 color; float pad1;
 	vec3 position; float pad2;
 	vec3 direction; float pad3;
-	vec3 params; float pad4;
+	vec4 params;
 };
 
 UBO_PREFIX(2) UniformLightBlock {
