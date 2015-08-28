@@ -6,6 +6,8 @@
 	},
 	"renderer": {
 		"gldebug": true,
+		"vsync": false,
 		"msaa": 8
-	}
+	},
+	"moddir": "../example/"
 }

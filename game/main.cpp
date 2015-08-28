@@ -65,6 +65,10 @@ int main(int, char*[])
 					renderer.toggleWireframe();
 					continue;
 				}
+				else if (keysym.sym == SDLK_F3) {
+					Engine::vsync(!Engine::vsync());
+					continue;
+				}
 			}
 
 			if (e.type == SDL_MOUSEBUTTONDOWN && !active) {

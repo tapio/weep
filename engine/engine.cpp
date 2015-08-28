@@ -67,6 +67,8 @@ void Engine::init(const string& configPath)
 		panic(SDL_GetError());
 	}
 
+	vsync(settings["rendering"]["vsync"].bool_value());
+
 	int major, minor;
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
@@ -86,6 +88,18 @@ void Engine::swap()
 	Uint64 curTime = SDL_GetPerformanceCounter();
 	dt = (curTime - prevTime) / (float)SDL_GetPerformanceFrequency();
 	prevTime = curTime;
+}
+
+void Engine::vsync(bool enable)
+{
+	if (SDL_GL_SetSwapInterval(enable ? 1 : 0))
+		logError("V-sync %s failed: %s", enable ? "enabling" : "disabling", SDL_GetError());
+	else logInfo("V-sync %s", enable ? "enabled" : "disabled");
+}
+
+bool Engine::vsync()
+{
+	return SDL_GL_GetSwapInterval() != 0;
 }
 
 int Engine::width()
