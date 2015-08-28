@@ -105,4 +105,7 @@ void main()
 	}
 
 	fragment = vec4(ambientComp + diffuseComp + specularComp, 1.0);
+
+	// Gamma correction
+	fragment.rgb = pow(fragment.rgb, vec3(1.0 / 2.2));
 }

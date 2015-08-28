@@ -3,6 +3,7 @@
 
 namespace {
 	static uint formats[] = { 0, GL_RED, GL_RG, GL_RGB, GL_RGBA };
+	static uint formats_sRGB[] = { 0, 0, 0, GL_SRGB, GL_SRGB8_ALPHA8 };
 }
 
 void Texture::create()
@@ -14,7 +15,8 @@ void Texture::create()
 void Texture::upload(Image& image)
 {
 	glBindTexture(GL_TEXTURE_2D, id);
-	glTexImage2D(GL_TEXTURE_2D, 0, formats[image.channels], image.width, image.height,
+	uint internalFormat = image.srgb ? formats_sRGB[image.channels] : formats[image.channels];
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.width, image.height,
 		0, formats[image.channels], GL_UNSIGNED_BYTE, &image.data.front());
 	update();
 	if (minFilter == GL_LINEAR_MIPMAP_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST

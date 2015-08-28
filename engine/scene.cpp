@@ -2,6 +2,7 @@
 #include "material.hpp"
 #include "geometry.hpp"
 #include "resources.hpp"
+#include "image.hpp"
 
 namespace {
 	vec3 toVec3(const Json& arr) {
@@ -82,12 +83,16 @@ void Scene::load(const string& path, Resources& resources)
 			if (!materialDef["shininess"].is_null())
 				model.material->shininess = materialDef["shininess"].number_value();
 
-			if (!materialDef["diffuseMap"].is_null())
+			if (!materialDef["diffuseMap"].is_null()) {
 				model.material->map[Material::DIFFUSE_MAP] = resources.getImage(materialDef["diffuseMap"].string_value());
+				model.material->map[Material::DIFFUSE_MAP]->srgb = true;
+			}
 			if (!materialDef["normalMap"].is_null())
 				model.material->map[Material::NORMAL_MAP] = resources.getImage(materialDef["normalMap"].string_value());
-			if (!materialDef["specularMap"].is_null())
+			if (!materialDef["specularMap"].is_null()) {
 				model.material->map[Material::SPECULAR_MAP] = resources.getImage(materialDef["specularMap"].string_value());
+				model.material->map[Material::SPECULAR_MAP]->srgb = true;
+			}
 			if (!materialDef["heightMap"].is_null())
 				model.material->map[Material::HEIGHT_MAP] = resources.getImage(materialDef["heightMap"].string_value());
 			model.material->shaderName = materialDef["shaderName"].string_value();
