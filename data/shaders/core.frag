@@ -11,6 +11,8 @@ in VertexData {
 
 layout(location = 0) out vec4 fragment;
 
+#define PI 3.14159265
+
 void main()
 {
 	// Accumulators
@@ -18,7 +20,7 @@ void main()
 	vec3 diffuseComp = vec3(0);
 	vec3 specularComp = vec3(0);
 
-	vec3 norm = normalize(input.normal);
+	vec3 normal = normalize(input.normal);
 	vec3 viewDir = normalize(cameraPosition - input.fragPosition);
 
 #ifdef ENABLE_DIFFUSE_MAP
@@ -48,14 +50,21 @@ void main()
 
 		// Diffuse
 #ifdef ENABLE_DIFFUSE
-		float diff = max(dot(norm, lightDir), 0.0);
+		float diff = max(dot(normal, lightDir), 0.0);
 		diffuseComp += attenuation * diff * material.diffuse * light.color * diffuseTex.rgb;
 #endif
 
 		// Specular
 #ifdef ENABLE_SPECULAR
-		vec3 reflectDir = reflect(-lightDir, norm);
-		float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+#ifdef ENABLE_PHONG
+		const float energy = (2.0 + material.shininess) / (2.0 * PI);
+		vec3 reflectDir = reflect(-lightDir, normal);
+		float spec = energy * pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+#else // Blinn-Phong
+		const float energy = (8.0 + material.shininess) / (8.0 * PI);
+		vec3 halfDir = normalize(lightDir + viewDir);
+		float spec = energy * pow(max(dot(normal, halfDir), 0.0), material.shininess);
+#endif
 		specularComp += attenuation * spec * material.specular * light.color * specularTex.rgb;
 #endif
 	}
