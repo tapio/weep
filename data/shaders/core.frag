@@ -1,33 +1,4 @@
 
-#define MAX_LIGHTS 4
-
-layout(binding = 0, std140) uniform CommonBlock {
-	mat4 modelMatrix;
-	mat4 modelViewMatrix;
-	mat4 projectionMatrix;
-	mat4 viewMatrix;
-	mat4 normalMatrix; // Problems with alignment if sent as mat3
-	vec3 cameraPosition; float numLights;
-};
-
-layout(binding = 1, std140) uniform ColorBlock {
-	vec3 ambient; float pad1;
-	vec3 diffuse; float pad2;
-	vec3 specular; float pad3;
-	float shininess;
-} material;
-
-struct LightData {
-	vec3 color; float pad1;
-	vec3 position; float pad2;
-	vec3 direction; float pad3;
-	vec3 params; float pad4;
-};
-
-layout(binding = 2, std140) uniform LightBlock {
-	LightData lights[MAX_LIGHTS];
-};
-
 layout(binding = 10) uniform sampler2D diffuseMap;
 layout(binding = 11) uniform sampler2D normalMap;
 layout(binding = 12) uniform sampler2D specularMap;
@@ -66,7 +37,7 @@ void main()
 	const int count = min(int(numLights), MAX_LIGHTS);
 	for (int i = 0; i < count; ++i)
 	{
-		LightData light = lights[i];
+		UniformLightData light = lights[i];
 
 		// Attenuation
 		float distance = length(light.position - input.fragPosition);

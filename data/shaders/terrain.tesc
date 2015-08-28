@@ -1,15 +1,6 @@
 
 layout(vertices = 3) out;
 
-layout(binding = 0, std140) uniform CommonBlock {
-	mat4 modelMatrix;
-	mat4 modelViewMatrix;
-	mat4 projectionMatrix;
-	mat4 viewMatrix;
-	mat4 normalMatrix; // Problems with alignment if sent as mat3
-	vec3 cameraPosition; float pad1;
-};
-
 in VertexData {
 	vec3 position;
 	vec2 texcoord;

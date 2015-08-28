@@ -61,7 +61,8 @@ void RenderDevice::loadShaders()
 		else defineText =
 			"#version 330\n"
 			"#extension GL_ARB_shading_language_420pack : enable\n"
-			"#extension GL_ARB_explicit_uniform_location : enable\n";
+			"#extension GL_ARB_explicit_uniform_location : enable\n"
+			"\n";
 
 		const Json& defines = it.second["defines"];
 		if (!defines.is_null()) {
@@ -72,6 +73,9 @@ void RenderDevice::loadShaders()
 				defineText += "#define " + def.string_value() + " 1\n";
 			}
 		}
+
+		defineText += m_resources.getText("shaders/uniforms.glsl");
+		defineText += "#line 1 1";
 
 		file = shaderFiles["vert"].string_value();
 		if (!file.empty()) program.compile(VERTEX_SHADER, m_resources.getText(file), defineText);
@@ -203,14 +207,14 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 	m_commonBlock.uniforms.cameraPosition = camera.position;
 
 	if (!lights.empty()) {
-		uint numLights = std::min((uint)lights.size(), MAX_LIGHTS);
+		uint numLights = std::min((int)lights.size(), MAX_LIGHTS);
 		m_commonBlock.uniforms.numLights = numLights;
 		for (uint i = 0; i < numLights; i++) {
 			const Light& light = lights[i];
-			m_lightBlock.uniformArray[i].color = light.color;
-			m_lightBlock.uniformArray[i].position = light.position;
-			m_lightBlock.uniformArray[i].direction = light.direction;
-			m_lightBlock.uniformArray[i].params = light.attenuation;
+			m_lightBlock.uniforms.lights[i].color = light.color;
+			m_lightBlock.uniforms.lights[i].position = light.position;
+			m_lightBlock.uniforms.lights[i].direction = light.direction;
+			m_lightBlock.uniforms.lights[i].params = light.attenuation;
 		}
 		m_lightBlock.upload();
 	}

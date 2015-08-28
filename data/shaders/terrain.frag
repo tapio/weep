@@ -1,11 +1,4 @@
 
-layout(binding = 1, std140) uniform ColorBlock {
-	vec3 ambient; float pad1;
-	vec3 diffuse; float pad2;
-	vec3 specular; float pad3;
-	float shininess;
-} material;
-
 layout(location = 0) uniform sampler2D diffuseMap;
 
 in TessEvalData {
