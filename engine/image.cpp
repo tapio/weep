@@ -14,7 +14,7 @@ bool Image::load(const std::string& path, int forceChannels)
 		logError("Failed to load image %s", path.c_str());
 		return false;
 	} else if (forceChannels && channels != forceChannels) {
-		logWarning("Image %s has %d channels but %d was requested", path.c_str(), channels, forceChannels);
+		//logDebug("Image %s has %d channels but %d was requested", path.c_str(), channels, forceChannels);
 		channels = forceChannels;
 	}
 	unsigned n = width * height * channels;
