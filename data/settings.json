@@ -9,5 +9,5 @@
 		"vsync": false,
 		"msaa": 8
 	},
-	"moddir": "../example/"
+	"moddir": "../weep-media/"
 }
