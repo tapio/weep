@@ -2,6 +2,7 @@
 layout(binding = 10) uniform sampler2D diffuseMap;
 layout(binding = 11) uniform sampler2D normalMap;
 layout(binding = 12) uniform sampler2D specularMap;
+layout(binding = 13) uniform sampler2D heightMap;
 
 in VertexData {
 	vec2 texcoord;
@@ -35,12 +36,12 @@ mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv)
 	return mat3(T * invmax, B * invmax, N);
 }
 
-vec3 perturb_normal(vec3 normal, vec3 eye)
+vec3 perturb_normal(vec3 normal, vec3 eye, vec2 texcoord)
 {
-	vec3 normalTex = texture(normalMap, input.texcoord).xyz * 2.0 - 1.0;
+	vec3 normalTex = texture(normalMap, texcoord).xyz * 2.0 - 1.0;
 	normalTex.y = -normalTex.y;
 	normalTex.xy *= 2.0; // TODO: Scale
-	mat3 TBN = cotangent_frame(normal, -eye, input.texcoord);
+	mat3 TBN = cotangent_frame(normal, -eye, texcoord);
 	return normalize(TBN * normalTex);
 }
 
@@ -52,20 +53,26 @@ void main()
 	vec3 specularComp = vec3(0);
 
 	vec3 viewDir = normalize(cameraPosition - input.fragPosition);
+
+	vec2 texcoord = input.texcoord;
+#ifdef USE_PARALLAX_MAPPING
+
+#endif
+
 	vec3 normal = normalize(input.normal);
 #ifdef USE_NORMAL_MAP
-	normal = perturb_normal(normal, viewDir);
+	normal = perturb_normal(normal, viewDir, texcoord);
 #endif
 
 #ifdef USE_DIFFUSE_MAP
-	vec4 diffuseTex = texture(diffuseMap, input.texcoord);
+	vec4 diffuseTex = texture(diffuseMap, texcoord);
 	ambientComp *= diffuseTex.rgb;
 #else
 	vec4 diffuseTex = vec4(1.0);
 #endif
 
 #ifdef USE_SPECULAR_MAP
-	vec4 specularTex = texture(specularMap, input.texcoord);
+	vec4 specularTex = texture(specularMap, texcoord);
 #else
 	vec4 specularTex = vec4(1.0);
 #endif
