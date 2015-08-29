@@ -30,6 +30,12 @@ void Controller::update(float dt)
 	if (keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT])
 		input *= fast;
 
-	vec3 dir = rotation * input;
-	position += dir * dt * speed;
+	rotation = quat();
+	rotation = glm::rotate(rotation, glm::radians(angles.y), yaxis);
+	rotation = glm::rotate(rotation, glm::radians(angles.x), xaxis);
+
+	if (dot(input, input) > 0.001) {
+		vec3 dir = rotation * input;
+		position += dir * speed * dt;
+	}
 }

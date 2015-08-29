@@ -80,8 +80,8 @@ int main(int, char*[])
 				Engine::grabMouse(false);
 			}
 			else if (e.type == SDL_MOUSEMOTION && active) {
-				controller.rotation = glm::rotate(controller.rotation, -0.005f * e.motion.xrel, yaxis);
-				controller.rotation = glm::rotate(controller.rotation, -0.005f * e.motion.yrel, xaxis);
+				controller.angles.x += -0.05f * e.motion.yrel;
+				controller.angles.y += -0.05f * e.motion.xrel;
 			}
 		}
 
