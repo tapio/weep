@@ -19,7 +19,7 @@
 	"objects": [
 	{
 		"material": {
-			"shaderName": "specularmap",
+			"shaderName": "nsmap",
 			"diffuseMap": "debug/uvtestgrid.png",
 			"specularMap": "debug/uvtestgrid_specular.png",
 			"normalMap": "debug/uvtestgrid_normal.png",
@@ -104,7 +104,8 @@
 		"prefab": "testcube",
 		"material": {
 			"shaderName": "parallax",
-			"heightMap": "debug/uvtestgrid_height.png"
+			"heightMap": "debug/uvtestgrid_height.png",
+			"ambient": 0.02
 		},
 		"position": [ -3, 0, -14 ],
 		"scale": 0.5

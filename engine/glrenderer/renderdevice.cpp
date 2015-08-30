@@ -249,8 +249,9 @@ void RenderDevice::render(Model& model)
 	m_colorBlock.uniforms.shininess = mat.shininess;
 	m_colorBlock.upload();
 	m_commonBlock.uniforms.modelMatrix = model.transform;
-	m_commonBlock.uniforms.modelViewMatrix = m_commonBlock.uniforms.viewMatrix * m_commonBlock.uniforms.modelMatrix;
-	m_commonBlock.uniforms.normalMatrix = glm::inverseTranspose(model.transform);
+	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_commonBlock.uniforms.modelMatrix;
+	m_commonBlock.uniforms.modelViewMatrix = modelView;
+	m_commonBlock.uniforms.normalMatrix = glm::inverseTranspose(modelView);
 	m_commonBlock.upload();
 	for (uint i = 0; i < mat.map.size(); ++i) {
 		uint tex = mat.tex[i];

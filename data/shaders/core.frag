@@ -48,7 +48,7 @@ vec3 perturb_normal(vec3 normal, vec3 eye, vec2 texcoord)
 
 vec2 parallax_mapping(vec2 texcoord, vec3 viewDir)
 {
-	const float heightScale = 0.4; // TODO: Uniform
+	const float heightScale = 0.2; // TODO: Uniform
 	// number of depth layers
 	const float minLayers = 8;
 	const float maxLayers = 32;
@@ -63,14 +63,14 @@ vec2 parallax_mapping(vec2 texcoord, vec3 viewDir)
 
 	// get initial values
 	vec2  currentTexCoords = texcoord;
-	float currentDepthMapValue = texture(heightMap, currentTexCoords).r;
+	float currentDepthMapValue = 1.0 - texture(heightMap, currentTexCoords).r;
 
 	while(currentLayerDepth < currentDepthMapValue)
 	{
 		// shift texture coordinates along direction of P
 		currentTexCoords -= deltaTexCoords;
 		// get depthmap value at current texture coordinates
-		currentDepthMapValue = texture(heightMap, currentTexCoords).r;
+		currentDepthMapValue = 1.0 - texture(heightMap, currentTexCoords).r;
 		// get depth of next layer
 		currentLayerDepth += layerDepth;
 	}
@@ -99,15 +99,14 @@ void main()
 	vec3 specularComp = vec3(0);
 	vec3 emissionComp = vec3(0);
 
-	vec3 viewDir = normalize(cameraPosition - input.fragPosition);
+	vec3 viewDir = normalize(-input.fragPosition);
 	vec3 normal = normalize(input.normal);
 	vec2 texcoord = input.texcoord;
 
 #ifdef USE_PARALLAX_MAP
 	mat3 TBN = cotangent_frame(normal, -viewDir, texcoord);
-	vec3 tangentViewPos = TBN * cameraPosition;
 	vec3 tangentFragPos = TBN * input.fragPosition;
-	vec3 tangentViewDir = normalize(tangentViewPos - tangentFragPos);
+	vec3 tangentViewDir = normalize(-tangentFragPos);
 	texcoord = parallax_mapping(texcoord, tangentViewDir);
 	//if (texcoord.x > 1.0 || texcoord.y > 1.0 || texcoord.x < 0.0 || texcoord.y < 0.0)
 	//	discard;
@@ -138,14 +137,15 @@ void main()
 	for (int i = 0; i < count; ++i)
 	{
 		UniformLightData light = lights[i];
+		vec3 lightPos = (viewMatrix * vec4(light.position, 1.0)).xyz;
 
 		// Attenuation
-		float distance = length(light.position - input.fragPosition);
+		float distance = length(lightPos - input.fragPosition);
 		if (distance >= light.params.x)
 			continue;
 		float attenuation = pow(saturate(1.0 - distance / light.params.x), light.params.y);
 
-		vec3 lightDir = normalize(light.position - input.fragPosition);
+		vec3 lightDir = normalize(lightPos - input.fragPosition);
 
 		// Diffuse
 #ifdef USE_DIFFUSE

@@ -13,7 +13,7 @@ void main()
 {
 	output.texcoord = texcoord;
 	output.normal = mat3(normalMatrix) * normal;
-	output.fragPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+	output.fragPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
 
