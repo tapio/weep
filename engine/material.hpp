@@ -12,11 +12,17 @@ struct Material
 	float shininess = 32.0f;
 
 	enum MapTypes {
-		DIFFUSE_MAP, NORMAL_MAP, SPECULAR_MAP, HEIGHT_MAP, EMISSION_MAP, MAX_MAPS
+		DIFFUSE_MAP,
+		NORMAL_MAP,
+		SPECULAR_MAP,
+		HEIGHT_MAP,
+		EMISSION_MAP,
+		REFLECTION_MAP,
+		MAX_MAPS
 	};
 
-	std::vector<Image*> map = { nullptr, nullptr, nullptr, nullptr, nullptr };
-	std::vector<uint> tex = { 0, 0, 0, 0, 0 };
+	std::vector<Image*> map = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+	std::vector<uint> tex = { 0, 0, 0, 0, 0, 0 };
 
 	bool tessellate = false;
 	string shaderName = "";

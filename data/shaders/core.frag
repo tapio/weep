@@ -1,10 +1,4 @@
 
-layout(binding = 10) uniform sampler2D diffuseMap;
-layout(binding = 11) uniform sampler2D normalMap;
-layout(binding = 12) uniform sampler2D specularMap;
-layout(binding = 13) uniform sampler2D heightMap;
-layout(binding = 14) uniform sampler2D emissionMap;
-
 in VertexData {
 	vec2 texcoord;
 	vec3 normal;
@@ -17,6 +11,7 @@ layout(location = 0) out vec4 fragment;
 #define PI 3.14159265
 #define saturate(x) clamp(x, 0.0, 1.0)
 
+#if defined(USE_NORMAL_MAP) || defined(USE_PARALLAX_MAP)
 // http://www.thetenthplanet.de/archives/1180
 mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv)
 {
@@ -36,7 +31,9 @@ mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv)
 	float invmax = inversesqrt(max(dot(T, T), dot(B, B)));
 	return mat3(T * invmax, B * invmax, N);
 }
+#endif
 
+#ifdef USE_NORMAL_MAP
 vec3 perturb_normal(mat3 TBN, vec2 texcoord)
 {
 	vec3 normalTex = texture(normalMap, texcoord).xyz * 2.0 - 1.0;
@@ -44,7 +41,9 @@ vec3 perturb_normal(mat3 TBN, vec2 texcoord)
 	normalTex.xy *= 2.0; // TODO: Uniform
 	return normalize(TBN * normalTex);
 }
+#endif
 
+#ifdef USE_PARALLAX_MAP
 vec2 parallax_mapping(vec2 texcoord, vec3 viewDir)
 {
 	const float heightScale = 0.2; // TODO: Uniform
@@ -88,6 +87,7 @@ vec2 parallax_mapping(vec2 texcoord, vec3 viewDir)
 
 	return finalTexCoords;
 }
+#endif
 
 
 void main()

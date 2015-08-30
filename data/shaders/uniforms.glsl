@@ -39,3 +39,29 @@ UBO_PREFIX(UniformLightBlock, 3)
 };
 
 #undef UBO_PREFIX
+
+#ifndef __cplusplus
+
+#ifdef USE_DIFFUSE_MAP
+layout(binding = 10) uniform sampler2D diffuseMap;
+#endif
+#ifdef USE_NORMAL_MAP
+layout(binding = 11) uniform sampler2D normalMap;
+#endif
+#ifdef USE_SPECULAR_MAP
+layout(binding = 12) uniform sampler2D specularMap;
+#endif
+#ifdef USE_PARALLAX_MAP
+layout(binding = 13) uniform sampler2D heightMap;
+#endif
+#ifdef USE_EMISSION_MAP
+layout(binding = 14) uniform sampler2D emissionMap;
+#endif
+#ifdef USE_REFLECTION_MAP
+layout(binding = 15) uniform sampler2D reflectionMap;
+#endif
+#ifdef USE_ENV_MAP
+layout(binding = 16) uniform sampler2D envMap;
+#endif
+
+#endif // __cplusplus
