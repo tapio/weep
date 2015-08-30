@@ -64,6 +64,20 @@
 			"frag": "shaders/core.frag"
 		}
 	},
+	"parallax": {
+		"defines": [
+			"USE_DIFFUSE",
+			"USE_SPECULAR",
+			"USE_DIFFUSE_MAP",
+			"USE_SPECULAR_MAPXXX",
+			"USE_NORMAL_MAPXXX",
+			"USE_PARALLAX_MAP"
+		],
+		"shaders" : {
+			"vert": "shaders/core.vert",
+			"frag": "shaders/core.frag"
+		}
+	},
 	"terrain_tess": {
 		"version": "430",
 		"shaders" : {

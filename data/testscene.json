@@ -100,5 +100,13 @@
 		},
 		"position": [ -5, 0, -10 ],
 		"scale": 0.5
+	},{
+		"prefab": "testcube",
+		"material": {
+			"shaderName": "parallax",
+			"heightMap": "debug/uvtestgrid_height.png"
+		},
+		"position": [ -3, 0, -14 ],
+		"scale": 0.5
 	}
 ]}
