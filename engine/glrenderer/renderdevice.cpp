@@ -9,7 +9,7 @@
 #include "light.hpp"
 #include "resources.hpp"
 
-static GLenum s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_NOTIFICATION;
+static GLenum s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
 
 static void debugCallback(GLenum /*source*/, GLenum /*type*/, GLuint /*id*/, GLenum severity, GLsizei /*length*/, const GLchar* msg, const void* /*data*/)
 {
@@ -25,9 +25,9 @@ RenderDevice::RenderDevice(Resources& resources)
 	logInfo("OpenGL Version:  %s", glGetString(GL_VERSION));
 	logInfo("GLSL Version:    %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-	if (Engine::settings["renderer"]["gldebug"].bool_value())
-		s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_NOTIFICATION;
-	else s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
+	//if (Engine::settings["renderer"]["gldebug"].bool_value())
+	//	s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_NOTIFICATION;
+	//else s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
 	glDebugMessageCallback(debugCallback, NULL);
 
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &caps.maxAnisotropy);
