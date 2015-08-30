@@ -2,31 +2,32 @@
 layout(vertices = 3) out;
 
 in VertexData {
-	vec3 position;
 	vec2 texcoord;
 	vec3 normal;
+	vec3 fragPosition;
 } inp[];
 
-out TessCtrlData {
-	vec3 position;
+out VertexData {
 	vec2 texcoord;
 	vec3 normal;
-	float curvature;
+	vec3 fragPosition;
 } outp[];
+
+out float curvature[];
 
 #define ID gl_InvocationID
 
-const float tessLevel = 2;
+const float tessLevel = 8;
 
 void main()
 {
-	outp[ID].position = inp[ID].position;
+	outp[ID].fragPosition = inp[ID].fragPosition;
 	outp[ID].texcoord = inp[ID].texcoord;
 	outp[ID].normal = inp[ID].normal;
 
 	// Calculate curvature factors for each edge
 	// Uses the angles between the corner normals of the patch
-	outp[ID].curvature = 1.0 - dot(normalize(inp[ID].normal), normalize(inp[(ID+1)%3].normal));
+	curvature[ID] = 1.0 - dot(normalize(inp[ID].normal), normalize(inp[(ID+1)%3].normal));
 
 	if (ID == 0) {
 		// Set tessellation levels
