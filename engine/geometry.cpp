@@ -49,9 +49,11 @@ Geometry::Geometry(const string& path)
 					break;
 				}
 				std::vector<std::string> indices = split(tempst, '/');
-				if (indices.size() != 3) {
+				if (indices.size() == 0 || indices.size() > 3) {
 					logError("Invalid face definition in %s:%d", path.c_str(), lineNumber);
 					continue;
+				} else if (indices.size() < 3) {
+					indices.resize(3);
 				}
 				// Vertex indices are 1-based in the file
 				if (i <= 3) {
@@ -84,6 +86,10 @@ Geometry::Geometry(const string& path)
 	}
 	calculateBoundingSphere();
 	calculateBoundingBox();
+	logDebug("Loaded mesh %s, vert/uv/n: %d/%d/%d, bound r: %f",
+		path.c_str(), positions.size(), texcoords.size(), normals.size(), boundingRadius);
+	if (normals.empty())
+		calculateNormals();
 	setupAttributes();
 }
 
@@ -225,6 +231,7 @@ void Geometry::calculateNormals()
 		normalizeNormals();
 	// Non-indexed elements
 	} else {
+		normals.resize(positions.size());
 		for (uint i = 0, len = positions.size(); i < len; i += 3) {
 			vec3 normal = glm::triangleNormal(positions[i], positions[i+1], positions[i+2]);
 			normals[i+0] = normal;
