@@ -10,7 +10,7 @@ public:
 	vec3& position;
 	quat& rotation;
 
-	vec3 angles = vec3(0, -90, 0);
+	vec3 angles = vec3(0, 0, 0);
 
 	float speed = 2.0f;
 	float fast = 4.0f;
