@@ -49,6 +49,7 @@ private:
 
 	uint m_program = 0;
 	UBO<UniformCommonBlock> m_commonBlock;
+	UBO<UniformObjectBlock> m_objectBlock;
 	UBO<UniformColorBlock> m_colorBlock;
 	UBO<UniformLightBlock> m_lightBlock;
 	std::vector<ShaderProgram> m_shaders;

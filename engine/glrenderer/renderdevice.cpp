@@ -40,6 +40,7 @@ RenderDevice::RenderDevice(Resources& resources)
 	loadShaders();
 
 	m_commonBlock.create();
+	m_objectBlock.create();
 	m_colorBlock.create();
 	m_lightBlock.create();
 }
@@ -112,6 +113,7 @@ void RenderDevice::loadShaders()
 RenderDevice::~RenderDevice()
 {
 	m_commonBlock.destroy();
+	m_objectBlock.destroy();
 	m_colorBlock.destroy();
 	m_lightBlock.destroy();
 }
@@ -224,6 +226,7 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 		}
 		m_lightBlock.upload();
 	}
+	m_commonBlock.upload();
 }
 
 void RenderDevice::render(Model& model)
@@ -248,11 +251,11 @@ void RenderDevice::render(Model& model)
 	m_colorBlock.uniforms.specular = mat.specular;
 	m_colorBlock.uniforms.shininess = mat.shininess;
 	m_colorBlock.upload();
-	m_commonBlock.uniforms.modelMatrix = model.transform;
-	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_commonBlock.uniforms.modelMatrix;
-	m_commonBlock.uniforms.modelViewMatrix = modelView;
-	m_commonBlock.uniforms.normalMatrix = glm::inverseTranspose(modelView);
-	m_commonBlock.upload();
+	m_objectBlock.uniforms.modelMatrix = model.transform;
+	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_objectBlock.uniforms.modelMatrix;
+	m_objectBlock.uniforms.modelViewMatrix = modelView;
+	m_objectBlock.uniforms.normalMatrix = glm::inverseTranspose(modelView);
+	m_objectBlock.upload();
 	for (uint i = 0; i < mat.map.size(); ++i) {
 		uint tex = mat.tex[i];
 		if (!tex) continue;
