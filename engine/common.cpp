@@ -1,6 +1,7 @@
 #include "common.hpp"
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <SDL2/SDL.h>
 
 string vlformat(const char* format, va_list vl)
@@ -73,7 +74,9 @@ void panic(const char* format, ...)
 string readFile(const string& path)
 {
 	std::ifstream f(path);
-	return std::string(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
+	std::stringstream buffer;
+	buffer << f.rdbuf();
+	return buffer.str();
 }
 
 string replace(string str, const string& search, const string& replace)

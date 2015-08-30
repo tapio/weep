@@ -2,6 +2,7 @@
 #include "image.hpp"
 #include "geometry.hpp"
 #include <fstream>
+#include <sstream>
 #include <algorithm>
 
 static bool fileExists(const string& path)
@@ -64,10 +65,11 @@ string Resources::getText(const string& path, CachePolicy cache)
 			return it->second;
 	}
 	std::ifstream f(findPath(path));
-	std::string text((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+	std::stringstream buffer;
+	buffer << f.rdbuf();
 	if (cache == USE_CACHE)
-		m_texts[path] = text;
-	return text;
+		m_texts[path] = buffer.str();
+	return buffer.str();
 }
 
 Image* Resources::getImage(const string& path)
