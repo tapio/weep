@@ -79,7 +79,7 @@ namespace {
 void Scene::load(const string& path, Resources& resources)
 {
 	std::string err;
-	Json jsonScene = Json::parse(resources.getText(path), err);
+	Json jsonScene = Json::parse(resources.getText(path, Resources::NO_CACHE), err);
 	if (!err.empty())
 		panic("Failed to read scene %s: %s", path.c_str(), err.c_str());
 

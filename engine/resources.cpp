@@ -28,6 +28,7 @@ Resources::~Resources()
 void Resources::reset()
 {
 	// Paths are not dropped
+	m_texts.clear();
 	m_images.clear();
 	m_geoms.clear();
 	logDebug("Resource cache dropped");
@@ -55,10 +56,18 @@ string Resources::findPath(const string& path) const
 	return "";
 }
 
-string Resources::getText(const string& path) const
+string Resources::getText(const string& path, CachePolicy cache)
 {
+	if (cache == USE_CACHE) {
+		auto it = m_texts.find(path);
+		if (it != m_texts.end())
+			return it->second;
+	}
 	std::ifstream f(findPath(path));
-	return std::string(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
+	std::string text((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+	if (cache == USE_CACHE)
+		m_texts[path] = text;
+	return text;
 }
 
 Image* Resources::getImage(const string& path)

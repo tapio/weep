@@ -49,7 +49,7 @@ void RenderDevice::loadShaders()
 	m_shaders.clear();
 	m_shaderNames.clear();
 	std::string err;
-	Json jsonShaders = Json::parse(m_resources.getText("shaders.json"), err);
+	Json jsonShaders = Json::parse(m_resources.getText("shaders.json", Resources::NO_CACHE), err);
 	if (!err.empty())
 		panic("Failed to read shader config: %s", err.c_str());
 
@@ -80,19 +80,19 @@ void RenderDevice::loadShaders()
 			}
 		}
 
-		defineText += m_resources.getText("shaders/uniforms.glsl");
+		defineText += m_resources.getText("shaders/uniforms.glsl", Resources::USE_CACHE);
 		defineText += "#line 1 1";
 
 		file = shaderFiles["vert"].string_value();
-		if (!file.empty()) program.compile(VERTEX_SHADER, m_resources.getText(file), defineText);
+		if (!file.empty()) program.compile(VERTEX_SHADER, m_resources.getText(file, Resources::USE_CACHE), defineText);
 		file = shaderFiles["frag"].string_value();
-		if (!file.empty()) program.compile(FRAGMENT_SHADER, m_resources.getText(file), defineText);
+		if (!file.empty()) program.compile(FRAGMENT_SHADER, m_resources.getText(file, Resources::USE_CACHE), defineText);
 		file = shaderFiles["geom"].string_value();
-		if (!file.empty()) program.compile(GEOMETRY_SHADER, m_resources.getText(file), defineText);
+		if (!file.empty()) program.compile(GEOMETRY_SHADER, m_resources.getText(file, Resources::USE_CACHE), defineText);
 		file = shaderFiles["tesc"].string_value();
-		if (!file.empty()) program.compile(TESS_CONTROL_SHADER, m_resources.getText(file), defineText);
+		if (!file.empty()) program.compile(TESS_CONTROL_SHADER, m_resources.getText(file, Resources::USE_CACHE), defineText);
 		file = shaderFiles["tese"].string_value();
-		if (!file.empty()) program.compile(TESS_EVALUATION_SHADER, m_resources.getText(file), defineText);
+		if (!file.empty()) program.compile(TESS_EVALUATION_SHADER, m_resources.getText(file, Resources::USE_CACHE), defineText);
 
 		if (!program.link())
 			continue;
