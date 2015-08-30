@@ -59,7 +59,7 @@ void RenderDevice::loadShaders()
 		if (it.second["version"].is_string())
 			defineText = "#version " + it.second["version"].string_value() + "\n";
 		else defineText =
-			"#version 330\n"
+			"#version 330 core\n"
 			"#extension GL_ARB_shading_language_420pack : enable\n"
 			"#extension GL_ARB_explicit_uniform_location : enable\n"
 			"\n";
