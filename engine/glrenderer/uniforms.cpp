@@ -2,11 +2,11 @@
 #include "glutil.hpp"
 
 template<typename T>
-void UBO<T>::create(uint binding)
+void UBO<T>::create()
 {
 	glGenBuffers(1, &id);
 	glBindBuffer(GL_UNIFORM_BUFFER, id);
-	glBindBufferBase(GL_UNIFORM_BUFFER, binding, id);
+	glBindBufferBase(GL_UNIFORM_BUFFER, uniforms.binding, id);
 	glBufferData(GL_UNIFORM_BUFFER, sizeof(uniforms), (const GLvoid*)&uniforms, GL_DYNAMIC_DRAW);
 }
 

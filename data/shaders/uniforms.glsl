@@ -2,14 +2,14 @@
 #define MAX_LIGHTS 4
 
 #ifdef __cplusplus
-#define UBO_PREFIX(bindpoint) struct
-#define UBO_SUFFIX(name)
+#define UBO_PREFIX(name, bindpoint) struct name { static const uint binding = bindpoint;
+#define UBO_SUFFIX(varname) };
 #else
-#define UBO_PREFIX(bindpoint) layout(binding = bindpoint, std140) uniform
-#define UBO_SUFFIX(name) name
+#define UBO_PREFIX(name, bindpoint) layout(binding = bindpoint, std140) uniform name {
+#define UBO_SUFFIX(varname) } varname;
 #endif
 
-UBO_PREFIX(0) UniformCommonBlock {
+UBO_PREFIX(UniformCommonBlock, 0)
 	mat4 modelMatrix;
 	mat4 modelViewMatrix;
 	mat4 projectionMatrix;
@@ -18,12 +18,12 @@ UBO_PREFIX(0) UniformCommonBlock {
 	vec3 cameraPosition; float numLights;
 };
 
-UBO_PREFIX(1) UniformColorBlock {
+UBO_PREFIX(UniformColorBlock, 1)
 	vec3 ambient; float pad1;
 	vec3 diffuse; float pad2;
 	vec3 specular; float pad3;
 	float shininess;
-} UBO_SUFFIX(material);
+UBO_SUFFIX(material)
 
 struct UniformLightData {
 	vec3 color; float pad1;
@@ -32,7 +32,7 @@ struct UniformLightData {
 	vec4 params;
 };
 
-UBO_PREFIX(2) UniformLightBlock {
+UBO_PREFIX(UniformLightBlock, 2)
 	UniformLightData lights[MAX_LIGHTS];
 };
 

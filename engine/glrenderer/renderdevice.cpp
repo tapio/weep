@@ -39,9 +39,9 @@ RenderDevice::RenderDevice(Resources& resources)
 
 	loadShaders();
 
-	m_commonBlock.create(0);
-	m_colorBlock.create(1);
-	m_lightBlock.create(2);
+	m_commonBlock.create();
+	m_colorBlock.create();
+	m_lightBlock.create();
 }
 
 void RenderDevice::loadShaders()

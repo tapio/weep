@@ -15,7 +15,7 @@ public:
 
 	UBO() {}
 
-	void create(uint binding);
+	void create();
 	void upload();
 	void destroy();
 };
