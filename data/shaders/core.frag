@@ -37,12 +37,11 @@ mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv)
 	return mat3(T * invmax, B * invmax, N);
 }
 
-vec3 perturb_normal(vec3 normal, vec3 eye, vec2 texcoord)
+vec3 perturb_normal(mat3 TBN, vec2 texcoord)
 {
 	vec3 normalTex = texture(normalMap, texcoord).xyz * 2.0 - 1.0;
 	normalTex.y = -normalTex.y;
 	normalTex.xy *= 2.0; // TODO: Uniform
-	mat3 TBN = cotangent_frame(normal, -eye, texcoord);
 	return normalize(TBN * normalTex);
 }
 
@@ -103,17 +102,19 @@ void main()
 	vec3 normal = normalize(input.normal);
 	vec2 texcoord = input.texcoord;
 
-#ifdef USE_PARALLAX_MAP
+#if defined(USE_NORMAL_MAP) || defined(USE_PARALLAX_MAP)
 	mat3 TBN = cotangent_frame(normal, -viewDir, texcoord);
-	vec3 tangentFragPos = TBN * input.fragPosition;
-	vec3 tangentViewDir = normalize(-tangentFragPos);
+#endif
+
+#ifdef USE_PARALLAX_MAP
+	vec3 tangentViewDir = normalize(TBN * viewDir);
 	texcoord = parallax_mapping(texcoord, tangentViewDir);
 	//if (texcoord.x > 1.0 || texcoord.y > 1.0 || texcoord.x < 0.0 || texcoord.y < 0.0)
 	//	discard;
 #endif
 
 #ifdef USE_NORMAL_MAP
-	normal = perturb_normal(normal, viewDir, texcoord);
+	normal = perturb_normal(TBN, texcoord);
 #endif
 
 #ifdef USE_DIFFUSE_MAP
