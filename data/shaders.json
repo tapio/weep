@@ -5,6 +5,14 @@
 			"frag": "shaders/normal.frag"
 		}
 	},
+	"color": {
+		"defines": [
+		],
+		"shaders" : {
+			"vert": "shaders/core.vert",
+			"frag": "shaders/core.frag"
+		}
+	},
 	"basic": {
 		"defines": [
 			"USE_DIFFUSE_MAP"

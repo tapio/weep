@@ -17,6 +17,7 @@ struct Model
 		transform *= glm::mat4_cast(rotation);
 	}
 
+	string name;
 	Geometry* geometry = nullptr;
 	std::shared_ptr<Material> material;
 };

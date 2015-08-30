@@ -1,5 +1,6 @@
 #include "engine.hpp"
 #include "scene.hpp"
+#include "material.hpp"
 #include "camera.hpp"
 #include "renderer.hpp"
 #include "resources.hpp"
@@ -96,9 +97,19 @@ int main(int, char*[])
 
 		controller.update(Engine::dt);
 
-		scene.getLights()[0].position.x = 5.f * glm::sin(SDL_GetTicks() / 800.f);
-		scene.getLights()[1].position.x = 4.f * glm::sin(SDL_GetTicks() / 500.f);
-		scene.getLights()[2].position.y = 1.f + 1.5f * glm::sin(SDL_GetTicks() / 1000.f);
+		auto& lights = scene.getLights();
+		lights[0].position.x = 5.f * glm::sin(SDL_GetTicks() / 800.f);
+		lights[1].position.x = 4.f * glm::sin(SDL_GetTicks() / 500.f);
+		lights[2].position.y = 1.f + 1.5f * glm::sin(SDL_GetTicks() / 1000.f);
+
+		for (uint i = 0; i < lights.size(); ++i) {
+			Model* model = scene.find("light_0" + std::to_string(i+1));
+			if (model) {
+				Light& light = lights[i];
+				model->position = light.position;
+				//model->material->ambient = light.color;
+			}
+		}
 
 		renderer.render(scene, camera);
 

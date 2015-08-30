@@ -73,6 +73,9 @@ namespace {
 			const Json& scaleDef = def["scale"];
 			model.scale = scaleDef.is_number() ? vec3(scaleDef.number_value()) : toVec3(scaleDef);
 		}
+
+		if (def["name"].is_string())
+			model.name = def["name"].string_value();
 	}
 }
 
@@ -149,4 +152,14 @@ void Scene::reset()
 	m_models.clear();
 	m_lights.clear();
 	m_prefabs.clear();
+}
+
+Model* Scene::find(const std::string& name)
+{
+	if (name.empty())
+		return nullptr;
+	for (uint i = 0, l = m_models.size(); i < l; ++i)
+		if (m_models[i].name == name)
+			return &m_models[i];
+	return nullptr;
 }

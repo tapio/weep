@@ -15,6 +15,8 @@ public:
 	std::vector<Model>& getChildren() { return m_models; }
 	std::vector<Light>& getLights() { return m_lights; }
 
+	Model* find(const string& name);
+
 private:
 	std::vector<Model> m_models;
 	std::vector<Light> m_lights;

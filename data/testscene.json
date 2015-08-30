@@ -6,6 +6,14 @@
 			},
 			"geometry": "debug/cube.obj"
 		},
+		"pointlight": {
+			"material": {
+				"shaderName": "color",
+				"ambient": 1.0
+			},
+			"geometry": "debug/sphere.obj",
+			"scale": 0.1
+		},
 		"testcube": {
 			"material": {
 				"shaderName": "nsmap",
@@ -34,6 +42,8 @@
 		"position": [ 0, -0.5, -10 ],
 		"scale": [ 0.1, 0.5, 0.1 ]
 	},{
+		"prefab": "pointlight",
+		"name": "light_01",
 		"light": {
 			"type": "point",
 			"color": [ 1.0, 1.0, 1.0 ],
@@ -42,6 +52,8 @@
 		},
 		"position": [ 0, 2, -15 ]
 	},{
+		"prefab": "pointlight",
+		"name": "light_02",
 		"light": {
 			"type": "point",
 			"color": [ 1.0, 1.0, 1.0 ],
@@ -50,6 +62,8 @@
 		},
 		"position": [ 0, 2, -6 ]
 	},{
+		"prefab": "pointlight",
+		"name": "light_03",
 		"light": {
 			"type": "point",
 			"color": [ 1.0, 0.0, 0.0 ],
