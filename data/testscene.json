@@ -67,7 +67,7 @@
 			"shaderName": "diffusemap",
 			"diffuse": [ 1, 0, 1 ]
 		},
-		"position": [ 5, -0.25, -12 ],
+		"position": [ 5, 0, -12 ],
 		"scale": 0.5
 	},{
 		"prefab": "testcube",
@@ -75,15 +75,14 @@
 			"shaderName": "specularmap",
 			"shininess": 48
 		},
-		"geometry": "debug/cube.obj",
-		"position": [ -5, -0.25, -12 ],
+		"position": [ -5, 0, -12 ],
 		"scale": 0.5
 	},{
 		"prefab": "cube",
 		"material": {
 			"shaderName": "normal"
 		},
-		"position": [ 3, -0.25, -5 ],
+		"position": [ 3, 0, -5 ],
 		"scale": 0.5
 	},{
 		"prefab": "cube",
@@ -91,7 +90,15 @@
 			"ambient": 1.0,
 			"diffuseMap": "debug/uvtestgrid.png"
 		},
-		"position": [ -3, -0.25, -5 ],
+		"position": [ -3, 0, -5 ],
+		"scale": 0.5
+	},{
+		"prefab": "testcube",
+		"material": {
+			"shaderName": "nsemap",
+			"emissionMap": "debug/uvtestgrid_emission.png"
+		},
+		"position": [ -5, 0, -10 ],
 		"scale": 0.5
 	}
 ]}

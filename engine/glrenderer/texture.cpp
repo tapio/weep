@@ -15,7 +15,7 @@ void Texture::create()
 void Texture::upload(Image& image)
 {
 	glBindTexture(GL_TEXTURE_2D, id);
-	uint internalFormat = image.srgb ? formats_sRGB[image.channels] : formats[image.channels];
+	uint internalFormat = image.sRGB ? formats_sRGB[image.channels] : formats[image.channels];
 	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.width, image.height,
 		0, formats[image.channels], GL_UNSIGNED_BYTE, &image.data.front());
 	update();

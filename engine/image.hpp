@@ -10,6 +10,6 @@ struct Image {
 	int width = 0;
 	int height = 0;
 	int channels = 0;
-	bool srgb = false;
+	bool sRGB = false;
 	std::vector<unsigned char> data;
 };

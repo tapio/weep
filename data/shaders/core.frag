@@ -3,6 +3,7 @@ layout(binding = 10) uniform sampler2D diffuseMap;
 layout(binding = 11) uniform sampler2D normalMap;
 layout(binding = 12) uniform sampler2D specularMap;
 layout(binding = 13) uniform sampler2D heightMap;
+layout(binding = 14) uniform sampler2D emissionMap;
 
 in VertexData {
 	vec2 texcoord;
@@ -51,6 +52,7 @@ void main()
 	vec3 ambientComp = material.ambient;
 	vec3 diffuseComp = vec3(0);
 	vec3 specularComp = vec3(0);
+	vec3 emissionComp = vec3(0);
 
 	vec3 viewDir = normalize(cameraPosition - input.fragPosition);
 
@@ -75,6 +77,10 @@ void main()
 	vec4 specularTex = texture(specularMap, texcoord);
 #else
 	vec4 specularTex = vec4(1.0);
+#endif
+
+#ifdef USE_EMISSION_MAP
+	emissionComp += texture(emissionMap, texcoord).rgb;
 #endif
 
 	const int count = min(int(numLights), MAX_LIGHTS);
@@ -111,7 +117,7 @@ void main()
 #endif
 	}
 
-	fragment = vec4(ambientComp + diffuseComp + specularComp, 1.0);
+	fragment = vec4(ambientComp + diffuseComp + specularComp + emissionComp, 1.0);
 
 	// Gamma correction
 	fragment.rgb = pow(fragment.rgb, vec3(1.0 / 2.2));

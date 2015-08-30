@@ -46,14 +46,18 @@ namespace {
 
 			if (!materialDef["diffuseMap"].is_null()) {
 				model.material->map[Material::DIFFUSE_MAP] = resources.getImage(materialDef["diffuseMap"].string_value());
-				model.material->map[Material::DIFFUSE_MAP]->srgb = true;
+				model.material->map[Material::DIFFUSE_MAP]->sRGB = true;
+			}
+			if (!materialDef["specularMap"].is_null()) {
+				model.material->map[Material::SPECULAR_MAP] = resources.getImage(materialDef["specularMap"].string_value());
+				model.material->map[Material::SPECULAR_MAP]->sRGB = true;
+			}
+			if (!materialDef["emissionMap"].is_null()) {
+				model.material->map[Material::EMISSION_MAP] = resources.getImage(materialDef["emissionMap"].string_value());
+				model.material->map[Material::EMISSION_MAP]->sRGB = true;
 			}
 			if (!materialDef["normalMap"].is_null())
 				model.material->map[Material::NORMAL_MAP] = resources.getImage(materialDef["normalMap"].string_value());
-			if (!materialDef["specularMap"].is_null()) {
-				model.material->map[Material::SPECULAR_MAP] = resources.getImage(materialDef["specularMap"].string_value());
-				model.material->map[Material::SPECULAR_MAP]->srgb = true;
-			}
 			if (!materialDef["heightMap"].is_null())
 				model.material->map[Material::HEIGHT_MAP] = resources.getImage(materialDef["heightMap"].string_value());
 		}
