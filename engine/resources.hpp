@@ -12,6 +12,7 @@ public:
 	void reset();
 
 	void addPath(const string& path);
+	void removePath(const string& path);
 	string findPath(const string& path) const;
 
 	string getText(const string& path) const; // Not cached

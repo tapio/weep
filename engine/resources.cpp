@@ -2,12 +2,20 @@
 #include "image.hpp"
 #include "geometry.hpp"
 #include <fstream>
+#include <algorithm>
 
 static bool fileExists(const string& path)
 {
 	std::ifstream f(path);
 	return f.good();
 }
+
+static string getCanonicalDir(const string& path)
+{
+	// TODO: Not portable
+	return path.back() == '/' ? path : (path + "/");
+}
+
 
 Resources::Resources()
 {
@@ -27,8 +35,12 @@ void Resources::reset()
 
 void Resources::addPath(const string& path)
 {
-	// TODO: Not portable
-	m_paths.insert(m_paths.begin(), path.back() == '/' ? path : (path + "/"));
+	m_paths.insert(m_paths.begin(), getCanonicalDir(path));
+}
+
+void Resources::removePath(const string& path)
+{
+	m_paths.erase(std::find(m_paths.begin(), m_paths.end(), getCanonicalDir(path)));
 }
 
 string Resources::findPath(const string& path) const

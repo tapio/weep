@@ -69,6 +69,15 @@ int main(int, char*[])
 					Engine::vsync(!Engine::vsync());
 					continue;
 				}
+				else if (keysym.sym == SDLK_F4) {
+					static bool removeModDir = true;
+					if (Engine::settings["moddir"].is_string()) {
+						if (removeModDir) resources.removePath(Engine::settings["moddir"].string_value());
+						else resources.addPath(Engine::settings["moddir"].string_value());
+						removeModDir = !removeModDir;
+					}
+					continue;
+				}
 			}
 
 			if (e.type == SDL_MOUSEBUTTONDOWN && !active) {
