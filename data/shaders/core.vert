@@ -7,13 +7,15 @@ out VertexData {
 	vec2 texcoord;
 	vec3 normal;
 	vec3 fragPosition;
-} output;
+} outData;
 
 void main()
 {
-	output.texcoord = texcoord;
-	output.normal = mat3(normalMatrix) * normal;
-	output.fragPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
+	outData.texcoord = texcoord;
+	outData.normal = mat3(normalMatrix) * normal;
+	outData.fragPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
+#ifndef USE_TESSELLATION
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+#endif
 }
 

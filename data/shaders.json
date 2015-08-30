@@ -89,15 +89,17 @@
 	"terrain_tess": {
 		"version": "430",
 		"defines": [
+			"USE_TESSELLATION",
 			"USE_DIFFUSE",
 			"USE_SPECULAR",
-			"USE_DIFFUSE_MAP"
+			"USE_DIFFUSE_MAP",
+			"USE_HEIGHT_MAP"
 		],
 		"shaders" : {
-			"vert": "shaders/terrain.vert",
+			"vert": "shaders/core.vert",
 			"tesc": "shaders/terrain.tesc",
 			"tese": "shaders/terrain.tese",
-			"frag": "shaders/terrain.frag"
+			"frag": "shaders/core.frag"
 		}
 	}
 }

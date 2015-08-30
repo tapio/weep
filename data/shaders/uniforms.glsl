@@ -51,7 +51,7 @@ layout(binding = 11) uniform sampler2D normalMap;
 #ifdef USE_SPECULAR_MAP
 layout(binding = 12) uniform sampler2D specularMap;
 #endif
-#ifdef USE_PARALLAX_MAP
+#if defined(USE_HEIGHT_MAP) || defined(USE_PARALLAX_MAP)
 layout(binding = 13) uniform sampler2D heightMap;
 #endif
 #ifdef USE_EMISSION_MAP
