@@ -1,6 +1,4 @@
 
-layout(location = 0) uniform sampler2D diffuseMap;
-
 in TessEvalData {
 	vec2 texcoord;
 	vec3 normal;

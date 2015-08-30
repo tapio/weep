@@ -88,6 +88,11 @@
 	},
 	"terrain_tess": {
 		"version": "430",
+		"defines": [
+			"USE_DIFFUSE",
+			"USE_SPECULAR",
+			"USE_DIFFUSE_MAP"
+		],
 		"shaders" : {
 			"vert": "shaders/terrain.vert",
 			"tesc": "shaders/terrain.tesc",
