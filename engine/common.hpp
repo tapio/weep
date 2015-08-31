@@ -28,6 +28,8 @@ using glm::mat3;
 using glm::mat4;
 using glm::quat;
 typedef unsigned uint;
+typedef uint64_t uint64;
+typedef int64_t int64;
 
 static const vec3 xaxis(1, 0, 0);
 static const vec3 yaxis(0, 1, 0);

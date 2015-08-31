@@ -3,6 +3,7 @@
 #include "geometry.hpp"
 #include "resources.hpp"
 #include "image.hpp"
+#include "engine.hpp"
 
 namespace {
 	vec3 toVec3(const Json& arr) {
@@ -81,6 +82,7 @@ namespace {
 
 void Scene::load(const string& path, Resources& resources)
 {
+	uint t0 = Engine::timems();
 	std::string err;
 	Json jsonScene = Json::parse(resources.getText(path, Resources::NO_CACHE), err);
 	if (!err.empty())
@@ -144,7 +146,8 @@ void Scene::load(const string& path, Resources& resources)
 		if (model)
 			parseModel(*model, def, resources);
 	}
-	logDebug("Loaded scene with %d models, %d lights", m_models.size(), m_lights.size());
+	uint t1 = Engine::timems();
+	logDebug("Loaded scene in %dms with %d models, %d lights", t1 - t0, m_models.size(), m_lights.size());
 }
 
 void Scene::reset()

@@ -98,9 +98,9 @@ int main(int, char*[])
 		controller.update(Engine::dt);
 
 		auto& lights = scene.getLights();
-		lights[0].position.x = 5.f * glm::sin(SDL_GetTicks() / 800.f);
-		lights[1].position.x = 4.f * glm::sin(SDL_GetTicks() / 500.f);
-		lights[2].position.y = 1.f + 1.5f * glm::sin(SDL_GetTicks() / 1000.f);
+		lights[0].position.x = 5.f * glm::sin(Engine::timems() / 800.f);
+		lights[1].position.x = 4.f * glm::sin(Engine::timems() / 500.f);
+		lights[2].position.y = 1.f + 1.5f * glm::sin(Engine::timems() / 1000.f);
 
 		for (uint i = 0; i < lights.size(); ++i) {
 			Model* model = scene.find("light_0" + std::to_string(i+1));

@@ -15,6 +15,8 @@ public:
 
 	static void grabMouse(bool grab);
 
+	static uint timems();
+
 	static float dt;
 	static Json settings;
 };

@@ -47,6 +47,7 @@ RenderDevice::RenderDevice(Resources& resources)
 
 void RenderDevice::loadShaders()
 {
+	uint t0 = Engine::timems();
 	m_shaders.clear();
 	m_shaderNames.clear();
 	std::string err;
@@ -108,6 +109,8 @@ void RenderDevice::loadShaders()
 			program.has(TESS_EVALUATION_SHADER)
 		);
 	}
+	uint t1 = Engine::timems();
+	logDebug("Loaded %d shaders in %dms", m_shaders.size(), t1 - t0);
 }
 
 RenderDevice::~RenderDevice()

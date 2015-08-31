@@ -8,7 +8,7 @@ namespace
 	static SDL_GLContext s_glcontext = nullptr;
 	static int s_width = 0;
 	static int s_height = 0;
-	static Uint64 prevTime = 0;
+	static uint64 prevTime = 0;
 }
 
 float Engine::dt = 0;
@@ -100,6 +100,11 @@ void Engine::vsync(bool enable)
 bool Engine::vsync()
 {
 	return SDL_GL_GetSwapInterval() != 0;
+}
+
+uint Engine::timems()
+{
+	return SDL_GetTicks();
 }
 
 int Engine::width()
