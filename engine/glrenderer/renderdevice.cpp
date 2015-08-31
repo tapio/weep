@@ -39,6 +39,45 @@ RenderDevice::RenderDevice(Resources& resources)
 
 	loadShaders();
 
+	GLfloat quadVertices[] = {
+		// Positions        // Texture Coords
+		-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+	};
+	// Setup plane VAO
+	glGenVertexArrays(1, &m_fullscreenQuad.vao);
+	glGenBuffers(1, &m_fullscreenQuad.vbo);
+	glBindVertexArray(m_fullscreenQuad.vao);
+	glBindBuffer(GL_ARRAY_BUFFER, m_fullscreenQuad.vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(ATTR_POSITION);
+	glVertexAttribPointer(ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(ATTR_TEXCOORD);
+	glVertexAttribPointer(ATTR_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glDisableVertexAttribArray(ATTR_NORMAL);
+
+	// Set up floating point framebuffer to render scene to
+	glGenFramebuffers(1, &m_fbo.fbo);
+	// Create floating point color buffer for HDR rendering
+	glGenTextures(1, &m_fbo.colorBuffer);
+	glBindTexture(GL_TEXTURE_2D, m_fbo.colorBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Engine::width(), Engine::height(), 0, GL_RGB, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// Create depth buffer (renderbuffer)
+	glGenRenderbuffers(1, &m_fbo.depthBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, m_fbo.depthBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, Engine::width(), Engine::height());
+	// Attach buffers
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo.fbo);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fbo.colorBuffer, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_fbo.depthBuffer);
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		logError("Framebuffer not complete!");
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	m_commonBlock.create();
 	m_objectBlock.create();
 	m_colorBlock.create();
@@ -83,7 +122,7 @@ void RenderDevice::loadShaders()
 		}
 
 		defineText += m_resources.getText("shaders/uniforms.glsl", Resources::USE_CACHE);
-		defineText += "#line 1 1";
+		defineText += "#line 1 1\n";
 
 		file = shaderFiles["vert"].string_value();
 		if (!file.empty()) program.compile(VERTEX_SHADER, m_resources.getText(file, Resources::USE_CACHE), defineText);
@@ -100,8 +139,9 @@ void RenderDevice::loadShaders()
 			continue;
 
 		m_shaderNames[it.first] = m_shaders.size() - 1;
-		logDebug("Shader \"%s\" initialized (shader mask: %d%d%d%d%d)",
+		logDebug("Shader \"%s\" initialized as %d (shader mask: %d%d%d%d%d)",
 			it.first.c_str(),
+			program.id,
 			program.has(VERTEX_SHADER),
 			program.has(FRAGMENT_SHADER),
 			program.has(GEOMETRY_SHADER),
@@ -115,6 +155,12 @@ void RenderDevice::loadShaders()
 
 RenderDevice::~RenderDevice()
 {
+	glDeleteRenderbuffers(1, &m_fbo.depthBuffer);
+	glDeleteTextures(1, &m_fbo.colorBuffer);
+	glDeleteFramebuffers(1, &m_fbo.fbo);
+
+	glDeleteBuffers(1, &m_fullscreenQuad.vbo);
+	glDeleteVertexArrays(1, &m_fullscreenQuad.vao);
 	m_commonBlock.destroy();
 	m_objectBlock.destroy();
 	m_colorBlock.destroy();
@@ -211,6 +257,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 
 void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lights)
 {
+	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo.fbo);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	stats = Stats();
 	m_program = 0;
@@ -282,9 +329,27 @@ void RenderDevice::render(Model& model)
 	glutil::checkGL("Post draw");
 }
 
+void RenderDevice::renderFullscreenQuad()
+{
+	glBindVertexArray(m_fullscreenQuad.vao);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	++stats.drawCalls;
+	stats.triangles += 2;
+	glBindVertexArray(0);
+}
+
 void RenderDevice::postRender()
 {
 	glBindVertexArray(0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glUseProgram(m_shaders[m_shaderNames["postfx"]].id);
+	++stats.programs;
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D, m_fbo.colorBuffer);
+	renderFullscreenQuad();
+
 	glUseProgram(0);
 	glutil::checkGL("Post render");
 }

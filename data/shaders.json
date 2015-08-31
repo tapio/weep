@@ -5,6 +5,15 @@
 			"frag": "shaders/missing.frag"
 		}
 	},
+	"postfx": {
+		"defines": [
+			"USE_DIFFUSE_MAP"
+		],
+		"shaders" : {
+			"vert": "shaders/postfx.vert",
+			"frag": "shaders/postfx.frag"
+		}
+	},
 	"normal": {
 		"shaders" : {
 			"vert": "shaders/normal.vert",

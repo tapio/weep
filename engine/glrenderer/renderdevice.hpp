@@ -47,7 +47,16 @@ private:
 		uint ebo = 0;
 	};
 
+	struct FBO {
+		uint fbo;
+		uint colorBuffer;
+		uint depthBuffer;
+	} m_fbo;
+
+	void renderFullscreenQuad();
+
 	uint m_program = 0;
+	GPUModel m_fullscreenQuad;
 	UBO<UniformCommonBlock> m_commonBlock;
 	UBO<UniformObjectBlock> m_objectBlock;
 	UBO<UniformColorBlock> m_colorBlock;
