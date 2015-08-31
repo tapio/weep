@@ -2,17 +2,17 @@
 layout(triangles, equal_spacing, ccw) in;
 
 in VertexData {
+	vec3 position;
 	vec2 texcoord;
 	vec3 normal;
-	vec3 fragPosition;
 } inp[];
 
 in float curvature[];
 
 out VertexData {
+	vec3 position;
 	vec2 texcoord;
 	vec3 normal;
-	vec3 fragPosition;
 } outp;
 
 #define tc gl_TessCoord
@@ -25,9 +25,9 @@ const float exaggeration = 0.3;
 void main()
 {
 	// Trivial point location
-	vec3 p0 = tc.x * inp[0].fragPosition;
-	vec3 p1 = tc.y * inp[1].fragPosition;
-	vec3 p2 = tc.z * inp[2].fragPosition;
+	vec3 p0 = tc.x * inp[0].position;
+	vec3 p1 = tc.y * inp[1].position;
+	vec3 p2 = tc.z * inp[2].position;
 	vec3 position = p0 + p1 + p2;
 
 	// Trivial texcoord
@@ -54,7 +54,7 @@ void main()
 	// Displace
 	position += exaggeration * f * outp.normal;
 
-	outp.fragPosition = position;
+	outp.position = position;
 
 	// Project
 	gl_Position = projectionMatrix * vec4(position, 1.0);

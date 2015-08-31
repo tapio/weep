@@ -4,16 +4,16 @@ layout(location = 1) in vec2 texcoord;
 layout(location = 2) in vec3 normal;
 
 out VertexData {
+	vec3 position;
 	vec2 texcoord;
 	vec3 normal;
-	vec3 fragPosition;
 } outData;
 
 void main()
 {
 	outData.texcoord = texcoord;
 	outData.normal = mat3(normalMatrix) * normal;
-	outData.fragPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
+	outData.position = (modelViewMatrix * vec4(position, 1.0)).xyz;
 #ifndef USE_TESSELLATION
 	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 #endif

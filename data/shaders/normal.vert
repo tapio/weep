@@ -4,6 +4,8 @@ layout(location = 1) in vec2 texcoord;
 layout(location = 2) in vec3 normal;
 
 out VertexData {
+	vec3 position;
+	vec2 texcoord;
 	vec3 normal;
 } output;
 

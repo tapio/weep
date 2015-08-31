@@ -1,8 +1,8 @@
 
 in VertexData {
+	vec3 position;
 	vec2 texcoord;
 	vec3 normal;
-	vec3 fragPosition;
 } input;
 
 layout(location = 0) out vec4 fragment;
@@ -98,7 +98,7 @@ void main()
 	vec3 specularComp = vec3(0);
 	vec3 emissionComp = vec3(0);
 
-	vec3 viewDir = normalize(-input.fragPosition);
+	vec3 viewDir = normalize(-input.position);
 	vec3 normal = normalize(input.normal);
 	vec2 texcoord = input.texcoord;
 
@@ -141,12 +141,12 @@ void main()
 		vec3 lightPos = (viewMatrix * vec4(light.position, 1.0)).xyz;
 
 		// Attenuation
-		float distance = length(lightPos - input.fragPosition);
+		float distance = length(lightPos - input.position);
 		if (distance >= light.params.x)
 			continue;
 		float attenuation = pow(saturate(1.0 - distance / light.params.x), light.params.y);
 
-		vec3 lightDir = normalize(lightPos - input.fragPosition);
+		vec3 lightDir = normalize(lightPos - input.position);
 
 		// Diffuse
 #ifdef USE_DIFFUSE

@@ -2,27 +2,27 @@
 layout(vertices = 3) out;
 
 in VertexData {
+	vec3 position;
 	vec2 texcoord;
 	vec3 normal;
-	vec3 fragPosition;
 } inp[];
 
-out TessCtrlData {
+out VertexData {
+	vec3 position;
 	vec2 texcoord;
 	vec3 normal;
-	vec3 fragPosition;
 } outp[];
 
 #define ID gl_InvocationID
 
 void main()
 {
-	outp[ID].fragPosition = inp[ID].fragPosition;
+	outp[ID].position = inp[ID].position;
 	outp[ID].texcoord = inp[ID].texcoord;
 	outp[ID].normal = inp[ID].normal;
 
 	if (ID == 0) {
-		float dist2 = dot(inp[0].fragPosition, inp[0].fragPosition);
+		float dist2 = dot(inp[0].position, inp[0].position);
 
 		float tessLevel = 1;
 		if (dist2 < 1 * 1) tessLevel = 8;

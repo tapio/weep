@@ -1,5 +1,7 @@
 
 in VertexData {
+	vec3 position;
+	vec2 texcoord;
 	vec3 normal;
 } input;
 

@@ -2,15 +2,15 @@
 layout(vertices = 3) out;
 
 in VertexData {
+	vec3 position;
 	vec2 texcoord;
 	vec3 normal;
-	vec3 fragPosition;
 } inp[];
 
 out VertexData {
+	vec3 position;
 	vec2 texcoord;
 	vec3 normal;
-	vec3 fragPosition;
 } outp[];
 
 out float curvature[];
@@ -21,7 +21,7 @@ const float tessLevel = 8;
 
 void main()
 {
-	outp[ID].fragPosition = inp[ID].fragPosition;
+	outp[ID].position = inp[ID].position;
 	outp[ID].texcoord = inp[ID].texcoord;
 	outp[ID].normal = inp[ID].normal;
 
