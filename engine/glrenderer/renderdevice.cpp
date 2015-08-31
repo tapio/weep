@@ -191,7 +191,9 @@ bool RenderDevice::uploadMaterial(Material& material)
 	auto it = m_shaderNames.find(material.shaderName);
 	if (it == m_shaderNames.end()) {
 		logError("Failed to find shader \"%s\"", material.shaderName.c_str());
-		return false;
+		it = m_shaderNames.find("missing");
+		if (it == m_shaderNames.end())
+			return false;
 	}
 	material.shaderId = it->second;
 

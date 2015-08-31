@@ -1,4 +1,10 @@
 {
+	"missing": {
+		"shaders" : {
+			"vert": "shaders/missing.vert",
+			"frag": "shaders/missing.frag"
+		}
+	},
 	"normal": {
 		"shaders" : {
 			"vert": "shaders/normal.vert",
