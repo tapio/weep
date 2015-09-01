@@ -1,12 +1,9 @@
 #include "engine.hpp"
 
 #include <SDL2/SDL.h>
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_sdl_gl3.h"
 
 namespace
 {
-	static SDL_Window* s_window = nullptr;
 	static SDL_GLContext s_glcontext = nullptr;
 	static int s_width = 0;
 	static int s_height = 0;
@@ -15,6 +12,7 @@ namespace
 
 float Engine::dt = 0;
 Json Engine::settings = Json();
+SDL_Window* Engine::window = nullptr;
 
 void Engine::init(const string& configPath)
 {
@@ -57,14 +55,14 @@ void Engine::init(const string& configPath)
 	s_height = settings["screen"]["height"].int_value();
 	int fullscreen = settings["screen"]["fullscreen"].bool_value() ? SDL_WINDOW_FULLSCREEN : 0;
 
-	s_window = SDL_CreateWindow("App",
+	window = SDL_CreateWindow("App",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, s_width, s_height,
 		SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | fullscreen);
-	if (!s_window) {
+	if (!window) {
 		panic(SDL_GetError());
 	}
 
-	s_glcontext = SDL_GL_CreateContext(s_window);
+	s_glcontext = SDL_GL_CreateContext(window);
 	if (!s_glcontext) {
 		panic(SDL_GetError());
 	}
@@ -75,21 +73,18 @@ void Engine::init(const string& configPath)
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
 	logInfo("OpenGL Context:  %d.%d", major, minor);
-
-	ImGui_ImplSDLGL3_Init(s_window);
 }
 
 void Engine::deinit()
 {
-	ImGui_ImplSDLGL3_Shutdown();
 	SDL_GL_DeleteContext(s_glcontext);
-	SDL_DestroyWindow(s_window);
+	SDL_DestroyWindow(window);
 	SDL_Quit();
 }
 
 void Engine::swap()
 {
-	SDL_GL_SwapWindow(s_window);
+	SDL_GL_SwapWindow(window);
 	Uint64 curTime = SDL_GetPerformanceCounter();
 	dt = (curTime - prevTime) / (float)SDL_GetPerformanceFrequency();
 	prevTime = curTime;

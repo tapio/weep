@@ -35,6 +35,8 @@ int main(int, char*[])
 	PhysicsSystem physics;
 	physics.addScene(scene);
 
+	ImGui_ImplSDLGL3_Init(Engine::window);
+
 	bool running = true;
 	bool active = false;
 	SDL_Event e;
@@ -163,6 +165,7 @@ int main(int, char*[])
 		Engine::swap();
 	}
 
+	ImGui_ImplSDLGL3_Shutdown();
 	renderer.reset(scene);
 	Engine::deinit();
 

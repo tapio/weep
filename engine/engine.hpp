@@ -19,4 +19,5 @@ public:
 
 	static float dt;
 	static Json settings;
+	static struct SDL_Window* window;
 };
