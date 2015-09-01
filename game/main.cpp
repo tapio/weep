@@ -118,7 +118,7 @@ int main(int, char*[])
 
 		renderer.render(scene, camera);
 
-		ImGui::Text("Hello World!");
+		ImGui::Text("FPS: %d (%fms)", int(1.0 / Engine::dt), Engine::dt);
 
 		ImGui::Render();
 
