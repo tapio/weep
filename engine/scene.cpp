@@ -70,12 +70,12 @@ namespace {
 
 			const string& shape = bodyDef["shape"].string_value();
 			if (shape == "box")
-				model.body.shape = Model::BodyDef::SHAPE_BOX;
+				model.bodyDef.shape = Model::BodyDef::SHAPE_BOX;
 			if (shape == "sphere")
-				model.body.shape = Model::BodyDef::SHAPE_SPHERE;
+				model.bodyDef.shape = Model::BodyDef::SHAPE_SPHERE;
 
 			if (bodyDef["mass"].is_number())
-				model.body.mass = bodyDef["mass"].number_value();
+				model.bodyDef.mass = bodyDef["mass"].number_value();
 		}
 
 		// Parse transform

@@ -6,7 +6,7 @@
 	},
 	"renderer": {
 		"gldebug": true,
-		"vsync": false,
+		"vsync": true,
 		"msaa": 8
 	},
 	"moddir": "../weep-media/"

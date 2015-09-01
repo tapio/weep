@@ -40,9 +40,8 @@ void PhysicsSystem::step(float dt)
 void PhysicsSystem::syncTransforms(Scene& scene)
 {
 	for (auto& model : scene.getChildren()) {
-		if (model.body.data) {
-			btRigidBody* body = static_cast<btRigidBody*>(model.body.data);
-			const btTransform& trans = body->getCenterOfMassTransform();
+		if (model.body) {
+			const btTransform& trans = model.body->getCenterOfMassTransform();
 			model.position = convert(trans.getOrigin());
 			model.rotation = convert(trans.getRotation());
 		}
@@ -51,7 +50,7 @@ void PhysicsSystem::syncTransforms(Scene& scene)
 
 void PhysicsSystem::addModel(Model& model)
 {
-	Model::BodyDef& def = model.body;
+	Model::BodyDef& def = model.bodyDef;
 	if (def.shape == Model::BodyDef::SHAPE_NONE)
 		return;
 
@@ -68,19 +67,8 @@ void PhysicsSystem::addModel(Model& model)
 	btTransform trans(convert(model.rotation), convert(model.position));
 	body->setWorldTransform(trans);
 	body->setUserPointer(&model);
-	body->setSleepingThresholds(0., 0.);
 	dynamicsWorld->addRigidBody(body);
-	model.body.data = body;
-}
-
-void PhysicsSystem::setTransformToBody(Model& model)
-{
-	btRigidBody* body = static_cast<btRigidBody*>(model.body.data);
-	if (body) {
-		btTransform trans(convert(model.rotation), convert(model.position));
-		body->setWorldTransform(trans);
-		body->setLinearFactor(btVector3(0, 0, 0)); // TODO: This is hack
-	}
+	model.body = body;
 }
 
 void PhysicsSystem::addScene(Scene& scene)

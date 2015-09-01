@@ -100,13 +100,19 @@ int main(int, char*[])
 			}
 		}
 
+		// Calculate and send current velocity from controller to Bullet
+		vec3 p0 = camera.position;
 		controller.update(Engine::dt);
+		vec3 p1 = camera.position;
+		vec3 vel = float(1.0f / Engine::dt) * (p1 - p0);
 
 		Model* cameraObj = scene.find("camera");
 		if (cameraObj) {
-			cameraObj->position = camera.position;
-			cameraObj->rotation = camera.rotation;
-			physics.setTransformToBody(*cameraObj);
+			cameraObj->body->setSleepingThresholds(0.f, 0.f); // TODO: Not every frame
+			cameraObj->body->setGravity(btVector3(0, 0, 0)); // TODO: Not every frame
+			btTransform trans(convert(camera.rotation), convert(camera.position));
+			cameraObj->body->setWorldTransform(trans);
+			cameraObj->body->setLinearVelocity(convert(vel));
 		}
 
 		auto& lights = scene.getLights();
@@ -125,6 +131,13 @@ int main(int, char*[])
 
 		physics.step(Engine::dt);
 		physics.syncTransforms(scene);
+
+		if (cameraObj) {
+			const btTransform& trans = cameraObj->body->getCenterOfMassTransform();
+			camera.position = convert(trans.getOrigin());
+			camera.rotation = convert(trans.getRotation());
+		}
+
 		renderer.render(scene, camera);
 
 		ImGui::Text("Right mouse button to toggle mouse grab.");

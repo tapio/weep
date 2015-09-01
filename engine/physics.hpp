@@ -11,7 +11,7 @@ public:
 
 	void addScene(class Scene& model);
 	void addModel(struct Model& model);
-	void setTransformToBody(struct Model& model);
+
 	void syncTransforms(class Scene& scene);
 	void step(float dt);
 
