@@ -63,6 +63,21 @@ namespace {
 				model.material->map[Material::HEIGHT_MAP] = resources.getImage(materialDef["heightMap"].string_value());
 		}
 
+		// Parse body
+		if (!def["body"].is_null()) {
+			const Json& bodyDef = def["body"];
+			ASSERT(bodyDef.is_object());
+
+			const string& shape = bodyDef["shape"].string_value();
+			if (shape == "box")
+				model.body.shape = Model::BodyDef::SHAPE_BOX;
+			if (shape == "sphere")
+				model.body.shape = Model::BodyDef::SHAPE_SPHERE;
+
+			if (bodyDef["mass"].is_number())
+				model.body.mass = bodyDef["mass"].number_value();
+		}
+
 		// Parse transform
 		if (!def["position"].is_null()) {
 			model.position = toVec3(def["position"]);
@@ -108,7 +123,7 @@ void Scene::load(const string& path, Resources& resources)
 		if (!lightDef.is_null()) {
 			m_lights.emplace_back();
 			Light& light = m_lights.back();
-			string lightType = lightDef["type"].string_value();
+			const string& lightType = lightDef["type"].string_value();
 			if (lightType == "ambient") light.type = Light::AMBIENT_LIGHT;
 			else if (lightType == "point") light.type = Light::POINT_LIGHT;
 			else if (lightType == "directional") light.type = Light::DIRECTIONAL_LIGHT;

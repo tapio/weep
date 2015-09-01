@@ -20,4 +20,11 @@ struct Model
 	string name;
 	Geometry* geometry = nullptr;
 	std::shared_ptr<Material> material;
+	struct BodyDef {
+		enum Shape {
+			SHAPE_NONE, SHAPE_BOX, SHAPE_SPHERE
+		} shape;
+		float mass = 0;
+		void* data = nullptr;
+	} body;
 };

@@ -34,6 +34,7 @@ list(APPEND LIBS ${GL_LIBRARIES})
 
 include_directories(engine)
 include_directories(SYSTEM third-party)
+include_directories(SYSTEM third-party/bullet)
 
 add_definitions(-DGL_GLEXT_PROTOTYPES)
 

@@ -5,6 +5,7 @@
 #include "renderer.hpp"
 #include "resources.hpp"
 #include "controller.hpp"
+#include "physics.hpp"
 
 #include <SDL2/SDL.h>
 #include "imgui/imgui.h"
@@ -30,6 +31,9 @@ int main(int, char*[])
 	const string scenePath = "testscene.json";
 	Scene scene;
 	scene.load(scenePath, resources);
+
+	PhysicsSystem physics;
+	physics.addScene(scene);
 
 	bool running = true;
 	bool active = false;
@@ -98,6 +102,13 @@ int main(int, char*[])
 
 		controller.update(Engine::dt);
 
+		Model* cameraObj = scene.find("camera");
+		if (cameraObj) {
+			cameraObj->position = camera.position;
+			cameraObj->rotation = camera.rotation;
+			physics.setTransformToBody(*cameraObj);
+		}
+
 		auto& lights = scene.getLights();
 		lights[0].position.x = 5.f * glm::sin(Engine::timems() / 800.f);
 		lights[1].position.x = 4.f * glm::sin(Engine::timems() / 500.f);
@@ -112,6 +123,8 @@ int main(int, char*[])
 			}
 		}
 
+		physics.step(Engine::dt);
+		physics.syncTransforms(scene);
 		renderer.render(scene, camera);
 
 		ImGui::Text("Right mouse button to toggle mouse grab.");
