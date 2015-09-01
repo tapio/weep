@@ -6,6 +6,13 @@
 			},
 			"geometry": "debug/cube.obj"
 		},
+		"plane": {
+			"material": {
+				"shaderName": "diffusemap",
+				"diffuseMap": "debug/uvtestgrid.png"
+			},
+			"geometry": "debug/plane.obj"
+		},
 		"pointlight": {
 			"material": {
 				"shaderName": "color",
@@ -26,7 +33,7 @@
 	},
 	"objects": [
 	{
-		"material": {
+		"DISABLEDmaterial": {
 			"shaderName": "nsmap",
 			"diffuseMap": "debug/uvtestgrid.png",
 			"specularMap": "debug/uvtestgrid_specular.png",
@@ -36,11 +43,15 @@
 			"ambient": [ 0.005, 0.005, 0.005 ],
 			"shininess": 8
 		},
-		"geometry": {
+		"DISABLEDgeometry": {
 			"heightmap": "debug/uvtestgrid.png"
 		},
 		"position": [ 0, -0.5, -10 ],
 		"scale": [ 0.1, 0.5, 0.1 ]
+	},{
+		"prefab": "plane",
+		"position": [ 0, -0.5, 0 ],
+		"scale": [ 50, 1, 50 ]
 	},{
 		"prefab": "pointlight",
 		"name": "light_01",
