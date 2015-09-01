@@ -63,9 +63,11 @@ int main(int, char*[])
 
 				if (keysym.mod == KMOD_LCTRL && keysym.sym == SDLK_r) {
 					renderer.reset(scene);
+					physics.reset();
 					scene.reset();
 					resources.reset();
 					scene.load(scenePath, resources);
+					physics.addScene(scene);
 					continue;
 				}
 				else if (keysym.sym == SDLK_F1) {

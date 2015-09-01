@@ -8,9 +8,10 @@ class PhysicsSystem
 public:
 	PhysicsSystem();
 	~PhysicsSystem();
+	void reset();
 
 	void addScene(class Scene& model);
-	void addModel(struct Model& model);
+	bool addModel(struct Model& model);
 
 	void syncTransforms(class Scene& scene);
 	void step(float dt);
