@@ -86,13 +86,9 @@ int main(int, char*[])
 				}
 			}
 
-			if (e.type == SDL_MOUSEBUTTONDOWN && !active) {
-				active = true;
-				Engine::grabMouse(true);
-			}
-			else if (e.type == SDL_MOUSEBUTTONDOWN && active) {
-				active = false;
-				Engine::grabMouse(false);
+			if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_RIGHT) {
+				active = !active;
+				Engine::grabMouse(active);
 			}
 			else if (e.type == SDL_MOUSEMOTION && active) {
 				controller.angles.x += -0.05f * e.motion.yrel;
@@ -119,6 +115,9 @@ int main(int, char*[])
 		renderer.render(scene, camera);
 
 		ImGui::Text("FPS: %d (%fms)", int(1.0 / Engine::dt), Engine::dt);
+
+		//ImGui::ShowTestWindow();
+		//ImGui::ShowStyleEditor();
 
 		ImGui::Render();
 
