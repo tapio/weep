@@ -82,9 +82,11 @@ bool PhysicsSystem::addModel(Model& model)
 	} else if (def.shape == Model::BodyDef::SHAPE_SPHERE) {
 		shape = new btSphereShape(model.bounds.radius);
 	}
+	btVector3 inertia(0, 0, 0);
+	shape->calculateLocalInertia(def.mass, inertia);
 	collisionShapes.push_back(shape);
 
-	btRigidBody::btRigidBodyConstructionInfo info(def.mass, NULL, shape);
+	btRigidBody::btRigidBodyConstructionInfo info(def.mass, NULL, shape, inertia);
 	btRigidBody* body = new btRigidBody(info);
 	btTransform trans(convert(model.rotation), convert(model.position));
 	body->setWorldTransform(trans);
