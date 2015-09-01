@@ -9,7 +9,6 @@
 #include <SDL2/SDL.h>
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl_gl3.h"
-#include "GL/glcorearb.h"
 
 
 int main(int, char*[])
@@ -121,7 +120,6 @@ int main(int, char*[])
 
 		ImGui::Text("Hello World!");
 
-		glViewport(0, 0, Engine::width(), Engine::height());
 		ImGui::Render();
 
 		Engine::swap();

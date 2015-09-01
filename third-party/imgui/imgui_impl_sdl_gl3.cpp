@@ -97,6 +97,8 @@ static void ImGui_ImplSDLGL3_RenderDrawLists(ImDrawData* draw_data)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, last_element_array_buffer);
     glBindVertexArray(last_vertex_array);
     glDisable(GL_SCISSOR_TEST);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
 }
 
 static const char* ImGui_ImplSDLGL3_GetClipboardText()
