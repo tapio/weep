@@ -87,9 +87,10 @@ Geometry::Geometry(const string& path)
 	calculateBoundingSphere();
 	calculateBoundingBox();
 	logDebug("Loaded mesh %s, vert/uv/n: %d/%d/%d, bound r: %f",
-		path.c_str(), positions.size(), texcoords.size(), normals.size(), boundingRadius);
+		path.c_str(), positions.size(), texcoords.size(), normals.size(), bounds.radius);
 	if (normals.empty())
 		calculateNormals();
+	else normalizeNormals();
 	setupAttributes();
 }
 
@@ -186,12 +187,12 @@ void Geometry::calculateBoundingSphere()
 	for (auto& pos : positions) {
 		maxRadiusSq = glm::max(maxRadiusSq, glm::length2(pos));
 	}
-	boundingRadius = glm::sqrt(maxRadiusSq);
+	bounds.radius = glm::sqrt(maxRadiusSq);
 }
 
 void Geometry::calculateBoundingBox()
 {
-	BoundingBox& bb = boundingBox;
+	Bounds& bb = bounds;
 	if (positions.empty()) {
 		bb.min = vec3();
 		bb.max = vec3();

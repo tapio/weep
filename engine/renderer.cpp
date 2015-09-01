@@ -16,7 +16,7 @@ public:
 	}
 
 	bool visible(const Model& model) {
-		float maxDist = model.geometry->boundingRadius + m_radius;
+		float maxDist = model.bounds.radius + m_radius;
 		return glm::distance2(m_center, model.position) < maxDist * maxDist;
 	}
 

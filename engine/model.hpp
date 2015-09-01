@@ -1,7 +1,7 @@
 #pragma once
 #include "common.hpp"
+#include "geometry.hpp"
 
-struct Geometry;
 struct Material;
 class btRigidBody;
 
@@ -11,6 +11,8 @@ struct Model
 	quat rotation = quat();
 	vec3 scale = vec3(1, 1, 1);
 	mat4 transform = mat4();
+
+	Bounds bounds;
 
 	void updateMatrix() {
 		transform = glm::translate(position);

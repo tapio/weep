@@ -92,6 +92,12 @@ namespace {
 
 		if (def["name"].is_string())
 			model.name = def["name"].string_value();
+
+		if (model.geometry) {
+			model.bounds.min = model.geometry->bounds.min * model.scale;
+			model.bounds.max = model.geometry->bounds.max * model.scale;
+			model.bounds.radius = model.geometry->bounds.radius * glm::compMax(model.scale);
+		}
 	}
 }
 

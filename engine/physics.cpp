@@ -77,10 +77,10 @@ bool PhysicsSystem::addModel(Model& model)
 
 	btCollisionShape* shape = NULL;
 	if (def.shape == Model::BodyDef::SHAPE_BOX) {
-		BoundingBox aabb = model.geometry->boundingBox;
+		Bounds aabb = model.bounds;
 		shape = new btBoxShape(convert((aabb.max - aabb.min) * 0.5f));
 	} else if (def.shape == Model::BodyDef::SHAPE_SPHERE) {
-		shape = new btSphereShape(model.geometry->boundingRadius);
+		shape = new btSphereShape(model.bounds.radius);
 	}
 	collisionShapes.push_back(shape);
 

@@ -11,10 +11,11 @@ enum GeometryAttributeIndex {
 	ATTR_MAX
 };
 
-struct BoundingBox
+struct Bounds
 {
 	vec3 min = vec3(INFINITY, INFINITY, INFINITY);
 	vec3 max = vec3(INFINITY, INFINITY, INFINITY);
+	float radius = INFINITY;
 };
 
 struct Geometry
@@ -44,8 +45,7 @@ struct Geometry
 	std::vector<uint> indices;
 	std::vector<char> vertexData;
 
-	BoundingBox boundingBox;
-	float boundingRadius = 0.f;
+	Bounds bounds;
 
 	int renderId = -1;
 };
