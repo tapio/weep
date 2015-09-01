@@ -69,7 +69,7 @@ void Engine::init(const string& configPath)
 		panic(SDL_GetError());
 	}
 
-	vsync(settings["rendering"]["vsync"].bool_value());
+	vsync(settings["renderer"]["vsync"].bool_value());
 
 	int major, minor;
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);

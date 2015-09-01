@@ -146,6 +146,14 @@ int main(int, char*[])
 		Environment& env = renderer.env();
 		ImGui::ColorEdit3("Ambient", (float*)&env.ambient);
 		ImGui::SliderFloat("Exposure", &env.exposure, 0.0f, 10.0f);
+		{
+			bool vsync = Engine::vsync();
+			bool oldVsync = vsync;
+			ImGui::Checkbox("V-sync", &vsync);
+			if (vsync != oldVsync)
+				Engine::vsync(vsync);
+		}
+
 
 		//ImGui::ShowTestWindow();
 		//ImGui::ShowStyleEditor();
