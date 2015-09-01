@@ -1,6 +1,8 @@
 #include "engine.hpp"
 
 #include <SDL2/SDL.h>
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_sdl_gl3.h"
 
 namespace
 {
@@ -73,10 +75,13 @@ void Engine::init(const string& configPath)
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
 	logInfo("OpenGL Context:  %d.%d", major, minor);
+
+	ImGui_ImplSDLGL3_Init(s_window);
 }
 
 void Engine::deinit()
 {
+	ImGui_ImplSDLGL3_Shutdown();
 	SDL_GL_DeleteContext(s_glcontext);
 	SDL_DestroyWindow(s_window);
 	SDL_Quit();

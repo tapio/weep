@@ -7,6 +7,9 @@
 #include "controller.hpp"
 
 #include <SDL2/SDL.h>
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_sdl_gl3.h"
+#include "GL/glcorearb.h"
 
 
 int main(int, char*[])
@@ -33,7 +36,10 @@ int main(int, char*[])
 	bool active = false;
 	SDL_Event e;
 	while (running) {
+		ImGui_ImplSDLGL3_NewFrame();
+
 		while (SDL_PollEvent(&e)) {
+			ImGui_ImplSDLGL3_ProcessEvent(&e);
 			if (e.type == SDL_QUIT) {
 				running = false;
 				break;
@@ -112,6 +118,11 @@ int main(int, char*[])
 		}
 
 		renderer.render(scene, camera);
+
+		ImGui::Text("Hello World!");
+
+		glViewport(0, 0, Engine::width(), Engine::height());
+		ImGui::Render();
 
 		Engine::swap();
 	}
