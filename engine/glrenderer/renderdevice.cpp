@@ -8,6 +8,7 @@
 #include "engine.hpp"
 #include "light.hpp"
 #include "resources.hpp"
+#include "environment.hpp"
 
 static GLenum s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
 
@@ -257,6 +258,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 
 void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lights)
 {
+	ASSERT(m_env);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo.fbo);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	stats = Stats();
@@ -265,6 +267,8 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 	m_commonBlock.uniforms.projectionMatrix = camera.projection;
 	m_commonBlock.uniforms.viewMatrix = camera.view;
 	m_commonBlock.uniforms.cameraPosition = camera.position;
+	m_commonBlock.uniforms.globalAmbient = m_env->ambient;
+	m_commonBlock.uniforms.exposure = m_env->exposure;
 
 	if (!lights.empty()) {
 		uint numLights = std::min((int)lights.size(), MAX_LIGHTS);

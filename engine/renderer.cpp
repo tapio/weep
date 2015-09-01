@@ -30,6 +30,7 @@ private:
 Renderer::Renderer(Resources& resources)
 {
 	m_device.reset(new RenderDevice(resources));
+	m_device->setEnvironment(&m_env);
 }
 
 Renderer::~Renderer()

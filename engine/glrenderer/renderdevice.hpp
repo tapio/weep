@@ -9,6 +9,7 @@ struct Model;
 struct Geometry;
 struct Material;
 struct Camera;
+struct Environment;
 
 class RenderDevice
 {
@@ -16,6 +17,7 @@ public:
 	RenderDevice(Resources& resources);
 	~RenderDevice();
 
+	void setEnvironment(Environment* env) { m_env = env; }
 	void loadShaders();
 	bool uploadGeometry(Geometry& geometry);
 	bool uploadMaterial(Material& material);
@@ -64,5 +66,6 @@ private:
 	std::vector<ShaderProgram> m_shaders;
 	std::map<string, int> m_shaderNames;
 	std::vector<GPUModel> m_models;
+	Environment* m_env;
 	Resources& m_resources;
 };

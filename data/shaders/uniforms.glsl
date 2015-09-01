@@ -13,6 +13,7 @@ UBO_PREFIX(UniformCommonBlock, 0)
 	mat4 projectionMatrix;
 	mat4 viewMatrix;
 	vec3 cameraPosition; float numLights;
+	vec3 globalAmbient; float exposure;
 };
 
 UBO_PREFIX(UniformObjectBlock, 1)

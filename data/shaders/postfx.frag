@@ -7,9 +7,6 @@ in VertexData {
 
 layout(location = 0) out vec4 fragment;
 
-// TODO: Uniform
-const float exposure = 1.0;
-
 void main()
 {
 	vec3 hdrColor = texture(diffuseMap, inData.texcoord).rgb;

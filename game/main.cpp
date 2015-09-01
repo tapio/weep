@@ -114,7 +114,12 @@ int main(int, char*[])
 
 		renderer.render(scene, camera);
 
+		ImGui::Text("Right mouse button to toggle mouse grab.");
 		ImGui::Text("FPS: %d (%fms)", int(1.0 / Engine::dt), Engine::dt);
+
+		Environment& env = renderer.env();
+		ImGui::ColorEdit3("Ambient", (float*)&env.ambient);
+		ImGui::SliderFloat("Exposure", &env.exposure, 0.0f, 10.0f);
 
 		//ImGui::ShowTestWindow();
 		//ImGui::ShowStyleEditor();

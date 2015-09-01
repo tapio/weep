@@ -93,7 +93,7 @@ vec2 parallax_mapping(vec2 texcoord, vec3 viewDir)
 void main()
 {
 	// Accumulators
-	vec3 ambientComp = material.ambient;
+	vec3 ambientComp = globalAmbient * material.ambient;
 	vec3 diffuseComp = vec3(0);
 	vec3 specularComp = vec3(0);
 	vec3 emissionComp = vec3(0);
