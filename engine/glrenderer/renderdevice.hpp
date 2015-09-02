@@ -63,6 +63,7 @@ private:
 	Material m_skyboxMat;
 
 	uint m_program = 0;
+	bool m_wireframe = false;
 	UBO<UniformCommonBlock> m_commonBlock;
 	UBO<UniformObjectBlock> m_objectBlock;
 	UBO<UniformColorBlock> m_colorBlock;

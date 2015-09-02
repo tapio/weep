@@ -190,9 +190,7 @@ void RenderDevice::destroyModel(Model& model)
 
 void RenderDevice::toggleWireframe()
 {
-	GLint mode;
-	glGetIntegerv(GL_POLYGON_MODE, &mode);
-	glPolygonMode(GL_FRONT_AND_BACK, mode == GL_LINE ? GL_FILL : GL_LINE);
+	m_wireframe = !m_wireframe;
 }
 
 bool RenderDevice::uploadGeometry(Geometry& geometry)
@@ -285,6 +283,8 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 		m_lightBlock.upload();
 	}
 	m_commonBlock.upload();
+	if (m_wireframe)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 void RenderDevice::render(Model& model)
@@ -434,6 +434,9 @@ void RenderDevice::postRender()
 	renderSkybox();
 	glBindVertexArray(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	if (m_wireframe)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(m_shaders[m_shaderNames["postfx"]].id);
