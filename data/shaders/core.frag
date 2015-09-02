@@ -97,6 +97,7 @@ void main()
 	vec3 diffuseComp = vec3(0);
 	vec3 specularComp = vec3(0);
 	vec3 emissionComp = vec3(0);
+	float alpha = 1.f;
 
 	vec3 viewDir = normalize(-input.position);
 	vec3 normal = normalize(input.normal);
@@ -113,15 +114,22 @@ void main()
 	//	discard;
 #endif
 
-#ifdef USE_NORMAL_MAP
-	normal = perturb_normal(TBN, texcoord);
-#endif
-
 #ifdef USE_DIFFUSE_MAP
 	vec4 diffuseTex = texture(diffuseMap, texcoord);
 	ambientComp *= diffuseTex.rgb;
-#else
+#ifdef USE_ALPHA_TEST
+	if (diffuseTex.a < 0.9)
+		discard;
+#endif
+#ifdef USE_ALPHA_BLEND
+	alpha = diffuseTex.a;
+#endif
+#else // USE_DIFFUSE_MAP
 	vec4 diffuseTex = vec4(1.0);
+#endif
+
+#ifdef USE_NORMAL_MAP
+	normal = perturb_normal(TBN, texcoord);
 #endif
 
 #ifdef USE_SPECULAR_MAP
@@ -169,5 +177,5 @@ void main()
 #endif
 	}
 
-	fragment = vec4(ambientComp + diffuseComp + specularComp + emissionComp, 1.0);
+	fragment = vec4(ambientComp + diffuseComp + specularComp + emissionComp, alpha);
 }
