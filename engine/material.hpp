@@ -18,11 +18,12 @@ struct Material
 		HEIGHT_MAP,
 		EMISSION_MAP,
 		REFLECTION_MAP,
+		ENV_MAP,
 		MAX_MAPS
 	};
 
-	std::vector<Image*> map = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-	std::vector<uint> tex = { 0, 0, 0, 0, 0, 0 };
+	std::vector<Image*> map = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+	std::vector<uint> tex = { 0, 0, 0, 0, 0, 0, 0 };
 
 	bool tessellate = false;
 	string shaderName = "";

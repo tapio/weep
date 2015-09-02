@@ -62,7 +62,7 @@ layout(binding = 14) uniform sampler2D emissionMap;
 layout(binding = 15) uniform sampler2D reflectionMap;
 #endif
 #ifdef USE_ENV_MAP
-layout(binding = 16) uniform sampler2D envMap;
+layout(binding = 16) uniform samplerCube envMap;
 #endif
 
 #endif // __cplusplus

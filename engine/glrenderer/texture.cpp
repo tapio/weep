@@ -14,24 +14,42 @@ void Texture::create()
 
 void Texture::upload(Image& image)
 {
-	glBindTexture(GL_TEXTURE_2D, id);
+	type = GL_TEXTURE_2D;
+	glBindTexture(type, id);
 	uint internalFormat = image.sRGB ? formats_sRGB[image.channels] : formats[image.channels];
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.width, image.height,
+	glTexImage2D(type, 0, internalFormat, image.width, image.height,
 		0, formats[image.channels], GL_UNSIGNED_BYTE, &image.data.front());
 	update();
 	if (minFilter == GL_LINEAR_MIPMAP_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST
 		|| minFilter == GL_NEAREST_MIPMAP_LINEAR || minFilter == GL_NEAREST_MIPMAP_NEAREST)
-			glGenerateMipmap(GL_TEXTURE_2D);
+		glGenerateMipmap(type);
+}
+
+void Texture::uploadCube(Image* images[6])
+{
+	type = GL_TEXTURE_CUBE_MAP;
+	glBindTexture(type, id);
+	for (int i = 0; i < 6; ++i) {
+		Image& image = *images[i];
+		uint internalFormat = image.sRGB ? formats_sRGB[image.channels] : formats[image.channels];
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, image.width, image.height,
+			0, formats[image.channels], GL_UNSIGNED_BYTE, &image.data.front());
+	}
+	magFilter = minFilter = GL_LINEAR;
+	wrapS = wrapT = wrapR = GL_CLAMP_TO_EDGE;
+	update();
 }
 
 void Texture::update()
 {
-	glBindTexture(GL_TEXTURE_2D, id);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
+	glBindTexture(type, id);
+	glTexParameteri(type, GL_TEXTURE_WRAP_S, wrapS);
+	glTexParameteri(type, GL_TEXTURE_WRAP_T, wrapT);
+	if (type == GL_TEXTURE_CUBE_MAP)
+		glTexParameteri(type, GL_TEXTURE_WRAP_R, wrapR);
+	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, minFilter);
+	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, magFilter);
+	glTexParameterf(type, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
 }
 
 void Texture::destroy()
