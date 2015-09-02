@@ -111,6 +111,7 @@ int main(int, char*[])
 		if (cameraObj) {
 			cameraObj->body->setSleepingThresholds(0.f, 0.f); // TODO: Not every frame
 			cameraObj->body->setGravity(btVector3(0, 0, 0)); // TODO: Not every frame
+			cameraObj->body->setAngularFactor(btVector3(0, 0, 0)); // TODO: Not every frame
 			btTransform trans(convert(camera.rotation), convert(camera.position));
 			cameraObj->body->setWorldTransform(trans);
 			cameraObj->body->setLinearVelocity(convert(vel));
