@@ -142,6 +142,7 @@ int main(int, char*[])
 
 		ImGui::Text("Right mouse button to toggle mouse grab.");
 		ImGui::Text("FPS: %d (%fms)", int(1.0 / Engine::dt), Engine::dt);
+		ImGui::Text("Cam: %.1f %.1f %.1f", camera.position.x, camera.position.y, camera.position.z);
 		if (ImGui::CollapsingHeader("Stats")) {
 
 		}
@@ -154,8 +155,10 @@ int main(int, char*[])
 		}
 		if (ImGui::CollapsingHeader("Environment")) {
 			Environment& env = renderer.env();
-			ImGui::ColorEdit3("Ambient", (float*)&env.ambient);
 			ImGui::SliderFloat("Exposure", &env.exposure, 0.0f, 10.0f);
+			ImGui::ColorEdit3("Ambient", (float*)&env.ambient);
+			ImGui::ColorEdit3("Sun Color", (float*)&env.sunColor);
+			ImGui::SliderFloat3("Sun Dir", (float*)&env.sunDirection, -3.f, 3.f);
 		}
 		if (ImGui::CollapsingHeader("Scene")) {
 			ImGui::InputText("", scenePath, sizeof(scenePath));

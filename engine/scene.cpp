@@ -6,15 +6,6 @@
 #include "engine.hpp"
 
 namespace {
-	vec3 toVec3(const Json& arr) {
-		ASSERT(arr.is_array());
-		return vec3(arr[0].number_value(), arr[1].number_value(), arr[2].number_value());
-	}
-	vec3 colorToVec3(const Json& color) {
-		if (color.is_number()) return vec3(color.number_value());
-		//if (color.is_string()) return TODO;
-		return toVec3(color);
-	}
 
 	void parseModel(Model& model, const Json& def, Resources& resources) {
 		// Parse geometry

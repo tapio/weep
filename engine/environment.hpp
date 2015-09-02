@@ -9,5 +9,8 @@ struct Environment
 	// 0 = Reinhard tonemapping
 	float exposure = 0.f;
 
+	vec3 sunDirection = vec3(0, 0, 0);
+	vec3 sunColor = vec3(0, 0, 0);
+
 	struct Image* skybox[6] = {};
 };

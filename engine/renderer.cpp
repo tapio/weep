@@ -50,6 +50,12 @@ Renderer::Renderer(Resources& resources)
 	}
 	if (def["exposure"].is_number())
 		m_env.exposure = def["exposure"].number_value();
+	if (!def["ambient"].is_null())
+		m_env.ambient = colorToVec3(def["ambient"]);
+	if (!def["sunDirection"].is_null())
+		m_env.sunDirection = toVec3(def["sunDirection"]);
+	if (!def["sunColor"].is_null())
+		m_env.sunColor = colorToVec3(def["sunColor"]);
 
 	m_device->setEnvironment(&m_env);
 }

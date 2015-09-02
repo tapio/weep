@@ -143,6 +143,30 @@ void main()
 #endif
 
 #if defined(USE_DIFFUSE) || defined(USE_SPECULAR)
+
+	if (sunColor.r > 0 || sunColor.g > 0 || sunColor.b > 0) {
+		vec3 sunDir = -(viewMatrix * vec4(sunDirection, 0.0)).xyz;
+		// Sun diffuse
+#ifdef USE_DIFFUSE
+		float diff = max(dot(normal, sunDir), 0.0);
+		diffuseComp += diff * material.diffuse * sunColor * diffuseTex.rgb;
+#endif
+		// Sun specular
+#ifdef USE_SPECULAR
+#ifdef USE_PHONG
+		const float energy = (2.0 + material.shininess) / (2.0 * PI);
+		vec3 reflectDir = reflect(-sunDir, normal);
+		float spec = energy * pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+#else // Blinn-Phong
+		const float energy = (8.0 + material.shininess) / (8.0 * PI);
+		vec3 halfDir = normalize(sunDir + viewDir);
+		float spec = energy * pow(max(dot(normal, halfDir), 0.0), material.shininess);
+#endif
+		specularComp += spec * material.specular * sunColor * specularTex.rgb;
+#endif
+	}
+
+	// Point lights
 	const int count = min(int(numLights), MAX_LIGHTS);
 	for (int i = 0; i < count; ++i)
 	{

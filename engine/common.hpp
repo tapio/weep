@@ -53,3 +53,13 @@ string replace(string str, const string& search, const string& replace);
 	T(T&&) = default; \
 	T(const T&) = delete; \
 	T& operator=(const T&) = delete
+
+inline vec3 toVec3(const Json& arr) {
+	ASSERT(arr.is_array());
+	return vec3(arr[0].number_value(), arr[1].number_value(), arr[2].number_value());
+}
+inline vec3 colorToVec3(const Json& color) {
+	if (color.is_number()) return vec3(color.number_value());
+	//if (color.is_string()) return TODO;
+	return toVec3(color);
+}
