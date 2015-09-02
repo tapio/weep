@@ -18,17 +18,11 @@ struct Bounds
 	float radius = INFINITY;
 };
 
-struct Geometry
+struct Batch
 {
-	Geometry() {}
-	Geometry(const string& path);
-	Geometry(const Image& heightmap);
-	~Geometry();
+	Batch() {}
+	~Batch();
 
-	void calculateBoundingSphere();
-	void calculateBoundingBox();
-	void calculateNormals();
-	void normalizeNormals();
 	void setupAttributes();
 
 	struct Attribute {
@@ -45,7 +39,23 @@ struct Geometry
 	std::vector<uint> indices;
 	std::vector<char> vertexData;
 
-	Bounds bounds;
-
 	int renderId = -1;
+};
+
+
+struct Geometry
+{
+	Geometry() {}
+	Geometry(const string& path);
+	Geometry(const Image& heightmap);
+	~Geometry();
+
+	void calculateBoundingSphere();
+	void calculateBoundingBox();
+	void calculateNormals();
+	void normalizeNormals();
+
+	std::vector<Batch> batches;
+
+	Bounds bounds;
 };

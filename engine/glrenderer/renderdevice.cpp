@@ -170,22 +170,26 @@ RenderDevice::~RenderDevice()
 
 void RenderDevice::destroyModel(Model& model)
 {
-	if (model.geometry->renderId == -1)
+	if (!model.geometry)
 		return;
-	GPUModel& m = m_models[model.geometry->renderId];
-	if (m.ebo) {
-		glDeleteBuffers(1, &m.ebo);
-		m.ebo = 0;
+	for (auto& batch : model.geometry->batches) {
+		if (batch.renderId == -1)
+			continue;
+		GPUModel& m = m_models[batch.renderId];
+		if (m.ebo) {
+			glDeleteBuffers(1, &m.ebo);
+			m.ebo = 0;
+		}
+		if (m.vbo) {
+			glDeleteBuffers(1, &m.vbo);
+			m.vbo = 0;
+		}
+		if (m.vao) {
+			glDeleteVertexArrays(1, &m.vao);
+			m.vao = 0;
+		}
+		batch.renderId = -1;
 	}
-	if (m.vbo) {
-		glDeleteBuffers(1, &m.vbo);
-		m.vbo = 0;
-	}
-	if (m.vao) {
-		glDeleteVertexArrays(1, &m.vao);
-		m.vao = 0;
-	}
-	model.geometry->renderId = -1;
 }
 
 void RenderDevice::toggleWireframe()
@@ -195,35 +199,37 @@ void RenderDevice::toggleWireframe()
 
 bool RenderDevice::uploadGeometry(Geometry& geometry)
 {
-	if (geometry.vertexData.empty()) {
+	if (geometry.batches.empty()) {
 		logError("Cannot upload empty geometry");
 		return false;
 	}
 	glutil::checkGL("Pre geometry upload");
-	geometry.renderId = m_models.size();
-	m_models.emplace_back(GPUModel());
-	GPUModel& model = m_models.back();
+	for (auto& batch : geometry.batches) {
+		batch.renderId = m_models.size();
+		m_models.emplace_back(GPUModel());
+		GPUModel& model = m_models.back();
 
-	if (!model.vao) glGenVertexArrays(1, &model.vao);
-	if (!model.vbo) glGenBuffers(1, &model.vbo);
-	if (!model.ebo && !geometry.indices.empty()) glGenBuffers(1, &model.ebo);
-	glBindVertexArray(model.vao);
-	glBindBuffer(GL_ARRAY_BUFFER, model.vbo);
-	glBufferData(GL_ARRAY_BUFFER, geometry.vertexData.size(), &geometry.vertexData.front(), GL_STATIC_DRAW);
-	// Setup attributes
-	for (int i = 0; i < ATTR_MAX; ++i) {
-		Geometry::Attribute& attr = geometry.attributes[i];
-		if (attr.components) {
-			glEnableVertexAttribArray(i);
-			glVertexAttribPointer(i, attr.components, GL_FLOAT, GL_FALSE, geometry.vertexSize, (GLvoid*)(uintptr_t)attr.offset);
-		} else {
-			glDisableVertexAttribArray(i);
+		if (!model.vao) glGenVertexArrays(1, &model.vao);
+		if (!model.vbo) glGenBuffers(1, &model.vbo);
+		if (!model.ebo && !batch.indices.empty()) glGenBuffers(1, &model.ebo);
+		glBindVertexArray(model.vao);
+		glBindBuffer(GL_ARRAY_BUFFER, model.vbo);
+		glBufferData(GL_ARRAY_BUFFER, batch.vertexData.size(), &batch.vertexData.front(), GL_STATIC_DRAW);
+		// Setup attributes
+		for (int i = 0; i < ATTR_MAX; ++i) {
+			Batch::Attribute& attr = batch.attributes[i];
+			if (attr.components) {
+				glEnableVertexAttribArray(i);
+				glVertexAttribPointer(i, attr.components, GL_FLOAT, GL_FALSE, batch.vertexSize, (GLvoid*)(uintptr_t)attr.offset);
+			} else {
+				glDisableVertexAttribArray(i);
+			}
 		}
-	}
-	// Elements
-	if (model.ebo) {
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, geometry.indices.size() * sizeof(uint), &geometry.indices.front(), GL_STATIC_DRAW);
+		// Elements
+		if (model.ebo) {
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.ebo);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, batch.indices.size() * sizeof(uint), &batch.indices.front(), GL_STATIC_DRAW);
+		}
 	}
 	glutil::checkGL("Post geometry upload");
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -291,9 +297,6 @@ void RenderDevice::render(Model& model)
 {
 	Geometry& geom = *model.geometry;
 	Material& mat = *model.material.get();
-	if (geom.renderId == -1)
-		uploadGeometry(geom);
-	GPUModel& gpuData = m_models[geom.renderId];
 	if (mat.shaderId < 0)
 		uploadMaterial(mat);
 
@@ -326,16 +329,23 @@ void RenderDevice::render(Model& model)
 		glActiveTexture(GL_TEXTURE10 + Material::ENV_MAP);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
 	}
-	glBindVertexArray(gpuData.vao);
-	uint mode = mat.tessellate ? GL_PATCHES : GL_TRIANGLES;
-	if (gpuData.ebo) {
-		glDrawElements(mode, geom.indices.size(), GL_UNSIGNED_INT, 0);
-		stats.triangles += geom.indices.size() / 3;
-	} else {
-		glDrawArrays(mode, 0, geom.numVertices);
-		stats.triangles += geom.numVertices / 3;
+
+	for (auto& batch : geom.batches) {
+		if (batch.renderId == -1)
+			uploadGeometry(geom); // TODO: Should not be here!
+
+		GPUModel& gpuData = m_models[batch.renderId];
+		glBindVertexArray(gpuData.vao);
+		uint mode = mat.tessellate ? GL_PATCHES : GL_TRIANGLES;
+		if (gpuData.ebo) {
+			glDrawElements(mode, batch.indices.size(), GL_UNSIGNED_INT, 0);
+			stats.triangles += batch.indices.size() / 3;
+		} else {
+			glDrawArrays(mode, 0, batch.numVertices);
+			stats.triangles += batch.numVertices / 3;
+		}
+		++stats.drawCalls;
 	}
-	++stats.drawCalls;
 	glBindVertexArray(0);
 	glutil::checkGL("Post draw");
 }

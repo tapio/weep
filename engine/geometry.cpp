@@ -23,6 +23,14 @@ Geometry::Geometry(const string& path)
 		logError("Failed to load object %s", path.c_str());
 		return;
 	}
+
+	batches.emplace_back();
+	Batch& batch = batches.back();
+	//auto& indices = batch.indices;
+	auto& positions = batch.positions;
+	auto& texcoords = batch.texcoords;
+	auto& normals = batch.normals;
+
 	std::vector<vec3> tmpVerts;
 	std::vector<vec2> tmpUvs;
 	std::vector<vec3> tmpNormals;
@@ -91,11 +99,18 @@ Geometry::Geometry(const string& path)
 	if (normals.empty())
 		calculateNormals();
 	else normalizeNormals();
-	setupAttributes();
+	batch.setupAttributes();
 }
 
 Geometry::Geometry(const Image& heightmap)
 {
+	batches.emplace_back();
+	Batch& batch = batches.back();
+	auto& indices = batch.indices;
+	auto& positions = batch.positions;
+	auto& texcoords = batch.texcoords;
+	auto& normals = batch.normals;
+
 	int wpoints = heightmap.width + 1;
 	int numVerts = wpoints * (heightmap.height + 1);
 	positions.resize(numVerts);
@@ -125,15 +140,89 @@ Geometry::Geometry(const Image& heightmap)
 	calculateBoundingSphere();
 	calculateBoundingBox();
 	calculateNormals();
-	setupAttributes();
+	batch.setupAttributes();
 }
 
 Geometry::~Geometry()
 {
+}
+
+void Geometry::calculateBoundingSphere()
+{
+	float maxRadiusSq = 0;
+	for (auto& batch : batches)
+		for (auto& pos : batch.positions)
+			maxRadiusSq = glm::max(maxRadiusSq, glm::length2(pos));
+	bounds.radius = glm::sqrt(maxRadiusSq);
+}
+
+void Geometry::calculateBoundingBox()
+{
+	Bounds& bb = bounds;
+	bb.min = vec3();
+	bb.max = vec3();
+
+	for (auto& batch : batches) {
+		auto& positions = batch.positions;
+		for (uint i = 0, len = positions.size(); i < len; ++i) {
+			float x = positions[i].x;
+			float y = positions[i].y;
+			float z = positions[i].z;
+			if (x < bb.min.x) bb.min.x = x;
+			else if ( x > bb.max.x ) bb.max.x = x;
+			if (y < bb.min.y) bb.min.y = y;
+			else if ( y > bb.max.y ) bb.max.y = y;
+			if (z < bb.min.z) bb.min.z = z;
+			else if (z > bb.max.z) bb.max.z = z;
+		}
+	}
+}
+
+void Geometry::calculateNormals()
+{
+	for (auto& batch : batches) {
+		auto& indices = batch.indices;
+		auto& positions = batch.positions;
+		auto& normals = batch.normals;
+		// Indexed elements
+		if (!indices.empty()) {
+			// Reset existing normals
+			for (auto& normal : normals)
+				normal = vec3();
+			for (uint i = 0, len = indices.size(); i < len; i += 3) {
+				vec3 normal = glm::triangleNormal(positions[indices[i]], positions[indices[i+1]], positions[indices[i+2]]);
+				normals[indices[i+0]] += normal;
+				normals[indices[i+1]] += normal;
+				normals[indices[i+2]] += normal;
+			}
+			normalizeNormals();
+		// Non-indexed elements
+		} else {
+			normals.resize(positions.size());
+			for (uint i = 0, len = positions.size(); i < len; i += 3) {
+				vec3 normal = glm::triangleNormal(positions[i], positions[i+1], positions[i+2]);
+				normals[i+0] = normal;
+				normals[i+1] = normal;
+				normals[i+2] = normal;
+			}
+		}
+	}
+}
+
+void Geometry::normalizeNormals()
+{
+	for (auto& batch : batches)
+		for (auto& normal : batch.normals)
+			normal = glm::normalize(normal);
+}
+
+
+Batch::~Batch()
+{
 	ASSERT(renderId == -1);
 }
 
-void Geometry::setupAttributes()
+void Batch::setupAttributes()
 {
 	ASSERT(positions.empty() || positions2d.empty());
 	int offset = 0;
@@ -179,71 +268,4 @@ void Geometry::setupAttributes()
 			}
 		}
 	}
-}
-
-void Geometry::calculateBoundingSphere()
-{
-	float maxRadiusSq = 0;
-	for (auto& pos : positions) {
-		maxRadiusSq = glm::max(maxRadiusSq, glm::length2(pos));
-	}
-	bounds.radius = glm::sqrt(maxRadiusSq);
-}
-
-void Geometry::calculateBoundingBox()
-{
-	Bounds& bb = bounds;
-	if (positions.empty()) {
-		bb.min = vec3();
-		bb.max = vec3();
-		return;
-	}
-
-	bb.min.x = bb.max.x = positions[0].x;
-	bb.min.y = bb.max.y = positions[0].y;
-	bb.min.z = bb.max.z = positions[0].z;
-
-	for (uint i = 1, len = positions.size(); i < len; ++i) {
-		float x = positions[i].x;
-		float y = positions[i].y;
-		float z = positions[i].z;
-		if (x < bb.min.x) bb.min.x = x;
-		else if ( x > bb.max.x ) bb.max.x = x;
-		if (y < bb.min.y) bb.min.y = y;
-		else if ( y > bb.max.y ) bb.max.y = y;
-		if (z < bb.min.z) bb.min.z = z;
-		else if (z > bb.max.z) bb.max.z = z;
-	}
-}
-
-void Geometry::calculateNormals()
-{
-	// Indexed elements
-	if (!indices.empty()) {
-		// Reset existing normals
-		for (auto& normal : normals)
-			normal = vec3();
-		for (uint i = 0, len = indices.size(); i < len; i += 3) {
-			vec3 normal = glm::triangleNormal(positions[indices[i]], positions[indices[i+1]], positions[indices[i+2]]);
-			normals[indices[i+0]] += normal;
-			normals[indices[i+1]] += normal;
-			normals[indices[i+2]] += normal;
-		}
-		normalizeNormals();
-	// Non-indexed elements
-	} else {
-		normals.resize(positions.size());
-		for (uint i = 0, len = positions.size(); i < len; i += 3) {
-			vec3 normal = glm::triangleNormal(positions[i], positions[i+1], positions[i+2]);
-			normals[i+0] = normal;
-			normals[i+1] = normal;
-			normals[i+2] = normal;
-		}
-	}
-}
-
-void Geometry::normalizeNormals()
-{
-	for (auto& normal : normals)
-		normal = glm::normalize(normal);
 }

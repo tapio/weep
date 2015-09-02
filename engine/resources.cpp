@@ -86,7 +86,7 @@ Geometry* Resources::getGeometry(const string& path)
 	return ptr.get();
 }
 
-Geometry*Resources::getHeightmap(const string& path)
+Geometry* Resources::getHeightmap(const string& path)
 {
 	auto& ptr = m_geoms[path];
 	if (!ptr) ptr.reset(new Geometry(*getImage(findPath(path))));
