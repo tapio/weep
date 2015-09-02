@@ -28,7 +28,7 @@ int main(int, char*[])
 
 	Controller controller(camera.position, camera.rotation);
 
-	const string scenePath = "testscene.json";
+	char scenePath[128] = "testscene.json";
 	Scene scene;
 	scene.load(scenePath, resources);
 
@@ -39,6 +39,7 @@ int main(int, char*[])
 
 	bool running = true;
 	bool active = false;
+	bool reload = false;
 	SDL_Event e;
 	while (running) {
 		ImGui_ImplSDLGL3_NewFrame();
@@ -62,12 +63,7 @@ int main(int, char*[])
 				}
 
 				if (keysym.mod == KMOD_LCTRL && keysym.sym == SDLK_r) {
-					renderer.reset(scene);
-					physics.reset();
-					scene.reset();
-					resources.reset();
-					scene.load(scenePath, resources);
-					physics.addScene(scene);
+					reload = true;
 					continue;
 				}
 				else if (keysym.sym == SDLK_F1) {
@@ -146,18 +142,28 @@ int main(int, char*[])
 
 		ImGui::Text("Right mouse button to toggle mouse grab.");
 		ImGui::Text("FPS: %d (%fms)", int(1.0 / Engine::dt), Engine::dt);
+		if (ImGui::CollapsingHeader("Stats")) {
 
-		Environment& env = renderer.env();
-		ImGui::ColorEdit3("Ambient", (float*)&env.ambient);
-		ImGui::SliderFloat("Exposure", &env.exposure, 0.0f, 10.0f);
-		{
+		}
+		if (ImGui::CollapsingHeader("Settings")) {
 			bool vsync = Engine::vsync();
 			bool oldVsync = vsync;
 			ImGui::Checkbox("V-sync", &vsync);
 			if (vsync != oldVsync)
 				Engine::vsync(vsync);
 		}
-
+		if (ImGui::CollapsingHeader("Environment")) {
+			Environment& env = renderer.env();
+			ImGui::ColorEdit3("Ambient", (float*)&env.ambient);
+			ImGui::SliderFloat("Exposure", &env.exposure, 0.0f, 10.0f);
+		}
+		if (ImGui::CollapsingHeader("Scene")) {
+			ImGui::InputText("", scenePath, sizeof(scenePath));
+			ImGui::SameLine();
+			if (ImGui::Button("Load")) {
+				reload = true;
+			}
+		}
 
 		//ImGui::ShowTestWindow();
 		//ImGui::ShowStyleEditor();
@@ -165,6 +171,16 @@ int main(int, char*[])
 		ImGui::Render();
 
 		Engine::swap();
+
+		if (reload) {
+			renderer.reset(scene);
+			physics.reset();
+			scene.reset();
+			resources.reset();
+			scene.load(scenePath, resources);
+			physics.addScene(scene);
+			reload = false;
+		}
 	}
 
 	ImGui_ImplSDLGL3_Shutdown();
