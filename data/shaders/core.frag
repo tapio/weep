@@ -142,6 +142,7 @@ void main()
 	emissionComp += texture(emissionMap, texcoord).rgb;
 #endif
 
+#if defined(USE_DIFFUSE) || defined(USE_SPECULAR)
 	const int count = min(int(numLights), MAX_LIGHTS);
 	for (int i = 0; i < count; ++i)
 	{
@@ -176,6 +177,7 @@ void main()
 		specularComp += attenuation * spec * material.specular * light.color * specularTex.rgb;
 #endif
 	}
+#endif // defined(USE_DIFFUSE) || defined(USE_SPECULAR)
 
 	fragment = vec4(ambientComp + diffuseComp + specularComp + emissionComp, alpha);
 }
