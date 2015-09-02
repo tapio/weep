@@ -14,6 +14,15 @@
 			"frag": "shaders/postfx.frag"
 		}
 	},
+	"skybox": {
+		"defines": [
+			"USE_ENV_MAP"
+		],
+		"shaders" : {
+			"vert": "shaders/skybox.vert",
+			"frag": "shaders/skybox.frag"
+		}
+	},
 	"normal": {
 		"shaders" : {
 			"vert": "shaders/normal.vert",

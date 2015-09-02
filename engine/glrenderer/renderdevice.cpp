@@ -342,8 +342,89 @@ void RenderDevice::renderFullscreenQuad()
 	glBindVertexArray(0);
 }
 
+void RenderDevice::renderSkybox()
+{
+	if (!m_env->skybox[0])
+		return;
+	if (m_skyboxMat.shaderId == -1) {
+		m_skyboxMat.shaderName = "skybox";
+		m_skyboxMat.shaderId = m_shaders[m_shaderNames["skybox"]].id;
+		Texture tex;
+		tex.anisotropy = caps.maxAnisotropy;
+		tex.create();
+		tex.uploadCube(m_env->skybox);
+		m_skyboxMat.tex[Material::ENV_MAP] = tex.id;
+	}
+	if (!m_skyboxCube.vao) {
+		GLfloat skyboxVertices[] = {
+			-1.0f, 1.0f, -1.0f,
+			-1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+			1.0f, 1.0f, -1.0f,
+			-1.0f, 1.0f, -1.0f,
+
+			-1.0f, -1.0f, 1.0f,
+			-1.0f, -1.0f, -1.0f,
+			-1.0f, 1.0f, -1.0f,
+			-1.0f, 1.0f, -1.0f,
+			-1.0f, 1.0f, 1.0f,
+			-1.0f, -1.0f, 1.0f,
+
+			1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+
+			-1.0f, -1.0f, 1.0f,
+			-1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+			1.0f, -1.0f, 1.0f,
+			-1.0f, -1.0f, 1.0f,
+
+			-1.0f, 1.0f, -1.0f,
+			1.0f, 1.0f, -1.0f,
+			1.0f, 1.0f, 1.0f,
+			1.0f, 1.0f, 1.0f,
+			-1.0f, 1.0f, 1.0f,
+			-1.0f, 1.0f, -1.0f,
+
+			-1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f, 1.0f,
+			1.0f, -1.0f, -1.0f,
+			1.0f, -1.0f, -1.0f,
+			-1.0f, -1.0f, 1.0f,
+			1.0f, -1.0f, 1.0f
+		};
+		glGenVertexArrays(1, &m_skyboxCube.vao);
+		glGenBuffers(1, &m_skyboxCube.vbo);
+		glBindVertexArray(m_skyboxCube.vao);
+		glBindBuffer(GL_ARRAY_BUFFER, m_skyboxCube.vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(ATTR_POSITION);
+		glVertexAttribPointer(ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+	}
+	glDepthFunc(GL_LEQUAL);
+	glUseProgram(m_skyboxMat.shaderId);
+	// Remove translation
+	m_commonBlock.uniforms.viewMatrix = glm::mat4(glm::mat3(m_commonBlock.uniforms.viewMatrix));
+	m_commonBlock.upload();
+	glBindVertexArray(m_skyboxCube.vao);
+	glActiveTexture(GL_TEXTURE10 + Material::ENV_MAP);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyboxMat.tex[Material::ENV_MAP]);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	glDepthFunc(GL_LESS);
+	++stats.drawCalls;
+	stats.triangles += 36;
+}
+
 void RenderDevice::postRender()
 {
+	renderSkybox();
 	glBindVertexArray(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

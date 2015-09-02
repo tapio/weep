@@ -4,6 +4,7 @@
 #include "geometry.hpp"
 #include "camera.hpp"
 #include "scene.hpp"
+#include "image.hpp"
 
 
 class Frustum
@@ -30,6 +31,26 @@ private:
 Renderer::Renderer(Resources& resources)
 {
 	m_device.reset(new RenderDevice(resources));
+
+	// TODO: Move to Environment class?
+	std::string err;
+	Json def = Json::parse(resources.getText("environment.json", Resources::NO_CACHE), err);
+	if (!err.empty())
+		panic("Failed to read environment: %s", err.c_str());
+
+	ASSERT(def.is_object());
+	if (def["skybox"].is_string()) {
+		const string& skyboxDir = def["skybox"].string_value();
+		m_env.skybox[0] = resources.getImage(skyboxDir + "px.jpg");
+		m_env.skybox[1] = resources.getImage(skyboxDir + "nx.jpg");
+		m_env.skybox[2] = resources.getImage(skyboxDir + "py.jpg");
+		m_env.skybox[3] = resources.getImage(skyboxDir + "ny.jpg");
+		m_env.skybox[4] = resources.getImage(skyboxDir + "pz.jpg");
+		m_env.skybox[5] = resources.getImage(skyboxDir + "nz.jpg");
+	}
+	if (def["exposure"].is_number())
+		m_env.exposure = def["exposure"].number_value();
+
 	m_device->setEnvironment(&m_env);
 }
 

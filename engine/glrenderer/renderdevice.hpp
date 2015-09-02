@@ -3,11 +3,11 @@
 #include "uniforms.hpp"
 #include "shader.hpp"
 #include "light.hpp"
+#include "material.hpp"
 
 class Resources;
 struct Model;
 struct Geometry;
-struct Material;
 struct Camera;
 struct Environment;
 
@@ -56,9 +56,13 @@ private:
 	} m_fbo;
 
 	void renderFullscreenQuad();
+	void renderSkybox();
+
+	GPUModel m_fullscreenQuad;
+	GPUModel m_skyboxCube;
+	Material m_skyboxMat;
 
 	uint m_program = 0;
-	GPUModel m_fullscreenQuad;
 	UBO<UniformCommonBlock> m_commonBlock;
 	UBO<UniformObjectBlock> m_objectBlock;
 	UBO<UniformColorBlock> m_colorBlock;
