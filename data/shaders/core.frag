@@ -179,5 +179,16 @@ void main()
 	}
 #endif // defined(USE_DIFFUSE) || defined(USE_SPECULAR)
 
+#ifdef USE_ENV_MAP
+	vec3 worldNormal = normalize((vec4(normal, 0.0) * viewMatrix).xyz);
+	vec3 worldView = normalize((vec4(viewDir, 0.0) * viewMatrix).xyz);
+	vec3 envRefl = reflect(-worldView, worldNormal);
+	vec4 envTex = texture(envMap, envRefl);
+	fragment = envTex;
+	//fragment = vec4(ambientComp + diffuseComp + specularComp + emissionComp, alpha);
+	//float specularStrength = length(specularComp);
+	//fragment.rgb = mix(fragment.rgb, envTex.rgb, specularStrength);
+#else
 	fragment = vec4(ambientComp + diffuseComp + specularComp + emissionComp, alpha);
+#endif
 }

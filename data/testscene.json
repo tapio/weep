@@ -134,5 +134,12 @@
 		},
 		"position": [ -3, 0, -14 ],
 		"scale": 0.5
+	},{
+		"prefab": "testcube",
+		"material": {
+			"shaderName": "nsrmap"
+		},
+		"position": [ -1, 0, -14 ],
+		"scale": 0.5
 	}
 ]}

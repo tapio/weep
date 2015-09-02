@@ -312,12 +312,17 @@ void RenderDevice::render(Model& model)
 	m_objectBlock.uniforms.modelViewMatrix = modelView;
 	m_objectBlock.uniforms.normalMatrix = glm::inverseTranspose(modelView);
 	m_objectBlock.upload();
-	for (uint i = 0; i < mat.map.size(); ++i) {
+	for (uint i = 0; i < Material::ENV_MAP; ++i) {
 		uint tex = mat.tex[i];
 		if (!tex) continue;
 		glActiveTexture(GL_TEXTURE10 + i);
 		glBindTexture(GL_TEXTURE_2D, tex);
 		//glUniform1i(i, i);
+	}
+	if (m_skyboxMat.shaderId != -1) {
+		uint tex = m_skyboxMat.tex[Material::ENV_MAP];
+		glActiveTexture(GL_TEXTURE10 + Material::ENV_MAP);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
 	}
 	glBindVertexArray(gpuData.vao);
 	uint mode = mat.tessellate ? GL_PATCHES : GL_TRIANGLES;
