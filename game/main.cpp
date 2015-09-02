@@ -6,6 +6,7 @@
 #include "resources.hpp"
 #include "controller.hpp"
 #include "physics.hpp"
+#include "glrenderer/renderdevice.hpp"
 
 #include <SDL2/SDL.h>
 #include "imgui/imgui.h"
@@ -129,8 +130,15 @@ int main(int, char*[])
 			}
 		}
 
-		physics.step(Engine::dt);
-		physics.syncTransforms(scene);
+		// Physics
+		float physTimeMs = 0.f;
+		{
+			uint64 t0 = SDL_GetPerformanceCounter();
+			physics.step(Engine::dt);
+			physics.syncTransforms(scene);
+			uint64 t1 = SDL_GetPerformanceCounter();
+			physTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
+		}
 
 		if (cameraObj) {
 			const btTransform& trans = cameraObj->body->getCenterOfMassTransform();
@@ -141,10 +149,14 @@ int main(int, char*[])
 		renderer.render(scene, camera);
 
 		ImGui::Text("Right mouse button to toggle mouse grab.");
-		ImGui::Text("FPS: %d (%fms)", int(1.0 / Engine::dt), Engine::dt);
+		ImGui::Text("FPS: %d (%.3fms)", int(1.0 / Engine::dt), Engine::dt * 1000.f);
 		ImGui::Text("Cam: %.1f %.1f %.1f", camera.position.x, camera.position.y, camera.position.z);
 		if (ImGui::CollapsingHeader("Stats")) {
-
+			ImGui::Text("Physics:    %.3fms", physTimeMs);
+			const RenderDevice::Stats& stats = renderer.device().stats;
+			ImGui::Text("Triangles:  %d", stats.triangles);
+			ImGui::Text("Programs:   %d", stats.programs);
+			ImGui::Text("Draw calls: %d", stats.drawCalls);
 		}
 		if (ImGui::CollapsingHeader("Settings")) {
 			bool vsync = Engine::vsync();

@@ -22,6 +22,8 @@ public:
 	void dumpStats() const;
 	void toggleWireframe();
 
+	RenderDevice& device() { return *m_device; }
+
 private:
 	std::unique_ptr<RenderDevice> m_device;
 	std::vector<Model*> m_models;
