@@ -11,7 +11,7 @@ out VertexData {
 
 void main()
 {
-	outData.texcoord = texcoord;
+	outData.texcoord = texcoord * material.uvRepeat + material.uvOffset;
 	outData.normal = mat3(normalMatrix) * normal;
 	outData.position = (modelViewMatrix * vec4(position, 1.0)).xyz;
 #ifndef USE_TESSELLATION

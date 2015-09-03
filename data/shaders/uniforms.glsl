@@ -24,10 +24,11 @@ UBO_PREFIX(UniformObjectBlock, 1)
 	mat4 normalMatrix; // Problems with alignment if sent as mat3
 };
 
-UBO_PREFIX(UniformColorBlock, 2)
+UBO_PREFIX(UniformMaterialBlock, 2)
 	vec3 ambient; float pad1;
 	vec3 diffuse; float pad2;
 	vec3 specular; float shininess;
+	vec2 uvOffset; vec2 uvRepeat;
 UBO_SUFFIX(material)
 
 struct UniformLightData {

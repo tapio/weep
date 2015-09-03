@@ -28,5 +28,5 @@ void UBO<T>::destroy()
 
 template class UBO<UniformCommonBlock>;
 template class UBO<UniformObjectBlock>;
-template class UBO<UniformColorBlock>;
+template class UBO<UniformMaterialBlock>;
 template class UBO<UniformLightBlock>;

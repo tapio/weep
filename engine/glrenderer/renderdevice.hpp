@@ -66,7 +66,7 @@ private:
 	bool m_wireframe = false;
 	UBO<UniformCommonBlock> m_commonBlock;
 	UBO<UniformObjectBlock> m_objectBlock;
-	UBO<UniformColorBlock> m_colorBlock;
+	UBO<UniformMaterialBlock> m_materialBlock;
 	UBO<UniformLightBlock> m_lightBlock;
 	std::vector<ShaderProgram> m_shaders;
 	std::map<string, int> m_shaderNames;

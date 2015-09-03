@@ -36,6 +36,11 @@ namespace {
 			if (!materialDef["shininess"].is_null())
 				model.material->shininess = materialDef["shininess"].number_value();
 
+			if (!materialDef["uvOffset"].is_null())
+				model.material->uvOffset = toVec2(materialDef["uvOffset"]);
+			if (!materialDef["uvRepeat"].is_null())
+				model.material->uvRepeat = toVec2(materialDef["uvRepeat"]);
+
 			if (!materialDef["diffuseMap"].is_null()) {
 				model.material->map[Material::DIFFUSE_MAP] = resources.getImage(materialDef["diffuseMap"].string_value());
 				model.material->map[Material::DIFFUSE_MAP]->sRGB = true;

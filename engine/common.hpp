@@ -54,6 +54,13 @@ string replace(string str, const string& search, const string& replace);
 	T(const T&) = delete; \
 	T& operator=(const T&) = delete
 
+
+inline vec2 toVec2(const Json& v) {
+	if (v.is_number()) return vec2(v.number_value());
+	ASSERT(v.is_array());
+	return vec2(v[0].number_value(), v[1].number_value());
+
+}
 inline vec3 toVec3(const Json& arr) {
 	ASSERT(arr.is_array());
 	return vec3(arr[0].number_value(), arr[1].number_value(), arr[2].number_value());

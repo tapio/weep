@@ -81,7 +81,7 @@ RenderDevice::RenderDevice(Resources& resources)
 
 	m_commonBlock.create();
 	m_objectBlock.create();
-	m_colorBlock.create();
+	m_materialBlock.create();
 	m_lightBlock.create();
 }
 
@@ -164,7 +164,7 @@ RenderDevice::~RenderDevice()
 	glDeleteVertexArrays(1, &m_fullscreenQuad.vao);
 	m_commonBlock.destroy();
 	m_objectBlock.destroy();
-	m_colorBlock.destroy();
+	m_materialBlock.destroy();
 	m_lightBlock.destroy();
 }
 
@@ -307,11 +307,13 @@ void RenderDevice::render(Model& model)
 		++stats.programs;
 	}
 	model.updateMatrix();
-	m_colorBlock.uniforms.ambient = mat.ambient;
-	m_colorBlock.uniforms.diffuse = mat.diffuse;
-	m_colorBlock.uniforms.specular = mat.specular;
-	m_colorBlock.uniforms.shininess = mat.shininess;
-	m_colorBlock.upload();
+	m_materialBlock.uniforms.ambient = mat.ambient;
+	m_materialBlock.uniforms.diffuse = mat.diffuse;
+	m_materialBlock.uniforms.specular = mat.specular;
+	m_materialBlock.uniforms.shininess = mat.shininess;
+	m_materialBlock.uniforms.uvOffset = mat.uvOffset;
+	m_materialBlock.uniforms.uvRepeat = mat.uvRepeat;
+	m_materialBlock.upload();
 	m_objectBlock.uniforms.modelMatrix = model.transform;
 	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_objectBlock.uniforms.modelMatrix;
 	m_objectBlock.uniforms.modelViewMatrix = modelView;

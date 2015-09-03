@@ -10,6 +10,8 @@ struct Material
 	vec3 specular = vec3(1, 1, 1);
 	vec3 emissive = vec3(0, 0, 0);
 	float shininess = 32.0f;
+	vec2 uvOffset = vec2(0, 0);
+	vec2 uvRepeat = vec2(1, 1);
 
 	enum MapTypes {
 		DIFFUSE_MAP,
