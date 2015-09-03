@@ -40,14 +40,26 @@ Renderer::Renderer(Resources& resources)
 
 	ASSERT(def.is_object());
 	if (def["skybox"].is_string()) {
-		const string& skyboxDir = def["skybox"].string_value();
-		m_env.skybox[0] = resources.getImage(skyboxDir + "px.jpg");
-		m_env.skybox[1] = resources.getImage(skyboxDir + "nx.jpg");
-		m_env.skybox[2] = resources.getImage(skyboxDir + "py.jpg");
-		m_env.skybox[3] = resources.getImage(skyboxDir + "ny.jpg");
-		m_env.skybox[4] = resources.getImage(skyboxDir + "pz.jpg");
-		m_env.skybox[5] = resources.getImage(skyboxDir + "nz.jpg");
+		const string& skyboxPath = def["skybox"].string_value();
+		if (skyboxPath.back() == '/' || skyboxPath.back() == '\\') {
+			m_env.skybox[0] = resources.getImage(skyboxPath + "px.jpg");
+			m_env.skybox[1] = resources.getImage(skyboxPath + "nx.jpg");
+			m_env.skybox[2] = resources.getImage(skyboxPath + "py.jpg");
+			m_env.skybox[3] = resources.getImage(skyboxPath + "ny.jpg");
+			m_env.skybox[4] = resources.getImage(skyboxPath + "pz.jpg");
+			m_env.skybox[5] = resources.getImage(skyboxPath + "nz.jpg");
+		} else {
+			for (int i = 0; i < 6; i++)
+				m_env.skybox[i] = resources.getImage(skyboxPath);
+		}
+	} else if (def["skybox"].is_array()) {
+		for (int i = 0; i < 6; i++)
+			m_env.skybox[i] = resources.getImage(def["skybox"][i].string_value());
 	}
+	for (int i = 0; i < 6; i++)
+		if (m_env.skybox[i])
+			m_env.skybox[i]->sRGB = true;
+
 	if (def["exposure"].is_number())
 		m_env.exposure = def["exposure"].number_value();
 	if (!def["ambient"].is_null())
