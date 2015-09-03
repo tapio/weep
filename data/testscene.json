@@ -138,7 +138,8 @@
 	},{
 		"prefab": "testcube",
 		"material": {
-			"shaderName": "nsrmap"
+			"shaderName": "nsrmap",
+			"reflectionMap": "debug/uvtestgrid_height.png"
 		},
 		"position": [ -1, 0, -14 ],
 		"scale": 0.5

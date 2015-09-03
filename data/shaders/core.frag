@@ -208,10 +208,14 @@ void main()
 	vec3 worldView = normalize((vec4(viewDir, 0.0) * viewMatrix).xyz);
 	vec3 envRefl = reflect(-worldView, worldNormal);
 	vec4 envTex = texture(envMap, envRefl);
-	fragment = envTex;
-	//fragment = vec4(ambientComp + diffuseComp + specularComp + emissionComp, alpha);
-	//float specularStrength = length(specularComp);
-	//fragment.rgb = mix(fragment.rgb, envTex.rgb, specularStrength);
+	float reflStrength = 1.0;
+#ifdef USE_REFLECTION_MAP
+	reflStrength *= texture(reflectionMap, texcoord).x;
+#endif
+	fragment = vec4(ambientComp + diffuseComp + specularComp + emissionComp, alpha);
+	fragment.rgb *= (1.0 - reflStrength);
+	fragment.rgb += reflStrength * envTex.rgb;
+	//fragment.rgb = mix(fragment.rgb, envTex.rgb, reflStrength);
 #else
 	fragment = vec4(ambientComp + diffuseComp + specularComp + emissionComp, alpha);
 #endif

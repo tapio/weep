@@ -117,7 +117,8 @@
 			"USE_DIFFUSE_MAP",
 			"USE_SPECULAR_MAP",
 			"XXXUSE_NORMAL_MAP",
-			"USE_ENV_MAP"
+			"USE_ENV_MAP",
+			"XXXUSE_REFLECTION_MAP"
 		],
 		"shaders" : {
 			"vert": "shaders/core.vert",

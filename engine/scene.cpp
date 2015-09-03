@@ -57,6 +57,8 @@ namespace {
 				model.material->map[Material::NORMAL_MAP] = resources.getImage(materialDef["normalMap"].string_value());
 			if (!materialDef["heightMap"].is_null())
 				model.material->map[Material::HEIGHT_MAP] = resources.getImage(materialDef["heightMap"].string_value());
+			if (!materialDef["reflectionMap"].is_null())
+				model.material->map[Material::REFLECTION_MAP] = resources.getImage(materialDef["reflectionMap"].string_value());
 		}
 
 		// Parse body
