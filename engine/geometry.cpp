@@ -42,9 +42,11 @@ Geometry::Geometry(const string& path)
 			if (mtlMap.empty()) {
 				mtlMap[materialName] = 0;
 			} else if (mtlMap.find(materialName) == mtlMap.end()) {
-				mtlMap[materialName] = batches.size();
+				uint newIndex = batches.size();
+				mtlMap[materialName] = newIndex;
 				batches.emplace_back();
 				batch = &batches.back();
+				batch->materialIndex = newIndex;
 			} else {
 				batch = &batches.at(mtlMap[materialName]);
 			}
