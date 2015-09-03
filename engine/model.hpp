@@ -22,7 +22,7 @@ struct Model
 
 	string name;
 	Geometry* geometry = nullptr;
-	std::shared_ptr<Material> material;
+	std::vector<Material*> materials;
 	btRigidBody* body = nullptr;
 
 	// TODO: Get rid of

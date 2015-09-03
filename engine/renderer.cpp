@@ -107,7 +107,7 @@ void Renderer::render(Scene& scene, Camera& camera)
 	Frustum frustum(camera);
 	m_device->preRender(camera, scene.getLights());
 	for (auto& model : scene.getChildren()) {
-		if (model.material && frustum.visible(model))
+		if (!model.materials.empty() && frustum.visible(model))
 			m_device->render(model);
 	}
 	m_device->postRender();

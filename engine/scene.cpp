@@ -7,6 +7,48 @@
 
 namespace {
 
+	Material* parseMaterial(Material* material, const Json& def, Resources& resources) {
+		ASSERT(def.is_object());
+		if (def["shaderName"].is_string())
+			material->shaderName = def["shaderName"].string_value();
+		if (def["tessellate"].bool_value())
+			material->tessellate = true;
+		if (!def["ambient"].is_null())
+			material->ambient = colorToVec3(def["ambient"]);
+		if (!def["diffuse"].is_null())
+			material->diffuse = colorToVec3(def["diffuse"]);
+		if (!def["specular"].is_null())
+			material->specular = colorToVec3(def["specular"]);
+		if (!def["shininess"].is_null())
+			material->shininess = def["shininess"].number_value();
+
+		if (!def["uvOffset"].is_null())
+			material->uvOffset = toVec2(def["uvOffset"]);
+		if (!def["uvRepeat"].is_null())
+			material->uvRepeat = toVec2(def["uvRepeat"]);
+
+		if (!def["diffuseMap"].is_null()) {
+			material->map[Material::DIFFUSE_MAP] = resources.getImage(def["diffuseMap"].string_value());
+			material->map[Material::DIFFUSE_MAP]->sRGB = true;
+		}
+		if (!def["specularMap"].is_null()) {
+			material->map[Material::SPECULAR_MAP] = resources.getImage(def["specularMap"].string_value());
+			material->map[Material::SPECULAR_MAP]->sRGB = true;
+		}
+		if (!def["emissionMap"].is_null()) {
+			material->map[Material::EMISSION_MAP] = resources.getImage(def["emissionMap"].string_value());
+			material->map[Material::EMISSION_MAP]->sRGB = true;
+		}
+		if (!def["normalMap"].is_null())
+			material->map[Material::NORMAL_MAP] = resources.getImage(def["normalMap"].string_value());
+		if (!def["heightMap"].is_null())
+			material->map[Material::HEIGHT_MAP] = resources.getImage(def["heightMap"].string_value());
+		if (!def["reflectionMap"].is_null())
+			material->map[Material::REFLECTION_MAP] = resources.getImage(def["reflectionMap"].string_value());
+
+		return material;
+	}
+
 	void parseModel(Model& model, const Json& def, Resources& resources) {
 		// Parse geometry
 		if (!def["geometry"].is_null()) {
@@ -17,48 +59,21 @@ namespace {
 		}
 
 		// Parse material
-		if (!def["material"].is_null()) {
-			const Json& materialDef = def["material"];
-			ASSERT(materialDef.is_object());
-			if (!model.material)
-				model.material.reset(new Material());
-			else model.material.reset(new Material(*model.material));
-			if (materialDef["shaderName"].is_string())
-				model.material->shaderName = materialDef["shaderName"].string_value();
-			if (materialDef["tessellate"].bool_value())
-				model.material->tessellate = true;
-			if (!materialDef["ambient"].is_null())
-				model.material->ambient = colorToVec3(materialDef["ambient"]);
-			if (!materialDef["diffuse"].is_null())
-				model.material->diffuse = colorToVec3(materialDef["diffuse"]);
-			if (!materialDef["specular"].is_null())
-				model.material->specular = colorToVec3(materialDef["specular"]);
-			if (!materialDef["shininess"].is_null())
-				model.material->shininess = materialDef["shininess"].number_value();
-
-			if (!materialDef["uvOffset"].is_null())
-				model.material->uvOffset = toVec2(materialDef["uvOffset"]);
-			if (!materialDef["uvRepeat"].is_null())
-				model.material->uvRepeat = toVec2(materialDef["uvRepeat"]);
-
-			if (!materialDef["diffuseMap"].is_null()) {
-				model.material->map[Material::DIFFUSE_MAP] = resources.getImage(materialDef["diffuseMap"].string_value());
-				model.material->map[Material::DIFFUSE_MAP]->sRGB = true;
+		const Json& materialDef = def["material"];
+		if (materialDef.is_object()) {
+			ASSERT(model.materials.size() <= 1);
+			if (model.materials.empty())
+				model.materials.push_back(new Material());
+			parseMaterial(model.materials.back(), materialDef, resources);
+		} else if (materialDef.is_array()) {
+			if (model.materials.empty()) {
+				for (auto& matDef : materialDef.array_items())
+					model.materials.push_back(parseMaterial(new Material(), matDef, resources));
+			} else {
+				ASSERT(model.materials.size() == materialDef.array_items().size());
+				for (uint i = 0; i < materialDef.array_items().size(); ++i)
+					parseMaterial(model.materials[i], materialDef[i], resources);
 			}
-			if (!materialDef["specularMap"].is_null()) {
-				model.material->map[Material::SPECULAR_MAP] = resources.getImage(materialDef["specularMap"].string_value());
-				model.material->map[Material::SPECULAR_MAP]->sRGB = true;
-			}
-			if (!materialDef["emissionMap"].is_null()) {
-				model.material->map[Material::EMISSION_MAP] = resources.getImage(materialDef["emissionMap"].string_value());
-				model.material->map[Material::EMISSION_MAP]->sRGB = true;
-			}
-			if (!materialDef["normalMap"].is_null())
-				model.material->map[Material::NORMAL_MAP] = resources.getImage(materialDef["normalMap"].string_value());
-			if (!materialDef["heightMap"].is_null())
-				model.material->map[Material::HEIGHT_MAP] = resources.getImage(materialDef["heightMap"].string_value());
-			if (!materialDef["reflectionMap"].is_null())
-				model.material->map[Material::REFLECTION_MAP] = resources.getImage(materialDef["reflectionMap"].string_value());
 		}
 
 		// Parse body

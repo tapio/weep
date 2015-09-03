@@ -296,36 +296,14 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 void RenderDevice::render(Model& model)
 {
 	Geometry& geom = *model.geometry;
-	Material& mat = *model.material.get();
-	if (mat.shaderId < 0)
-		uploadMaterial(mat);
 
-	uint programId = m_shaders[mat.shaderId].id;
-	if (m_program != programId) {
-		m_program = programId;
-		glUseProgram(m_program);
-		++stats.programs;
-	}
 	model.updateMatrix();
-	m_materialBlock.uniforms.ambient = mat.ambient;
-	m_materialBlock.uniforms.diffuse = mat.diffuse;
-	m_materialBlock.uniforms.specular = mat.specular;
-	m_materialBlock.uniforms.shininess = mat.shininess;
-	m_materialBlock.uniforms.uvOffset = mat.uvOffset;
-	m_materialBlock.uniforms.uvRepeat = mat.uvRepeat;
-	m_materialBlock.upload();
 	m_objectBlock.uniforms.modelMatrix = model.transform;
 	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_objectBlock.uniforms.modelMatrix;
 	m_objectBlock.uniforms.modelViewMatrix = modelView;
 	m_objectBlock.uniforms.normalMatrix = glm::inverseTranspose(modelView);
 	m_objectBlock.upload();
-	for (uint i = 0; i < Material::ENV_MAP; ++i) {
-		uint tex = mat.tex[i];
-		if (!tex) continue;
-		glActiveTexture(GL_TEXTURE10 + i);
-		glBindTexture(GL_TEXTURE_2D, tex);
-		//glUniform1i(i, i);
-	}
+
 	if (m_skyboxMat.shaderId != -1) {
 		uint tex = m_skyboxMat.tex[Material::ENV_MAP];
 		glActiveTexture(GL_TEXTURE10 + Material::ENV_MAP);
@@ -333,6 +311,34 @@ void RenderDevice::render(Model& model)
 	}
 
 	for (auto& batch : geom.batches) {
+
+		Material& mat = *model.materials[batch.materialIndex];
+		if (mat.shaderId < 0)
+			uploadMaterial(mat); // TODO: Should not be here!
+
+		uint programId = m_shaders[mat.shaderId].id;
+		if (m_program != programId) {
+			m_program = programId;
+			glUseProgram(m_program);
+			++stats.programs;
+		}
+
+		m_materialBlock.uniforms.ambient = mat.ambient;
+		m_materialBlock.uniforms.diffuse = mat.diffuse;
+		m_materialBlock.uniforms.specular = mat.specular;
+		m_materialBlock.uniforms.shininess = mat.shininess;
+		m_materialBlock.uniforms.uvOffset = mat.uvOffset;
+		m_materialBlock.uniforms.uvRepeat = mat.uvRepeat;
+		m_materialBlock.upload();
+
+		for (uint i = 0; i < Material::ENV_MAP; ++i) {
+			uint tex = mat.tex[i];
+			if (!tex) continue;
+			glActiveTexture(GL_TEXTURE10 + i);
+			glBindTexture(GL_TEXTURE_2D, tex);
+			//glUniform1i(i, i);
+		}
+
 		if (batch.renderId == -1)
 			uploadGeometry(geom); // TODO: Should not be here!
 
