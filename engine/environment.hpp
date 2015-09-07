@@ -9,8 +9,14 @@ struct Environment
 	void reset();
 
 	vec3 ambient = vec3(0.1, 0.1, 0.1);
-	// 0 = Reinhard tonemapping
 	float exposure = 0.f;
+	enum Tonemap {
+		TONEMAP_REINHARD,
+		TONEMAP_EXPOSURE,
+		TONEMAP_FILMIC,
+		TONEMAP_UNCHARTED2,
+		TONEMAP_COUNT
+	} tonemap = TONEMAP_REINHARD;
 
 	vec3 sunDirection = vec3(0, -1, 0);
 	vec3 sunColor = vec3(0, 0, 0);

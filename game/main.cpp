@@ -168,6 +168,7 @@ int main(int, char*[])
 		}
 		if (ImGui::CollapsingHeader("Environment")) {
 			Environment& env = renderer.env();
+			ImGui::SliderInt("Tonemap", (int*)&env.tonemap, 0, Environment::TONEMAP_COUNT-1);
 			ImGui::SliderFloat("Exposure", &env.exposure, 0.0f, 10.0f);
 			ImGui::ColorEdit3("Ambient", (float*)&env.ambient);
 			ImGui::ColorEdit3("Sun Color", (float*)&env.sunColor);

@@ -32,6 +32,8 @@ void Environment::load(const string& path, Resources& resources)
 
 	if (def["exposure"].is_number())
 		exposure = def["exposure"].number_value();
+	if (def["tonemap"].is_number())
+		tonemap = (Tonemap)def["tonemap"].number_value();
 	if (!def["ambient"].is_null())
 		ambient = colorToVec3(def["ambient"]);
 	if (!def["sunDirection"].is_null())
