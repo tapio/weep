@@ -87,7 +87,6 @@ void Renderer::reset(Scene& scene)
 	for (auto& model : scene.getChildren()) {
 		m_device->destroyModel(model);
 	}
-	m_device->loadShaders();
 }
 
 void Renderer::dumpStats() const
