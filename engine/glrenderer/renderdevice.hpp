@@ -17,7 +17,7 @@ public:
 	RenderDevice(Resources& resources);
 	~RenderDevice();
 
-	void setEnvironment(Environment* env) { m_env = env; }
+	void setEnvironment(Environment* env);
 	void loadShaders();
 	bool uploadGeometry(Geometry& geometry);
 	bool uploadMaterial(Material& material);

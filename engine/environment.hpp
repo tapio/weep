@@ -5,6 +5,9 @@
 
 struct Environment
 {
+	void load(const string& path, Resources& resources);
+	void reset();
+
 	vec3 ambient = vec3(0.1, 0.1, 0.1);
 	// 0 = Reinhard tonemapping
 	float exposure = 0.f;

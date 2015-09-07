@@ -168,6 +168,12 @@ RenderDevice::~RenderDevice()
 	m_lightBlock.destroy();
 }
 
+void RenderDevice::setEnvironment(Environment* env)
+{
+	 m_env = env;
+	 m_skyboxMat.shaderId = -1; // TODO: Proper destroy
+}
+
 void RenderDevice::destroyModel(Model& model)
 {
 	if (!model.geometry)

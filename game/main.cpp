@@ -196,6 +196,9 @@ int main(int, char*[])
 			scene.reset();
 			resources.reset();
 			renderer.device().loadShaders();
+			renderer.env().reset();
+			renderer.env().load("environment.json", resources);
+			renderer.device().setEnvironment(&renderer.env());
 			scene.load(scenePath, resources);
 			physics.addScene(scene);
 			reload = false;
