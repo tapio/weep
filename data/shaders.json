@@ -48,6 +48,7 @@
 	},
 	"diffusemap": {
 		"defines": [
+			"USE_FOG",
 			"USE_DIFFUSE",
 			"USE_SPECULAR",
 			"USE_DIFFUSE_MAP"
@@ -59,6 +60,7 @@
 	},
 	"specularmap": {
 		"defines": [
+			"USE_FOG",
 			"USE_DIFFUSE",
 			"USE_SPECULAR",
 			"USE_DIFFUSE_MAP",
@@ -71,6 +73,7 @@
 	},
 	"nsmap": {
 		"defines": [
+			"USE_FOG",
 			"USE_DIFFUSE",
 			"USE_SPECULAR",
 			"USE_DIFFUSE_MAP",
@@ -84,6 +87,7 @@
 	},
 	"nsamap": {
 		"defines": [
+			"USE_FOG",
 			"USE_DIFFUSE",
 			"USE_SPECULAR",
 			"USE_DIFFUSE_MAP",
@@ -98,6 +102,7 @@
 	},
 	"nsemap": {
 		"defines": [
+			"USE_FOG",
 			"USE_DIFFUSE",
 			"USE_SPECULAR",
 			"USE_DIFFUSE_MAP",
@@ -112,6 +117,7 @@
 	},
 	"nsrmap": {
 		"defines": [
+			"USE_FOG",
 			"USE_DIFFUSE",
 			"USE_SPECULAR",
 			"USE_DIFFUSE_MAP",
@@ -127,6 +133,7 @@
 	},
 	"parallax": {
 		"defines": [
+			"USE_FOG",
 			"USE_DIFFUSE",
 			"USE_SPECULAR",
 			"USE_DIFFUSE_MAP",
@@ -142,6 +149,7 @@
 	"nstess": {
 		"version": "430",
 		"defines": [
+			"USE_FOG",
 			"USE_TESSELLATION",
 			"USE_DIFFUSE",
 			"USE_SPECULAR",
@@ -159,6 +167,7 @@
 	"terrain_tess": {
 		"version": "430",
 		"defines": [
+			"USE_FOG",
 			"USE_TESSELLATION",
 			"USE_DIFFUSE",
 			"USE_SPECULAR",

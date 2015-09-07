@@ -275,6 +275,8 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 	m_commonBlock.uniforms.exposure = m_env->exposure;
 	m_commonBlock.uniforms.sunDirection = glm::normalize(m_env->sunDirection);
 	m_commonBlock.uniforms.sunColor = m_env->sunColor;
+	m_commonBlock.uniforms.fogColor = m_env->fogColor;
+	m_commonBlock.uniforms.fogDensity = m_env->fogDensity;
 
 	if (!lights.empty()) {
 		uint numLights = std::min((int)lights.size(), MAX_LIGHTS);

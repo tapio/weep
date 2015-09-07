@@ -68,6 +68,10 @@ Renderer::Renderer(Resources& resources)
 		m_env.sunDirection = toVec3(def["sunDirection"]);
 	if (!def["sunColor"].is_null())
 		m_env.sunColor = colorToVec3(def["sunColor"]);
+	if (!def["fogColor"].is_null())
+		m_env.fogColor = colorToVec3(def["fogColor"]);
+	if (!def["fogDensity"].is_null())
+		m_env.fogDensity = def["fogDensity"].number_value();
 
 	m_device->setEnvironment(&m_env);
 }

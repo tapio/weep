@@ -142,10 +142,12 @@ void main()
 	emissionComp += texture(emissionMap, texcoord).rgb;
 #endif
 
+	float sunAmount = 0.0;
 #if defined(USE_DIFFUSE) || defined(USE_SPECULAR)
 
 	if (sunColor.r > 0 || sunColor.g > 0 || sunColor.b > 0) {
-		vec3 sunDir = -(viewMatrix * vec4(sunDirection, 0.0)).xyz;
+		vec3 sunDir = normalize(-(viewMatrix * vec4(sunDirection, 0.0)).xyz);
+		sunAmount = max(dot(viewDir, -sunDir), 0.0);
 		// Sun diffuse
 #ifdef USE_DIFFUSE
 		float diff = max(dot(normal, sunDir), 0.0);
@@ -218,5 +220,13 @@ void main()
 	//fragment.rgb = mix(fragment.rgb, envTex.rgb, reflStrength);
 #else
 	fragment = vec4(ambientComp + diffuseComp + specularComp + emissionComp, alpha);
+#endif
+
+#ifdef USE_FOG
+	// http://iquilezles.org/www/articles/fog/fog.htm
+	float depth = gl_FragCoord.z / gl_FragCoord.w;
+	float fogAmount = 1.0 - exp(-depth * fogDensity);
+	vec3 sunAffectedFogColor = mix(fogColor, sunColor, pow(sunAmount, 8.0));
+	fragment.rgb = mix(fragment.rgb, sunAffectedFogColor, fogAmount);
 #endif
 }

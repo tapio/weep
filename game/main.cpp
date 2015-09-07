@@ -172,6 +172,8 @@ int main(int, char*[])
 			ImGui::ColorEdit3("Ambient", (float*)&env.ambient);
 			ImGui::ColorEdit3("Sun Color", (float*)&env.sunColor);
 			ImGui::SliderFloat3("Sun Dir", (float*)&env.sunDirection, -3.f, 3.f);
+			ImGui::ColorEdit3("Fog Color", (float*)&env.fogColor);
+			ImGui::SliderFloat("Fog Density", &env.fogDensity, 0.0f, 1.0f);
 		}
 		if (ImGui::CollapsingHeader("Scene")) {
 			ImGui::InputText("", scenePath, sizeof(scenePath));

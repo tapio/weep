@@ -16,6 +16,7 @@ UBO_PREFIX(UniformCommonBlock, 0)
 	vec3 globalAmbient; float exposure;
 	vec3 sunDirection; float pad1;
 	vec3 sunColor; float pad2;
+	vec3 fogColor; float fogDensity;
 };
 
 UBO_PREFIX(UniformObjectBlock, 1)
