@@ -9,7 +9,7 @@ struct Environment
 	void reset();
 
 	vec3 ambient = vec3(0.1, 0.1, 0.1);
-	float exposure = 0.f;
+	float exposure = 1.f;
 	enum Tonemap {
 		TONEMAP_REINHARD,
 		TONEMAP_EXPOSURE,
