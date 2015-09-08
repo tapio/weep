@@ -35,8 +35,13 @@ list(APPEND LIBS ${GL_LIBRARIES})
 include_directories(engine)
 include_directories(SYSTEM third-party)
 include_directories(SYSTEM third-party/bullet)
+include_directories(SYSTEM third-party/soloud/include)
 
 add_definitions(-DGL_GLEXT_PROTOTYPES)
+# SoLoud
+add_definitions(-DWITH_NULL -DWITH_SDL2_STATIC)
+
+# TODO: Make separate libs of third-party deps
 
 file(GLOB_RECURSE DEPS_SOURCES "third-party/*.cpp" "third-party/*.hpp" "third-party/*.h")
 file(GLOB_RECURSE ENGINE_SOURCES "engine/*.cpp" "engine/*.hpp")
