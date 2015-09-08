@@ -10,7 +10,7 @@ public:
 	~PhysicsSystem();
 	void reset();
 
-	void addScene(class Scene& model);
+	void addScene(class Scene& scene);
 	bool addModel(struct Model& model);
 
 	void syncTransforms(class Scene& scene);
