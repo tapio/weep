@@ -6,6 +6,7 @@
 #include "resources.hpp"
 #include "controller.hpp"
 #include "physics.hpp"
+#include "audio.hpp"
 #include "glrenderer/renderdevice.hpp"
 
 #include <SDL2/SDL.h>
@@ -21,6 +22,7 @@ int main(int, char*[])
 	if (Engine::settings["moddir"].is_string())
 		resources.addPath(Engine::settings["moddir"].string_value());
 	Renderer renderer(resources);
+	AudioSystem audio;
 
 	float ar = Engine::width() / (float)Engine::height();
 	Camera camera;
@@ -147,17 +149,35 @@ int main(int, char*[])
 			camera.rotation = convert(trans.getRotation());
 		}
 
-		renderer.render(scene, camera);
+		// Audio
+		float audioTimeMs = 0.f;
+		{
+			uint64 t0 = SDL_GetPerformanceCounter();
+			audio.update();
+			uint64 t1 = SDL_GetPerformanceCounter();
+			audioTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
+		}
+
+		// Graphics
+		float renderTimeMs = 0.f;
+		{
+			uint64 t0 = SDL_GetPerformanceCounter();
+			renderer.render(scene, camera);
+			uint64 t1 = SDL_GetPerformanceCounter();
+			renderTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
+		}
 
 		ImGui::Text("Right mouse button to toggle mouse grab.");
 		ImGui::Text("FPS: %d (%.3fms)", int(1.0 / Engine::dt), Engine::dt * 1000.f);
 		ImGui::Text("Cam: %.1f %.1f %.1f", camera.position.x, camera.position.y, camera.position.z);
 		if (ImGui::CollapsingHeader("Stats")) {
-			ImGui::Text("Physics:    %.3fms", physTimeMs);
+			ImGui::Text("Physics:      %.3fms", physTimeMs);
+			ImGui::Text("Audio:        %.3fms", audioTimeMs);
+			ImGui::Text("CPU Render:   %.3fms", renderTimeMs);
 			const RenderDevice::Stats& stats = renderer.device().stats;
-			ImGui::Text("Triangles:  %d", stats.triangles);
-			ImGui::Text("Programs:   %d", stats.programs);
-			ImGui::Text("Draw calls: %d", stats.drawCalls);
+			ImGui::Text("Triangles:    %d", stats.triangles);
+			ImGui::Text("Programs:     %d", stats.programs);
+			ImGui::Text("Draw calls:   %d", stats.drawCalls);
 		}
 		if (ImGui::CollapsingHeader("Settings")) {
 			bool vsync = Engine::vsync();
