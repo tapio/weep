@@ -7,7 +7,6 @@
 	},
 	"postfx": {
 		"defines": [
-			"USE_DIFFUSE_MAP"
 		],
 		"shaders" : {
 			"vert": "shaders/postfx.vert",

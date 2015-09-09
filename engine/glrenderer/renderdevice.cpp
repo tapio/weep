@@ -59,30 +59,31 @@ RenderDevice::RenderDevice(Resources& resources)
 	glVertexAttribPointer(ATTR_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glDisableVertexAttribArray(ATTR_NORMAL);
 
-	// Set up floating point framebuffer to render scene to
+	// Set up floating point framebuffer to render HDR scene to
 	glGenFramebuffers(1, &m_fbo.fbo);
-	// Create floating point color buffer for HDR rendering
 	glGenTextures(1, &m_fbo.colorBuffer);
-	glBindTexture(GL_TEXTURE_2D, m_fbo.colorBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Engine::width(), Engine::height(), 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// Create depth buffer (renderbuffer)
-	glGenRenderbuffers(1, &m_fbo.depthBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, m_fbo.depthBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, Engine::width(), Engine::height());
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.colorBuffer);
+	int samples = Engine::settings["renderer"]["msaa"].number_value();
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB16F, Engine::width(), Engine::height(), GL_TRUE);
+	// Create depth buffer
+	glGenTextures(1, &m_fbo.depthBuffer);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.depthBuffer);
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_DEPTH_COMPONENT24, Engine::width(), Engine::height(), GL_TRUE);
 	// Attach buffers
 	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo.fbo);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fbo.colorBuffer, 0);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_fbo.depthBuffer);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_fbo.colorBuffer, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, m_fbo.depthBuffer, 0);
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		logError("Framebuffer not complete!");
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glutil::checkGL("Post framebuffer create");
 
 	m_commonBlock.create();
 	m_objectBlock.create();
 	m_materialBlock.create();
 	m_lightBlock.create();
+
+	m_commonBlock.uniforms.multisamples = samples;
 }
 
 void RenderDevice::loadShaders()
@@ -156,7 +157,7 @@ void RenderDevice::loadShaders()
 
 RenderDevice::~RenderDevice()
 {
-	glDeleteRenderbuffers(1, &m_fbo.depthBuffer);
+	glDeleteTextures(1, &m_fbo.depthBuffer);
 	glDeleteTextures(1, &m_fbo.colorBuffer);
 	glDeleteFramebuffers(1, &m_fbo.fbo);
 
@@ -468,8 +469,8 @@ void RenderDevice::postRender()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(m_shaders[m_shaderNames["postfx"]].id);
 	++stats.programs;
-	glActiveTexture(GL_TEXTURE10);
-	glBindTexture(GL_TEXTURE_2D, m_fbo.colorBuffer);
+	glActiveTexture(GL_TEXTURE20);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.colorBuffer);
 	renderFullscreenQuad();
 
 	glUseProgram(0);

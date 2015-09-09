@@ -5,6 +5,8 @@ in VertexData {
 	vec3 normal;
 } inData;
 
+layout(binding = 20) uniform sampler2DMS sceneMap;
+
 layout(location = 0) out vec4 fragment;
 
 
@@ -21,10 +23,23 @@ vec3 Uncharted2Tonemap(vec3 x)
 	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
 }
 
+vec4 textureMultisample(sampler2DMS sampler, vec2 uv)
+{
+	vec2 texSize = textureSize(sampler);
+	uv = floor(texSize * uv);
+	ivec2 itexcoord = ivec2(int(uv.s), int(uv.t));
+
+	vec4 color = vec4(0.0);
+	for (int i = 0; i < multisamples; i++)
+		color += texelFetch(sampler, itexcoord, i);
+	color /= float(multisamples);
+	return color;
+}
+
 
 void main()
 {
-	vec3 hdrColor = texture(diffuseMap, inData.texcoord).rgb;
+	vec3 hdrColor = textureMultisample(sceneMap, inData.texcoord).rgb;
 
 	// Tone mapping & gamma
 	vec3 result;
