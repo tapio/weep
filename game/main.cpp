@@ -153,7 +153,7 @@ int main(int, char*[])
 		float audioTimeMs = 0.f;
 		{
 			uint64 t0 = SDL_GetPerformanceCounter();
-			audio.update();
+			audio.update(camera);
 			uint64 t1 = SDL_GetPerformanceCounter();
 			audioTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
 		}
