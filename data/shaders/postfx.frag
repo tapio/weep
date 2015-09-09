@@ -6,6 +6,7 @@ in VertexData {
 } inData;
 
 layout(binding = 20) uniform sampler2DMS sceneMap;
+layout(binding = 21) uniform sampler2DMS depthMap;
 
 layout(location = 0) out vec4 fragment;
 

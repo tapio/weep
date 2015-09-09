@@ -471,6 +471,8 @@ void RenderDevice::postRender()
 	++stats.programs;
 	glActiveTexture(GL_TEXTURE20);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.colorBuffer);
+	glActiveTexture(GL_TEXTURE21);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.depthBuffer);
 	renderFullscreenQuad();
 
 	glUseProgram(0);
