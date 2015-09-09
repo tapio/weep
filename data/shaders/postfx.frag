@@ -37,6 +37,13 @@ vec4 textureMultisample(sampler2DMS sampler, vec2 uv)
 	return color;
 }
 
+float linearizeDepth(float depth)
+{
+	float z = depth * 2.0 - 1.0;
+	return (2.0 * near * far) / (far + near - z * (far - near));
+}
+
+
 
 void main()
 {
@@ -63,6 +70,11 @@ void main()
 	} else {
 		result = vec3(1.0, 0.0, 1.0);
 	}
+
+#if 0 // Visualize depth
+	result = vec3(linearizeDepth(textureMultisample(depthMap, inData.texcoord).r));
+	result = result / (result + vec3(1.0)); // Tonemap depth with Reinhard
+#endif
 
 	fragment = vec4(result, 1.0);
 }

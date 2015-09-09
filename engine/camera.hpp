@@ -7,12 +7,14 @@ struct Camera
 	void makePerspective(float fov, float aspect, float near, float far)
 	{
 		projection = glm::perspective(fov, aspect, near, far);
+		this->near = near;
 		this->far = far;
 	}
 
 	void makeOrtho(float left, float right, float top, float bottom, float near, float far)
 	{
 		projection = glm::ortho(left, right, bottom, top, near, far);
+		this->near = near;
 		this->far = far;
 	}
 
@@ -25,5 +27,6 @@ struct Camera
 	mat4 view = mat4();
 	vec3 position = vec3();
 	quat rotation = quat();
+	float near = 0;
 	float far = 0;
 };

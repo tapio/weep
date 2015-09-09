@@ -169,7 +169,7 @@ void main()
 	}
 
 	// Point lights
-	const int count = min(int(numLights), MAX_LIGHTS);
+	const int count = min(numLights, MAX_LIGHTS);
 	for (int i = 0; i < count; ++i)
 	{
 		UniformLightData light = lights[i];
