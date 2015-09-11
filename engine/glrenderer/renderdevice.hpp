@@ -4,6 +4,7 @@
 #include "shader.hpp"
 #include "light.hpp"
 #include "material.hpp"
+#include "fbo.hpp"
 
 class Resources;
 struct Model;
@@ -49,11 +50,8 @@ private:
 		uint ebo = 0;
 	};
 
-	struct FBO {
-		uint fbo;
-		uint colorBuffer;
-		uint depthBuffer;
-	} m_fbo;
+
+	FBO m_fbo;
 
 	void renderFullscreenQuad();
 	void renderSkybox();

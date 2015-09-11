@@ -60,22 +60,10 @@ RenderDevice::RenderDevice(Resources& resources)
 	glDisableVertexAttribArray(ATTR_NORMAL);
 
 	// Set up floating point framebuffer to render HDR scene to
-	glGenFramebuffers(1, &m_fbo.fbo);
-	glGenTextures(1, &m_fbo.colorBuffer);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.colorBuffer);
 	int samples = Engine::settings["renderer"]["msaa"].number_value();
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGB16F, Engine::width(), Engine::height(), GL_TRUE);
-	// Create depth buffer
-	glGenTextures(1, &m_fbo.depthBuffer);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.depthBuffer);
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_DEPTH_COMPONENT24, Engine::width(), Engine::height(), GL_TRUE);
-	// Attach buffers
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo.fbo);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_fbo.colorBuffer, 0);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, m_fbo.depthBuffer, 0);
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		logError("Framebuffer not complete!");
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	m_fbo.samples = samples;
+	m_fbo.numTextures = 3;
+	m_fbo.create();
 	glutil::checkGL("Post framebuffer create");
 
 	m_commonBlock.create();
@@ -157,10 +145,6 @@ void RenderDevice::loadShaders()
 
 RenderDevice::~RenderDevice()
 {
-	glDeleteTextures(1, &m_fbo.depthBuffer);
-	glDeleteTextures(1, &m_fbo.colorBuffer);
-	glDeleteFramebuffers(1, &m_fbo.fbo);
-
 	glDeleteBuffers(1, &m_fullscreenQuad.vbo);
 	glDeleteVertexArrays(1, &m_fullscreenQuad.vao);
 	m_commonBlock.destroy();
@@ -270,7 +254,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lights)
 {
 	ASSERT(m_env);
-	glBindFramebuffer(GL_FRAMEBUFFER, m_fbo.fbo);
+	m_fbo.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	stats = Stats();
 	m_program = 0;
@@ -472,9 +456,11 @@ void RenderDevice::postRender()
 	glUseProgram(m_shaders[m_shaderNames["postfx"]].id);
 	++stats.programs;
 	glActiveTexture(GL_TEXTURE20);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.colorBuffer);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.tex[0]);
 	glActiveTexture(GL_TEXTURE21);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.depthBuffer);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.tex[1]);
+	glActiveTexture(GL_TEXTURE22);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.tex[2]);
 	renderFullscreenQuad();
 
 	glUseProgram(0);
