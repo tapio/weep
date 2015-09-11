@@ -19,6 +19,7 @@ const char* glutil::getErrorString(uint error)
 
 bool glutil::checkGL(const char* format, ...)
 {
+	return true; // Disabled, debug callback is better
 	GLenum error = glGetError();
 	if (error == GL_NO_ERROR)
 		return true;
