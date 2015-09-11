@@ -10,6 +10,8 @@ struct Environment
 
 	vec3 ambient = vec3(0.1, 0.1, 0.1);
 	float exposure = 1.f;
+	float bloomThreshold = 0.4f;
+	float bloomIntensity = 5.f;
 	enum Tonemap {
 		TONEMAP_REINHARD,
 		TONEMAP_EXPOSURE,

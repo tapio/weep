@@ -231,6 +231,8 @@ void main()
 	fragment.rgb = mix(fragment.rgb, sunAffectedFogColor, fogAmount);
 #endif
 
-	float brightness = dot(fragment.rgb, vec3(0.2126, 0.7152, 0.0722));
-	brightFragment = brightness > 0.5 ? vec4(fragment.rgb, 1.0) : vec4(0.0, 0.0, 0.0, 1.0);
+	if (bloomThreshold > 0.f) {
+		float brightness = dot(fragment.rgb, vec3(0.2126, 0.7152, 0.0722));
+		brightFragment = brightness > bloomThreshold ? vec4(fragment.rgb, 1.0) : vec4(0.0, 0.0, 0.0, 1.0);
+	} else brightFragment = vec4(0.0, 0.0, 0.0, 1.0);
 }

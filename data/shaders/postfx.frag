@@ -49,7 +49,8 @@ float linearizeDepth(float depth)
 void main()
 {
 	vec3 hdrColor = texture(sceneMap, inData.texcoord).rgb;
-	hdrColor += texture(bloomMap, inData.texcoord).rgb; // Bloom
+	if (bloomThreshold > 0)
+		hdrColor += texture(bloomMap, inData.texcoord).rgb; // Bloom
 
 #if 0 // Visualize depth
 	hdrColor = vec3(linearizeDepth(texture(depthMap, inData.texcoord).r));

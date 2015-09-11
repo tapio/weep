@@ -32,6 +32,10 @@ void Environment::load(const string& path, Resources& resources)
 
 	if (def["exposure"].is_number())
 		exposure = def["exposure"].number_value();
+	if (def["bloomThreshold"].is_number())
+		bloomThreshold = def["bloomThreshold"].number_value();
+	if (def["bloomIntensity"].is_number())
+		bloomIntensity = def["bloomIntensity"].number_value();
 	if (def["tonemap"].is_number())
 		tonemap = (Tonemap)def["tonemap"].number_value();
 	if (!def["ambient"].is_null())

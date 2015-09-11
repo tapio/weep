@@ -15,7 +15,7 @@ UBO_PREFIX(UniformCommonBlock, 0)
 	vec3 cameraPosition; int numLights;
 	vec3 globalAmbient; float exposure;
 	vec3 sunDirection; int tonemap;
-	vec3 sunColor; int multisamples;
+	vec3 sunColor; float bloomThreshold;
 	vec3 fogColor; float fogDensity;
 	float near; float far; float pad1; float pad2;
 };

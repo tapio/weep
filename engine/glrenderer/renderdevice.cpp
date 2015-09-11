@@ -83,8 +83,6 @@ RenderDevice::RenderDevice(Resources& resources)
 	m_objectBlock.create();
 	m_materialBlock.create();
 	m_lightBlock.create();
-
-	m_commonBlock.uniforms.multisamples = samples;
 }
 
 void RenderDevice::loadShaders()
@@ -279,6 +277,7 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 	m_commonBlock.uniforms.globalAmbient = m_env->ambient;
 	m_commonBlock.uniforms.exposure = m_env->exposure;
 	m_commonBlock.uniforms.tonemap = m_env->tonemap;
+	m_commonBlock.uniforms.bloomThreshold = m_env->bloomThreshold;
 	m_commonBlock.uniforms.sunDirection = glm::normalize(m_env->sunDirection);
 	m_commonBlock.uniforms.sunColor = m_env->sunColor;
 	m_commonBlock.uniforms.fogColor = m_env->fogColor;
@@ -470,27 +469,36 @@ void RenderDevice::postRender()
 	if (m_msaaFbo.valid()) {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_msaaFbo.fbo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo.fbo);
+		glReadBuffer(GL_COLOR_ATTACHMENT0);
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		glBlitFramebuffer(0, 0, Engine::width(), Engine::height(), 0, 0, Engine::width(), Engine::height(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glReadBuffer(GL_COLOR_ATTACHMENT1);
+		glDrawBuffer(GL_COLOR_ATTACHMENT1);
+		glBlitFramebuffer(0, 0, Engine::width(), Engine::height(), 0, 0, Engine::width(), Engine::height(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	}
 
-	// Blur bloom texture
-	uint amount = 5, pingpong = 0;
-	glUseProgram(m_shaders[m_shaderNames["hblur"]].id);
-	glActiveTexture(GL_TEXTURE20);
-	for (uint i = 0; i < amount; i++)
+	uint pingpong = 0;
+	//if (m_env->bloomIntensity >= 1.f && m_env->bloomThreshold > 0.f)
 	{
-		m_pingPongFbo[pingpong].bind();
-		glBindTexture(GL_TEXTURE_2D, i == 0 ? m_fbo.tex[1] : m_pingPongFbo[!pingpong].tex[0]);
-		renderFullscreenQuad();
-		pingpong = !pingpong;
-	}
-	glUseProgram(m_shaders[m_shaderNames["vblur"]].id);
-	for (uint i = 0; i < amount; i++)
-	{
-		m_pingPongFbo[pingpong].bind();
-		glBindTexture(GL_TEXTURE_2D, m_pingPongFbo[!pingpong].tex[0]);
-		renderFullscreenQuad();
-		pingpong = !pingpong;
+		// Blur bloom texture
+		uint amount = (uint)m_env->bloomIntensity;
+		glUseProgram(m_shaders[m_shaderNames["hblur"]].id);
+		glActiveTexture(GL_TEXTURE20);
+		for (uint i = 0; i < amount; i++)
+		{
+			m_pingPongFbo[pingpong].bind();
+			glBindTexture(GL_TEXTURE_2D, i == 0 ? m_fbo.tex[1] : m_pingPongFbo[!pingpong].tex[0]);
+			renderFullscreenQuad();
+			pingpong = !pingpong;
+		}
+		glUseProgram(m_shaders[m_shaderNames["vblur"]].id);
+		for (uint i = 0; i < amount; i++)
+		{
+			m_pingPongFbo[pingpong].bind();
+			glBindTexture(GL_TEXTURE_2D, m_pingPongFbo[!pingpong].tex[0]);
+			renderFullscreenQuad();
+			pingpong = !pingpong;
+		}
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
