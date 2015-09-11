@@ -6,6 +6,7 @@ in VertexData {
 } input;
 
 layout(location = 0) out vec4 fragment;
+layout(location = 1) out vec4 brightFragment;
 
 // TODO: Create utils file
 #define PI 3.14159265
@@ -229,4 +230,7 @@ void main()
 	vec3 sunAffectedFogColor = mix(fogColor, sunColor, pow(sunAmount, 8.0));
 	fragment.rgb = mix(fragment.rgb, sunAffectedFogColor, fogAmount);
 #endif
+
+	float brightness = dot(fragment.rgb, vec3(0.2126, 0.7152, 0.0722));
+	brightFragment = brightness > 0.5 ? vec4(fragment.rgb, 1.0) : vec4(0.0, 0.0, 0.0, 1.0);
 }

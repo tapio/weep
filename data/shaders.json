@@ -13,6 +13,24 @@
 			"frag": "shaders/postfx.frag"
 		}
 	},
+	"hblur": {
+		"defines": [
+			"BLUR_HORIZONTAL"
+		],
+		"shaders" : {
+			"vert": "shaders/postfx.vert",
+			"frag": "shaders/blur.frag"
+		}
+	},
+	"vblur": {
+		"defines": [
+			"BLUR_VERTICAL"
+		],
+		"shaders" : {
+			"vert": "shaders/postfx.vert",
+			"frag": "shaders/blur.frag"
+		}
+	},
 	"skybox": {
 		"defines": [
 			"USE_ENV_MAP"

@@ -49,6 +49,14 @@ float linearizeDepth(float depth)
 void main()
 {
 	vec3 hdrColor = textureMultisample(sceneMap, inData.texcoord).rgb;
+	hdrColor += textureMultisample(bloomMap, inData.texcoord).rgb; // Bloom
+
+#if 0 // Visualize depth
+	hdrColor = vec3(linearizeDepth(textureMultisample(depthMap, inData.texcoord).r));
+#endif
+#if 0 // Visualize bloom
+	hdrColor = textureMultisample(bloomMap, inData.texcoord).rgb;
+#endif
 
 	// Tone mapping & gamma
 	vec3 result;
@@ -71,11 +79,6 @@ void main()
 	} else {
 		result = vec3(1.0, 0.0, 1.0);
 	}
-
-#if 0 // Visualize depth
-	result = vec3(linearizeDepth(textureMultisample(depthMap, inData.texcoord).r));
-	result = result / (result + vec3(1.0)); // Tonemap depth with Reinhard
-#endif
 
 	fragment = vec4(result, 1.0);
 }

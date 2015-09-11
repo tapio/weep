@@ -26,9 +26,9 @@ RenderDevice::RenderDevice(Resources& resources)
 	logInfo("OpenGL Version:  %s", glGetString(GL_VERSION));
 	logInfo("GLSL Version:    %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-	//if (Engine::settings["renderer"]["gldebug"].bool_value())
-	//	s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_NOTIFICATION;
-	//else s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
+	if (Engine::settings["renderer"]["gldebug"].bool_value())
+		s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_NOTIFICATION;
+	else s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
 	glDebugMessageCallback(debugCallback, NULL);
 
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &caps.maxAnisotropy);
@@ -64,6 +64,11 @@ RenderDevice::RenderDevice(Resources& resources)
 	m_fbo.samples = samples;
 	m_fbo.numTextures = 3;
 	m_fbo.create();
+	for (int i = 0; i < 2; ++i) {
+		m_pingPongFbo[i].samples = samples; // TODO: Non-MSAA?
+		m_pingPongFbo[i].numTextures = 1;
+		m_pingPongFbo[i].create();
+	}
 	glutil::checkGL("Post framebuffer create");
 
 	m_commonBlock.create();
@@ -452,13 +457,33 @@ void RenderDevice::postRender()
 	if (m_wireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+	uint amount = 5, pingpong = 0;
+	glUseProgram(m_shaders[m_shaderNames["hblur"]].id);
+	glActiveTexture(GL_TEXTURE20);
+	for (uint i = 0; i < amount; i++)
+	{
+		m_pingPongFbo[pingpong].bind();
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, i == 0 ? m_fbo.tex[1] : m_pingPongFbo[!pingpong].tex[0]);
+		renderFullscreenQuad();
+		pingpong = !pingpong;
+	}
+	glUseProgram(m_shaders[m_shaderNames["vblur"]].id);
+	for (uint i = 0; i < amount; i++)
+	{
+		m_pingPongFbo[pingpong].bind();
+		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_pingPongFbo[!pingpong].tex[0]);
+		renderFullscreenQuad();
+		pingpong = !pingpong;
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(m_shaders[m_shaderNames["postfx"]].id);
 	++stats.programs;
 	glActiveTexture(GL_TEXTURE20);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.tex[0]);
 	glActiveTexture(GL_TEXTURE21);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.tex[1]);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_pingPongFbo[!pingpong].tex[0]);
 	glActiveTexture(GL_TEXTURE22);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.tex[2]);
 	renderFullscreenQuad();
