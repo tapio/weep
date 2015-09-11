@@ -5,9 +5,9 @@ in VertexData {
 	vec3 normal;
 } inData;
 
-layout(binding = 20) uniform sampler2DMS sceneMap;
-layout(binding = 21) uniform sampler2DMS bloomMap;
-layout(binding = 22) uniform sampler2DMS depthMap;
+layout(binding = 20) uniform sampler2D sceneMap;
+layout(binding = 21) uniform sampler2D bloomMap;
+layout(binding = 22) uniform sampler2D depthMap;
 
 layout(location = 0) out vec4 fragment;
 
@@ -25,7 +25,7 @@ vec3 Uncharted2Tonemap(vec3 x)
 	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
 }
 
-vec4 textureMultisample(sampler2DMS sampler, vec2 uv)
+/*vec4 textureMultisample(sampler2DMS sampler, vec2 uv)
 {
 	vec2 texSize = textureSize(sampler);
 	uv = floor(texSize * uv);
@@ -36,7 +36,7 @@ vec4 textureMultisample(sampler2DMS sampler, vec2 uv)
 		color += texelFetch(sampler, itexcoord, i);
 	color /= float(multisamples);
 	return color;
-}
+}*/
 
 float linearizeDepth(float depth)
 {
@@ -48,14 +48,14 @@ float linearizeDepth(float depth)
 
 void main()
 {
-	vec3 hdrColor = textureMultisample(sceneMap, inData.texcoord).rgb;
-	hdrColor += textureMultisample(bloomMap, inData.texcoord).rgb; // Bloom
+	vec3 hdrColor = texture(sceneMap, inData.texcoord).rgb;
+	hdrColor += texture(bloomMap, inData.texcoord).rgb; // Bloom
 
 #if 0 // Visualize depth
-	hdrColor = vec3(linearizeDepth(textureMultisample(depthMap, inData.texcoord).r));
+	hdrColor = vec3(linearizeDepth(texture(depthMap, inData.texcoord).r));
 #endif
 #if 0 // Visualize bloom
-	hdrColor = textureMultisample(bloomMap, inData.texcoord).rgb;
+	hdrColor = texture(bloomMap, inData.texcoord).rgb;
 #endif
 
 	// Tone mapping & gamma

@@ -61,11 +61,14 @@ RenderDevice::RenderDevice(Resources& resources)
 
 	// Set up floating point framebuffer to render HDR scene to
 	int samples = Engine::settings["renderer"]["msaa"].number_value();
-	m_fbo.samples = samples;
+	if (samples > 1) {
+		m_msaaFbo.samples = samples;
+		m_msaaFbo.numTextures = 3;
+		m_msaaFbo.create();
+	}
 	m_fbo.numTextures = 3;
 	m_fbo.create();
 	for (int i = 0; i < 2; ++i) {
-		m_pingPongFbo[i].samples = samples; // TODO: Non-MSAA?
 		m_pingPongFbo[i].numTextures = 1;
 		m_pingPongFbo[i].create();
 	}
@@ -259,7 +262,8 @@ bool RenderDevice::uploadMaterial(Material& material)
 void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lights)
 {
 	ASSERT(m_env);
-	m_fbo.bind();
+	if (m_msaaFbo.valid()) m_msaaFbo.bind();
+	else m_fbo.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	stats = Stats();
 	m_program = 0;
@@ -457,13 +461,21 @@ void RenderDevice::postRender()
 	if (m_wireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+	// Resolve MSAA to regular FBO
+	if (m_msaaFbo.valid()) {
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_msaaFbo.fbo);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo.fbo);
+		glBlitFramebuffer(0, 0, Engine::width(), Engine::height(), 0, 0, Engine::width(), Engine::height(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	}
+
+	// Blur bloom texture
 	uint amount = 5, pingpong = 0;
 	glUseProgram(m_shaders[m_shaderNames["hblur"]].id);
 	glActiveTexture(GL_TEXTURE20);
 	for (uint i = 0; i < amount; i++)
 	{
 		m_pingPongFbo[pingpong].bind();
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, i == 0 ? m_fbo.tex[1] : m_pingPongFbo[!pingpong].tex[0]);
+		glBindTexture(GL_TEXTURE_2D, i == 0 ? m_fbo.tex[1] : m_pingPongFbo[!pingpong].tex[0]);
 		renderFullscreenQuad();
 		pingpong = !pingpong;
 	}
@@ -471,7 +483,7 @@ void RenderDevice::postRender()
 	for (uint i = 0; i < amount; i++)
 	{
 		m_pingPongFbo[pingpong].bind();
-		glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_pingPongFbo[!pingpong].tex[0]);
+		glBindTexture(GL_TEXTURE_2D, m_pingPongFbo[!pingpong].tex[0]);
 		renderFullscreenQuad();
 		pingpong = !pingpong;
 	}
@@ -481,11 +493,11 @@ void RenderDevice::postRender()
 	glUseProgram(m_shaders[m_shaderNames["postfx"]].id);
 	++stats.programs;
 	glActiveTexture(GL_TEXTURE20);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.tex[0]);
+	glBindTexture(GL_TEXTURE_2D, m_fbo.tex[0]);
 	glActiveTexture(GL_TEXTURE21);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_pingPongFbo[!pingpong].tex[0]);
+	glBindTexture(GL_TEXTURE_2D, m_pingPongFbo[!pingpong].tex[0]);
 	glActiveTexture(GL_TEXTURE22);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, m_fbo.tex[2]);
+	glBindTexture(GL_TEXTURE_2D, m_fbo.tex[2]);
 	renderFullscreenQuad();
 
 	glUseProgram(0);

@@ -10,10 +10,11 @@ struct FBO {
 	void create();
 	void bind();
 	void destroy();
+	bool valid() const { return fbo > 0; }
 
 	static const uint MAX_TEXTURES = 3;
 
-	uint fbo;
+	uint fbo = 0;
 	uint tex[MAX_TEXTURES] = {0, 0, 0};
 	uint numTextures = 0;
 	uint samples = 0;

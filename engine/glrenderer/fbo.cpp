@@ -25,9 +25,15 @@ void FBO::create()
 		uint internalFormat = depth ? GL_DEPTH_COMPONENT24 : GL_RGB16F;
 		if (samples > 1)
 			glTexImage2DMultisample(texType, samples, internalFormat, Engine::width(), Engine::height(), GL_TRUE);
-		else glTexImage2D(texType, 0, internalFormat, Engine::width(), Engine::height(), 0, GL_RGB, GL_FLOAT, NULL);
+		else {
+			glTexImage2D(texType, 0, internalFormat, Engine::width(), Engine::height(), 0, depth ? GL_DEPTH_COMPONENT : GL_RGB, GL_FLOAT, NULL);
+			glTexParameteri(texType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(texType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(texType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(texType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		}
 		uint attach = depth ? GL_DEPTH_ATTACHMENT : (GL_COLOR_ATTACHMENT0 + i);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, attach, texType, tex[i], 0);
+		glFramebufferTexture(GL_FRAMEBUFFER, attach, tex[i], 0);
 	}
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		logError("Framebuffer not complete!");

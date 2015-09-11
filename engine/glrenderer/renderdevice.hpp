@@ -51,6 +51,7 @@ private:
 	};
 
 
+	FBO m_msaaFbo;
 	FBO m_fbo;
 	FBO m_pingPongFbo[2];
 
