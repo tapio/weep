@@ -16,7 +16,7 @@
 		"pointlight": {
 			"material": {
 				"shaderName": "color",
-				"ambient": 1.0
+				"ambient": 20.0
 			},
 			"geometry": "debug/sphere.obj",
 			"scale": 0.1
