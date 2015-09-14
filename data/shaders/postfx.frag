@@ -53,7 +53,7 @@ void main()
 		hdrColor += texture(bloomMap, inData.texcoord).rgb; // Bloom
 
 #if 0 // Visualize depth
-	hdrColor = vec3(linearizeDepth(texture(depthMap, inData.texcoord).r));
+	hdrColor = vec3(linearizeDepth(texture(depthMap, inData.texcoord).r) / far);
 #endif
 #if 0 // Visualize bloom
 	hdrColor = texture(bloomMap, inData.texcoord).rgb;
