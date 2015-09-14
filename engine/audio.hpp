@@ -1,6 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include "soloud.h"
+#include "soloud_wav.h"
 
 struct Camera;
 

@@ -43,7 +43,7 @@ add_definitions(-DWITH_NULL -DWITH_SDL2_STATIC)
 
 # TODO: Make separate libs of third-party deps
 
-file(GLOB_RECURSE DEPS_SOURCES "third-party/*.cpp" "third-party/*.hpp" "third-party/*.h")
+file(GLOB_RECURSE DEPS_SOURCES "third-party/*.cpp" "third-party/*.c" "third-party/*.hpp" "third-party/*.h")
 file(GLOB_RECURSE ENGINE_SOURCES "engine/*.cpp" "engine/*.hpp")
 file(GLOB_RECURSE GAME_SOURCES "game/*.cpp" "game/*.hpp")
 file(GLOB_RECURSE SHADER_SOURCES "data/shaders/*.*")
