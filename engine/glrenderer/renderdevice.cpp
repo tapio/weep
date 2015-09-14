@@ -69,13 +69,21 @@ RenderDevice::RenderDevice(Resources& resources)
 	// Set up floating point framebuffer to render HDR scene to
 	int samples = Engine::settings["renderer"]["msaa"].number_value();
 	if (samples > 1) {
-		m_msaaFbo.samples = samples;
+		m_msaaFbo.width = Engine::width();
+		m_msaaFbo.height = Engine::height();
 		m_msaaFbo.numTextures = 3;
+		m_msaaFbo.depthAttachment = 2;
+		m_msaaFbo.samples = samples;
 		m_msaaFbo.create();
 	}
+	m_fbo.width = Engine::width();
+	m_fbo.height = Engine::height();
 	m_fbo.numTextures = 3;
+	m_fbo.depthAttachment = 2;
 	m_fbo.create();
 	for (int i = 0; i < 2; ++i) {
+		m_pingPongFbo[i].width = Engine::width();
+		m_pingPongFbo[i].height = Engine::height();
 		m_pingPongFbo[i].numTextures = 1;
 		m_pingPongFbo[i].create();
 	}
@@ -473,10 +481,10 @@ void RenderDevice::postRender()
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo.fbo);
 		glReadBuffer(GL_COLOR_ATTACHMENT0);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
-		glBlitFramebuffer(0, 0, Engine::width(), Engine::height(), 0, 0, Engine::width(), Engine::height(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(0, 0, m_msaaFbo.width, m_msaaFbo.height, 0, 0, m_fbo.width, m_fbo.height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glReadBuffer(GL_COLOR_ATTACHMENT1);
 		glDrawBuffer(GL_COLOR_ATTACHMENT1);
-		glBlitFramebuffer(0, 0, Engine::width(), Engine::height(), 0, 0, Engine::width(), Engine::height(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(0, 0, m_msaaFbo.width, m_msaaFbo.height, 0, 0, m_fbo.width, m_fbo.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	}
 
 	uint pingpong = 0;

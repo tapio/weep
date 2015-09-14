@@ -17,5 +17,8 @@ struct FBO {
 	uint fbo = 0;
 	uint tex[MAX_TEXTURES] = {0, 0, 0};
 	uint numTextures = 0;
+	uint width = 0;
+	uint height = 0;
 	uint samples = 0;
+	uint depthAttachment = -1;
 };

@@ -15,18 +15,19 @@ FBO::~FBO()
 
 void FBO::create()
 {
+	ASSERT(width && height);
 	uint texType = samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glGenTextures(numTextures, tex);
 	for (uint i = 0; i < numTextures; ++i) {
 		glBindTexture(texType, tex[i]);
-		bool depth = i >= 2;
+		bool depth = i == depthAttachment;
 		uint internalFormat = depth ? GL_DEPTH_COMPONENT24 : GL_RGB16F;
 		if (samples > 1)
-			glTexImage2DMultisample(texType, samples, internalFormat, Engine::width(), Engine::height(), GL_TRUE);
+			glTexImage2DMultisample(texType, samples, internalFormat, width, height, GL_TRUE);
 		else {
-			glTexImage2D(texType, 0, internalFormat, Engine::width(), Engine::height(), 0, depth ? GL_DEPTH_COMPONENT : GL_RGB, GL_FLOAT, NULL);
+			glTexImage2D(texType, 0, internalFormat, width, height, 0, depth ? GL_DEPTH_COMPONENT : GL_RGB, GL_FLOAT, NULL);
 			glTexParameteri(texType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(texType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(texType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
