@@ -41,6 +41,9 @@ void FBO::create()
 	if (numTextures >= 3) {
 		GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 		glDrawBuffers(2, attachments);
+	} else if (numTextures == 1 && depthAttachment == 0) {
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

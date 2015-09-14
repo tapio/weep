@@ -7,7 +7,8 @@
 	"renderer": {
 		"gldebug": true,
 		"vsync": true,
-		"msaa": 8
+		"msaa": 8,
+		"shadowMapSize": 1024
 	},
 	"moddir": "../weep-media/"
 }

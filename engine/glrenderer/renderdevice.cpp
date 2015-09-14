@@ -87,6 +87,10 @@ RenderDevice::RenderDevice(Resources& resources)
 		m_pingPongFbo[i].numTextures = 1;
 		m_pingPongFbo[i].create();
 	}
+	m_shadowFbo.width = Engine::settings["renderer"]["shadowMapSize"].number_value();
+	m_shadowFbo.height = m_shadowFbo.width;
+	m_shadowFbo.depthAttachment = 0;
+	m_shadowFbo.create();
 	glutil::checkGL("Post framebuffer create");
 
 	m_commonBlock.create();

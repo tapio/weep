@@ -54,6 +54,7 @@ private:
 	FBO m_msaaFbo;
 	FBO m_fbo;
 	FBO m_pingPongFbo[2];
+	FBO m_shadowFbo;
 
 	void renderFullscreenQuad();
 	void renderSkybox();
