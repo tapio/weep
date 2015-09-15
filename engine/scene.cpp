@@ -5,6 +5,8 @@
 #include "image.hpp"
 #include "engine.hpp"
 
+#define USE_DEBUG_NAMES
+
 namespace {
 
 	Material* parseMaterial(Material* material, const Json& def, Resources& resources) {
@@ -179,6 +181,16 @@ void Scene::load(const string& path, Resources& resources)
 
 		if (model)
 			parseModel(*model, def, resources);
+
+#ifdef USE_DEBUG_NAMES
+		if (model && model->name.empty()) {
+			static uint debugId = 0;
+			if (def["prefab"].is_string())
+				model->name = def["prefab"].string_value() + "#";
+			else model->name = "object#";
+			model->name += std::to_string(debugId++);
+		}
+#endif
 	}
 	uint t1 = Engine::timems();
 	logDebug("Loaded scene in %dms with %d models, %d lights", t1 - t0, m_models.size(), m_lights.size());
