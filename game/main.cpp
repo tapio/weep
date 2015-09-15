@@ -213,6 +213,8 @@ int main(int, char*[])
 
 		Engine::swap();
 
+		scene.world.update();
+
 		if (reload) {
 			renderer.reset(scene);
 			physics.reset();

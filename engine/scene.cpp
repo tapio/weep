@@ -86,9 +86,6 @@ namespace {
 			model.scale = scaleDef.is_number() ? vec3(scaleDef.number_value()) : toVec3(scaleDef);
 		}
 
-		if (def["name"].is_string())
-			model.name = def["name"].string_value();
-
 		if (model.geometry) {
 			model.bounds.min = model.geometry->bounds.min * model.scale;
 			model.bounds.max = model.geometry->bounds.max * model.scale;
@@ -111,36 +108,6 @@ namespace {
 				for (uint i = 0; i < materialDef.array_items().size(); ++i)
 					parseMaterial(model.materials[i], materialDef[i], resources);
 			}
-		}
-
-		// Parse body (needs to be after geometry, transform, bounds...)
-		if (!def["body"].is_null()) {
-			const Json& bodyDef = def["body"];
-			ASSERT(bodyDef.is_object());
-
-			btCollisionShape* shape = NULL;
-			const string& shapeStr = bodyDef["shape"].string_value();
-			if (shapeStr == "box") {
-				Bounds aabb = model.bounds;
-				shape = new btBoxShape(convert((aabb.max - aabb.min) * 0.5f));
-			} else if (shapeStr == "sphere") {
-				shape = new btSphereShape(model.bounds.radius);
-			} else {
-				logError("Unknown shape %s", shapeStr.c_str());
-			}
-			ASSERT(shape);
-
-			float mass = 0.f;
-			if (bodyDef["mass"].is_number())
-				mass = bodyDef["mass"].number_value();
-
-			btVector3 inertia(0, 0, 0);
-			shape->calculateLocalInertia(mass, inertia);
-
-			btRigidBody::btRigidBodyConstructionInfo info(mass, NULL, shape, inertia);
-			info.m_startWorldTransform = btTransform(convert(model.rotation), convert(model.position));
-			model.body = new btRigidBody(info);
-			model.body->setUserPointer(&model);
 		}
 	}
 }
@@ -175,11 +142,26 @@ void Scene::load(const string& path, Resources& resources)
 			}
 		}
 
+		entity::Entity entity = world.create_entity();
+
+		if (def["name"].is_string()) {
+			entity.tag(def["name"].string_value());
+		} else {
+#ifdef USE_DEBUG_NAMES
+			static uint debugId = 0;
+			string name;
+			if (def["prefab"].is_string())
+				name = def["prefab"].string_value() + "#";
+			else name = "object#";
+			name += std::to_string(debugId++);
+			entity.tag(name);
+#endif
+		}
+
 		// Parse light
 		const Json& lightDef = def["light"];
 		if (!lightDef.is_null()) {
-			m_lights.emplace_back();
-			Light& light = m_lights.back();
+			Light light;
 			const string& lightType = lightDef["type"].string_value();
 			if (lightType == "ambient") light.type = Light::AMBIENT_LIGHT;
 			else if (lightType == "point") light.type = Light::POINT_LIGHT;
@@ -198,27 +180,46 @@ void Scene::load(const string& path, Resources& resources)
 				light.distance = lightDef["distance"].number_value();
 			if (!lightDef["decay"].is_null())
 				light.decay = lightDef["decay"].number_value();
+			entity.add_component(light);
 		}
-
-		Model* model = nullptr;
 
 		if (!def["geometry"].is_null()) {
-			m_models.emplace_back();
-			model = &m_models.back();
+			Model model;
+			parseModel(model, def, resources);
+			entity.add_component(model);
 		}
 
-		if (model)
-			parseModel(*model, def, resources);
+		// Parse body (needs to be after geometry, transform, bounds...)
+		if (!def["body"].is_null()) {
+			const Json& bodyDef = def["body"];
+			ASSERT(bodyDef.is_object());
+			ASSERT(entity.has_component<Model>());
+			const Model& model = entity.get_component<Model>();
 
-#ifdef USE_DEBUG_NAMES
-		if (model && model->name.empty()) {
-			static uint debugId = 0;
-			if (def["prefab"].is_string())
-				model->name = def["prefab"].string_value() + "#";
-			else model->name = "object#";
-			model->name += std::to_string(debugId++);
+			btCollisionShape* shape = NULL;
+			const string& shapeStr = bodyDef["shape"].string_value();
+			if (shapeStr == "box") {
+				Bounds aabb = model.bounds;
+				shape = new btBoxShape(convert((aabb.max - aabb.min) * 0.5f));
+			} else if (shapeStr == "sphere") {
+				shape = new btSphereShape(model.bounds.radius);
+			} else {
+				logError("Unknown shape %s", shapeStr.c_str());
+			}
+			ASSERT(shape);
+
+			float mass = 0.f;
+			if (bodyDef["mass"].is_number())
+				mass = bodyDef["mass"].number_value();
+
+			btVector3 inertia(0, 0, 0);
+			shape->calculateLocalInertia(mass, inertia);
+
+			btRigidBody::btRigidBodyConstructionInfo info(mass, NULL, shape, inertia);
+			info.m_startWorldTransform = btTransform(convert(model.rotation), convert(model.position));
+			btRigidBody* body = new btRigidBody(info);
+			entity.add_component(body);
 		}
-#endif
 	}
 	uint t1 = Engine::timems();
 	logDebug("Loaded scene in %dms with %d models, %d lights", t1 - t0, m_models.size(), m_lights.size());
@@ -235,8 +236,9 @@ Model* Scene::find(const std::string& name)
 {
 	if (name.empty())
 		return nullptr;
-	for (uint i = 0, l = m_models.size(); i < l; ++i)
-		if (m_models[i].name == name)
-			return &m_models[i];
-	return nullptr;
+	auto entity = world.get_entity(name);
+	if (!entity.is_alive())
+		return nullptr;
+	ASSERT(entity.has_component<Model>());
+	return entity.get_component<Model>();
 }

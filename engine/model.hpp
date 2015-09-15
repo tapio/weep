@@ -20,8 +20,6 @@ struct Model
 		transform *= glm::mat4_cast(rotation);
 	}
 
-	string name = "";
 	Geometry* geometry = nullptr;
 	std::vector<Material*> materials;
-	btRigidBody* body = nullptr; // TODO: Does not belong here
 };

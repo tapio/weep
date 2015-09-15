@@ -2,6 +2,7 @@
 #include "common.hpp"
 #include "model.hpp"
 #include "light.hpp"
+#include "entity/world.hpp"
 
 class Resources;
 
@@ -16,6 +17,8 @@ public:
 	std::vector<Light>& getLights() { return m_lights; }
 
 	Model* find(const string& name);
+
+	entity::World world;
 
 private:
 	std::vector<Model> m_models;
