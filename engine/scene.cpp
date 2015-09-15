@@ -9,6 +9,19 @@
 
 namespace {
 
+	Json assign(Json lhs, const Json& rhs) {
+		ASSERT(rhs.is_object());
+		Json::object object;
+		if (lhs.is_object())
+			object = lhs.object_items();
+		for (auto& item : rhs.object_items()) {
+			if (item.second.is_object())
+				object[item.first] = assign(lhs[item.first], item.second);
+			else object[item.first] = item.second;
+		}
+		return Json(object);
+	}
+
 	Material* parseMaterial(Material* material, const Json& def, Resources& resources) {
 		ASSERT(def.is_object());
 		if (def["shaderName"].is_string())
@@ -128,16 +141,23 @@ void Scene::load(const string& path, Resources& resources)
 	if (jsonScene.is_object() && jsonScene["prefabs"].is_object()) {
 		const Json::object& prefabs = jsonScene["prefabs"].object_items();
 		for (auto& it : prefabs)
-		{
-			parseModel(m_prefabs[it.first], it.second, resources);
-		}
+			m_prefabs[it.first] = it.second;
 	}
 
 	// Parse objects
 	const Json::array& objects = jsonScene.is_array() ? jsonScene.array_items() : jsonScene["objects"].array_items();
 	for (uint i = 0; i < objects.size(); ++i) {
-		const Json& def = objects[i];
+		Json def = objects[i];
 		ASSERT(def.is_object());
+
+		if (def["prefab"].is_string()) {
+			auto prefabIter = m_prefabs.find(def["prefab"].string_value());
+			if (prefabIter != m_prefabs.end()) {
+				def = assign(prefabIter->second, def);
+			} else {
+				logWarning("Could not find prefab \"%s\"", def["prefab"].string_value().c_str());
+			}
+		}
 
 		// Parse light
 		const Json& lightDef = def["light"];
@@ -166,15 +186,7 @@ void Scene::load(const string& path, Resources& resources)
 
 		Model* model = nullptr;
 
-		if (def["prefab"].is_string()) {
-			auto prefabIter = m_prefabs.find(def["prefab"].string_value());
-			if (prefabIter != m_prefabs.end()) {
-				m_models.push_back(prefabIter->second);
-				model = &m_models.back();
-			} else {
-				logWarning("Could not find prefab \"%s\"", def["prefab"].string_value().c_str());
-			}
-		} else if (!def["geometry"].is_null()) {
+		if (!def["geometry"].is_null()) {
 			m_models.emplace_back();
 			model = &m_models.back();
 		}

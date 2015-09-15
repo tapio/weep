@@ -20,5 +20,5 @@ public:
 private:
 	std::vector<Model> m_models;
 	std::vector<Light> m_lights;
-	std::map<string, Model> m_prefabs;
+	std::map<string, Json> m_prefabs;
 };
