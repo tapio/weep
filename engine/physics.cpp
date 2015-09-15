@@ -71,28 +71,10 @@ void PhysicsSystem::syncTransforms(Scene& scene)
 
 bool PhysicsSystem::addModel(Model& model)
 {
-	Model::BodyDef& def = model.bodyDef;
-	if (def.shape == Model::BodyDef::SHAPE_NONE)
-		return false;
-
-	btCollisionShape* shape = NULL;
-	if (def.shape == Model::BodyDef::SHAPE_BOX) {
-		Bounds aabb = model.bounds;
-		shape = new btBoxShape(convert((aabb.max - aabb.min) * 0.5f));
-	} else if (def.shape == Model::BodyDef::SHAPE_SPHERE) {
-		shape = new btSphereShape(model.bounds.radius);
-	}
-	btVector3 inertia(0, 0, 0);
-	shape->calculateLocalInertia(def.mass, inertia);
-	collisionShapes.push_back(shape);
-
-	btRigidBody::btRigidBodyConstructionInfo info(def.mass, NULL, shape, inertia);
-	btRigidBody* body = new btRigidBody(info);
-	btTransform trans(convert(model.rotation), convert(model.position));
-	body->setWorldTransform(trans);
-	body->setUserPointer(&model);
-	dynamicsWorld->addRigidBody(body);
-	model.body = body;
+	if (!model.body) return false;
+	ASSERT(!model.body->isInWorld());
+	collisionShapes.push_back(model.body->getCollisionShape());
+	dynamicsWorld->addRigidBody(model.body);
 	return true;
 }
 

@@ -4,6 +4,7 @@
 #include "resources.hpp"
 #include "image.hpp"
 #include "engine.hpp"
+#include "physics.hpp"
 
 #define USE_DEBUG_NAMES
 
@@ -73,39 +74,6 @@ namespace {
 			else model.geometry = resources.getHeightmap(defGeom["heightmap"].string_value());
 		}
 
-		// Parse material
-		const Json& materialDef = def["material"];
-		if (materialDef.is_object()) {
-			ASSERT(model.materials.size() <= 1);
-			if (model.materials.empty())
-				model.materials.push_back(new Material());
-			parseMaterial(model.materials.back(), materialDef, resources);
-		} else if (materialDef.is_array()) {
-			if (model.materials.empty()) {
-				for (auto& matDef : materialDef.array_items())
-					model.materials.push_back(parseMaterial(new Material(), matDef, resources));
-			} else {
-				ASSERT(model.materials.size() == materialDef.array_items().size());
-				for (uint i = 0; i < materialDef.array_items().size(); ++i)
-					parseMaterial(model.materials[i], materialDef[i], resources);
-			}
-		}
-
-		// Parse body
-		if (!def["body"].is_null()) {
-			const Json& bodyDef = def["body"];
-			ASSERT(bodyDef.is_object());
-
-			const string& shape = bodyDef["shape"].string_value();
-			if (shape == "box")
-				model.bodyDef.shape = Model::BodyDef::SHAPE_BOX;
-			if (shape == "sphere")
-				model.bodyDef.shape = Model::BodyDef::SHAPE_SPHERE;
-
-			if (bodyDef["mass"].is_number())
-				model.bodyDef.mass = bodyDef["mass"].number_value();
-		}
-
 		// Parse transform
 		if (!def["position"].is_null()) {
 			model.position = toVec3(def["position"]);
@@ -125,6 +93,54 @@ namespace {
 			model.bounds.min = model.geometry->bounds.min * model.scale;
 			model.bounds.max = model.geometry->bounds.max * model.scale;
 			model.bounds.radius = model.geometry->bounds.radius * glm::compMax(model.scale);
+		}
+
+		// Parse material
+		const Json& materialDef = def["material"];
+		if (materialDef.is_object()) {
+			ASSERT(model.materials.size() <= 1);
+			if (model.materials.empty())
+				model.materials.push_back(new Material());
+			parseMaterial(model.materials.back(), materialDef, resources);
+		} else if (materialDef.is_array()) {
+			if (model.materials.empty()) {
+				for (auto& matDef : materialDef.array_items())
+					model.materials.push_back(parseMaterial(new Material(), matDef, resources));
+			} else {
+				ASSERT(model.materials.size() == materialDef.array_items().size());
+				for (uint i = 0; i < materialDef.array_items().size(); ++i)
+					parseMaterial(model.materials[i], materialDef[i], resources);
+			}
+		}
+
+		// Parse body (needs to be after geometry, transform, bounds...)
+		if (!def["body"].is_null()) {
+			const Json& bodyDef = def["body"];
+			ASSERT(bodyDef.is_object());
+
+			btCollisionShape* shape = NULL;
+			const string& shapeStr = bodyDef["shape"].string_value();
+			if (shapeStr == "box") {
+				Bounds aabb = model.bounds;
+				shape = new btBoxShape(convert((aabb.max - aabb.min) * 0.5f));
+			} else if (shapeStr == "sphere") {
+				shape = new btSphereShape(model.bounds.radius);
+			} else {
+				logError("Unknown shape %s", shapeStr.c_str());
+			}
+			ASSERT(shape);
+
+			float mass = 0.f;
+			if (bodyDef["mass"].is_number())
+				mass = bodyDef["mass"].number_value();
+
+			btVector3 inertia(0, 0, 0);
+			shape->calculateLocalInertia(mass, inertia);
+
+			btRigidBody::btRigidBodyConstructionInfo info(mass, NULL, shape, inertia);
+			info.m_startWorldTransform = btTransform(convert(model.rotation), convert(model.position));
+			model.body = new btRigidBody(info);
+			model.body->setUserPointer(&model);
 		}
 	}
 }

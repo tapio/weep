@@ -20,16 +20,8 @@ struct Model
 		transform *= glm::mat4_cast(rotation);
 	}
 
-	string name;
+	string name = "";
 	Geometry* geometry = nullptr;
 	std::vector<Material*> materials;
-	btRigidBody* body = nullptr;
-
-	// TODO: Get rid of
-	struct BodyDef {
-		enum Shape {
-			SHAPE_NONE, SHAPE_BOX, SHAPE_SPHERE
-		} shape;
-		float mass = 0;
-	} bodyDef;
+	btRigidBody* body = nullptr; // TODO: Does not belong here
 };
