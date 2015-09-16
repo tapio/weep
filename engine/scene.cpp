@@ -142,7 +142,7 @@ void Scene::load(const string& path, Resources& resources)
 			}
 		}
 
-		entity::Entity entity = world.create_entity();
+		entity::Entity entity = world.create();
 
 		if (def["name"].is_string()) {
 			entity.tag(def["name"].string_value());
@@ -180,21 +180,21 @@ void Scene::load(const string& path, Resources& resources)
 				light.distance = lightDef["distance"].number_value();
 			if (!lightDef["decay"].is_null())
 				light.decay = lightDef["decay"].number_value();
-			entity.add_component(light);
+			entity.add(light);
 		}
 
 		if (!def["geometry"].is_null()) {
 			Model model;
 			parseModel(model, def, resources);
-			entity.add_component(model);
+			entity.add(model);
 		}
 
 		// Parse body (needs to be after geometry, transform, bounds...)
 		if (!def["body"].is_null()) {
 			const Json& bodyDef = def["body"];
 			ASSERT(bodyDef.is_object());
-			ASSERT(entity.has_component<Model>());
-			const Model& model = entity.get_component<Model>();
+			ASSERT(entity.has<Model>());
+			const Model& model = entity.get<Model>();
 
 			btCollisionShape* shape = NULL;
 			const string& shapeStr = bodyDef["shape"].string_value();
@@ -218,7 +218,7 @@ void Scene::load(const string& path, Resources& resources)
 			btRigidBody::btRigidBodyConstructionInfo info(mass, NULL, shape, inertia);
 			info.m_startWorldTransform = btTransform(convert(model.rotation), convert(model.position));
 			btRigidBody* body = new btRigidBody(info);
-			entity.add_component(body);
+			entity.add(body);
 		}
 	}
 	uint t1 = Engine::timems();
@@ -236,9 +236,9 @@ Model* Scene::find(const std::string& name)
 {
 	if (name.empty())
 		return nullptr;
-	auto entity = world.get_entity(name);
+	auto entity = world.get_entity_by_tag(name);
 	if (!entity.is_alive())
 		return nullptr;
-	ASSERT(entity.has_component<Model>());
-	return entity.get_component<Model>();
+	ASSERT(entity.has<Model>());
+	return &entity.get<Model>();
 }

@@ -11,7 +11,7 @@ public:
 	void reset();
 
 	void addScene(class Scene& scene);
-	bool addModel(struct Model& model);
+	bool addModel(Entity entity);
 
 	void syncTransforms(class Scene& scene);
 	void step(float dt);

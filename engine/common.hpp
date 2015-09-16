@@ -18,7 +18,9 @@
 #include <glm/gtx/component_wise.hpp>
 #define SDL_ASSERT_LEVEL 2
 #include <SDL2/SDL_assert.h>
+#include <entity/ecs.hpp>
 
+using namespace entity;
 using std::string;
 using json11::Json;
 using glm::vec2;

@@ -69,12 +69,13 @@ void PhysicsSystem::syncTransforms(Scene& scene)
 	}
 }
 
-bool PhysicsSystem::addModel(Model& model)
+bool PhysicsSystem::addModel(Entity entity)
 {
-	if (!model.body) return false;
-	ASSERT(!model.body->isInWorld());
-	collisionShapes.push_back(model.body->getCollisionShape());
-	dynamicsWorld->addRigidBody(model.body);
+	if (!entity.has<btRigidBody*>()) return false;
+	btRigidBody* body = entity.get<btRigidBody*>();
+	ASSERT(!body->isInWorld());
+	collisionShapes.push_back(body->getCollisionShape());
+	dynamicsWorld->addRigidBody(body);
 	return true;
 }
 
@@ -82,7 +83,7 @@ void PhysicsSystem::addScene(Scene& scene)
 {
 	uint t0 = Engine::timems();
 	int count = 0;
-	for (auto& it : scene.getChildren()) {
+	for (auto& it : scene.world.get_entities()) {
 		count += addModel(it);
 	}
 	uint t1 = Engine::timems();
