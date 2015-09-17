@@ -1,0 +1,34 @@
+{
+	"prefabs": {
+		"cube": {
+			"material": {
+				"shaderName": "basic"
+			},
+			"geometry": "debug/cube.obj"
+		},
+		"plane": {
+			"material": {
+				"shaderName": "diffusemap",
+				"diffuseMap": "debug/uvtestgrid.png"
+			},
+			"geometry": "debug/plane.obj"
+		},
+		"pointlight": {
+			"material": {
+				"shaderName": "color",
+				"ambient": 20.0
+			},
+			"geometry": "debug/sphere.obj",
+			"scale": 0.1
+		},
+		"testcube": {
+			"material": {
+				"shaderName": "nsmap",
+				"diffuseMap": "debug/uvtestgrid.png",
+				"specularMap": "debug/uvtestgrid_specular.png",
+				"normalMap": "debug/uvtestgrid_normal.png"
+			},
+			"geometry": "debug/cube.obj"
+		}
+	}
+}

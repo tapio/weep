@@ -115,18 +115,29 @@ namespace {
 void Scene::load(const string& path, Resources& resources)
 {
 	uint t0 = Engine::timems();
+	load_internal(path, resources);
+	uint t1 = Engine::timems();
+	logDebug("Loaded scene in %dms with %d models, %d bodies, %d lights, %d prefabs", t1 - t0, numModels, numBodies, numLights, m_prefabs.size());
+}
+
+void Scene::load_internal(const string& path, Resources& resources)
+{
 	std::string err;
 	Json jsonScene = Json::parse(resources.getText(path, Resources::NO_CACHE), err);
 	if (!err.empty())
 		panic("Failed to read scene %s: %s", path.c_str(), err.c_str());
 
-	uint numModels = 0, numBodies = 0, numLights = 0;
+	if (jsonScene.is_object()) {
+		if (jsonScene["include"].is_string()) {
+			load_internal(jsonScene["include"].string_value(), resources);
+		}
 
-	// Parse prefabs
-	if (jsonScene.is_object() && jsonScene["prefabs"].is_object()) {
-		const Json::object& prefabs = jsonScene["prefabs"].object_items();
-		for (auto& it : prefabs)
-			m_prefabs[it.first] = it.second;
+		// Parse prefabs
+		if (jsonScene["prefabs"].is_object()) {
+			const Json::object& prefabs = jsonScene["prefabs"].object_items();
+			for (auto& it : prefabs)
+				m_prefabs[it.first] = it.second;
+		}
 	}
 
 	// Parse objects
@@ -225,12 +236,11 @@ void Scene::load(const string& path, Resources& resources)
 			numBodies++;
 		}
 	}
-	uint t1 = Engine::timems();
-	logDebug("Loaded scene in %dms with %d models, %d bodies, %d lights, %d prefabs", t1 - t0, numModels, numBodies, numLights, m_prefabs.size());
 }
 
 void Scene::reset()
 {
 	m_prefabs.clear();
+	numModels = 0; numBodies = 0; numLights = 0;
 	world = Entities();
 }
