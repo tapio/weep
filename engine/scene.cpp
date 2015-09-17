@@ -233,4 +233,5 @@ void Scene::load(const string& path, Resources& resources)
 void Scene::reset()
 {
 	m_prefabs.clear();
+	world = Entities();
 }

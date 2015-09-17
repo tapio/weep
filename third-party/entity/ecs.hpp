@@ -19,7 +19,7 @@ namespace entity
 	class BasePool
 	{
 	public:
-		virtual ~BasePool() {};
+		virtual ~BasePool() {}
 		virtual void clear() = 0;
 	};
 
@@ -30,7 +30,7 @@ namespace entity
 	public:
 		Pool(int size = 100) { resize(size); }
 
-		virtual ~Pool() {};
+		virtual ~Pool() {}
 
 		bool is_empty() const { return data.empty(); }
 
@@ -360,7 +360,7 @@ namespace entity
 		std::shared_ptr<Pool<T>> accommodate_component();
 
 		// minimum amount of free indices before we reuse one
-		const std::uint32_t MINIMUM_FREE_IDS = 1024;
+		static const std::uint32_t MINIMUM_FREE_IDS = 1024;
 
 		// deque of free entity indices
 		std::deque<Entity::Id> free_ids;

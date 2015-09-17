@@ -15,7 +15,7 @@ namespace entity
 
 	bool Entity::is_alive() const
 	{
-		return entities->is_entity_alive(*this);
+		return entities && entities->is_entity_alive(*this);
 	}
 
 	void Entity::tag(std::string tag_name)
