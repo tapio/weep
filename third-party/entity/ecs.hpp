@@ -9,7 +9,11 @@
 #include <cstdint>
 #include <bitset>
 #include <typeindex>
+
+#ifndef ECS_ASSERT
 #include <cassert>
+#define ECS_ASSERT assert
+#endif
 
 namespace entity
 {
@@ -42,14 +46,14 @@ namespace entity
 
 		bool set(unsigned int index, T object)
 		{
-			assert(index < get_size());
+			ECS_ASSERT(index < get_size());
 			data[index] = object;
 			return true;
 		}
 
 		T& get(unsigned int index)
 		{
-			assert(index < get_size());
+			ECS_ASSERT(index < get_size());
 			return static_cast<T&>(data[index]);
 		}
 
@@ -82,7 +86,7 @@ namespace entity
 		static Id get_id()
 		{
 			static auto id = id_counter++;
-			assert(id < MAX_COMPONENTS);
+			ECS_ASSERT(id < MAX_COMPONENTS);
 			return id;
 		}
 	};
@@ -272,9 +276,9 @@ namespace entity
 		void for_each(std::function<void(Entity, T&)> func)
 		{
 			const auto component_id = Component<T>::get_id();
-			assert(component_id < component_pools.size());
+			ECS_ASSERT(component_id < component_pools.size());
 			auto component_pool = std::static_pointer_cast<Pool<T>>(component_pools[component_id]);
-			assert(component_pool);
+			ECS_ASSERT(component_pool);
 			Entity e;
 			e.entities = this;
 			for (Entity::Id i = 0; i < component_masks.size(); ++i) {
@@ -290,12 +294,12 @@ namespace entity
 		{
 			const auto component_id1 = Component<T1>::get_id();
 			const auto component_id2 = Component<T2>::get_id();
-			assert(component_id1 < component_pools.size());
-			assert(component_id2 < component_pools.size());
+			ECS_ASSERT(component_id1 < component_pools.size());
+			ECS_ASSERT(component_id2 < component_pools.size());
 			auto component_pool1 = std::static_pointer_cast<Pool<T1>>(component_pools[component_id1]);
 			auto component_pool2 = std::static_pointer_cast<Pool<T2>>(component_pools[component_id2]);
-			assert(component_pool1);
-			assert(component_pool2);
+			ECS_ASSERT(component_pool1);
+			ECS_ASSERT(component_pool2);
 			Entity e;
 			e.entities = this;
 			for (Entity::Id i = 0; i < component_masks.size(); ++i) {
@@ -312,15 +316,15 @@ namespace entity
 			const auto component_id1 = Component<T1>::get_id();
 			const auto component_id2 = Component<T2>::get_id();
 			const auto component_id3 = Component<T3>::get_id();
-			assert(component_id1 < component_pools.size());
-			assert(component_id2 < component_pools.size());
-			assert(component_id3 < component_pools.size());
+			ECS_ASSERT(component_id1 < component_pools.size());
+			ECS_ASSERT(component_id2 < component_pools.size());
+			ECS_ASSERT(component_id3 < component_pools.size());
 			auto component_pool1 = std::static_pointer_cast<Pool<T1>>(component_pools[component_id1]);
 			auto component_pool2 = std::static_pointer_cast<Pool<T2>>(component_pools[component_id2]);
 			auto component_pool3 = std::static_pointer_cast<Pool<T3>>(component_pools[component_id3]);
-			assert(component_pool1);
-			assert(component_pool2);
-			assert(component_pool3);
+			ECS_ASSERT(component_pool1);
+			ECS_ASSERT(component_pool2);
+			ECS_ASSERT(component_pool3);
 			Entity e;
 			e.entities = this;
 			for (Entity::Id i = 0; i < component_masks.size(); ++i) {
@@ -457,7 +461,7 @@ namespace entity
 	{
 		const auto component_id = Component<T>::get_id();
 		const auto entity_id = e.get_index();
-		assert(entity_id < component_masks.size());
+		ECS_ASSERT(entity_id < component_masks.size());
 		component_masks[entity_id].set(component_id, false);
 	}
 
@@ -466,7 +470,7 @@ namespace entity
 	{
 		const auto component_id = Component<T>::get_id();
 		const auto entity_id = e.get_index();
-		assert(entity_id < component_masks.size());
+		ECS_ASSERT(entity_id < component_masks.size());
 		return component_masks[entity_id].test(component_id);
 	}
 
@@ -476,12 +480,12 @@ namespace entity
 		const auto component_id = Component<T>::get_id();
 		const auto entity_id = e.get_index();
 
-		assert(has_component<T>(e));
-		assert(component_id < component_pools.size());
+		ECS_ASSERT(has_component<T>(e));
+		ECS_ASSERT(component_id < component_pools.size());
 		auto component_pool = std::static_pointer_cast<Pool<T>>(component_pools[component_id]);
 
-		assert(component_pool);
-		assert(entity_id < component_pool->get_size());
+		ECS_ASSERT(component_pool);
+		ECS_ASSERT(entity_id < component_pool->get_size());
 		return component_pool->get(entity_id);
 	}
 

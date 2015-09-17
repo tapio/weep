@@ -105,7 +105,7 @@ namespace entity
 		else {
 			versions.push_back(0);
 			index = (unsigned int)versions.size() - 1;
-			assert(index < (1 << Entity::INDEX_BITS));
+			ECS_ASSERT(index < (1 << Entity::INDEX_BITS));
 
 			if (index >= component_masks.size()) {
 				// TODO: grow by doubling?
@@ -113,7 +113,7 @@ namespace entity
 			}
 		}
 
-		assert(index < versions.size());
+		ECS_ASSERT(index < versions.size());
 		Entity e(index, versions[index]);
 		e.entities = this;
 
@@ -123,8 +123,8 @@ namespace entity
 	void Entities::destroy_entity(Entity e)
 	{
 		const auto index = e.get_index();
-		assert(index < versions.size());        // sanity check
-		assert(index < component_masks.size());
+		ECS_ASSERT(index < versions.size());        // sanity check
+		ECS_ASSERT(index < component_masks.size());
 		++versions[index];                      // increase the version for that id
 		free_ids.push_back(index);              // make the id available for reuse
 		component_masks[index].reset();         // reset the component mask for that id
@@ -133,14 +133,14 @@ namespace entity
 	bool Entities::is_entity_alive(Entity e) const
 	{
 		const auto index = e.get_index();
-		assert(index < versions.size());
+		ECS_ASSERT(index < versions.size());
 		return versions[index] == e.get_version();
 	}
 
 	const ComponentMask& Entities::get_component_mask(Entity e) const
 	{
 		const auto index = e.get_index();
-		assert(index < component_masks.size());
+		ECS_ASSERT(index < component_masks.size());
 		return component_masks[index];
 	}
 
@@ -156,7 +156,7 @@ namespace entity
 
 	Entity Entities::get_entity_by_tag(std::string tag_name)
 	{
-		assert(has_tagged_entity(tag_name));
+		ECS_ASSERT(has_tagged_entity(tag_name));
 		return tagged_entities[tag_name];
 	}
 
@@ -173,7 +173,7 @@ namespace entity
 
 	std::vector<Entity> Entities::get_entity_group(std::string group_name)
 	{
-		assert(has_entity_group(group_name));
+		ECS_ASSERT(has_entity_group(group_name));
 		auto &s = entity_groups[group_name];
 		return std::vector<Entity>(s.begin(), s.end());
 	}

@@ -18,6 +18,8 @@
 #include <glm/gtx/component_wise.hpp>
 #define SDL_ASSERT_LEVEL 2
 #include <SDL2/SDL_assert.h>
+#define ASSERT SDL_assert
+#define ECS_ASSERT ASSERT
 #include <entity/ecs.hpp>
 
 using namespace entity;
@@ -48,8 +50,6 @@ void panic(const char* format, ...);
 
 string readFile(const string& path);
 string replace(string str, const string& search, const string& replace);
-
-#define ASSERT SDL_assert
 
 #define NONCOPYABLE(T) \
 	T(T&&) = default; \
