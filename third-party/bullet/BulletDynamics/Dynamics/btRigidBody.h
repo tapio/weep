@@ -176,7 +176,7 @@ public:
 
 	///btRigidBody constructor for backwards compatibility. 
 	///To specify friction (etc) during rigid body construction, please use the other constructor (using btRigidBodyConstructionInfo)
-	btRigidBody(	btScalar mass, btMotionState* motionState, btCollisionShape* collisionShape, const btVector3& localInertia=btVector3(0,0,0));
+	btRigidBody(	btScalar mass = 0, btMotionState* motionState = 0, btCollisionShape* collisionShape = 0, const btVector3& localInertia=btVector3(0,0,0));
 
 
 	virtual ~btRigidBody()

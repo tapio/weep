@@ -221,8 +221,7 @@ void Scene::load(const string& path, Resources& resources)
 
 			btRigidBody::btRigidBodyConstructionInfo info(mass, NULL, shape, inertia);
 			info.m_startWorldTransform = btTransform(convert(model.rotation), convert(model.position));
-			btRigidBody* body = new btRigidBody(info);
-			entity.add(body);
+			entity.add<btRigidBody>(info);
 			numBodies++;
 		}
 	}
