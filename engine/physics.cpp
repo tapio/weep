@@ -60,13 +60,11 @@ void PhysicsSystem::step(float dt)
 
 void PhysicsSystem::syncTransforms(Scene& scene)
 {
-	for (auto& model : scene.getChildren()) {
-		if (model.body) {
-			const btTransform& trans = model.body->getCenterOfMassTransform();
-			model.position = convert(trans.getOrigin());
-			model.rotation = convert(trans.getRotation());
-		}
-	}
+	scene.world.for_each<Model, btRigidBody*>([](Entity, Model& model, btRigidBody* body) {
+		const btTransform& trans = body->getCenterOfMassTransform();
+		model.position = convert(trans.getOrigin());
+		model.rotation = convert(trans.getRotation());
+	});
 }
 
 bool PhysicsSystem::addModel(Entity entity)
@@ -83,9 +81,9 @@ void PhysicsSystem::addScene(Scene& scene)
 {
 	uint t0 = Engine::timems();
 	int count = 0;
-	for (auto& it : scene.world.get_entities()) {
-		count += addModel(it);
-	}
+	scene.world.for_each<btRigidBody*>([this, &count](Entity e, btRigidBody*) {
+		count += addModel(e);
+	});
 	uint t1 = Engine::timems();
 	logDebug("Loaded %d bodies in %dms", count, t1 - t0);
 }

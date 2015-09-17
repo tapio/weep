@@ -109,27 +109,28 @@ int main(int, char*[])
 		vec3 p1 = camera.position;
 		vec3 vel = float(1.0f / Engine::dt) * (p1 - p0);
 
-		Model* cameraObj = scene.find("camera");
-		if (cameraObj) {
-			cameraObj->body->setSleepingThresholds(0.f, 0.f); // TODO: Not every frame
-			cameraObj->body->setGravity(btVector3(0, 0, 0)); // TODO: Not every frame
-			cameraObj->body->setAngularFactor(btVector3(0, 0, 0)); // TODO: Not every frame
+		Entity cameraEnt = scene.world.get_entity_by_tag("camera");
+		if (cameraEnt.is_alive()) {
+			btRigidBody* cameraBody = cameraEnt.get<btRigidBody*>();
+			cameraBody->setSleepingThresholds(0.f, 0.f); // TODO: Not every frame
+			cameraBody->setGravity(btVector3(0, 0, 0)); // TODO: Not every frame
+			cameraBody->setAngularFactor(btVector3(0, 0, 0)); // TODO: Not every frame
 			btTransform trans(convert(camera.rotation), convert(camera.position));
-			cameraObj->body->setWorldTransform(trans);
-			cameraObj->body->setLinearVelocity(convert(vel));
+			cameraBody->setWorldTransform(trans);
+			cameraBody->setLinearVelocity(convert(vel));
 		}
 
-		auto& lights = scene.getLights();
-		lights[0].position.x = 5.f * glm::sin(Engine::timems() / 800.f);
-		lights[1].position.x = 4.f * glm::sin(Engine::timems() / 500.f);
-		lights[2].position.y = 1.f + 1.5f * glm::sin(Engine::timems() / 1000.f);
-
-		for (uint i = 0; i < lights.size(); ++i) {
-			Model* model = scene.find("light_0" + std::to_string(i+1));
-			if (model) {
-				Light& light = lights[i];
-				model->position = light.position;
-				//model->material->ambient = light.color;
+		for (uint i = 0; i < 3; ++i) {
+			Entity e = scene.world.get_entity_by_tag("light_0" + std::to_string(i+1));
+			if (!e.is_alive())
+				continue;
+			Light& light = e.get<Light>();
+			/**/ if (i == 0) light.position.x = 5.f * glm::sin(Engine::timems() / 800.f);
+			else if (i == 2) light.position.x = 4.f * glm::sin(Engine::timems() / 500.f);
+			else if (i == 3) light.position.y = 1.f + 1.5f * glm::sin(Engine::timems() / 1000.f);
+			if (e.has<Model>()) {
+				e.get<Model>().position = light.position;
+				//e.get<Model>().material->ambient = light.color;
 			}
 		}
 
@@ -143,8 +144,8 @@ int main(int, char*[])
 			physTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
 		}
 
-		if (cameraObj) {
-			const btTransform& trans = cameraObj->body->getCenterOfMassTransform();
+		if (cameraEnt.is_alive()) {
+			const btTransform& trans = cameraEnt.get<btRigidBody*>()->getCenterOfMassTransform();
 			camera.position = convert(trans.getOrigin());
 			camera.rotation = convert(trans.getRotation());
 		}

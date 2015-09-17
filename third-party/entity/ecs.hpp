@@ -268,6 +268,72 @@ namespace entity
 		template <typename T> T& get_component(Entity e) const;
 		const ComponentMask& get_component_mask(Entity e) const;
 
+		template <typename T>
+		void for_each(std::function<void(Entity, T&)> func)
+		{
+			const auto component_id = Component<T>::get_id();
+			assert(component_id < component_pools.size());
+			auto component_pool = std::static_pointer_cast<Pool<T>>(component_pools[component_id]);
+			assert(component_pool);
+			Entity e;
+			e.entities = this;
+			for (Entity::Id i = 0; i < component_masks.size(); ++i) {
+				if (component_masks[i].test(component_id)) {
+					e.id = (versions[i] << Entity::INDEX_BITS) | i;
+					func(e, component_pool->get(i));
+				}
+			}
+		}
+
+		template <typename T1, typename T2>
+		void for_each(std::function<void(Entity, T1&, T2&)> func)
+		{
+			const auto component_id1 = Component<T1>::get_id();
+			const auto component_id2 = Component<T2>::get_id();
+			assert(component_id1 < component_pools.size());
+			assert(component_id2 < component_pools.size());
+			auto component_pool1 = std::static_pointer_cast<Pool<T1>>(component_pools[component_id1]);
+			auto component_pool2 = std::static_pointer_cast<Pool<T2>>(component_pools[component_id2]);
+			assert(component_pool1);
+			assert(component_pool2);
+			Entity e;
+			e.entities = this;
+			for (Entity::Id i = 0; i < component_masks.size(); ++i) {
+				if (component_masks[i].test(component_id1) && component_masks[i].test(component_id2)) {
+					e.id = (versions[i] << Entity::INDEX_BITS) | i;
+					func(e, component_pool1->get(i), component_pool2->get(i));
+				}
+			}
+		}
+
+		template <typename T1, typename T2, typename T3>
+		void for_each(std::function<void(Entity, T1&, T2&, T3&)> func)
+		{
+			const auto component_id1 = Component<T1>::get_id();
+			const auto component_id2 = Component<T2>::get_id();
+			const auto component_id3 = Component<T3>::get_id();
+			assert(component_id1 < component_pools.size());
+			assert(component_id2 < component_pools.size());
+			assert(component_id3 < component_pools.size());
+			auto component_pool1 = std::static_pointer_cast<Pool<T1>>(component_pools[component_id1]);
+			auto component_pool2 = std::static_pointer_cast<Pool<T2>>(component_pools[component_id2]);
+			auto component_pool3 = std::static_pointer_cast<Pool<T3>>(component_pools[component_id3]);
+			assert(component_pool1);
+			assert(component_pool2);
+			assert(component_pool3);
+			Entity e;
+			e.entities = this;
+			for (Entity::Id i = 0; i < component_masks.size(); ++i) {
+				if (component_masks[i].test(component_id1) &&
+					component_masks[i].test(component_id2) &&
+					component_masks[i].test(component_id3))
+				{
+					e.id = (versions[i] << Entity::INDEX_BITS) | i;
+					func(e, component_pool1->get(i), component_pool2->get(i), component_pool3->get(i));
+				}
+			}
+		}
+
 		/*
 		Tag management.
 		*/
