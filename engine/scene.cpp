@@ -120,6 +120,8 @@ void Scene::load(const string& path, Resources& resources)
 	if (!err.empty())
 		panic("Failed to read scene %s: %s", path.c_str(), err.c_str());
 
+	uint numModels = 0, numBodies = 0, numLights = 0;
+
 	// Parse prefabs
 	if (jsonScene.is_object() && jsonScene["prefabs"].is_object()) {
 		const Json::object& prefabs = jsonScene["prefabs"].object_items();
@@ -181,12 +183,14 @@ void Scene::load(const string& path, Resources& resources)
 			if (!lightDef["decay"].is_null())
 				light.decay = lightDef["decay"].number_value();
 			entity.add(light);
+			numLights++;
 		}
 
 		if (!def["geometry"].is_null()) {
 			Model model;
 			parseModel(model, def, resources);
 			entity.add(model);
+			numModels++;
 		}
 
 		// Parse body (needs to be after geometry, transform, bounds...)
@@ -219,26 +223,14 @@ void Scene::load(const string& path, Resources& resources)
 			info.m_startWorldTransform = btTransform(convert(model.rotation), convert(model.position));
 			btRigidBody* body = new btRigidBody(info);
 			entity.add(body);
+			numBodies++;
 		}
 	}
 	uint t1 = Engine::timems();
-	logDebug("Loaded scene in %dms with %d models, %d lights", t1 - t0, m_models.size(), m_lights.size());
+	logDebug("Loaded scene in %dms with %d models, %d bodies, %d lights, %d prefabs", t1 - t0, numModels, numBodies, numLights, m_prefabs.size());
 }
 
 void Scene::reset()
 {
-	m_models.clear();
-	m_lights.clear();
 	m_prefabs.clear();
-}
-
-Model* Scene::find(const std::string& name)
-{
-	if (name.empty())
-		return nullptr;
-	auto entity = world.get_entity_by_tag(name);
-	if (!entity.is_alive())
-		return nullptr;
-	ASSERT(entity.has<Model>());
-	return &entity.get<Model>();
 }

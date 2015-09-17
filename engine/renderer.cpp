@@ -44,9 +44,9 @@ Renderer::~Renderer()
 void Renderer::reset(Scene& scene)
 {
 	logDebug("Reseting renderer");
-	for (auto& model : scene.getChildren()) {
+	scene.world.for_each<Model>([this](Entity, Model& model) {
 		m_device->destroyModel(model);
-	}
+	});
 }
 
 void Renderer::dumpStats() const
@@ -68,10 +68,14 @@ void Renderer::render(Scene& scene, Camera& camera)
 {
 	camera.updateViewMatrix();
 	Frustum frustum(camera);
-	m_device->preRender(camera, scene.getLights());
-	for (auto& model : scene.getChildren()) {
+	std::vector<Light> lights;
+	scene.world.for_each<Light>([&](Entity, Light& light) {
+		lights.push_back(light);
+	});
+	m_device->preRender(camera, lights);
+	scene.world.for_each<Model>([&](Entity, Model& model) {
 		if (!model.materials.empty() && frustum.visible(model))
 			m_device->render(model);
-	}
+	});
 	m_device->postRender();
 }
