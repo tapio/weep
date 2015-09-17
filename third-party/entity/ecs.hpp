@@ -15,7 +15,7 @@
 #define ECS_ASSERT assert
 #endif
 
-namespace entity
+namespace ecs
 {
 	// Pool
 

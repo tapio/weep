@@ -1,7 +1,7 @@
 #include "ecs.hpp"
 #include <algorithm>
 
-namespace entity
+namespace ecs
 {
 
 	BaseComponent::Id BaseComponent::id_counter = 0;

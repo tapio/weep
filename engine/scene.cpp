@@ -159,7 +159,7 @@ void Scene::load_internal(const string& path, Resources& resources)
 			}
 		}
 
-		entity::Entity entity = world.create();
+		Entity entity = world.create();
 
 		if (def["name"].is_string()) {
 			entity.tag(def["name"].string_value());

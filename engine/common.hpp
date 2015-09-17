@@ -22,7 +22,7 @@
 #define ECS_ASSERT ASSERT
 #include <entity/ecs.hpp>
 
-using namespace entity;
+using namespace ecs;
 using std::string;
 using json11::Json;
 using glm::vec2;
