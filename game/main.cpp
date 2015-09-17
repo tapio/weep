@@ -126,8 +126,8 @@ int main(int, char*[])
 				continue;
 			Light& light = e.get<Light>();
 			/**/ if (i == 0) light.position.x = 5.f * glm::sin(Engine::timems() / 800.f);
-			else if (i == 2) light.position.x = 4.f * glm::sin(Engine::timems() / 500.f);
-			else if (i == 3) light.position.y = 1.f + 1.5f * glm::sin(Engine::timems() / 1000.f);
+			else if (i == 1) light.position.x = 4.f * glm::sin(Engine::timems() / 500.f);
+			else if (i == 2) light.position.y = 1.f + 1.5f * glm::sin(Engine::timems() / 1000.f);
 			if (e.has<Model>()) {
 				e.get<Model>().position = light.position;
 				//e.get<Model>().material->ambient = light.color;
