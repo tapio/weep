@@ -128,8 +128,12 @@ void Scene::load_internal(const string& path, Resources& resources)
 		panic("Failed to read scene %s: %s", path.c_str(), err.c_str());
 
 	if (jsonScene.is_object()) {
+		// Handle includes
 		if (jsonScene["include"].is_string()) {
 			load_internal(jsonScene["include"].string_value(), resources);
+		} else if (jsonScene["include"].is_array()) {
+			for (auto& includePath : jsonScene["include"].array_items())
+				load_internal(includePath.string_value(), resources);
 		}
 
 		// Parse prefabs
