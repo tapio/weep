@@ -20,7 +20,7 @@
 #include <SDL2/SDL_assert.h>
 #define ASSERT SDL_assert
 #define ECS_ASSERT ASSERT
-#include <entity/ecs.hpp>
+#include <ecs/ecs.hpp>
 
 using namespace ecs;
 using std::string;

@@ -1,7 +1,7 @@
 Library      URL                                          License
 ================================================================================
 bullet     - https://github.com/bulletphysics/bullet3   - zlib
-entity     - https://github.com/arvidsson/entity        - MIT
+ecs        - https://github.com/tapio/ecs               - MIT
 GL         - http://www.opengl.org/registry/            - MIT
 glm        - http://glm.g-truc.net/                     - MIT
 iqm        - https://github.com/lsalzman/iqm            - Public Domain
