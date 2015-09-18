@@ -117,7 +117,7 @@ void Scene::load(const string& path, Resources& resources)
 	uint t0 = Engine::timems();
 	load_internal(path, resources);
 	uint t1 = Engine::timems();
-	logDebug("Loaded scene in %dms with %d models, %d bodies, %d lights, %d prefabs", t1 - t0, numModels, numBodies, numLights, m_prefabs.size());
+	logDebug("Loaded scene in %dms with %d models, %d bodies, %d lights, %d prefabs", t1 - t0, numModels, numBodies, numLights, prefabs.size());
 }
 
 void Scene::load_internal(const string& path, Resources& resources)
@@ -138,113 +138,119 @@ void Scene::load_internal(const string& path, Resources& resources)
 
 		// Parse prefabs
 		if (jsonScene["prefabs"].is_object()) {
-			const Json::object& prefabs = jsonScene["prefabs"].object_items();
-			for (auto& it : prefabs)
-				m_prefabs[it.first] = it.second;
+			const Json::object& scenePrefabs = jsonScene["prefabs"].object_items();
+			for (auto& it : scenePrefabs)
+				prefabs[it.first] = it.second;
 		}
 	}
 
 	// Parse objects
 	const Json::array& objects = jsonScene.is_array() ? jsonScene.array_items() : jsonScene["objects"].array_items();
 	for (uint i = 0; i < objects.size(); ++i) {
-		Json def = objects[i];
-		ASSERT(def.is_object());
+		instantiate(objects[i], resources);
+	}
+}
 
-		if (def["prefab"].is_string()) {
-			auto prefabIter = m_prefabs.find(def["prefab"].string_value());
-			if (prefabIter != m_prefabs.end()) {
-				def = assign(prefabIter->second, def);
-			} else {
-				logWarning("Could not find prefab \"%s\"", def["prefab"].string_value().c_str());
-			}
-		}
+Entity Scene::instantiate(Json def, Resources& resources)
+{
+	ASSERT(def.is_object());
 
-		Entity entity = world.create();
-
-		if (def["name"].is_string()) {
-			entity.tag(def["name"].string_value());
+	if (def["prefab"].is_string()) {
+		auto prefabIter = prefabs.find(def["prefab"].string_value());
+		if (prefabIter != prefabs.end()) {
+			def = assign(prefabIter->second, def);
 		} else {
-#ifdef USE_DEBUG_NAMES
-			static uint debugId = 0;
-			string name;
-			if (def["prefab"].is_string())
-				name = def["prefab"].string_value() + "#";
-			else name = "object#";
-			name += std::to_string(debugId++);
-			entity.tag(name);
-#endif
-		}
-
-		// Parse light
-		const Json& lightDef = def["light"];
-		if (!lightDef.is_null()) {
-			Light light;
-			const string& lightType = lightDef["type"].string_value();
-			if (lightType == "ambient") light.type = Light::AMBIENT_LIGHT;
-			else if (lightType == "point") light.type = Light::POINT_LIGHT;
-			else if (lightType == "directional") light.type = Light::DIRECTIONAL_LIGHT;
-			else if (lightType == "spot") light.type = Light::SPOT_LIGHT;
-			else if (lightType == "area") light.type = Light::AREA_LIGHT;
-			else if (lightType == "hemisphere") light.type = Light::HEMISPHERE_LIGHT;
-			else logError("Unknown light type \"%s\"", lightType.c_str());
-			if (!lightDef["color"].is_null())
-				light.color = colorToVec3(lightDef["color"]);
-			if (!def["position"].is_null())
-				light.position = toVec3(def["position"]);
-			if (!lightDef["direction"].is_null())
-				light.direction = toVec3(lightDef["direction"]);
-			if (!lightDef["distance"].is_null())
-				light.distance = lightDef["distance"].number_value();
-			if (!lightDef["decay"].is_null())
-				light.decay = lightDef["decay"].number_value();
-			entity.add(light);
-			numLights++;
-		}
-
-		if (!def["geometry"].is_null()) {
-			Model model;
-			parseModel(model, def, resources);
-			entity.add(model);
-			numModels++;
-		}
-
-		// Parse body (needs to be after geometry, transform, bounds...)
-		if (!def["body"].is_null()) {
-			const Json& bodyDef = def["body"];
-			ASSERT(bodyDef.is_object());
-			ASSERT(entity.has<Model>());
-			const Model& model = entity.get<Model>();
-
-			btCollisionShape* shape = NULL;
-			const string& shapeStr = bodyDef["shape"].string_value();
-			if (shapeStr == "box") {
-				Bounds aabb = model.bounds;
-				shape = new btBoxShape(convert((aabb.max - aabb.min) * 0.5f));
-			} else if (shapeStr == "sphere") {
-				shape = new btSphereShape(model.bounds.radius);
-			} else {
-				logError("Unknown shape %s", shapeStr.c_str());
-			}
-			ASSERT(shape);
-
-			float mass = 0.f;
-			if (bodyDef["mass"].is_number())
-				mass = bodyDef["mass"].number_value();
-
-			btVector3 inertia(0, 0, 0);
-			shape->calculateLocalInertia(mass, inertia);
-
-			btRigidBody::btRigidBodyConstructionInfo info(mass, NULL, shape, inertia);
-			info.m_startWorldTransform = btTransform(convert(model.rotation), convert(model.position));
-			entity.add<btRigidBody>(info);
-			numBodies++;
+			logWarning("Could not find prefab \"%s\"", def["prefab"].string_value().c_str());
 		}
 	}
+
+	Entity entity = world.create();
+
+	if (def["name"].is_string()) {
+		entity.tag(def["name"].string_value());
+	} else {
+#ifdef USE_DEBUG_NAMES
+		static uint debugId = 0;
+		string name;
+		if (def["prefab"].is_string())
+			name = def["prefab"].string_value() + "#";
+		else name = "object#";
+		name += std::to_string(debugId++);
+		entity.tag(name);
+#endif
+	}
+
+	// Parse light
+	const Json& lightDef = def["light"];
+	if (!lightDef.is_null()) {
+		Light light;
+		const string& lightType = lightDef["type"].string_value();
+		if (lightType == "ambient") light.type = Light::AMBIENT_LIGHT;
+		else if (lightType == "point") light.type = Light::POINT_LIGHT;
+		else if (lightType == "directional") light.type = Light::DIRECTIONAL_LIGHT;
+		else if (lightType == "spot") light.type = Light::SPOT_LIGHT;
+		else if (lightType == "area") light.type = Light::AREA_LIGHT;
+		else if (lightType == "hemisphere") light.type = Light::HEMISPHERE_LIGHT;
+		else logError("Unknown light type \"%s\"", lightType.c_str());
+		if (!lightDef["color"].is_null())
+			light.color = colorToVec3(lightDef["color"]);
+		if (!def["position"].is_null())
+			light.position = toVec3(def["position"]);
+		if (!lightDef["direction"].is_null())
+			light.direction = toVec3(lightDef["direction"]);
+		if (!lightDef["distance"].is_null())
+			light.distance = lightDef["distance"].number_value();
+		if (!lightDef["decay"].is_null())
+			light.decay = lightDef["decay"].number_value();
+		entity.add(light);
+		numLights++;
+	}
+
+	if (!def["geometry"].is_null()) {
+		Model model;
+		parseModel(model, def, resources);
+		entity.add(model);
+		numModels++;
+	}
+
+	// Parse body (needs to be after geometry, transform, bounds...)
+	if (!def["body"].is_null()) {
+		const Json& bodyDef = def["body"];
+		ASSERT(bodyDef.is_object());
+		ASSERT(entity.has<Model>());
+		const Model& model = entity.get<Model>();
+
+		btCollisionShape* shape = NULL;
+		const string& shapeStr = bodyDef["shape"].string_value();
+		if (shapeStr == "box") {
+			Bounds aabb = model.bounds;
+			shape = new btBoxShape(convert((aabb.max - aabb.min) * 0.5f));
+		} else if (shapeStr == "sphere") {
+			shape = new btSphereShape(model.bounds.radius);
+		} else {
+			logError("Unknown shape %s", shapeStr.c_str());
+		}
+		ASSERT(shape);
+
+		float mass = 0.f;
+		if (bodyDef["mass"].is_number())
+			mass = bodyDef["mass"].number_value();
+
+		btVector3 inertia(0, 0, 0);
+		shape->calculateLocalInertia(mass, inertia);
+
+		btRigidBody::btRigidBodyConstructionInfo info(mass, NULL, shape, inertia);
+		info.m_startWorldTransform = btTransform(convert(model.rotation), convert(model.position));
+		entity.add<btRigidBody>(info);
+		numBodies++;
+	}
+
+	return entity;
 }
 
 void Scene::reset()
 {
-	m_prefabs.clear();
+	prefabs.clear();
 	numModels = 0; numBodies = 0; numLights = 0;
 	world = Entities();
 }
