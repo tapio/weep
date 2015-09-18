@@ -32,7 +32,7 @@ namespace ecs
 	class Pool : public BasePool
 	{
 	public:
-		Pool(int size = 100) { resize(size); }
+		Pool(int size = 1000) { resize(size); }
 
 		virtual ~Pool() {}
 
