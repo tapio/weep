@@ -12,6 +12,7 @@ class Texture
 public:
 	NONCOPYABLE(Texture);
 	Texture() {}
+	~Texture();
 
 	uint id = 0;
 	uint type = 0;
@@ -27,4 +28,5 @@ public:
 	void uploadCube(Image* images[6]);
 	void update();
 	void destroy();
+	bool valid() const { return id > 0; }
 };

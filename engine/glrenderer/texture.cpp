@@ -6,11 +6,23 @@ namespace {
 	static uint formats_sRGB[] = { 0, 0, 0, GL_SRGB, GL_SRGB8_ALPHA8 };
 }
 
+Texture::~Texture()
+{
+	destroy();
+}
+
 void Texture::create()
 {
 	glGenTextures(1, &id);
 }
 
+void Texture::destroy()
+{
+	if (id) {
+		glDeleteTextures(1, &id);
+		id = 0;
+	}
+}
 
 void Texture::upload(Image& image)
 {
@@ -50,12 +62,4 @@ void Texture::update()
 	glTexParameteri(type, GL_TEXTURE_MIN_FILTER, minFilter);
 	glTexParameteri(type, GL_TEXTURE_MAG_FILTER, magFilter);
 	glTexParameterf(type, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
-}
-
-void Texture::destroy()
-{
-	if (id) {
-		glDeleteTextures(1, &id);
-		id = 0;
-	}
 }

@@ -176,12 +176,22 @@ RenderDevice::~RenderDevice()
 	m_objectBlock.destroy();
 	m_materialBlock.destroy();
 	m_lightBlock.destroy();
+	m_textures.clear();
 }
 
 void RenderDevice::setEnvironment(Environment* env)
 {
-	 m_env = env;
-	 m_skyboxMat.shaderId = -1; // TODO: Proper destroy
+	m_env = env;
+	// TODO: Use uploadMaterial()
+	m_skyboxMat.shaderName = "skybox";
+	m_skyboxMat.shaderId = m_shaders[m_shaderNames["skybox"]].id;
+	Texture& tex = m_textures[m_env->skybox[0]];
+	if (!tex.valid()) {
+		tex.anisotropy = caps.maxAnisotropy;
+		tex.create();
+		tex.uploadCube(m_env->skybox);
+	}
+	m_skyboxMat.tex[Material::ENV_MAP] = tex.id;
 }
 
 void RenderDevice::destroyModel(Model& model)
@@ -267,10 +277,12 @@ bool RenderDevice::uploadMaterial(Material& material)
 	for (uint i = 0; i < material.map.size(); ++i) {
 		if (!material.map[i] || material.tex[i])
 			continue;
-		Texture tex;
-		tex.anisotropy = caps.maxAnisotropy;
-		tex.create();
-		tex.upload(*material.map[i]);
+		Texture& tex = m_textures[material.map[i]];
+		if (!tex.valid()) {
+			tex.anisotropy = caps.maxAnisotropy;
+			tex.create();
+			tex.upload(*material.map[i]);
+		}
 		material.tex[i] = tex.id;
 	}
 	return true;
@@ -392,17 +404,8 @@ void RenderDevice::renderFullscreenQuad()
 
 void RenderDevice::renderSkybox()
 {
-	if (!m_env->skybox[0])
+	if (!m_env->skybox[0] || m_skyboxMat.shaderId == -1)
 		return;
-	if (m_skyboxMat.shaderId == -1) {
-		m_skyboxMat.shaderName = "skybox";
-		m_skyboxMat.shaderId = m_shaders[m_shaderNames["skybox"]].id;
-		Texture tex;
-		tex.anisotropy = caps.maxAnisotropy;
-		tex.create();
-		tex.uploadCube(m_env->skybox);
-		m_skyboxMat.tex[Material::ENV_MAP] = tex.id;
-	}
 	if (!m_skyboxCube.vao) {
 		GLfloat skyboxVertices[] = {
 			-1.0f, 1.0f, -1.0f,

@@ -3,6 +3,7 @@
 #include "uniforms.hpp"
 #include "shader.hpp"
 #include "light.hpp"
+#include "texture.hpp"
 #include "material.hpp"
 #include "fbo.hpp"
 
@@ -71,6 +72,7 @@ private:
 	UBO<UniformLightBlock> m_lightBlock;
 	std::vector<ShaderProgram> m_shaders;
 	std::map<string, int> m_shaderNames;
+	std::map<void*, Texture> m_textures;
 	std::vector<GPUModel> m_models;
 	Environment* m_env;
 	Resources& m_resources;
