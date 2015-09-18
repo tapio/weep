@@ -276,9 +276,9 @@ namespace ecs
 		void for_each(std::function<void(Entity, T&)> func)
 		{
 			const auto component_id = Component<T>::get_id();
-			ECS_ASSERT(component_id < component_pools.size());
+			if (component_id >= component_pools.size()) return;
 			auto component_pool = std::static_pointer_cast<Pool<T>>(component_pools[component_id]);
-			ECS_ASSERT(component_pool);
+			if (!component_pool) return;
 			Entity e;
 			e.entities = this;
 			for (Entity::Id i = 0; i < component_masks.size(); ++i) {
@@ -294,12 +294,12 @@ namespace ecs
 		{
 			const auto component_id1 = Component<T1>::get_id();
 			const auto component_id2 = Component<T2>::get_id();
-			ECS_ASSERT(component_id1 < component_pools.size());
-			ECS_ASSERT(component_id2 < component_pools.size());
+			if (component_id1 >= component_pools.size()) return;
+			if (component_id2 >= component_pools.size()) return;
 			auto component_pool1 = std::static_pointer_cast<Pool<T1>>(component_pools[component_id1]);
 			auto component_pool2 = std::static_pointer_cast<Pool<T2>>(component_pools[component_id2]);
-			ECS_ASSERT(component_pool1);
-			ECS_ASSERT(component_pool2);
+			if (!component_pool1 || !component_pool2)
+				return;
 			Entity e;
 			e.entities = this;
 			for (Entity::Id i = 0; i < component_masks.size(); ++i) {
@@ -316,15 +316,14 @@ namespace ecs
 			const auto component_id1 = Component<T1>::get_id();
 			const auto component_id2 = Component<T2>::get_id();
 			const auto component_id3 = Component<T3>::get_id();
-			ECS_ASSERT(component_id1 < component_pools.size());
-			ECS_ASSERT(component_id2 < component_pools.size());
-			ECS_ASSERT(component_id3 < component_pools.size());
+			if (component_id1 >= component_pools.size()) return;
+			if (component_id2 >= component_pools.size()) return;
+			if (component_id3 >= component_pools.size()) return;
 			auto component_pool1 = std::static_pointer_cast<Pool<T1>>(component_pools[component_id1]);
 			auto component_pool2 = std::static_pointer_cast<Pool<T2>>(component_pools[component_id2]);
 			auto component_pool3 = std::static_pointer_cast<Pool<T3>>(component_pools[component_id3]);
-			ECS_ASSERT(component_pool1);
-			ECS_ASSERT(component_pool2);
-			ECS_ASSERT(component_pool3);
+			if (!component_pool1 || !component_pool2 || !component_pool3)
+				return;
 			Entity e;
 			e.entities = this;
 			for (Entity::Id i = 0; i < component_masks.size(); ++i) {
