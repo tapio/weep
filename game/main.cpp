@@ -207,6 +207,29 @@ int main(int, char*[])
 			if (ImGui::Button("Load")) {
 				reload = true;
 			}
+			const char* prefabs[scene.prefabs.size()];
+			int temp = 0;
+			for (auto it : scene.prefabs)
+				prefabs[temp++] = it.first.c_str();
+			static int selectedPrefab = -1;
+			ImGui::ListBox("", &selectedPrefab, prefabs, scene.prefabs.size(), 6);
+			ImGui::SameLine();
+			if (ImGui::Button("Add prefab")) {
+				Entity e = scene.instantiate(scene.prefabs[prefabs[selectedPrefab]], resources);
+				vec3 pos = camera.position + glm::rotate(camera.rotation, vec3(0, 0, -2));
+				if (e.has<Model>()) {
+					Model& model = e.get<Model>();
+					model.position = pos;
+					model.rotation = camera.rotation;
+				}
+				if (e.has<btRigidBody>()) {
+					physics.add(e);
+					btRigidBody& body = e.get<btRigidBody>();
+					btTransform trans(convert(camera.rotation), convert(pos));
+					body.setWorldTransform(trans);
+				}
+			}
+
 		}
 
 		//ImGui::ShowTestWindow();
