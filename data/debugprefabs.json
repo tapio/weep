@@ -2,7 +2,8 @@
 	"prefabs": {
 		"cube": {
 			"material": {
-				"shaderName": "basic"
+				"shaderName": "color_lit",
+				"diffuse": 1.0
 			},
 			"geometry": "debug/cube.obj"
 		},

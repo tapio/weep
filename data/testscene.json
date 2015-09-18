@@ -82,6 +82,7 @@
 	},{
 		"prefab": "cube",
 		"material": {
+			"shaderName": "basic",
 			"ambient": 1.0,
 			"diffuseMap": "debug/uvtestgrid.png"
 		},
