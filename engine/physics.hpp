@@ -10,8 +10,8 @@ public:
 	~PhysicsSystem();
 	void reset();
 
+	bool add(Entity entity);
 	void addScene(class Scene& scene);
-	bool addModel(Entity entity);
 
 	void syncTransforms(class Scene& scene);
 	void step(float dt);

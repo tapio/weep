@@ -66,7 +66,7 @@ void PhysicsSystem::syncTransforms(Scene& scene)
 	});
 }
 
-bool PhysicsSystem::addModel(Entity entity)
+bool PhysicsSystem::add(Entity entity)
 {
 	if (!entity.has<btRigidBody>()) return false;
 	btRigidBody& body = entity.get<btRigidBody>();
@@ -81,7 +81,7 @@ void PhysicsSystem::addScene(Scene& scene)
 	uint t0 = Engine::timems();
 	int count = 0;
 	scene.world.for_each<btRigidBody>([this, &count](Entity e, btRigidBody) {
-		count += addModel(e);
+		count += add(e);
 	});
 	uint t1 = Engine::timems();
 	logDebug("Loaded %d bodies in %dms", count, t1 - t0);
