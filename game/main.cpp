@@ -114,9 +114,6 @@ int main(int, char*[])
 		Entity cameraEnt = scene.world.get_entity_by_tag("camera");
 		if (cameraEnt.is_alive()) {
 			btRigidBody& cameraBody = cameraEnt.get<btRigidBody>();
-			cameraBody.setSleepingThresholds(0.f, 0.f); // TODO: Not every frame
-			cameraBody.setGravity(btVector3(0, 0, 0)); // TODO: Not every frame
-			cameraBody.setAngularFactor(btVector3(0, 0, 0)); // TODO: Not every frame
 			btTransform trans(convert(camera.rotation), convert(camera.position));
 			cameraBody.setWorldTransform(trans);
 			cameraBody.setLinearVelocity(convert(vel));

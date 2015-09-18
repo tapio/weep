@@ -23,10 +23,19 @@ namespace {
 		return Json(object);
 	}
 
+	template<typename T> void setNumber(T& dst, const Json& src) {
+		if (src.is_number())
+			dst = src.number_value();
+	}
+
+	void setString(string& dst, const Json& src) {
+		if (src.is_string())
+			dst = src.string_value();
+	}
+
 	Material* parseMaterial(Material* material, const Json& def, Resources& resources) {
 		ASSERT(def.is_object());
-		if (def["shaderName"].is_string())
-			material->shaderName = def["shaderName"].string_value();
+		setString(material->shaderName, def["shaderName"]);
 		if (def["tessellate"].bool_value())
 			material->tessellate = true;
 		if (!def["ambient"].is_null())
@@ -35,8 +44,7 @@ namespace {
 			material->diffuse = colorToVec3(def["diffuse"]);
 		if (!def["specular"].is_null())
 			material->specular = colorToVec3(def["specular"]);
-		if (!def["shininess"].is_null())
-			material->shininess = def["shininess"].number_value();
+		setNumber(material->shininess, def["shininess"]);
 
 		if (!def["uvOffset"].is_null())
 			material->uvOffset = toVec2(def["uvOffset"]);
@@ -198,10 +206,8 @@ Entity Scene::instantiate(Json def, Resources& resources)
 			light.position = toVec3(def["position"]);
 		if (!lightDef["direction"].is_null())
 			light.direction = toVec3(lightDef["direction"]);
-		if (!lightDef["distance"].is_null())
-			light.distance = lightDef["distance"].number_value();
-		if (!lightDef["decay"].is_null())
-			light.decay = lightDef["decay"].number_value();
+		setNumber(light.distance, lightDef["distance"]);
+		setNumber(light.decay, lightDef["decay"]);
 		entity.add(light);
 		numLights++;
 	}
@@ -233,16 +239,29 @@ Entity Scene::instantiate(Json def, Resources& resources)
 		ASSERT(shape);
 
 		float mass = 0.f;
-		if (bodyDef["mass"].is_number())
-			mass = bodyDef["mass"].number_value();
+		setNumber(mass, bodyDef["mass"]);
 
 		btVector3 inertia(0, 0, 0);
 		shape->calculateLocalInertia(mass, inertia);
 
 		btRigidBody::btRigidBodyConstructionInfo info(mass, NULL, shape, inertia);
 		info.m_startWorldTransform = btTransform(convert(model.rotation), convert(model.position));
+		setNumber(info.m_friction, bodyDef["friction"]);
+		setNumber(info.m_rollingFriction, bodyDef["rollingFriction"]);
+		setNumber(info.m_restitution, bodyDef["restitution"]);
+		if (bodyDef["noSleep"].bool_value()) {
+			info.m_linearSleepingThreshold = 0.f;
+			info.m_angularSleepingThreshold = 0.f;
+		}
 		entity.add<btRigidBody>(info);
 		numBodies++;
+		btRigidBody& body = entity.get<btRigidBody>();
+		if (!bodyDef["angularFactor"].is_null())
+			body.setAngularFactor(convert(toVec3(bodyDef["angularFactor"])));
+		if (!bodyDef["linearFactor"].is_null())
+			body.setLinearFactor(convert(toVec3(bodyDef["linearFactor"])));
+		if (bodyDef["noGravity"].bool_value())
+			body.setFlags(body.getFlags() | BT_DISABLE_WORLD_GRAVITY);
 	}
 
 	return entity;
