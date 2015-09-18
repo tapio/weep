@@ -119,19 +119,17 @@ int main(int, char*[])
 			cameraBody.setLinearVelocity(convert(vel));
 		}
 
-		for (uint i = 0; i < 3; ++i) {
-			Entity e = scene.world.get_entity_by_tag("light_0" + std::to_string(i+1));
-			if (!e.is_alive())
-				continue;
-			Light& light = e.get<Light>();
-			/**/ if (i == 0) light.position.x = 5.f * glm::sin(Engine::timems() / 800.f);
-			else if (i == 1) light.position.x = 4.f * glm::sin(Engine::timems() / 500.f);
-			else if (i == 2) light.position.y = 1.f + 1.5f * glm::sin(Engine::timems() / 1000.f);
+		int lightIndex = 0;
+		scene.world.for_each<Light>([&](Entity e, Light& light) {
+			/**/ if (lightIndex == 0) light.position.x = 5.f * glm::sin(Engine::timems() / 800.f);
+			else if (lightIndex == 1) light.position.x = 4.f * glm::sin(Engine::timems() / 500.f);
+			else if (lightIndex == 2) light.position.y = 1.f + 1.5f * glm::sin(Engine::timems() / 1000.f);
 			if (e.has<Model>()) {
 				e.get<Model>().position = light.position;
 				//e.get<Model>().material->ambient = light.color;
 			}
-		}
+			lightIndex++;
+		});
 
 		// Physics
 		float physTimeMs = 0.f;
