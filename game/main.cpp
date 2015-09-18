@@ -211,8 +211,8 @@ int main(int, char*[])
 			int temp = 0;
 			for (auto it : scene.prefabs)
 				prefabs[temp++] = it.first.c_str();
-			static int selectedPrefab = -1;
-			ImGui::ListBox("", &selectedPrefab, prefabs, scene.prefabs.size(), 6);
+			static int selectedPrefab = 0;
+			ImGui::Combo("", &selectedPrefab, prefabs, scene.prefabs.size());
 			ImGui::SameLine();
 			if (ImGui::Button("Add prefab")) {
 				Entity e = scene.instantiate(scene.prefabs[prefabs[selectedPrefab]], resources);
