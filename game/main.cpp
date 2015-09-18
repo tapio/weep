@@ -213,8 +213,18 @@ int main(int, char*[])
 				prefabs[temp++] = it.first.c_str();
 			static int selectedPrefab = 0;
 			ImGui::Combo("", &selectedPrefab, prefabs, scene.prefabs.size());
+			bool create = false;
+			vec3 vel(0, 0, 0);
 			ImGui::SameLine();
-			if (ImGui::Button("Add prefab")) {
+			if (ImGui::Button("Drop")) {
+				create = true;
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Shoot")) {
+				create = true;
+				vel = glm::rotate(camera.rotation, vec3(0, 0, -20));
+			}
+			if (create) {
 				Entity e = scene.instantiate(scene.prefabs[prefabs[selectedPrefab]], resources);
 				vec3 pos = camera.position + glm::rotate(camera.rotation, vec3(0, 0, -2));
 				if (e.has<Model>()) {
@@ -227,9 +237,9 @@ int main(int, char*[])
 					btRigidBody& body = e.get<btRigidBody>();
 					btTransform trans(convert(camera.rotation), convert(pos));
 					body.setWorldTransform(trans);
+					body.setLinearVelocity(convert(vel));
 				}
 			}
-
 		}
 
 		//ImGui::ShowTestWindow();
