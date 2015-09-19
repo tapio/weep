@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Voxel Painter</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<style>
+			body {
+				font-family: Monospace;
+				background-color: #f0f0f0;
+				margin: 0px;
+				overflow: hidden;
+			}
+			#info {
+				position: absolute;
+				top: 10px;
+				width: 100%;
+				text-align: center;
+			}
+			#controls {
+				position: absolute;
+				top: 10px;
+				left: 10px;
+			}
+
+			#oldie { background-color: #ddd !important }
+		</style>
+	</head>
+	<body>
+
+		<div id="container">
+			<div id="info">
+				voxelpainter<br>
+				<strong>click</strong>: add voxel, <strong>shift + click</strong>: remove voxel
+			</div>
+			<div id="controls">
+				<button id="export-obj">Export to OBJ</button>
+			</div>
+		</div>
+
+		<script src="three.min.js"></script>
+		<script src="OBJExporter.js"></script>
+		<script src="voxelpainter.js"></script>
+
+	</body>
+</html>
