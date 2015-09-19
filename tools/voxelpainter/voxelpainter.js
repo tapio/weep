@@ -1,7 +1,7 @@
 var BLOCK_SIZE = 1;
-var GRID_SIZE = 20;
+var GRID_SIZE = 30;
 var container;
-var camera, scene, renderer;
+var camera, controls, scene, renderer;
 var plane, cube, voxelParent;
 var mouse, raycaster, isShiftDown = false;
 
@@ -35,8 +35,8 @@ function init() {
 		exportToObj(voxelParent);
 	}, false);
 
-	camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-	var camPosRef = BLOCK_SIZE * GRID_SIZE * 0.1;
+	camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+	var camPosRef = BLOCK_SIZE * GRID_SIZE * 0.05;
 	camera.position.set(camPosRef * 5, camPosRef * 8, camPosRef * 13);
 	camera.lookAt(new THREE.Vector3());
 
@@ -101,6 +101,10 @@ function init() {
 	container.appendChild(renderer.domElement);
 	renderer.domElement.addEventListener('contextmenu', function(e) { e.preventDefault(); }, false);
 
+	controls = new THREE.OrbitControls(camera, renderer.domElement);
+	controls.mouseButtons.ORBIT = THREE.MOUSE.RIGHT;
+	controls.mouseButtons.PAN = null;
+
 	document.addEventListener('mousemove', onDocumentMouseMove, false);
 	document.addEventListener('mousedown', onDocumentMouseDown, false);
 	document.addEventListener('keydown', onDocumentKeyDown, false);
@@ -127,7 +131,6 @@ function onDocumentMouseMove(event) {
 		rollOverMesh.position.copy(intersect.point).add(intersect.face.normal.clone().multiplyScalar(0.5));
 		rollOverMesh.position.divideScalar(BLOCK_SIZE).floor().multiplyScalar(BLOCK_SIZE).addScalar(BLOCK_SIZE * 0.5);
 	}
-	render();
 }
 
 function onDocumentMouseDown(event) {
@@ -151,7 +154,6 @@ function onDocumentMouseDown(event) {
 			voxelParent.add(voxel);
 			objects.push(voxel);
 		}
-		render();
 	}
 }
 
@@ -168,5 +170,7 @@ function onDocumentKeyUp(event) {
 }
 
 function render() {
+	requestAnimationFrame(render);
+	controls.update();
 	renderer.render(scene, camera);
 }
