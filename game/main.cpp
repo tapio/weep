@@ -45,6 +45,7 @@ int main(int, char*[])
 	bool running = true;
 	bool active = false;
 	bool reload = false;
+	bool resetCamera = false;
 	SDL_Event e;
 	while (running) {
 		ImGui_ImplSDLGL3_NewFrame();
@@ -201,6 +202,7 @@ int main(int, char*[])
 			ImGui::SameLine();
 			if (ImGui::Button("Load")) {
 				reload = true;
+				resetCamera = true;
 			}
 			const char* prefabs[scene.prefabs.size()];
 			int temp = 0;
@@ -257,6 +259,12 @@ int main(int, char*[])
 			renderer.device().setEnvironment(&renderer.env());
 			scene.load(scenePath, resources);
 			physics.addScene(scene);
+			if (resetCamera) {
+				Entity cameraEnt = scene.world.get_entity_by_tag("camera");
+				if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>())
+					camera.position = convert(cameraEnt.get<btRigidBody>().getCenterOfMassPosition());
+				resetCamera = false;
+			}
 			reload = false;
 		}
 	}
