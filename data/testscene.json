@@ -18,6 +18,17 @@
 		"position": [ 0, -0.5, -10 ],
 		"scale": [ 0.1, 0.5, 0.1 ]
 	},{
+		"material": {
+			"shaderName": "nsmap",
+			"diffuseMap": "debug/uvtestgrid.png",
+			"specularMap": "debug/uvtestgrid_specular.png",
+			"normalMap": "debug/uvtestgrid_normal.png",
+			"ambient": [ 0.005, 0.005, 0.005 ],
+			"shininess": 8
+		},
+		"geometry": "debug/sphere.obj",
+		"position": [ 0, 1, -8 ]
+	},{
 		"prefab": "plane",
 		"material": { "uvRepeat": 10 },
 		"position": [ 0, -0.5, 0 ],
