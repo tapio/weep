@@ -99,6 +99,7 @@ function init() {
 	renderer.setPixelRatio(window.devicePixelRatio);
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	container.appendChild(renderer.domElement);
+	renderer.domElement.addEventListener('contextmenu', function(e) { e.preventDefault(); }, false);
 
 	document.addEventListener('mousemove', onDocumentMouseMove, false);
 	document.addEventListener('mousedown', onDocumentMouseDown, false);
@@ -137,13 +138,13 @@ function onDocumentMouseDown(event) {
 	if (intersects.length > 0) {
 		var intersect = intersects[0];
 		// delete cube
-		if (isShiftDown) {
+		if (event.button == 2 || isShiftDown) {
 			if (intersect.object != plane) {
 				voxelParent.remove(intersect.object);
 				objects.splice(objects.indexOf(intersect.object), 1);
 			}
 		// create cube
-		} else {
+		} else if (event.button == 0) {
 			var voxel = new THREE.Mesh(cubeGeo, cubeMaterial);
 			voxel.position.copy(intersect.point).add(intersect.face.normal.clone().multiplyScalar(0.5));
 			voxel.position.divideScalar(BLOCK_SIZE).floor().multiplyScalar(BLOCK_SIZE).addScalar(BLOCK_SIZE * 0.5);
