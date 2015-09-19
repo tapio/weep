@@ -2,7 +2,7 @@ var BLOCK_SIZE = 1;
 var GRID_SIZE = 30;
 var container;
 var camera, controls, scene, renderer;
-var plane, cube, voxelParent;
+var plane, cube, voxelParent, lastPlaced;
 var mouse, raycaster, isShiftDown = false;
 
 var rollOverMesh, rollOverMaterial;
@@ -107,6 +107,7 @@ function init() {
 
 	document.addEventListener('mousemove', onDocumentMouseMove, false);
 	document.addEventListener('mousedown', onDocumentMouseDown, false);
+	document.addEventListener('mouseup', onDocumentMouseUp, false);
 	document.addEventListener('keydown', onDocumentKeyDown, false);
 	document.addEventListener('keyup', onDocumentKeyUp, false);
 
@@ -131,6 +132,8 @@ function onDocumentMouseMove(event) {
 		rollOverMesh.position.copy(intersect.point).add(intersect.face.normal.clone().multiplyScalar(0.5));
 		rollOverMesh.position.divideScalar(BLOCK_SIZE).floor().multiplyScalar(BLOCK_SIZE).addScalar(BLOCK_SIZE * 0.5);
 	}
+	if (event.buttons == 1)
+		onDocumentMouseDown(event);
 }
 
 function onDocumentMouseDown(event) {
@@ -151,10 +154,18 @@ function onDocumentMouseDown(event) {
 			var voxel = new THREE.Mesh(cubeGeo, cubeMaterial);
 			voxel.position.copy(intersect.point).add(intersect.face.normal.clone().multiplyScalar(0.5));
 			voxel.position.divideScalar(BLOCK_SIZE).floor().multiplyScalar(BLOCK_SIZE).addScalar(BLOCK_SIZE * 0.5);
-			voxelParent.add(voxel);
-			objects.push(voxel);
+			if (!lastPlaced || Math.abs(lastPlaced.position.y - voxel.position.y) < 0.001) {
+				voxelParent.add(voxel);
+				objects.push(voxel);
+				lastPlaced = voxel;
+			}
 		}
 	}
+}
+
+function onDocumentMouseUp(event) {
+	event.preventDefault();
+	lastPlaced = null;
 }
 
 function onDocumentKeyDown(event) {
