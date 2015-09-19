@@ -55,8 +55,11 @@ struct Geometry
 	void calculateBoundingBox();
 	void calculateNormals();
 	void normalizeNormals();
+	void generateCollisionTriMesh(bool deduplicateVertices = true);
 
 	std::vector<Batch> batches;
 
 	Bounds bounds;
+
+	struct btTriangleMesh* collisionMesh = nullptr;
 };

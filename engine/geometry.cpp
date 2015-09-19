@@ -1,5 +1,6 @@
 #include "geometry.hpp"
 #include "image.hpp"
+#include "physics.hpp"
 #include <sstream>
 #include <fstream>
 
@@ -157,6 +158,8 @@ Geometry::Geometry(const Image& heightmap)
 
 Geometry::~Geometry()
 {
+	if (collisionMesh)
+		delete collisionMesh;
 }
 
 void Geometry::calculateBoundingSphere()
@@ -228,6 +231,40 @@ void Geometry::normalizeNormals()
 			normal = glm::normalize(normal);
 }
 
+void Geometry::generateCollisionTriMesh(bool deduplicateVertices)
+{
+	ASSERT(!collisionMesh);
+	uint numVerts = 0;
+	for (auto& batch : batches) {
+		if (!batch.indices.empty()) numVerts += batch.indices.size();
+		else if (!batch.positions.empty()) numVerts += batch.positions.size();
+		else if (!batch.positions2d.empty()) numVerts += batch.positions2d.size();
+	}
+	collisionMesh = new btTriangleMesh(numVerts > 65536);
+
+	for (auto& batch : batches) {
+		if (batch.indices.empty()) {
+			for (uint i = 0; i < batch.positions.size(); i += 3) {
+				collisionMesh->addTriangle(
+					convert(batch.positions[i]),
+					convert(batch.positions[i+1]),
+					convert(batch.positions[i+2]),
+					deduplicateVertices);
+			}
+		} else {
+			for (uint i = 0; i < batch.indices.size(); i += 3) {
+				collisionMesh->addTriangle(
+					convert(batch.positions[batch.indices[i]]),
+					convert(batch.positions[batch.indices[i+1]]),
+					convert(batch.positions[batch.indices[i+2]]),
+					deduplicateVertices);
+			}
+		}
+	}
+}
+
+
+// Batch
 
 Batch::~Batch()
 {

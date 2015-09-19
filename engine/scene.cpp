@@ -233,6 +233,10 @@ Entity Scene::instantiate(Json def, Resources& resources)
 			shape = new btBoxShape(convert((aabb.max - aabb.min) * 0.5f));
 		} else if (shapeStr == "sphere") {
 			shape = new btSphereShape(model.bounds.radius);
+		} else if (shapeStr == "trimesh") {
+			if (!model.geometry->collisionMesh)
+				model.geometry->generateCollisionTriMesh();
+			shape = new btBvhTriangleMeshShape(model.geometry->collisionMesh, true);
 		} else {
 			logError("Unknown shape %s", shapeStr.c_str());
 		}
