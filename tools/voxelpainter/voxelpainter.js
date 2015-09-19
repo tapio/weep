@@ -2,11 +2,13 @@ var BLOCK_SIZE = 1;
 var GRID_SIZE = 30;
 var container;
 var camera, controls, scene, renderer;
-var plane, cube, voxelParent, lastPlaced;
+var globalPlane, plane, cube, voxelParent, lastPlaced;
 var mouse, raycaster, isShiftDown = false;
+var cursorMesh;
 
-var rollOverMesh, rollOverMaterial;
+var cubeCursorMesh, planeCursorMesh;
 var cubeGeo, cubeMaterial;
+var planeGeo, planeMaterial;
 
 var objects = [];
 
@@ -45,16 +47,27 @@ function init() {
 	scene.add(voxelParent);
 
 	// roll-over helpers
+	var cursorMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, opacity: 0.5, transparent: true });
+	var cubeCursorGeo = new THREE.BoxGeometry(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+	var planeCursorGeo = new THREE.PlaneBufferGeometry(BLOCK_SIZE, BLOCK_SIZE);
+	planeCursorGeo.rotateX(-Math.PI / 2);
+	planeCursorGeo.computeBoundingBox();
+	cubeCursorGeo.computeBoundingBox();
+	cubeCursorMesh = new THREE.Mesh(cubeCursorGeo, cursorMaterial);
+	planeCursorMesh = new THREE.Mesh(planeCursorGeo, cursorMaterial);
+	scene.add(cubeCursorMesh);
+	scene.add(planeCursorMesh);
+	cursorMesh = cubeCursorMesh;
+	planeCursorMesh.visible = false;
 
-	rollOverGeo = new THREE.BoxGeometry(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-	rollOverMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000, opacity: 0.5, transparent: true });
-	rollOverMesh = new THREE.Mesh(rollOverGeo, rollOverMaterial);
-	scene.add(rollOverMesh);
-
-	// cubes
+	// primitives
 
 	cubeGeo = new THREE.BoxGeometry(BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 	cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xfeb74c });
+
+	planeGeo = new THREE.PlaneBufferGeometry(BLOCK_SIZE, BLOCK_SIZE);
+	planeGeo.rotateX(-Math.PI / 2);
+	planeMaterial = new THREE.MeshLambertMaterial({ color: 0xfe944c });
 
 	// grid
 
@@ -81,9 +94,9 @@ function init() {
 	var geometry = new THREE.PlaneBufferGeometry(BLOCK_SIZE * GRID_SIZE, BLOCK_SIZE * GRID_SIZE);
 	geometry.rotateX(-Math.PI / 2);
 
-	plane = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ visible: false }));
-	scene.add(plane);
-	objects.push(plane);
+	globalPlane = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ visible: false }));
+	scene.add(globalPlane);
+	objects.push(globalPlane);
 
 	// Lights
 
@@ -129,8 +142,8 @@ function onDocumentMouseMove(event) {
 	var intersects = raycaster.intersectObjects(objects);
 	if (intersects.length > 0) {
 		var intersect = intersects[0];
-		rollOverMesh.position.copy(intersect.point).add(intersect.face.normal.clone().multiplyScalar(0.5));
-		rollOverMesh.position.divideScalar(BLOCK_SIZE).floor().multiplyScalar(BLOCK_SIZE).addScalar(BLOCK_SIZE * 0.5);
+		cursorMesh.position.copy(intersect.point).add(intersect.face.normal.clone().multiplyScalar(0.5));
+		cursorMesh.position.divideScalar(BLOCK_SIZE).floor().multiplyScalar(BLOCK_SIZE).add(cursorMesh.geometry.boundingBox.size().clone().multiplyScalar(0.5));
 	}
 	if (event.buttons == 1)
 		onDocumentMouseDown(event);
@@ -143,18 +156,28 @@ function onDocumentMouseDown(event) {
 	var intersects = raycaster.intersectObjects(objects);
 	if (intersects.length > 0) {
 		var intersect = intersects[0];
-		// delete cube
+		// delete object
 		if (event.button == 2 || isShiftDown) {
-			if (intersect.object != plane) {
+			if (intersect.object != globalPlane) {
 				voxelParent.remove(intersect.object);
 				objects.splice(objects.indexOf(intersect.object), 1);
 			}
 		// create cube
-		} else if (event.button == 0) {
+		} else if (event.button == 0 && cursorMesh === cubeCursorMesh) {
 			var voxel = new THREE.Mesh(cubeGeo, cubeMaterial);
 			voxel.position.copy(intersect.point).add(intersect.face.normal.clone().multiplyScalar(0.5));
-			voxel.position.divideScalar(BLOCK_SIZE).floor().multiplyScalar(BLOCK_SIZE).addScalar(BLOCK_SIZE * 0.5);
+			voxel.position.divideScalar(BLOCK_SIZE).floor().multiplyScalar(BLOCK_SIZE).add(cursorMesh.geometry.boundingBox.size().clone().multiplyScalar(0.5));
 			if (!lastPlaced || Math.abs(lastPlaced.position.y - voxel.position.y) < 0.001) {
+				voxelParent.add(voxel);
+				objects.push(voxel);
+				lastPlaced = voxel;
+			}
+		// create plane, only on floor level
+		} else if (event.button == 0 && cursorMesh === planeCursorMesh && intersect.object === globalPlane) {
+			var voxel = new THREE.Mesh(planeGeo, planeMaterial);
+			voxel.position.copy(intersect.point).add(intersect.face.normal.clone().multiplyScalar(0.5));
+			voxel.position.divideScalar(BLOCK_SIZE).floor().multiplyScalar(BLOCK_SIZE).add(cursorMesh.geometry.boundingBox.size().clone().multiplyScalar(0.5));
+			if (!lastPlaced || Math.abs(voxel.position.y) < 0.001) {
 				voxelParent.add(voxel);
 				objects.push(voxel);
 				lastPlaced = voxel;
@@ -177,6 +200,11 @@ function onDocumentKeyDown(event) {
 function onDocumentKeyUp(event) {
 	switch (event.keyCode) {
 		case 16: isShiftDown = false; break;
+		case 32:
+			cursorMesh.visible = false;
+			cursorMesh = cursorMesh == cubeCursorMesh ? planeCursorMesh : cubeCursorMesh;
+			cursorMesh.visible = true;
+			break;
 	}
 }
 
