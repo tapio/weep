@@ -11,7 +11,8 @@ Controller::Controller(vec3 pos, quat rot)
 void Controller::update(float dt)
 {
 	const unsigned char* keys = SDL_GetKeyboardState(NULL);
-	vec3 input;
+	vec3 input(0);
+	float jump = 0;
 
 	if (keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_W])
 		input.z = -1;
@@ -28,6 +29,13 @@ void Controller::update(float dt)
 	else if (keys[SDL_SCANCODE_PAGEDOWN] || keys[SDL_SCANCODE_Z])
 		input.y = -1;
 
+	if (keys[SDL_SCANCODE_SPACE] && onGround) {
+		jump = 1.f;
+		onGround = false;
+	} else if (!keys[SDL_SCANCODE_SPACE] && !onGround) {
+		onGround = true;
+	}
+
 	if (keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT])
 		input *= fast;
 
@@ -35,11 +43,13 @@ void Controller::update(float dt)
 	rotation = glm::rotate(rotation, glm::radians(angles.y), yaxis);
 	rotation = glm::rotate(rotation, glm::radians(angles.x), xaxis);
 
-	if (dot(input, input) > 0.001) {
+	if (dot(input, input) > 0.001 || jump) {
 		vec3 dir = rotation * input;
 		if (!fly) dir.y = 0;
 		if (body) {
-			body->applyCentralImpulse(convert(dir * speed * moveForce * dt));
+			vec3 force = dir * speed * moveForce * dt;
+			force.y += jump * jumpForce;
+			body->applyCentralImpulse(convert(force));
 		} else {
 			position += dir * speed * dt;
 		}

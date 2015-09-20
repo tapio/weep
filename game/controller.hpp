@@ -17,7 +17,9 @@ public:
 
 	float moveForce = 3000.f;
 	float brakeForce = 1000.f;
+	float jumpForce = 500.f;
 	class btRigidBody* body = nullptr;
 
+	bool onGround = true;
 	bool fly = true;
 };

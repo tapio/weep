@@ -181,6 +181,7 @@ int main(int, char*[])
 			}
 			ImGui::SliderFloat("Move force", &controller.moveForce, 0.0f, 10000.0f);
 			ImGui::SliderFloat("Brake force", &controller.brakeForce, 0.0f, 10000.0f);
+			ImGui::SliderFloat("Jump force", &controller.jumpForce, 0.0f, 10000.0f);
 		}
 		if (ImGui::CollapsingHeader("Settings")) {
 			bool vsync = Engine::vsync();
