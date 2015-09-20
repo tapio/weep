@@ -29,19 +29,16 @@ void Controller::update(float dt)
 	else if (keys[SDL_SCANCODE_PAGEDOWN] || keys[SDL_SCANCODE_Z])
 		input.y = -1;
 
-	if (keys[SDL_SCANCODE_SPACE] && onGround) {
-		jumpCharge += jumpChargeSpeed * dt;
-		if (jumpCharge > 1.f) jumpCharge = 1.f;
-	}
-	else if (!keys[SDL_SCANCODE_SPACE] && onGround && jumpCharge > 0) {
-		jump = jumpCharge;
-		jumpCharge = 0.f;
-	}
-	if (!keys[SDL_SCANCODE_SPACE] || !onGround)
-		jumpCharge = 0.f;
-
 	if (keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT])
 		input *= fast;
+
+	if (jumpDelay > 0)
+		jumpDelay -= dt;
+
+	if (keys[SDL_SCANCODE_SPACE] && onGround && jumpDelay <= 0) {
+		jump = 1.f;
+		jumpDelay = 0.250f;
+	}
 
 	rotation = quat();
 	rotation = glm::rotate(rotation, glm::radians(angles.y), yaxis);

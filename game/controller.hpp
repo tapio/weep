@@ -14,12 +14,11 @@ public:
 
 	float speed = 2.0f;
 	float fast = 4.0f;
-	float jumpChargeSpeed = 5.f;
 
+	float jumpDelay = 0;
 	float moveForce = 3000.f;
 	float brakeForce = 1000.f;
 	float jumpForce = 500.f;
-	float jumpCharge = 0.f;
 	class btRigidBody* body = nullptr;
 
 	bool onGround = true;
