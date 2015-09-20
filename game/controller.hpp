@@ -14,4 +14,6 @@ public:
 
 	float speed = 2.0f;
 	float fast = 4.0f;
+
+	bool fly = true;
 };

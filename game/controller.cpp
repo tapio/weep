@@ -36,6 +36,7 @@ void Controller::update(float dt)
 
 	if (dot(input, input) > 0.001) {
 		vec3 dir = rotation * input;
+		if (!fly) dir.y = 0;
 		position += dir * speed * dt;
 	}
 }

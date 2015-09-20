@@ -169,6 +169,14 @@ int main(int, char*[])
 		ImGui::Text("Right mouse button to toggle mouse grab.");
 		ImGui::Text("FPS: %d (%.3fms)", int(1.0 / Engine::dt), Engine::dt * 1000.f);
 		ImGui::Text("Cam: %.1f %.1f %.1f", camera.position.x, camera.position.y, camera.position.z);
+		ImGui::SameLine();
+		if (ImGui::Checkbox("Free Cam", &controller.fly)) {
+			Entity cameraEnt = scene.world.get_entity_by_tag("camera");
+			if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>()) {
+				btRigidBody& body = cameraEnt.get<btRigidBody>();
+				body.setGravity(controller.fly ? btVector3(0, 0, 0) : physics.dynamicsWorld->getGravity());
+			}
+		}
 		if (ImGui::CollapsingHeader("Stats")) {
 			ImGui::Text("Physics:      %.3fms", physTimeMs);
 			ImGui::Text("Audio:        %.3fms", audioTimeMs);
