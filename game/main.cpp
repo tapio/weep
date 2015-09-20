@@ -48,7 +48,6 @@ int main(int, char*[])
 	bool running = true;
 	bool active = false;
 	bool reload = false;
-	bool resetCamera = false;
 	SDL_Event e;
 	while (running) {
 		ImGui_ImplSDLGL3_NewFrame();
@@ -139,6 +138,7 @@ int main(int, char*[])
 			btRigidBody& body = cameraEnt.get<btRigidBody>();
 			camera.position = convert(body.getCenterOfMassPosition());
 			controller.onGround = physics.testGroundHit(body);
+
 		} else {
 			camera.position = controller.position;
 		}
@@ -209,10 +209,8 @@ int main(int, char*[])
 		if (ImGui::CollapsingHeader("Scene")) {
 			ImGui::InputText("", scenePath, sizeof(scenePath));
 			ImGui::SameLine();
-			if (ImGui::Button("Load")) {
+			if (ImGui::Button("Load"))
 				reload = true;
-				resetCamera = true;
-			}
 			const char* prefabs[scene.prefabs.size()];
 			int temp = 0;
 			for (auto it : scene.prefabs)
@@ -271,10 +269,7 @@ int main(int, char*[])
 			Entity cameraEnt = scene.world.get_entity_by_tag("camera");
 			if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>()) {
 				controller.body = &cameraEnt.get<btRigidBody>();
-				if (resetCamera)
-					camera.position = convert(cameraEnt.get<btRigidBody>().getCenterOfMassPosition());
 			} else controller.body = nullptr;
-			resetCamera = false;
 			reload = false;
 		}
 	}
