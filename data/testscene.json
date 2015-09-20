@@ -103,6 +103,7 @@
 		"prefab": "testcube",
 		"material": {
 			"shaderName": "nsemap",
+			"emissive": 1.0,
 			"emissionMap": "debug/uvtestgrid_emission.png"
 		},
 		"position": [ -5, 0, -10 ],

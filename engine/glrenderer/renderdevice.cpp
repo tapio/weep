@@ -362,6 +362,7 @@ void RenderDevice::render(Model& model)
 		m_materialBlock.uniforms.diffuse = mat.diffuse;
 		m_materialBlock.uniforms.specular = mat.specular;
 		m_materialBlock.uniforms.shininess = mat.shininess;
+		m_materialBlock.uniforms.emissive = mat.emissive;
 		m_materialBlock.uniforms.uvOffset = mat.uvOffset;
 		m_materialBlock.uniforms.uvRepeat = mat.uvRepeat;
 		m_materialBlock.upload();

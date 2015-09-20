@@ -97,7 +97,7 @@ void main()
 	vec3 ambientComp = globalAmbient * material.ambient;
 	vec3 diffuseComp = vec3(0);
 	vec3 specularComp = vec3(0);
-	vec3 emissionComp = vec3(0);
+	vec3 emissionComp = material.emissive;
 	float alpha = 1.f;
 
 	vec3 viewDir = normalize(-input.position);
@@ -140,7 +140,7 @@ void main()
 #endif
 
 #ifdef USE_EMISSION_MAP
-	emissionComp += texture(emissionMap, texcoord).rgb;
+	emissionComp *= texture(emissionMap, texcoord).rgb;
 #endif
 
 	float sunAmount = 0.0;

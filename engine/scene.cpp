@@ -44,6 +44,8 @@ namespace {
 			material->diffuse = colorToVec3(def["diffuse"]);
 		if (!def["specular"].is_null())
 			material->specular = colorToVec3(def["specular"]);
+		if (!def["emissive"].is_null())
+			material->emissive = colorToVec3(def["emissive"]);
 		setNumber(material->shininess, def["shininess"]);
 
 		if (!def["uvOffset"].is_null())
