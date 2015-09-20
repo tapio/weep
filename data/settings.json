@@ -10,5 +10,6 @@
 		"msaa": 8,
 		"shadowMapSize": 1024
 	},
-	"moddir": "../weep-media/"
+	"moddir": "../weep-media/",
+	"modules": [ "skyrunner" ]
 }

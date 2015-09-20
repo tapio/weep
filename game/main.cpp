@@ -7,6 +7,7 @@
 #include "controller.hpp"
 #include "physics.hpp"
 #include "audio.hpp"
+#include "module.hpp"
 #include "glrenderer/renderdevice.hpp"
 
 #include <SDL2/SDL.h>
@@ -15,8 +16,6 @@
 
 void SetupImGuiStyle();
 
-typedef void (*GameplayInitFunc)(Entities& entities);
-typedef void (*GameplayUpdateFunc)(Entities& entities);
 
 int main(int, char*[])
 {
@@ -48,13 +47,14 @@ int main(int, char*[])
 	ImGui_ImplSDLGL3_Init(Engine::window);
 	SetupImGuiStyle();
 
-	void* moduleHandle = SDL_LoadObject("libskyrunner.so");
-	ASSERT(moduleHandle);
-	GameplayInitFunc GameplayInit = (GameplayInitFunc)SDL_LoadFunction(moduleHandle, "GameplayInit");
-	GameplayUpdateFunc GameplayUpdate = (GameplayUpdateFunc)SDL_LoadFunction(moduleHandle, "GameplayUpdate");
-	ASSERT(GameplayInit);
-	ASSERT(GameplayUpdate);
-	GameplayInit(scene.world);
+	std::map<string, Module> modules;
+	if (Engine::settings["modules"].is_array()) {
+		for (auto& it : Engine::settings["modules"].array_items())
+			modules.emplace(it.string_value(), it.string_value());
+	}
+	for (auto& it : modules)
+		if (it.second.init)
+			it.second.init(scene.world);
 
 	bool running = true;
 	bool active = false;
@@ -129,7 +129,9 @@ int main(int, char*[])
 			lightIndex++;
 		});
 
-		GameplayUpdate(scene.world);
+		for (auto& it : modules)
+			if (it.second.update)
+				it.second.update(scene.world);
 
 		// Physics
 		float physTimeMs = 0.f;
@@ -263,6 +265,9 @@ int main(int, char*[])
 		scene.world.update();
 
 		if (reload) {
+			for (auto& it : modules)
+				if (it.second.deinit)
+					it.second.deinit(scene.world);
 			renderer.reset(scene);
 			physics.reset();
 			scene.reset();
@@ -277,7 +282,9 @@ int main(int, char*[])
 			if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>()) {
 				controller.body = &cameraEnt.get<btRigidBody>();
 			} else controller.body = nullptr;
-			GameplayInit(scene.world);
+			for (auto& it : modules)
+				if (it.second.init)
+					it.second.init(scene.world);
 			reload = false;
 		}
 	}

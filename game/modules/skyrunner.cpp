@@ -3,7 +3,7 @@
 
 static btTransform startPos;
 
-EXPORT void GameplayInit(Entities& entities)
+EXPORT void ModuleInit(Entities& entities)
 {
 	Entity pl = entities.get_entity_by_tag("camera");
 	if (!pl.is_alive() || !pl.has<btRigidBody>())
@@ -13,7 +13,7 @@ EXPORT void GameplayInit(Entities& entities)
 	startPos = body.getCenterOfMassTransform();
 }
 
-EXPORT void GameplayUpdate(Entities& entities)
+EXPORT void ModuleUpdate(Entities& entities)
 {
 	Entity pl = entities.get_entity_by_tag("camera");
 	if (!pl.is_alive() || !pl.has<btRigidBody>())
