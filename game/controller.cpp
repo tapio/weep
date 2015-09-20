@@ -39,7 +39,7 @@ void Controller::update(float dt)
 		vec3 dir = rotation * input;
 		if (!fly) dir.y = 0;
 		if (body) {
-			body->applyCentralImpulse(convert(dir * speed * moveForce));
+			body->applyCentralImpulse(convert(dir * speed * moveForce * dt));
 		} else {
 			position += dir * speed * dt;
 		}
@@ -47,7 +47,7 @@ void Controller::update(float dt)
 	// Brake force to limit speed
 	if (body) {
 		btVector3 vel = body->getLinearVelocity();
-		vel *= -brakeForce;
+		vel *= -brakeForce * dt;
 		if (!fly) vel.setY(0);
 		body->applyCentralImpulse(vel);
 	}

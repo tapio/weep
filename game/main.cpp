@@ -179,8 +179,8 @@ int main(int, char*[])
 					body.setGravity(controller.fly ? btVector3(0, 0, 0) : physics.dynamicsWorld->getGravity());
 				}
 			}
-			ImGui::SliderFloat("Move force", &controller.moveForce, 0.0f, 1000.0f);
-			ImGui::SliderFloat("Brake force", &controller.brakeForce, 0.0f, 1000.0f);
+			ImGui::SliderFloat("Move force", &controller.moveForce, 0.0f, 10000.0f);
+			ImGui::SliderFloat("Brake force", &controller.brakeForce, 0.0f, 10000.0f);
 		}
 		if (ImGui::CollapsingHeader("Settings")) {
 			bool vsync = Engine::vsync();

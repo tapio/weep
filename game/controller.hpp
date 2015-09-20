@@ -15,8 +15,8 @@ public:
 	float speed = 2.0f;
 	float fast = 4.0f;
 
-	float moveForce = 50.f;
-	float brakeForce = 15.f;
+	float moveForce = 3000.f;
+	float brakeForce = 1000.f;
 	class btRigidBody* body = nullptr;
 
 	bool fly = true;
