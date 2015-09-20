@@ -17,6 +17,15 @@
 void SetupImGuiStyle();
 
 
+void loadModules(std::map<string, Module>& modules)
+{
+	modules.clear();
+	if (Engine::settings["modules"].is_array()) {
+		for (auto& it : Engine::settings["modules"].array_items())
+			modules.emplace(it.string_value(), it.string_value());
+	}
+}
+
 int main(int, char*[])
 {
 	Resources resources;
@@ -48,10 +57,7 @@ int main(int, char*[])
 	SetupImGuiStyle();
 
 	std::map<string, Module> modules;
-	if (Engine::settings["modules"].is_array()) {
-		for (auto& it : Engine::settings["modules"].array_items())
-			modules.emplace(it.string_value(), it.string_value());
-	}
+	loadModules(modules);
 	for (auto& it : modules)
 		if (it.second.init)
 			it.second.init(scene.world);
@@ -116,21 +122,8 @@ int main(int, char*[])
 
 		controller.update(Engine::dt);
 
-		int lightIndex = 0;
-		scene.world.for_each<Light>([&](Entity e, Light& light) {
-			/**/ if (lightIndex == 0) light.position.x = 5.f * glm::sin(Engine::timems() / 800.f);
-			else if (lightIndex == 1) light.position.x = 4.f * glm::sin(Engine::timems() / 500.f);
-			else if (lightIndex == 2) light.position.y = 1.f + 1.5f * glm::sin(Engine::timems() / 1000.f);
-			if (e.has<Model>()) {
-				Model& model = e.get<Model>();
-				model.position = light.position;
-				model.materials[0]->emissive = light.color * 1.f;
-			}
-			lightIndex++;
-		});
-
 		for (auto& it : modules)
-			if (it.second.update)
+			if (it.second.update && it.second.enabled)
 				it.second.update(scene.world);
 
 		// Physics
@@ -215,10 +208,27 @@ int main(int, char*[])
 			ImGui::ColorEdit3("Fog Color", (float*)&env.fogColor);
 			ImGui::SliderFloat("Fog Density", &env.fogDensity, 0.0f, 1.0f);
 		}
+		if (ImGui::CollapsingHeader("Game Modules")) {
+			if (ImGui::Button("Reload all##Modules")) {
+				loadModules(modules);
+				for (auto& it : modules)
+					if (it.second.init)
+						it.second.init(scene.world);
+			}
+			ImGui::Text("Active modules:");
+			for (auto& it : modules) {
+				ImGui::Checkbox(it.first.c_str(), &it.second.enabled);
+				ImGui::SameLine();
+				if (ImGui::Button(("Reload##" + it.first).c_str())) {
+					modules.erase(it.first);
+					modules.emplace(it.first, it.first);
+				}
+			}
+		}
 		if (ImGui::CollapsingHeader("Scene")) {
 			ImGui::InputText("", scenePath, sizeof(scenePath));
 			ImGui::SameLine();
-			if (ImGui::Button("Load"))
+			if (ImGui::Button("Load##Scene"))
 				reload = true;
 			const char* prefabs[scene.prefabs.size()];
 			int temp = 0;

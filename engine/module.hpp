@@ -11,6 +11,7 @@ struct Module {
 	ModuleInitFunc init = nullptr;
 	ModuleDeinitFunc deinit = nullptr;
 	ModuleUpdateFunc update = nullptr;
+	bool enabled = true;
 	void* handle = nullptr;
 	string name;
 };
