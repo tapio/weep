@@ -321,6 +321,7 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 			m_lightBlock.uniforms.lights[i].direction = light.direction;
 			m_lightBlock.uniforms.lights[i].params = vec4(light.distance, light.decay, 0.0f, 0.0f);
 		}
+		stats.lights = numLights;
 		m_lightBlock.upload();
 	}
 	m_commonBlock.upload();

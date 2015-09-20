@@ -167,6 +167,7 @@ int main(int, char*[])
 			ImGui::Text("Audio:        %.3fms", audioTimeMs);
 			ImGui::Text("CPU Render:   %.3fms", renderTimeMs);
 			const RenderDevice::Stats& stats = renderer.device().stats;
+			ImGui::Text("Lights:       %d", stats.lights);
 			ImGui::Text("Triangles:    %d", stats.triangles);
 			ImGui::Text("Programs:     %d", stats.programs);
 			ImGui::Text("Draw calls:   %d", stats.drawCalls);

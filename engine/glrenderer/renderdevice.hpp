@@ -41,6 +41,7 @@ public:
 		uint drawCalls = 0;
 		uint programs = 0;
 		uint triangles = 0;
+		uint lights = 0;
 	} stats;
 
 private:
