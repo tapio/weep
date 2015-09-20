@@ -15,8 +15,8 @@
 
 void SetupImGuiStyle();
 
-void GameplayInit(Entities& entities);
-void GameplayUpdate(Entities& entities);
+typedef void (*GameplayInitFunc)(Entities& entities);
+typedef void (*GameplayUpdateFunc)(Entities& entities);
 
 int main(int, char*[])
 {
@@ -48,6 +48,12 @@ int main(int, char*[])
 	ImGui_ImplSDLGL3_Init(Engine::window);
 	SetupImGuiStyle();
 
+	void* moduleHandle = SDL_LoadObject("libskyrunner.so");
+	ASSERT(moduleHandle);
+	GameplayInitFunc GameplayInit = (GameplayInitFunc)SDL_LoadFunction(moduleHandle, "GameplayInit");
+	GameplayUpdateFunc GameplayUpdate = (GameplayUpdateFunc)SDL_LoadFunction(moduleHandle, "GameplayUpdate");
+	ASSERT(GameplayInit);
+	ASSERT(GameplayUpdate);
 	GameplayInit(scene.world);
 
 	bool running = true;

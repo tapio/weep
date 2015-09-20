@@ -56,6 +56,11 @@ string replace(string str, const string& search, const string& replace);
 	T(const T&) = delete; \
 	T& operator=(const T&) = delete
 
+#ifdef _WIN32
+#define EXPORT extern "C" __declspec(dllexport)
+#else
+#define EXPORT extern "C"
+#endif
 
 inline vec2 toVec2(const Json& v) {
 	if (v.is_number()) return vec2(v.number_value());
