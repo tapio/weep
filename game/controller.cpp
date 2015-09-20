@@ -1,8 +1,9 @@
 #include "controller.hpp"
+#include "physics.hpp"
 #include <SDL2/SDL.h>
 
 
-Controller::Controller(vec3& pos, quat& rot)
+Controller::Controller(vec3 pos, quat rot)
 : position(pos)
 , rotation(rot)
 {}
@@ -37,6 +38,17 @@ void Controller::update(float dt)
 	if (dot(input, input) > 0.001) {
 		vec3 dir = rotation * input;
 		if (!fly) dir.y = 0;
-		position += dir * speed * dt;
+		if (body) {
+			body->applyCentralImpulse(convert(dir * speed * moveForce));
+		} else {
+			position += dir * speed * dt;
+		}
+	}
+	// Brake force to limit speed
+	if (body) {
+		btVector3 vel = body->getLinearVelocity();
+		vel *= -brakeForce;
+		if (!fly) vel.setY(0);
+		body->applyCentralImpulse(vel);
 	}
 }

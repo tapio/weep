@@ -30,14 +30,17 @@ int main(int, char*[])
 	camera.makePerspective(45, ar, 0.1, 1000);
 	camera.view = glm::lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
 
-	Controller controller(camera.position, camera.rotation);
-
 	char scenePath[128] = "testscene.json";
 	Scene scene;
 	scene.load(scenePath, resources);
 
 	PhysicsSystem physics;
 	physics.addScene(scene);
+
+	Controller controller(camera.position, camera.rotation);
+	Entity cameraEnt = scene.world.get_entity_by_tag("camera");
+	if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>())
+		controller.body = &cameraEnt.get<btRigidBody>();
 
 	ImGui_ImplSDLGL3_Init(Engine::window);
 	SetupImGuiStyle();
@@ -106,19 +109,7 @@ int main(int, char*[])
 			}
 		}
 
-		// Calculate and send current velocity from controller to Bullet
-		vec3 p0 = camera.position;
 		controller.update(Engine::dt);
-		vec3 p1 = camera.position;
-		vec3 vel = float(1.0f / Engine::dt) * (p1 - p0);
-
-		Entity cameraEnt = scene.world.get_entity_by_tag("camera");
-		if (cameraEnt.is_alive()) {
-			btRigidBody& cameraBody = cameraEnt.get<btRigidBody>();
-			btTransform trans(convert(camera.rotation), convert(camera.position));
-			cameraBody.setWorldTransform(trans);
-			cameraBody.setLinearVelocity(convert(vel));
-		}
 
 		int lightIndex = 0;
 		scene.world.for_each<Light>([&](Entity e, Light& light) {
@@ -142,11 +133,13 @@ int main(int, char*[])
 			physTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
 		}
 
-		if (cameraEnt.is_alive()) {
-			const btTransform& trans = cameraEnt.get<btRigidBody>().getCenterOfMassTransform();
-			camera.position = convert(trans.getOrigin());
-			camera.rotation = convert(trans.getRotation());
+		Entity cameraEnt = scene.world.get_entity_by_tag("camera");
+		if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>()) {
+			camera.position = convert(cameraEnt.get<btRigidBody>().getCenterOfMassPosition());
+		} else {
+			camera.position = controller.position;
 		}
+		camera.rotation = controller.rotation;
 
 		// Audio
 		float audioTimeMs = 0.f;
@@ -168,14 +161,17 @@ int main(int, char*[])
 
 		ImGui::Text("Right mouse button to toggle mouse grab.");
 		ImGui::Text("FPS: %d (%.3fms)", int(1.0 / Engine::dt), Engine::dt * 1000.f);
-		ImGui::Text("Cam: %.1f %.1f %.1f", camera.position.x, camera.position.y, camera.position.z);
-		ImGui::SameLine();
-		if (ImGui::Checkbox("Free Cam", &controller.fly)) {
-			Entity cameraEnt = scene.world.get_entity_by_tag("camera");
-			if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>()) {
-				btRigidBody& body = cameraEnt.get<btRigidBody>();
-				body.setGravity(controller.fly ? btVector3(0, 0, 0) : physics.dynamicsWorld->getGravity());
+		if (ImGui::CollapsingHeader("Camera")) {
+			ImGui::Text("Position: %.1f %.1f %.1f", camera.position.x, camera.position.y, camera.position.z);
+			if (ImGui::Checkbox("Fly", &controller.fly)) {
+				Entity cameraEnt = scene.world.get_entity_by_tag("camera");
+				if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>()) {
+					btRigidBody& body = cameraEnt.get<btRigidBody>();
+					body.setGravity(controller.fly ? btVector3(0, 0, 0) : physics.dynamicsWorld->getGravity());
+				}
 			}
+			ImGui::SliderFloat("Move force", &controller.moveForce, 0.0f, 1000.0f);
+			ImGui::SliderFloat("Brake force", &controller.brakeForce, 0.0f, 1000.0f);
 		}
 		if (ImGui::CollapsingHeader("Stats")) {
 			ImGui::Text("Physics:      %.3fms", physTimeMs);
@@ -267,12 +263,13 @@ int main(int, char*[])
 			renderer.device().setEnvironment(&renderer.env());
 			scene.load(scenePath, resources);
 			physics.addScene(scene);
-			if (resetCamera) {
-				Entity cameraEnt = scene.world.get_entity_by_tag("camera");
-				if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>())
+			Entity cameraEnt = scene.world.get_entity_by_tag("camera");
+			if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>()) {
+				controller.body = &cameraEnt.get<btRigidBody>();
+				if (resetCamera)
 					camera.position = convert(cameraEnt.get<btRigidBody>().getCenterOfMassPosition());
-				resetCamera = false;
-			}
+			} else controller.body = nullptr;
+			resetCamera = false;
 			reload = false;
 		}
 	}
