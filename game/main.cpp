@@ -15,6 +15,9 @@
 
 void SetupImGuiStyle();
 
+void GameplayInit(Entities& entities);
+void GameplayUpdate(Entities& entities);
+
 int main(int, char*[])
 {
 	Resources resources;
@@ -44,6 +47,8 @@ int main(int, char*[])
 
 	ImGui_ImplSDLGL3_Init(Engine::window);
 	SetupImGuiStyle();
+
+	GameplayInit(scene.world);
 
 	bool running = true;
 	bool active = false;
@@ -117,6 +122,8 @@ int main(int, char*[])
 			}
 			lightIndex++;
 		});
+
+		GameplayUpdate(scene.world);
 
 		// Physics
 		float physTimeMs = 0.f;
@@ -264,6 +271,7 @@ int main(int, char*[])
 			if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>()) {
 				controller.body = &cameraEnt.get<btRigidBody>();
 			} else controller.body = nullptr;
+			GameplayInit(scene.world);
 			reload = false;
 		}
 	}
