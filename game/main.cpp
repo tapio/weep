@@ -161,6 +161,15 @@ int main(int, char*[])
 
 		ImGui::Text("Right mouse button to toggle mouse grab.");
 		ImGui::Text("FPS: %d (%.3fms)", int(1.0 / Engine::dt), Engine::dt * 1000.f);
+		if (ImGui::CollapsingHeader("Stats")) {
+			ImGui::Text("Physics:      %.3fms", physTimeMs);
+			ImGui::Text("Audio:        %.3fms", audioTimeMs);
+			ImGui::Text("CPU Render:   %.3fms", renderTimeMs);
+			const RenderDevice::Stats& stats = renderer.device().stats;
+			ImGui::Text("Triangles:    %d", stats.triangles);
+			ImGui::Text("Programs:     %d", stats.programs);
+			ImGui::Text("Draw calls:   %d", stats.drawCalls);
+		}
 		if (ImGui::CollapsingHeader("Camera")) {
 			ImGui::Text("Position: %.1f %.1f %.1f", camera.position.x, camera.position.y, camera.position.z);
 			if (ImGui::Checkbox("Fly", &controller.fly)) {
@@ -172,15 +181,6 @@ int main(int, char*[])
 			}
 			ImGui::SliderFloat("Move force", &controller.moveForce, 0.0f, 1000.0f);
 			ImGui::SliderFloat("Brake force", &controller.brakeForce, 0.0f, 1000.0f);
-		}
-		if (ImGui::CollapsingHeader("Stats")) {
-			ImGui::Text("Physics:      %.3fms", physTimeMs);
-			ImGui::Text("Audio:        %.3fms", audioTimeMs);
-			ImGui::Text("CPU Render:   %.3fms", renderTimeMs);
-			const RenderDevice::Stats& stats = renderer.device().stats;
-			ImGui::Text("Triangles:    %d", stats.triangles);
-			ImGui::Text("Programs:     %d", stats.programs);
-			ImGui::Text("Draw calls:   %d", stats.drawCalls);
 		}
 		if (ImGui::CollapsingHeader("Settings")) {
 			bool vsync = Engine::vsync();
