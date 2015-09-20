@@ -311,9 +311,10 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 	m_commonBlock.uniforms.near = camera.near;
 	m_commonBlock.uniforms.far = camera.far;
 
-	if (!lights.empty()) {
-		uint numLights = std::min((int)lights.size(), MAX_LIGHTS);
-		m_commonBlock.uniforms.numLights = numLights;
+	uint numLights = std::min((int)lights.size(), MAX_LIGHTS);
+	m_commonBlock.uniforms.numLights = numLights;
+	stats.lights = numLights;
+	if (numLights) {
 		for (uint i = 0; i < numLights; i++) {
 			const Light& light = lights[i];
 			m_lightBlock.uniforms.lights[i].color = light.color;
@@ -321,9 +322,8 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 			m_lightBlock.uniforms.lights[i].direction = light.direction;
 			m_lightBlock.uniforms.lights[i].params = vec4(light.distance, light.decay, 0.0f, 0.0f);
 		}
-		stats.lights = numLights;
-		m_lightBlock.upload();
 	}
+	m_lightBlock.upload();
 	m_commonBlock.upload();
 	if (m_wireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
