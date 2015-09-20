@@ -30,11 +30,15 @@ void Controller::update(float dt)
 		input.y = -1;
 
 	if (keys[SDL_SCANCODE_SPACE] && onGround) {
-		jump = 1.f;
-		onGround = false;
-	} else if (!keys[SDL_SCANCODE_SPACE] && !onGround) {
-		onGround = true;
+		jumpCharge += jumpChargeSpeed * dt;
+		if (jumpCharge > 1.f) jumpCharge = 1.f;
 	}
+	else if (!keys[SDL_SCANCODE_SPACE] && onGround && jumpCharge > 0) {
+		jump = jumpCharge;
+		jumpCharge = 0.f;
+	}
+	if (!keys[SDL_SCANCODE_SPACE] || !onGround)
+		jumpCharge = 0.f;
 
 	if (keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT])
 		input *= fast;

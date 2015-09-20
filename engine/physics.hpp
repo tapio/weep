@@ -16,6 +16,8 @@ public:
 	void syncTransforms(class Scene& scene);
 	void step(float dt);
 
+	bool testGroundHit(btRigidBody& body);
+
 	btAlignedObjectArray<btCollisionShape*> collisionShapes;
 	btBroadphaseInterface* broadphase;
 	btCollisionDispatcher* dispatcher;

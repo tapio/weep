@@ -136,7 +136,9 @@ int main(int, char*[])
 
 		Entity cameraEnt = scene.world.get_entity_by_tag("camera");
 		if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>()) {
-			camera.position = convert(cameraEnt.get<btRigidBody>().getCenterOfMassPosition());
+			btRigidBody& body = cameraEnt.get<btRigidBody>();
+			camera.position = convert(body.getCenterOfMassPosition());
+			controller.onGround = physics.testGroundHit(body);
 		} else {
 			camera.position = controller.position;
 		}

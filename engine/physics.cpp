@@ -57,6 +57,21 @@ void PhysicsSystem::step(float dt)
 	dynamicsWorld->stepSimulation(dt);
 }
 
+bool PhysicsSystem::testGroundHit(btRigidBody& body)
+{
+	btVector3 from = body.getCenterOfMassPosition();
+	btVector3 to(from.x(), from.y() - 10.0, from.z());
+	btCollisionWorld::ClosestRayResultCallback res(from, to);
+	dynamicsWorld->rayTest(from, to, res);
+	if (res.hasHit()) {
+		btVector3 aabbMin, aabbMax;
+		body.getAabb(aabbMin, aabbMax);
+		btScalar d = (aabbMax.y() - aabbMin.y()) * 0.5f + 0.01f;
+		return res.m_hitPointWorld.distance2(from) <= d * d;
+	}
+	return false;
+}
+
 void PhysicsSystem::syncTransforms(Scene& scene)
 {
 	scene.world.for_each<Model, btRigidBody>([](Entity, Model& model, btRigidBody& body) {
