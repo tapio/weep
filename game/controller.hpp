@@ -21,5 +21,5 @@ public:
 	class btRigidBody* body = nullptr;
 
 	bool onGround = true;
-	bool fly = true;
+	bool fly = false;
 };
