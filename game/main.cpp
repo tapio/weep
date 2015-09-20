@@ -74,11 +74,6 @@ int main(int, char*[])
 					reload = true;
 					continue;
 				}
-				else if (keysym.sym == SDLK_F1) {
-					renderer.dumpStats();
-					logDebug("Last frame took %fms", Engine::dt * 1000);
-					continue;
-				}
 				else if (keysym.sym == SDLK_F2) {
 					renderer.toggleWireframe();
 					continue;
@@ -138,7 +133,6 @@ int main(int, char*[])
 			btRigidBody& body = cameraEnt.get<btRigidBody>();
 			camera.position = convert(body.getCenterOfMassPosition());
 			controller.onGround = physics.testGroundHit(body);
-
 		} else {
 			camera.position = controller.position;
 		}
