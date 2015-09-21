@@ -11,10 +11,8 @@ Module::Module(const std::string& moduleName)
 #endif
 	handle = SDL_LoadObject(path.c_str());
 	ASSERT(handle);
-	init = (ModuleInitFunc)SDL_LoadFunction(handle, "ModuleInit");
-	deinit = (ModuleDeinitFunc)SDL_LoadFunction(handle, "ModuleDeinit");
-	update = (ModuleUpdateFunc)SDL_LoadFunction(handle, "ModuleUpdate");
-	ASSERT(init || deinit || update);
+	func = (ModuleFunc)SDL_LoadFunction(handle, "ModuleFunc");
+	ASSERT(func);
 	logDebug("Loaded module %s", path.c_str());
 }
 
@@ -42,23 +40,28 @@ void Modules::reload(const string& name)
 	emplace(name, name);
 }
 
+void Modules::call(uint msg, void* param)
+{
+	for (auto& it : *this)
+		if (it.second.func && it.second.enabled)
+			it.second.func(msg, param);
+}
+
 void Modules::init(Entities& entities)
 {
 	for (auto& it : *this)
-		if (it.second.init)
-			it.second.init(entities);
+		if (it.second.func)
+			it.second.func($id(INIT), &entities);
 }
 
 void Modules::deinit(Entities& entities)
 {
 	for (auto& it : *this)
-		if (it.second.deinit)
-			it.second.deinit(entities);
+		if (it.second.func)
+			it.second.func($id(DEINIT), &entities);
 }
 
 void Modules::update(Entities& entities)
 {
-	for (auto& it : *this)
-		if (it.second.update && it.second.enabled)
-			it.second.update(entities);
+	call($id(UPDATE), &entities);
 }

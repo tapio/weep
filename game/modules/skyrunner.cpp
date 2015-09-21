@@ -3,25 +3,33 @@
 
 static btTransform startPos;
 
-EXPORT void ModuleInit(Entities& entities)
+EXPORT void ModuleFunc(uint msg, void* param)
 {
-	Entity pl = entities.get_entity_by_tag("camera");
-	if (!pl.is_alive() || !pl.has<btRigidBody>())
-		return;
+	switch (msg) {
+		case $id(INIT):
+		{
+			Entities& entities = *static_cast<Entities*>(param);
+			Entity pl = entities.get_entity_by_tag("camera");
+			if (!pl.is_alive() || !pl.has<btRigidBody>())
+				return;
 
-	btRigidBody& body = pl.get<btRigidBody>();
-	startPos = body.getCenterOfMassTransform();
-}
+			btRigidBody& body = pl.get<btRigidBody>();
+			startPos = body.getCenterOfMassTransform();
+			break;
+		}
+		case $id(UPDATE):
+		{
+			Entities& entities = *static_cast<Entities*>(param);
+			Entity pl = entities.get_entity_by_tag("camera");
+			if (!pl.is_alive() || !pl.has<btRigidBody>())
+				return;
 
-EXPORT void ModuleUpdate(Entities& entities)
-{
-	Entity pl = entities.get_entity_by_tag("camera");
-	if (!pl.is_alive() || !pl.has<btRigidBody>())
-		return;
-
-	btRigidBody& body = pl.get<btRigidBody>();
-	if (body.getCenterOfMassPosition().y() < -2) {
-		body.setCenterOfMassTransform(startPos);
+			btRigidBody& body = pl.get<btRigidBody>();
+			if (body.getCenterOfMassPosition().y() < -2) {
+				body.setCenterOfMassTransform(startPos);
+			}
+			break;
+		}
 	}
 }
 

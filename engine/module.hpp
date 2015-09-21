@@ -1,16 +1,12 @@
 #include "common.hpp"
 
 struct Module {
-	typedef void (*ModuleInitFunc)(Entities& entities);
-	typedef void (*ModuleDeinitFunc)(Entities& entities);
-	typedef void (*ModuleUpdateFunc)(Entities& entities);
+	typedef void (*ModuleFunc)(uint msg, void* param);
 
 	Module(const string& name);
 	~Module();
 
-	ModuleInitFunc init = nullptr;
-	ModuleDeinitFunc deinit = nullptr;
-	ModuleUpdateFunc update = nullptr;
+	ModuleFunc func = nullptr;
 	bool enabled = true;
 	void* handle = nullptr;
 	string name;
@@ -23,6 +19,9 @@ public:
 	void load(const Json& modules);
 	void reload(const string& name);
 
+	void call(uint msg, void* param = nullptr);
+
+	// TODO: Probably should remove...
 	void init(Entities& entities);
 	void deinit(Entities& entities);
 	void update(Entities& entities);
