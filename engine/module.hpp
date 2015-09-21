@@ -15,3 +15,15 @@ struct Module {
 	void* handle = nullptr;
 	string name;
 };
+
+
+class Modules : public std::map<string, Module>
+{
+public:
+	void load(const Json& modules);
+	void reload(const string& name);
+
+	void init(Entities& entities);
+	void deinit(Entities& entities);
+	void update(Entities& entities);
+};

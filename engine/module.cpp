@@ -26,3 +26,39 @@ Module::~Module()
 		logDebug("Unloaded module %s", name.c_str());
 	}
 }
+
+void Modules::load(const Json& modules)
+{
+	clear();
+	if (modules.is_array()) {
+		for (auto& it : modules.array_items())
+			emplace(it.string_value(), it.string_value());
+	}
+}
+
+void Modules::reload(const string& name)
+{
+	erase(name);
+	emplace(name, name);
+}
+
+void Modules::init(Entities& entities)
+{
+	for (auto& it : *this)
+		if (it.second.init)
+			it.second.init(entities);
+}
+
+void Modules::deinit(Entities& entities)
+{
+	for (auto& it : *this)
+		if (it.second.deinit)
+			it.second.deinit(entities);
+}
+
+void Modules::update(Entities& entities)
+{
+	for (auto& it : *this)
+		if (it.second.update && it.second.enabled)
+			it.second.update(entities);
+}

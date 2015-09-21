@@ -16,16 +16,6 @@
 
 void SetupImGuiStyle();
 
-
-void loadModules(std::map<string, Module>& modules)
-{
-	modules.clear();
-	if (Engine::settings["modules"].is_array()) {
-		for (auto& it : Engine::settings["modules"].array_items())
-			modules.emplace(it.string_value(), it.string_value());
-	}
-}
-
 int main(int, char*[])
 {
 	Resources resources;
@@ -56,11 +46,8 @@ int main(int, char*[])
 	ImGui_ImplSDLGL3_Init(Engine::window);
 	SetupImGuiStyle();
 
-	std::map<string, Module> modules;
-	loadModules(modules);
-	for (auto& it : modules)
-		if (it.second.init)
-			it.second.init(scene.world);
+	Modules modules;
+	modules.load(Engine::settings["modules"]);
 
 	bool running = true;
 	bool active = false;
@@ -122,9 +109,14 @@ int main(int, char*[])
 
 		controller.update(Engine::dt);
 
-		for (auto& it : modules)
-			if (it.second.update && it.second.enabled)
-				it.second.update(scene.world);
+		// Modules
+		float moduleTimeMs = 0.f;
+		{
+			uint64 t0 = SDL_GetPerformanceCounter();
+			modules.update(scene.world);
+			uint64 t1 = SDL_GetPerformanceCounter();
+			moduleTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
+		}
 
 		// Physics
 		float physTimeMs = 0.f;
@@ -170,6 +162,7 @@ int main(int, char*[])
 			ImGui::Text("Physics:      %.3fms", physTimeMs);
 			ImGui::Text("Audio:        %.3fms", audioTimeMs);
 			ImGui::Text("CPU Render:   %.3fms", renderTimeMs);
+			ImGui::Text("Module upd:   %.3fms", moduleTimeMs);
 			const RenderDevice::Stats& stats = renderer.device().stats;
 			ImGui::Text("Lights:       %d", stats.lights);
 			ImGui::Text("Triangles:    %d", stats.triangles);
@@ -210,19 +203,15 @@ int main(int, char*[])
 		}
 		if (ImGui::CollapsingHeader("Game Modules")) {
 			if (ImGui::Button("Reload all##Modules")) {
-				loadModules(modules);
-				for (auto& it : modules)
-					if (it.second.init)
-						it.second.init(scene.world);
+				modules.load(Engine::settings["modules"]);
+				modules.init(scene.world);
 			}
 			ImGui::Text("Active modules:");
 			for (auto& it : modules) {
 				ImGui::Checkbox(it.first.c_str(), &it.second.enabled);
 				ImGui::SameLine();
-				if (ImGui::Button(("Reload##" + it.first).c_str())) {
-					modules.erase(it.first);
-					modules.emplace(it.first, it.first);
-				}
+				if (ImGui::Button(("Reload##" + it.first).c_str()))
+					modules.reload(it.first);
 			}
 		}
 		if (ImGui::CollapsingHeader("Scene")) {
@@ -275,9 +264,7 @@ int main(int, char*[])
 		scene.world.update();
 
 		if (reload) {
-			for (auto& it : modules)
-				if (it.second.deinit)
-					it.second.deinit(scene.world);
+			modules.deinit(scene.world);
 			renderer.reset(scene);
 			physics.reset();
 			scene.reset();
@@ -292,9 +279,7 @@ int main(int, char*[])
 			if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>()) {
 				controller.body = &cameraEnt.get<btRigidBody>();
 			} else controller.body = nullptr;
-			for (auto& it : modules)
-				if (it.second.init)
-					it.second.init(scene.world);
+			modules.init(scene.world);
 			reload = false;
 		}
 	}
