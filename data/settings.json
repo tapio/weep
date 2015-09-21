@@ -11,5 +11,5 @@
 		"shadowMapSize": 1024
 	},
 	"moddir": "../weep-media/",
-	"modules": [ "skyrunner", "testbed" ]
+	"modules": [ "testbed", "skyrunner_levelgen", "skyrunner_rules" ]
 }
