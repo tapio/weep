@@ -20,6 +20,7 @@ public:
 	void reload(const string& name);
 
 	void call(uint msg, void* param = nullptr);
+	void call(const string& module, uint msg, void* param = nullptr);
 
 	// TODO: Probably should remove...
 	void init(Game& game);

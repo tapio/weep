@@ -34,16 +34,7 @@ int main(int, char*[])
 	physics.addScene(scene);
 
 	Entity cameraEnt = scene.world.get_entity_by_tag("camera");
-	if (!cameraEnt.is_alive()) {
-		cameraEnt = scene.world.create();
-		cameraEnt.tag("camera");
-	}
-	cameraEnt.add<Camera>();
 	Camera& camera = cameraEnt.get<Camera>();
-	float ar = Engine::width() / (float)Engine::height();
-	camera.makePerspective(45, ar, 0.1, 1000);
-	camera.view = glm::lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
-
 	cameraEnt.add<Controller>(camera.position, camera.rotation);
 	Controller& controller = cameraEnt.get<Controller>();
 	if (cameraEnt.has<btRigidBody>())
@@ -260,6 +251,9 @@ int main(int, char*[])
 					body.setWorldTransform(trans);
 					body.setLinearVelocity(convert(vel));
 				}
+			}
+			if (ImGui::Button("Generate skyrunner level")) {
+				modules.call("skyrunner_levelgen", $id(GENERATE_LEVEL), &game);
 			}
 		}
 

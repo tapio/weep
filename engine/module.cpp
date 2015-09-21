@@ -47,6 +47,13 @@ void Modules::call(uint msg, void* param)
 			it.second.func(msg, param);
 }
 
+void Modules::call(const string& module, uint msg, void* param)
+{
+	const auto it = find(module);
+	if (it != end() && it->second.func && it->second.enabled)
+		it->second.func(msg, param);
+}
+
 void Modules::init(Game& game)
 {
 	for (auto& it : *this)
