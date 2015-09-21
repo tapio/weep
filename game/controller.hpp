@@ -3,7 +3,7 @@
 class Controller
 {
 public:
-	Controller(vec3 pos, quat rot);
+	Controller(vec3 pos = vec3(0), quat rot = quat());
 
 	void update(float dt);
 

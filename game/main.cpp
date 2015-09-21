@@ -26,11 +26,6 @@ int main(int, char*[])
 	Renderer renderer(resources);
 	AudioSystem audio;
 
-	float ar = Engine::width() / (float)Engine::height();
-	Camera camera;
-	camera.makePerspective(45, ar, 0.1, 1000);
-	camera.view = glm::lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
-
 	char scenePath[128] = "testscene.json";
 	Scene scene;
 	scene.load(scenePath, resources);
@@ -38,15 +33,26 @@ int main(int, char*[])
 	PhysicsSystem physics;
 	physics.addScene(scene);
 
-	Controller controller(camera.position, camera.rotation);
 	Entity cameraEnt = scene.world.get_entity_by_tag("camera");
-	if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>())
+	if (!cameraEnt.is_alive()) {
+		cameraEnt = scene.world.create();
+		cameraEnt.tag("camera");
+	}
+	cameraEnt.add<Camera>();
+	Camera& camera = cameraEnt.get<Camera>();
+	float ar = Engine::width() / (float)Engine::height();
+	camera.makePerspective(45, ar, 0.1, 1000);
+	camera.view = glm::lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
+
+	cameraEnt.add<Controller>(camera.position, camera.rotation);
+	Controller& controller = cameraEnt.get<Controller>();
+	if (cameraEnt.has<btRigidBody>())
 		controller.body = &cameraEnt.get<btRigidBody>();
 
 	ImGui_ImplSDLGL3_Init(Engine::window);
 	SetupImGuiStyle();
 
-	Game game = { scene.world, resources, renderer, physics, audio };
+	Game game = { scene.world, scene, resources, renderer, physics, audio };
 
 	Modules modules;
 	modules.load(Engine::settings["modules"]);
@@ -204,7 +210,7 @@ int main(int, char*[])
 			ImGui::ColorEdit3("Fog Color", (float*)&env.fogColor);
 			ImGui::SliderFloat("Fog Density", &env.fogDensity, 0.0f, 1.0f);
 		}
-		if (ImGui::CollapsingHeader("Game Modules")) {
+		if (ImGui::CollapsingHeader("Modules")) {
 			if (ImGui::Button("Reload all##Modules")) {
 				modules.load(Engine::settings["modules"]);
 				modules.init(game);
