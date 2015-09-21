@@ -16,6 +16,7 @@
 #include <glm/gtx/normal.hpp>
 #include <glm/gtx/norm.hpp>
 #include <glm/gtx/component_wise.hpp>
+#include <id/id.hpp>
 #define SDL_ASSERT_LEVEL 2
 #include <SDL2/SDL_assert.h>
 #define ASSERT SDL_assert
