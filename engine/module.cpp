@@ -47,21 +47,21 @@ void Modules::call(uint msg, void* param)
 			it.second.func(msg, param);
 }
 
-void Modules::init(Entities& entities)
+void Modules::init(Game& game)
 {
 	for (auto& it : *this)
 		if (it.second.func)
-			it.second.func($id(INIT), &entities);
+			it.second.func($id(INIT), &game);
 }
 
-void Modules::deinit(Entities& entities)
+void Modules::deinit(Game& game)
 {
 	for (auto& it : *this)
 		if (it.second.func)
-			it.second.func($id(DEINIT), &entities);
+			it.second.func($id(DEINIT), &game);
 }
 
-void Modules::update(Entities& entities)
+void Modules::update(Game& game)
 {
-	call($id(UPDATE), &entities);
+	call($id(UPDATE), &game);
 }

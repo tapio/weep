@@ -46,8 +46,11 @@ int main(int, char*[])
 	ImGui_ImplSDLGL3_Init(Engine::window);
 	SetupImGuiStyle();
 
+	Game game = { scene.world, resources, renderer, physics, audio };
+
 	Modules modules;
 	modules.load(Engine::settings["modules"]);
+	modules.init(game);
 
 	bool running = true;
 	bool active = false;
@@ -113,7 +116,7 @@ int main(int, char*[])
 		float moduleTimeMs = 0.f;
 		{
 			uint64 t0 = SDL_GetPerformanceCounter();
-			modules.update(scene.world);
+			modules.update(game);
 			uint64 t1 = SDL_GetPerformanceCounter();
 			moduleTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
 		}
@@ -204,7 +207,7 @@ int main(int, char*[])
 		if (ImGui::CollapsingHeader("Game Modules")) {
 			if (ImGui::Button("Reload all##Modules")) {
 				modules.load(Engine::settings["modules"]);
-				modules.init(scene.world);
+				modules.init(game);
 			}
 			ImGui::Text("Active modules:");
 			for (auto& it : modules) {
@@ -264,7 +267,7 @@ int main(int, char*[])
 		scene.world.update();
 
 		if (reload) {
-			modules.deinit(scene.world);
+			modules.deinit(game);
 			renderer.reset(scene);
 			physics.reset();
 			scene.reset();
@@ -279,7 +282,7 @@ int main(int, char*[])
 			if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>()) {
 				controller.body = &cameraEnt.get<btRigidBody>();
 			} else controller.body = nullptr;
-			modules.init(scene.world);
+			modules.init(game);
 			reload = false;
 		}
 	}

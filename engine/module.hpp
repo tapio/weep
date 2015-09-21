@@ -22,7 +22,7 @@ public:
 	void call(uint msg, void* param = nullptr);
 
 	// TODO: Probably should remove...
-	void init(Entities& entities);
-	void deinit(Entities& entities);
-	void update(Entities& entities);
+	void init(Game& game);
+	void deinit(Game& game);
+	void update(Game& game);
 };

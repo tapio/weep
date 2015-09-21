@@ -5,11 +5,11 @@ static btTransform startPos;
 
 EXPORT void ModuleFunc(uint msg, void* param)
 {
+	Game& game = *static_cast<Game*>(param);
 	switch (msg) {
 		case $id(INIT):
 		{
-			Entities& entities = *static_cast<Entities*>(param);
-			Entity pl = entities.get_entity_by_tag("camera");
+			Entity pl = game.entities.get_entity_by_tag("camera");
 			if (!pl.is_alive() || !pl.has<btRigidBody>())
 				return;
 
@@ -19,8 +19,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		}
 		case $id(UPDATE):
 		{
-			Entities& entities = *static_cast<Entities*>(param);
-			Entity pl = entities.get_entity_by_tag("camera");
+			Entity pl = game.entities.get_entity_by_tag("camera");
 			if (!pl.is_alive() || !pl.has<btRigidBody>())
 				return;
 

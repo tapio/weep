@@ -4,10 +4,10 @@
 
 EXPORT void ModuleFunc(uint msg, void* param)
 {
+	Game& game = *static_cast<Game*>(param);
 	switch (msg) {
 		case $id(INIT):
 		{
-			//Entities& entities = *static_cast<Entities*>(param);
 			// TODO: Generate level :)
 			break;
 		}
