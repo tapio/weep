@@ -61,5 +61,5 @@ struct Geometry
 
 	Bounds bounds;
 
-	struct btTriangleMesh* collisionMesh = nullptr;
+	class btTriangleMesh* collisionMesh = nullptr;
 };
