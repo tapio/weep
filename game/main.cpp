@@ -23,7 +23,7 @@ int main(int, char*[])
 	Engine::init(resources.findPath("settings.json"));
 	if (Engine::settings["moddir"].is_string())
 		resources.addPath(Engine::settings["moddir"].string_value());
-	Renderer renderer(resources);
+	RenderSystem renderer(resources);
 	AudioSystem audio;
 
 	char scenePath[128] = "testscene.json";

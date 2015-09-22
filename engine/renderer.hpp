@@ -8,11 +8,11 @@ class Resources;
 struct Camera;
 struct Model;
 
-class Renderer
+class RenderSystem
 {
 public:
-	Renderer(Resources& resources);
-	~Renderer();
+	RenderSystem(Resources& resources);
+	~RenderSystem();
 
 	void render(Scene& scene, Camera& camera);
 	void reset(Scene& scene);

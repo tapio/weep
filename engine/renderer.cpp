@@ -28,7 +28,7 @@ private:
 
 
 
-Renderer::Renderer(Resources& resources)
+RenderSystem::RenderSystem(Resources& resources)
 {
 	m_device.reset(new RenderDevice(resources));
 
@@ -36,12 +36,12 @@ Renderer::Renderer(Resources& resources)
 	m_device->setEnvironment(&m_env);
 }
 
-Renderer::~Renderer()
+RenderSystem::~RenderSystem()
 {
 	//reset();
 }
 
-void Renderer::reset(Scene& scene)
+void RenderSystem::reset(Scene& scene)
 {
 	logDebug("Reseting renderer");
 	scene.world.for_each<Model>([this](Entity, Model& model) {
@@ -49,7 +49,7 @@ void Renderer::reset(Scene& scene)
 	});
 }
 
-void Renderer::dumpStats() const
+void RenderSystem::dumpStats() const
 {
 	RenderDevice::Stats& stats = m_device->stats;
 	logDebug("RenderDevice frame stats:\n"
@@ -59,12 +59,12 @@ void Renderer::dumpStats() const
 		stats.triangles, stats.programs, stats.drawCalls);
 }
 
-void Renderer::toggleWireframe()
+void RenderSystem::toggleWireframe()
 {
 	m_device->toggleWireframe();
 }
 
-void Renderer::render(Scene& scene, Camera& camera)
+void RenderSystem::render(Scene& scene, Camera& camera)
 {
 	camera.updateViewMatrix();
 	Frustum frustum(camera);

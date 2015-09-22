@@ -84,7 +84,7 @@ struct Game {
 	class Entities& entities;
 	class Scene& scene;
 	class Resources& resources;
-	class Renderer& renderer;
+	class RenderSystem& renderer;
 	class PhysicsSystem& physics;
 	class AudioSystem& audio;
 };
