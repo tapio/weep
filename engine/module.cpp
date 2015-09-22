@@ -53,22 +53,3 @@ void Modules::call(const string& module, uint msg, void* param)
 	if (it != end() && it->second.func && it->second.enabled)
 		it->second.func(msg, param);
 }
-
-void Modules::init(Game& game)
-{
-	for (auto& it : *this)
-		if (it.second.func)
-			it.second.func($id(INIT), &game);
-}
-
-void Modules::deinit(Game& game)
-{
-	for (auto& it : *this)
-		if (it.second.func)
-			it.second.func($id(DEINIT), &game);
-}
-
-void Modules::update(Game& game)
-{
-	call($id(UPDATE), &game);
-}

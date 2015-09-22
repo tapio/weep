@@ -21,9 +21,4 @@ public:
 
 	void call(uint msg, void* param = nullptr);
 	void call(const string& module, uint msg, void* param = nullptr);
-
-	// TODO: Probably should remove...
-	void init(Game& game);
-	void deinit(Game& game);
-	void update(Game& game);
 };

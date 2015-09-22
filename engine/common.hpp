@@ -79,9 +79,3 @@ inline vec3 colorToVec3(const Json& color) {
 	//if (color.is_string()) return TODO;
 	return toVec3(color);
 }
-
-struct Game {
-	class Entities* entities = nullptr;
-	class Scene* scene = nullptr;
-	class Resources* resources = nullptr;
-};

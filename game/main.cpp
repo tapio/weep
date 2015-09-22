@@ -9,6 +9,7 @@
 #include "audio.hpp"
 #include "module.hpp"
 #include "glrenderer/renderdevice.hpp"
+#include "game.hpp"
 
 #include <SDL2/SDL.h>
 #include "imgui/imgui.h"
@@ -16,46 +17,41 @@
 
 void SetupImGuiStyle();
 
-void init(Game& game, Entities& entities, Resources& resources, Scene& scene, const string& scenePath)
+void init(Game& game, Scene& scene, const string& scenePath)
 {
-	entities = Entities();
-	entities.add_system<RenderSystem>(resources);
-	entities.add_system<PhysicsSystem>();
-	entities.add_system<AudioSystem>();
-	scene = Scene(entities);
-	scene.load(scenePath, resources);
-	{
-		Entity cameraEnt = scene.world->get_entity_by_tag("camera");
-		Camera& camera = cameraEnt.get<Camera>();
-		cameraEnt.add<Controller>(camera.position, camera.rotation);
-		if (cameraEnt.has<btRigidBody>())
-			cameraEnt.get<Controller>().body = &cameraEnt.get<btRigidBody>();
-	}
-	game.entities = &entities;
-	game.resources = &resources;
-	game.scene = &scene;
+	game.entities = Entities();
+	game.entities.add_system<RenderSystem>(game.resources);
+	game.entities.add_system<PhysicsSystem>();
+	game.entities.add_system<AudioSystem>();
+	scene = Scene(game.entities);
+	scene.load(scenePath, game.resources);
+	Entity cameraEnt = scene.world->get_entity_by_tag("camera");
+	Camera& camera = cameraEnt.get<Camera>();
+	cameraEnt.add<Controller>(camera.position, camera.rotation);
+	if (cameraEnt.has<btRigidBody>())
+		cameraEnt.get<Controller>().body = &cameraEnt.get<btRigidBody>();
 }
 
 int main(int, char*[])
 {
-	Resources resources;
+	Game game;
+	Resources& resources = game.resources;
 	resources.addPath("../data/");
 	Engine::init(resources.findPath("settings.json"));
 	if (Engine::settings["moddir"].is_string())
 		resources.addPath(Engine::settings["moddir"].string_value());
 
-	Entities entities;
-	Scene scene(entities);
-	Game game;
+	Scene scene(game.entities);
+
 	char scenePath[128] = "testscene.json";
-	init(game, entities, resources, scene, scenePath);
+	init(game, scene, scenePath);
 
 	ImGui_ImplSDLGL3_Init(Engine::window);
 	SetupImGuiStyle();
 
 	Modules modules;
 	modules.load(Engine::settings["modules"]);
-	modules.init(game);
+	modules.call($id(INIT), &game);
 
 	bool running = true;
 	bool active = false;
@@ -64,10 +60,10 @@ int main(int, char*[])
 	while (running) {
 		ImGui_ImplSDLGL3_NewFrame();
 
-		RenderSystem& renderer = game.entities->get_system<RenderSystem>();
-		PhysicsSystem& physics = game.entities->get_system<PhysicsSystem>();
-		AudioSystem& audio = game.entities->get_system<AudioSystem>();
-		Entity cameraEnt = entities.get_entity_by_tag("camera");
+		RenderSystem& renderer = game.entities.get_system<RenderSystem>();
+		PhysicsSystem& physics = game.entities.get_system<PhysicsSystem>();
+		AudioSystem& audio = game.entities.get_system<AudioSystem>();
+		Entity cameraEnt = game.entities.get_entity_by_tag("camera");
 		Controller& controller = cameraEnt.get<Controller>();
 		Camera& camera = cameraEnt.get<Camera>();
 
@@ -128,7 +124,7 @@ int main(int, char*[])
 		float moduleTimeMs = 0.f;
 		{
 			uint64 t0 = SDL_GetPerformanceCounter();
-			modules.update(game);
+			modules.call($id(UPDATE), &game);
 			uint64 t1 = SDL_GetPerformanceCounter();
 			moduleTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
 		}
@@ -186,7 +182,7 @@ int main(int, char*[])
 		if (ImGui::CollapsingHeader("Camera")) {
 			ImGui::Text("Position: %.1f %.1f %.1f", camera.position.x, camera.position.y, camera.position.z);
 			if (ImGui::Checkbox("Fly", &controller.fly)) {
-				Entity cameraEnt = entities.get_entity_by_tag("camera");
+				Entity cameraEnt = game.entities.get_entity_by_tag("camera");
 				if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>()) {
 					btRigidBody& body = cameraEnt.get<btRigidBody>();
 					body.setGravity(controller.fly ? btVector3(0, 0, 0) : physics.dynamicsWorld->getGravity());
@@ -218,7 +214,7 @@ int main(int, char*[])
 		if (ImGui::CollapsingHeader("Modules")) {
 			if (ImGui::Button("Reload all##Modules")) {
 				modules.load(Engine::settings["modules"]);
-				modules.init(game);
+				modules.call($id(INIT), &game);
 			}
 			ImGui::Text("Active modules:");
 			for (auto& it : modules) {
@@ -278,24 +274,24 @@ int main(int, char*[])
 
 		Engine::swap();
 
-		entities.update();
+		game.entities.update();
 
 		if (reload) {
-			modules.deinit(game);
+			modules.call($id(DEINIT), &game);
 			renderer.reset(scene);
 			scene.reset();
 			resources.reset();
-			init(game, entities, resources, scene, scenePath);
-			modules.init(game);
+			init(game, scene, scenePath);
+			modules.call($id(INIT), &game);
 			reload = false;
 		}
 	}
 
 	ImGui_ImplSDLGL3_Shutdown();
 
-	entities.remove_system<AudioSystem>();
-	entities.remove_system<PhysicsSystem>();
-	entities.remove_system<RenderSystem>();
+	game.entities.remove_system<AudioSystem>();
+	game.entities.remove_system<PhysicsSystem>();
+	game.entities.remove_system<RenderSystem>();
 
 	Engine::deinit();
 
