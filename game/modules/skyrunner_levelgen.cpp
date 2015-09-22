@@ -17,10 +17,10 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			Scene loader(game.entities);
 			loader.load("skyrunner.json", game.resources);
 			const Json& block = loader.prefabs["skyblock"];
-			for (int i = 0; i < 10; i++) {
+			vec3 pos(0, -1, 0);
+			for (int i = 0; i < 100; i++) {
 				Entity e = loader.instantiate(block, game.resources);
 				// TODO: Need to make this position setting easier
-				vec3 pos = vec3(0, -1, -i * 1.f);
 				if (e.has<Model>()) {
 					Model& model = e.get<Model>();
 					model.position = pos;
@@ -30,6 +30,16 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					btTransform trans(body.getCenterOfMassTransform().getRotation(), convert(pos));
 					body.setWorldTransform(trans);
 				}
+				// Adjust position
+				float xrand = glm::linearRand(-1.f, 1.f);
+				if (xrand < -0.6f || xrand > 0.6f)
+					pos.x += xrand;
+				else pos.x = 0;
+				if (glm::linearRand(0.f, 1.f) < 0.25f)
+					pos.y += glm::linearRand(-0.5f, 1.2f);
+				if (glm::linearRand(0.f, 1.f) < 0.2f)
+					pos.z -= glm::linearRand(1.5f, 3.0f);
+				else pos.z -= 1.f;
 			}
 
 			Entity cameraEnt = game.entities.get_entity_by_tag("camera");
