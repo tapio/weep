@@ -49,9 +49,8 @@ int main(int, char*[])
 	ImGui_ImplSDLGL3_Init(Engine::window);
 	SetupImGuiStyle();
 
-	Modules modules;
-	modules.load(Engine::settings["modules"]);
-	modules.call($id(INIT), &game);
+	game.modules.load(Engine::settings["modules"]);
+	game.modules.call($id(INIT), &game);
 
 	bool running = true;
 	bool active = false;
@@ -124,7 +123,7 @@ int main(int, char*[])
 		float moduleTimeMs = 0.f;
 		{
 			uint64 t0 = SDL_GetPerformanceCounter();
-			modules.call($id(UPDATE), &game);
+			game.modules.call($id(UPDATE), &game);
 			uint64 t1 = SDL_GetPerformanceCounter();
 			moduleTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
 		}
@@ -213,15 +212,15 @@ int main(int, char*[])
 		}
 		if (ImGui::CollapsingHeader("Modules")) {
 			if (ImGui::Button("Reload all##Modules")) {
-				modules.load(Engine::settings["modules"]);
-				modules.call($id(INIT), &game);
+				game.modules.load(Engine::settings["modules"]);
+				game.modules.call($id(INIT), &game);
 			}
 			ImGui::Text("Active modules:");
-			for (auto& it : modules) {
+			for (auto& it : game.modules) {
 				ImGui::Checkbox(it.first.c_str(), &it.second.enabled);
 				ImGui::SameLine();
 				if (ImGui::Button(("Reload##" + it.first).c_str()))
-					modules.reload(it.first);
+					game.modules.reload(it.first);
 			}
 		}
 		if (ImGui::CollapsingHeader("Scene")) {
@@ -263,7 +262,7 @@ int main(int, char*[])
 				}
 			}
 			if (ImGui::Button("Generate skyrunner level")) {
-				modules.call("skyrunner_levelgen", $id(GENERATE_LEVEL), &game);
+				game.modules.call("skyrunner_levelgen", $id(GENERATE_LEVEL), &game);
 			}
 		}
 
@@ -277,12 +276,12 @@ int main(int, char*[])
 		game.entities.update();
 
 		if (reload) {
-			modules.call($id(DEINIT), &game);
+			game.modules.call($id(DEINIT), &game);
 			renderer.reset(scene);
 			scene.reset();
 			resources.reset();
 			init(game, scene, scenePath);
-			modules.call($id(INIT), &game);
+			game.modules.call($id(INIT), &game);
 			reload = false;
 		}
 	}
