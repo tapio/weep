@@ -188,7 +188,7 @@ namespace ecs
 		virtual ~System() {}
 
 		// override this!
-		virtual void update(float dt = 0.0f) = 0;
+		//virtual void update(float dt = 0.0f) = 0;
 
 		// what component types the system requires of entities (we can use this method in the constructor for example)
 		template <typename T>
@@ -253,6 +253,7 @@ namespace ecs
 
 		/* System */
 		template <typename T> void add_system();
+		template <typename T, typename ... Args> void add_system(Args && ... args);
 		template <typename T> void remove_system();
 		template <typename T> T& get_system();
 		template <typename T> bool has_system() const;
@@ -402,6 +403,17 @@ namespace ecs
 		}
 
 		std::shared_ptr<T> system(new T);
+		systems.insert(std::make_pair(std::type_index(typeid(T)), system));
+	}
+
+	template <typename T, typename ... Args>
+	void Entities::add_system(Args && ... args)
+	{
+		if (has_system<T>()) {
+			return;
+		}
+
+		std::shared_ptr<T> system(new T(std::forward<Args>(args) ...));
 		systems.insert(std::make_pair(std::type_index(typeid(T)), system));
 	}
 
