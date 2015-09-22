@@ -128,9 +128,9 @@ void Scene::load(const string& path, Resources& resources)
 	uint t0 = Engine::timems();
 	load_internal(path, resources);
 
-	Entity cameraEnt = world.get_entity_by_tag("camera");
+	Entity cameraEnt = world->get_entity_by_tag("camera");
 	if (!cameraEnt.is_alive()) {
-		cameraEnt = world.create();
+		cameraEnt = world->create();
 		cameraEnt.tag("camera");
 	}
 	cameraEnt.add<Camera>();
@@ -187,7 +187,7 @@ Entity Scene::instantiate(Json def, Resources& resources)
 		}
 	}
 
-	Entity entity = world.create();
+	Entity entity = world->create();
 
 	if (def["name"].is_string()) {
 		entity.tag(def["name"].string_value());
@@ -281,6 +281,8 @@ Entity Scene::instantiate(Json def, Resources& resources)
 			body.setLinearFactor(convert(toVec3(bodyDef["linearFactor"])));
 		if (bodyDef["noGravity"].bool_value())
 			body.setFlags(body.getFlags() | BT_DISABLE_WORLD_GRAVITY);
+		if (world->has_system<PhysicsSystem>())
+			world->get_system<PhysicsSystem>().add(entity);
 	}
 
 	return entity;
@@ -290,5 +292,4 @@ void Scene::reset()
 {
 	prefabs.clear();
 	numModels = 0; numBodies = 0; numLights = 0;
-	world = Entities();
 }

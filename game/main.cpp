@@ -16,6 +16,26 @@
 
 void SetupImGuiStyle();
 
+void init(Game& game, Entities& entities, Resources& resources, Scene& scene, const string& scenePath)
+{
+	entities = Entities();
+	entities.add_system<RenderSystem>(resources);
+	entities.add_system<PhysicsSystem>();
+	entities.add_system<AudioSystem>();
+	scene = Scene(entities);
+	scene.load(scenePath, resources);
+	{
+		Entity cameraEnt = scene.world->get_entity_by_tag("camera");
+		Camera& camera = cameraEnt.get<Camera>();
+		cameraEnt.add<Controller>(camera.position, camera.rotation);
+		if (cameraEnt.has<btRigidBody>())
+			cameraEnt.get<Controller>().body = &cameraEnt.get<btRigidBody>();
+	}
+	game.entities = &entities;
+	game.resources = &resources;
+	game.scene = &scene;
+}
+
 int main(int, char*[])
 {
 	Resources resources;
@@ -23,27 +43,15 @@ int main(int, char*[])
 	Engine::init(resources.findPath("settings.json"));
 	if (Engine::settings["moddir"].is_string())
 		resources.addPath(Engine::settings["moddir"].string_value());
-	RenderSystem renderer(resources);
-	AudioSystem audio;
 
+	Entities entities;
+	Scene scene(entities);
+	Game game;
 	char scenePath[128] = "testscene.json";
-	Scene scene;
-	scene.load(scenePath, resources);
-
-	PhysicsSystem physics;
-	physics.addScene(scene);
-
-	Entity cameraEnt = scene.world.get_entity_by_tag("camera");
-	Camera& camera = cameraEnt.get<Camera>();
-	cameraEnt.add<Controller>(camera.position, camera.rotation);
-	Controller& controller = cameraEnt.get<Controller>();
-	if (cameraEnt.has<btRigidBody>())
-		controller.body = &cameraEnt.get<btRigidBody>();
+	init(game, entities, resources, scene, scenePath);
 
 	ImGui_ImplSDLGL3_Init(Engine::window);
 	SetupImGuiStyle();
-
-	Game game = { scene.world, scene, resources, renderer, physics, audio };
 
 	Modules modules;
 	modules.load(Engine::settings["modules"]);
@@ -55,6 +63,13 @@ int main(int, char*[])
 	SDL_Event e;
 	while (running) {
 		ImGui_ImplSDLGL3_NewFrame();
+
+		RenderSystem& renderer = game.entities->get_system<RenderSystem>();
+		PhysicsSystem& physics = game.entities->get_system<PhysicsSystem>();
+		AudioSystem& audio = game.entities->get_system<AudioSystem>();
+		Entity cameraEnt = entities.get_entity_by_tag("camera");
+		Controller& controller = cameraEnt.get<Controller>();
+		Camera& camera = cameraEnt.get<Camera>();
 
 		while (SDL_PollEvent(&e)) {
 			ImGui_ImplSDLGL3_ProcessEvent(&e);
@@ -128,8 +143,7 @@ int main(int, char*[])
 			physTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
 		}
 
-		Entity cameraEnt = scene.world.get_entity_by_tag("camera");
-		if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>()) {
+		if (cameraEnt.has<btRigidBody>()) {
 			btRigidBody& body = cameraEnt.get<btRigidBody>();
 			camera.position = convert(body.getCenterOfMassPosition());
 			controller.onGround = physics.testGroundHit(body);
@@ -172,7 +186,7 @@ int main(int, char*[])
 		if (ImGui::CollapsingHeader("Camera")) {
 			ImGui::Text("Position: %.1f %.1f %.1f", camera.position.x, camera.position.y, camera.position.z);
 			if (ImGui::Checkbox("Fly", &controller.fly)) {
-				Entity cameraEnt = scene.world.get_entity_by_tag("camera");
+				Entity cameraEnt = entities.get_entity_by_tag("camera");
 				if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>()) {
 					btRigidBody& body = cameraEnt.get<btRigidBody>();
 					body.setGravity(controller.fly ? btVector3(0, 0, 0) : physics.dynamicsWorld->getGravity());
@@ -264,31 +278,25 @@ int main(int, char*[])
 
 		Engine::swap();
 
-		scene.world.update();
+		entities.update();
 
 		if (reload) {
 			modules.deinit(game);
 			renderer.reset(scene);
-			physics.reset();
 			scene.reset();
 			resources.reset();
-			renderer.device().loadShaders();
-			renderer.env().reset();
-			renderer.env().load("environment.json", resources);
-			renderer.device().setEnvironment(&renderer.env());
-			scene.load(scenePath, resources);
-			physics.addScene(scene);
-			Entity cameraEnt = scene.world.get_entity_by_tag("camera");
-			if (cameraEnt.is_alive() && cameraEnt.has<btRigidBody>()) {
-				controller.body = &cameraEnt.get<btRigidBody>();
-			} else controller.body = nullptr;
+			init(game, entities, resources, scene, scenePath);
 			modules.init(game);
 			reload = false;
 		}
 	}
 
 	ImGui_ImplSDLGL3_Shutdown();
-	renderer.reset(scene);
+
+	entities.remove_system<AudioSystem>();
+	entities.remove_system<PhysicsSystem>();
+	entities.remove_system<RenderSystem>();
+
 	Engine::deinit();
 
 	return EXIT_SUCCESS;

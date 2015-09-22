@@ -9,7 +9,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 	switch (msg) {
 		case $id(INIT):
 		{
-			Entity pl = game.entities.get_entity_by_tag("camera");
+			Entity pl = game.entities->get_entity_by_tag("camera");
 			if (!pl.is_alive() || !pl.has<btRigidBody>())
 				return;
 
@@ -19,7 +19,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		}
 		case $id(UPDATE):
 		{
-			Entity pl = game.entities.get_entity_by_tag("camera");
+			Entity pl = game.entities->get_entity_by_tag("camera");
 			if (!pl.is_alive() || !pl.has<btRigidBody>())
 				return;
 

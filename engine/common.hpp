@@ -81,10 +81,7 @@ inline vec3 colorToVec3(const Json& color) {
 }
 
 struct Game {
-	class Entities& entities;
-	class Scene& scene;
-	class Resources& resources;
-	class RenderSystem& renderer;
-	class PhysicsSystem& physics;
-	class AudioSystem& audio;
+	class Entities* entities = nullptr;
+	class Scene* scene = nullptr;
+	class Resources* resources = nullptr;
 };

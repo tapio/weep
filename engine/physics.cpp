@@ -74,7 +74,7 @@ bool PhysicsSystem::testGroundHit(btRigidBody& body)
 
 void PhysicsSystem::syncTransforms(Scene& scene)
 {
-	scene.world.for_each<Model, btRigidBody>([](Entity, Model& model, btRigidBody& body) {
+	scene.world->for_each<Model, btRigidBody>([](Entity, Model& model, btRigidBody& body) {
 		const btTransform& trans = body.getCenterOfMassTransform();
 		model.position = convert(trans.getOrigin());
 		model.rotation = convert(trans.getRotation());
@@ -95,7 +95,7 @@ void PhysicsSystem::addScene(Scene& scene)
 {
 	uint t0 = Engine::timems();
 	int count = 0;
-	scene.world.for_each<btRigidBody>([this, &count](Entity e, btRigidBody) {
+	scene.world->for_each<btRigidBody>([this, &count](Entity e, btRigidBody) {
 		count += add(e);
 	});
 	uint t1 = Engine::timems();

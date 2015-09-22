@@ -3,7 +3,7 @@
 #include "bullet/btBulletCollisionCommon.h"
 #include "bullet/btBulletDynamicsCommon.h"
 
-class PhysicsSystem
+class PhysicsSystem : public System
 {
 public:
 	PhysicsSystem();

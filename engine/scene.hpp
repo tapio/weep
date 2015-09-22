@@ -9,12 +9,14 @@ class Scene
 {
 public:
 
+	Scene(Entities& entities): world(&entities) {}
+
 	void load(const string& path, Resources& resources);
 	void reset();
 
 	Entity instantiate(Json def, Resources& resources);
 
-	Entities world;
+	Entities* world;
 	std::map<string, Json> prefabs;
 
 private:

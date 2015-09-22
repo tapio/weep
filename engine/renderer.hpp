@@ -8,7 +8,7 @@ class Resources;
 struct Camera;
 struct Model;
 
-class RenderSystem
+class RenderSystem : public System
 {
 public:
 	RenderSystem(Resources& resources);

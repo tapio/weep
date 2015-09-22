@@ -44,7 +44,7 @@ RenderSystem::~RenderSystem()
 void RenderSystem::reset(Scene& scene)
 {
 	logDebug("Reseting renderer");
-	scene.world.for_each<Model>([this](Entity, Model& model) {
+	scene.world->for_each<Model>([this](Entity, Model& model) {
 		m_device->destroyModel(model);
 	});
 }
@@ -69,11 +69,11 @@ void RenderSystem::render(Scene& scene, Camera& camera)
 	camera.updateViewMatrix();
 	Frustum frustum(camera);
 	std::vector<Light> lights;
-	scene.world.for_each<Light>([&](Entity, Light& light) {
+	scene.world->for_each<Light>([&](Entity, Light& light) {
 		lights.push_back(light);
 	});
 	m_device->preRender(camera, lights);
-	scene.world.for_each<Model>([&](Entity, Model& model) {
+	scene.world->for_each<Model>([&](Entity, Model& model) {
 		if (!model.materials.empty() && frustum.visible(model))
 			m_device->render(model);
 	});

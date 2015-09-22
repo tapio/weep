@@ -5,7 +5,7 @@
 
 struct Camera;
 
-class AudioSystem
+class AudioSystem : public System
 {
 public:
 	AudioSystem();
