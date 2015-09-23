@@ -15,7 +15,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl_gl3.h"
 
-void SetupImGuiStyle();
+void SetupImGuiStyle(const string& fontPath = "");
 
 void init(Game& game, Scene& scene, const string& scenePath)
 {
@@ -47,6 +47,7 @@ int main(int, char*[])
 	init(game, scene, scenePath);
 
 	ImGui_ImplSDLGL3_Init(Engine::window);
+	//SetupImGuiStyle(resources.findPath("fonts/DejaVuSansMono.ttf"));
 	SetupImGuiStyle();
 	game.imgui = ImGui::GetInternalState();
 
@@ -298,7 +299,7 @@ int main(int, char*[])
 	return EXIT_SUCCESS;
 }
 
-void SetupImGuiStyle()
+void SetupImGuiStyle(const string& fontPath)
 {
 	ImGuiStyle& style = ImGui::GetStyle();
 	style.WindowRounding = 6.f;
@@ -323,4 +324,8 @@ void SetupImGuiStyle()
 	style.Colors[ImGuiCol_HeaderActive]          = ImVec4(0.53f, 0.71f, 0.78f, 0.80f);
 	style.Colors[ImGuiCol_CloseButton]           = ImVec4(0.50f, 0.78f, 0.90f, 0.50f);
 	style.Colors[ImGuiCol_CloseButtonHovered]    = ImVec4(0.70f, 0.78f, 0.90f, 0.60f);
+	if (!fontPath.empty()) {
+		ImGuiIO& io = ImGui::GetIO();
+		io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 13.0f, NULL, io.Fonts->GetGlyphRangesDefault());
+	}
 }
