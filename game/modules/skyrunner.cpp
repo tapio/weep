@@ -8,6 +8,20 @@
 #include "../game.hpp"
 
 static btTransform startPos;
+static vec3 goalPos;
+
+void setPos(Entity e, vec3 pos) {
+	// TODO: Need to make this position setting easier on engine level
+	if (e.has<Model>()) {
+		Model& model = e.get<Model>();
+		model.position = pos;
+	}
+	if (e.has<btRigidBody>()) {
+		btRigidBody& body = e.get<btRigidBody>();
+		btTransform trans(body.getCenterOfMassTransform().getRotation(), convert(pos));
+		body.setWorldTransform(trans);
+	}
+}
 
 EXPORT void ModuleFunc(uint msg, void* param)
 {
@@ -43,16 +57,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			vec3 pos(0, -1, 0);
 			for (int i = 0; i < 100; i++) {
 				Entity e = loader.instantiate(block, game.resources);
-				// TODO: Need to make this position setting easier
-				if (e.has<Model>()) {
-					Model& model = e.get<Model>();
-					model.position = pos;
-				}
-				if (e.has<btRigidBody>()) {
-					btRigidBody& body = e.get<btRigidBody>();
-					btTransform trans(body.getCenterOfMassTransform().getRotation(), convert(pos));
-					body.setWorldTransform(trans);
-				}
+				setPos(e, pos);
 				// Adjust position
 				float xrand = glm::linearRand(-1.f, 1.f);
 				if (xrand < -0.6f || xrand > 0.6f)
@@ -64,6 +69,9 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					pos.z -= glm::linearRand(1.5f, 3.0f);
 				else pos.z -= 1.f;
 			}
+			Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
+			setPos(e, pos);
+			goalPos = pos;
 
 			Entity cameraEnt = game.entities.get_entity_by_tag("camera");
 			Camera& camera = cameraEnt.get<Camera>();
