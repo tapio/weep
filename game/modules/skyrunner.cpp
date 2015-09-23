@@ -110,6 +110,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			Scene loader(game.entities);
 			loader.load("skyrunner.json", game.resources);
 			const Json& block = loader.prefabs["skyblock"];
+			const Json& box = loader.prefabs["skybox"];
 			vec3 pos(0, -1, 0);
 			for (int i = 0; i < 100; i++) {
 				Entity e = loader.instantiate(block, game.resources);
@@ -125,6 +126,12 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					pos.z -= glm::linearRand(1.5f, 3.0f);
 					generatePole(block, pos, loader, game.resources);
 				} else pos.z -= 1.f;
+
+				if (glm::linearRand(0.f, 1.f) < 0.35f) {
+					Entity ebox = loader.instantiate(box, game.resources);
+					vec3 offset(glm::linearRand(-0.4, 0.4), 0.8, glm::linearRand(-0.4, 0.4));
+					setPos(ebox, pos + offset);
+				}
 			}
 			Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
 			setPos(e, pos);
