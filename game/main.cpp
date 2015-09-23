@@ -258,7 +258,6 @@ int main(int, char*[])
 						model.rotation = camera.rotation;
 					}
 					if (e.has<btRigidBody>()) {
-						physics.add(e);
 						btRigidBody& body = e.get<btRigidBody>();
 						btTransform trans(convert(camera.rotation), convert(pos));
 						body.setWorldTransform(trans);
