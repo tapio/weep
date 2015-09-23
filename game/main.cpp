@@ -48,6 +48,7 @@ int main(int, char*[])
 
 	ImGui_ImplSDLGL3_Init(Engine::window);
 	SetupImGuiStyle();
+	game.imgui = ImGui::GetInternalState();
 
 	game.modules.load(Engine::settings["modules"]);
 	game.modules.call($id(INIT), &game);

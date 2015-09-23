@@ -6,6 +6,7 @@
 #include "model.hpp"
 #include "../controller.hpp"
 #include "../game.hpp"
+#include "imgui/imgui.h"
 
 static btTransform startPos;
 static vec3 goalPos;
@@ -29,6 +30,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 	switch (msg) {
 		case $id(INIT):
 		{
+			ImGui::SetInternalState(game.imgui);
 			Entity pl = game.entities.get_entity_by_tag("camera");
 			if (!pl.is_alive() || !pl.has<btRigidBody>())
 				return;

@@ -7,4 +7,5 @@ struct Game {
 	Entities entities = {};
 	Resources resources = {};
 	Modules modules = {};
+	void* imgui = nullptr;
 };
