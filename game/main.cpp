@@ -262,7 +262,7 @@ int main(int, char*[])
 				}
 			}
 			if (ImGui::Button("Generate skyrunner level")) {
-				game.modules.call("skyrunner_levelgen", $id(GENERATE_LEVEL), &game);
+				game.modules.call("skyrunner", $id(GENERATE_LEVEL), &game);
 			}
 		}
 
