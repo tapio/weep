@@ -32,6 +32,15 @@ void setPos(Entity e, vec3 pos) {
 	}
 }
 
+void generatePole(const Json& block, vec3 pos, Scene& loader, Resources& resources) {
+	for (int i = 0; i < 10; ++i) {
+		pos.y -= 1.f;
+		Entity e = loader.instantiate(block, resources);
+		setPos(e, pos);
+	}
+}
+
+
 EXPORT void ModuleFunc(uint msg, void* param)
 {
 	Game& game = *static_cast<Game*>(param);
@@ -112,9 +121,10 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				else pos.x = 0;
 				if (glm::linearRand(0.f, 1.f) < 0.25f)
 					pos.y += glm::linearRand(-0.5f, 1.2f);
-				if (glm::linearRand(0.f, 1.f) < 0.2f)
+				if (glm::linearRand(0.f, 1.f) < 0.2f) {
 					pos.z -= glm::linearRand(1.5f, 3.0f);
-				else pos.z -= 1.f;
+					generatePole(block, pos, loader, game.resources);
+				} else pos.z -= 1.f;
 			}
 			Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
 			setPos(e, pos);
