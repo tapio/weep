@@ -8,4 +8,5 @@ struct Game {
 	Resources resources = {};
 	Modules modules = {};
 	void* imgui = nullptr;
+	float dt = 0;
 };

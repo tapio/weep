@@ -8,8 +8,16 @@
 #include "../game.hpp"
 #include "imgui/imgui.h"
 
+static const int MinimalWindow =
+	ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoScrollbar|
+	ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoSavedSettings;
+
+static ImFont* font = 0;
 static btTransform startPos;
-static vec3 goalPos;
+static vec3 goalPos = vec3(INFINITY, INFINITY, INFINITY);
+static float gameTime = 0;
+static bool levelStarted = false;
+static bool levelComplete = false;
 
 void setPos(Entity e, vec3 pos) {
 	// TODO: Need to make this position setting easier on engine level
@@ -31,6 +39,13 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		case $id(INIT):
 		{
 			ImGui::SetInternalState(game.imgui);
+			ImGuiIO& io = ImGui::GetIO();
+			// TODO: Super fragile, figure out a way to get the font
+			if (io.Fonts->Fonts.size() <= 1) {
+				string fontPath = game.resources.findPath("fonts/Orbitron-Black.ttf");
+				font = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 48.0f, NULL, io.Fonts->GetGlyphRangesDefault());
+			} else font = io.Fonts->Fonts.back();
+			gameTime = 0;
 			Entity pl = game.entities.get_entity_by_tag("camera");
 			if (!pl.is_alive() || !pl.has<btRigidBody>())
 				return;
@@ -41,14 +56,44 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		}
 		case $id(UPDATE):
 		{
+			if (!levelStarted)
+				return;
 			Entity pl = game.entities.get_entity_by_tag("camera");
 			if (!pl.is_alive() || !pl.has<btRigidBody>())
 				return;
 
+			if (!levelComplete)
+				gameTime += game.dt;
+
 			btRigidBody& body = pl.get<btRigidBody>();
-			if (body.getCenterOfMassPosition().y() < -2) {
+			vec3 curPos = convert(body.getCenterOfMassPosition());
+			if (curPos.y < -3) {
 				body.setCenterOfMassTransform(startPos);
+				gameTime = 0;
+				levelComplete = false;
 			}
+
+			ASSERT(font);
+			ImGui::PushFont(font);
+			if (glm::distance2(curPos, goalPos) < 1.1f || levelComplete) {
+				levelComplete = true;
+				ImGui::SetNextWindowPosCenter();
+				ImGui::Begin("", NULL, MinimalWindow);
+				ImGui::Text("Good Job! %.2f s", gameTime);
+				ImGui::End();
+			} else if (gameTime < 3) {
+				ImGui::SetNextWindowPosCenter();
+				ImGui::Begin("", NULL, MinimalWindow);
+				ImGui::Text("Run to the end!");
+				ImGui::End();
+			} else {
+				ImGui::SetNextWindowPos(ImVec2(20, 20));
+				ImGui::Begin("", NULL, MinimalWindow);
+				ImGui::Text("Time: %.2f", gameTime);
+				ImGui::End();
+			}
+			ImGui::PopFont();
+
 			break;
 		}
 		case $id(GENERATE_LEVEL):
@@ -81,6 +126,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			Controller& controller = cameraEnt.get<Controller>();
 			if (cameraEnt.has<btRigidBody>())
 				controller.body = &cameraEnt.get<btRigidBody>();
+			levelStarted = true;
 			break;
 		}
 	}
