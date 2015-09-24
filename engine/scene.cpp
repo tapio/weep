@@ -123,7 +123,7 @@ namespace {
 	}
 }
 
-void Scene::load(const string& path, Resources& resources)
+void SceneLoader::load(const string& path, Resources& resources)
 {
 	uint t0 = Engine::timems();
 	load_internal(path, resources);
@@ -143,7 +143,7 @@ void Scene::load(const string& path, Resources& resources)
 	logDebug("Loaded scene in %dms with %d models, %d bodies, %d lights, %d prefabs", t1 - t0, numModels, numBodies, numLights, prefabs.size());
 }
 
-void Scene::load_internal(const string& path, Resources& resources)
+void SceneLoader::load_internal(const string& path, Resources& resources)
 {
 	std::string err;
 	Json jsonScene = Json::parse(resources.getText(path, Resources::NO_CACHE), err);
@@ -174,7 +174,7 @@ void Scene::load_internal(const string& path, Resources& resources)
 	}
 }
 
-Entity Scene::instantiate(Json def, Resources& resources)
+Entity SceneLoader::instantiate(Json def, Resources& resources)
 {
 	ASSERT(def.is_object());
 
@@ -288,7 +288,7 @@ Entity Scene::instantiate(Json def, Resources& resources)
 	return entity;
 }
 
-void Scene::reset()
+void SceneLoader::reset()
 {
 	prefabs.clear();
 	numModels = 0; numBodies = 0; numLights = 0;

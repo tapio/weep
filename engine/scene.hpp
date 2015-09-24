@@ -5,11 +5,11 @@
 
 class Resources;
 
-class Scene
+class SceneLoader
 {
 public:
 
-	Scene(Entities& entities): world(&entities) {}
+	SceneLoader(Entities& entities): world(&entities) {}
 
 	void load(const string& path, Resources& resources);
 	void reset();

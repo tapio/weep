@@ -11,9 +11,9 @@ public:
 	void reset();
 
 	bool add(Entity entity);
-	void addScene(class Scene& scene);
+	void addScene(class SceneLoader& scene);
 
-	void syncTransforms(class Scene& scene);
+	void syncTransforms(class SceneLoader& scene);
 	void step(float dt);
 
 	bool testGroundHit(btRigidBody& body);

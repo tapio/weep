@@ -32,7 +32,7 @@ void setPos(Entity e, vec3 pos) {
 	}
 }
 
-void generatePole(const Json& block, vec3 pos, Scene& loader, Resources& resources) {
+void generatePole(const Json& block, vec3 pos, SceneLoader& loader, Resources& resources) {
 	for (int i = 0; i < 10; ++i) {
 		pos.y -= 1.f;
 		Entity e = loader.instantiate(block, resources);
@@ -107,7 +107,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		}
 		case $id(GENERATE_LEVEL):
 		{
-			Scene loader(game.entities);
+			SceneLoader loader(game.entities);
 			loader.load("skyrunner.json", game.resources);
 			const Json& block = loader.prefabs["skyblock"];
 			const Json& box = loader.prefabs["skybox"];

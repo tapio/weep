@@ -41,7 +41,7 @@ RenderSystem::~RenderSystem()
 	//reset();
 }
 
-void RenderSystem::reset(Scene& scene)
+void RenderSystem::reset(SceneLoader& scene)
 {
 	logDebug("Reseting renderer");
 	scene.world->for_each<Model>([this](Entity, Model& model) {
@@ -64,7 +64,7 @@ void RenderSystem::toggleWireframe()
 	m_device->toggleWireframe();
 }
 
-void RenderSystem::render(Scene& scene, Camera& camera)
+void RenderSystem::render(SceneLoader& scene, Camera& camera)
 {
 	camera.updateViewMatrix();
 	Frustum frustum(camera);

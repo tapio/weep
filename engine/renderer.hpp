@@ -3,7 +3,7 @@
 #include "environment.hpp"
 
 class RenderDevice;
-class Scene;
+class SceneLoader;
 class Resources;
 struct Camera;
 struct Model;
@@ -14,8 +14,8 @@ public:
 	RenderSystem(Resources& resources);
 	~RenderSystem();
 
-	void render(Scene& scene, Camera& camera);
-	void reset(Scene& scene);
+	void render(SceneLoader& scene, Camera& camera);
+	void reset(SceneLoader& scene);
 
 	Environment& env() { return m_env; }
 

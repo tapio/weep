@@ -17,13 +17,13 @@
 
 void SetupImGuiStyle(const string& fontPath = "");
 
-void init(Game& game, Scene& scene, const string& scenePath)
+void init(Game& game, SceneLoader& scene, const string& scenePath)
 {
 	game.entities = Entities();
 	game.entities.add_system<RenderSystem>(game.resources);
 	game.entities.add_system<PhysicsSystem>();
 	game.entities.add_system<AudioSystem>();
-	scene = Scene(game.entities);
+	scene = SceneLoader(game.entities);
 	scene.load(scenePath, game.resources);
 	Entity cameraEnt = scene.world->get_entity_by_tag("camera");
 	Camera& camera = cameraEnt.get<Camera>();
@@ -41,7 +41,7 @@ int main(int, char*[])
 	if (Engine::settings["moddir"].is_string())
 		resources.addPath(Engine::settings["moddir"].string_value());
 
-	Scene scene(game.entities);
+	SceneLoader scene(game.entities);
 
 	char scenePath[128] = "testscene.json";
 	init(game, scene, scenePath);

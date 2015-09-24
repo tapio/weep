@@ -72,7 +72,7 @@ bool PhysicsSystem::testGroundHit(btRigidBody& body)
 	return false;
 }
 
-void PhysicsSystem::syncTransforms(Scene& scene)
+void PhysicsSystem::syncTransforms(SceneLoader& scene)
 {
 	scene.world->for_each<Model, btRigidBody>([](Entity, Model& model, btRigidBody& body) {
 		const btTransform& trans = body.getCenterOfMassTransform();
@@ -91,7 +91,7 @@ bool PhysicsSystem::add(Entity entity)
 	return true;
 }
 
-void PhysicsSystem::addScene(Scene& scene)
+void PhysicsSystem::addScene(SceneLoader& scene)
 {
 	uint t0 = Engine::timems();
 	int count = 0;
