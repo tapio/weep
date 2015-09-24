@@ -118,6 +118,8 @@ int main(int, char*[])
 				controller.angles.x += -0.05f * e.motion.yrel;
 				controller.angles.y += -0.05f * e.motion.xrel;
 			}
+
+			game.modules.call($id(INPUT), &e);
 		}
 
 		controller.update(Engine::dt);
