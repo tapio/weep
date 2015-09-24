@@ -294,6 +294,8 @@ int main(int, char*[])
 
 	ImGui_ImplSDLGL3_Shutdown();
 
+	game.entities.get_system<RenderSystem>().reset(game.entities); // TODO: Should not be needed...
+
 	game.entities.remove_system<AudioSystem>();
 	game.entities.remove_system<PhysicsSystem>();
 	game.entities.remove_system<RenderSystem>();
