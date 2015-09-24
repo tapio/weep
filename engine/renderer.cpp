@@ -45,7 +45,8 @@ void RenderSystem::reset(Entities& entities)
 {
 	logDebug("Reseting renderer");
 	entities.for_each<Model>([this](Entity, Model& model) {
-		m_device->destroyModel(model);
+		if (model.geometry)
+			m_device->destroyGeometry(*model.geometry);
 	});
 }
 

@@ -194,11 +194,14 @@ void RenderDevice::setEnvironment(Environment* env)
 	m_skyboxMat.tex[Material::ENV_MAP] = tex.id;
 }
 
-void RenderDevice::destroyModel(Model& model)
+void RenderDevice::toggleWireframe()
 {
-	if (!model.geometry)
-		return;
-	for (auto& batch : model.geometry->batches) {
+	m_wireframe = !m_wireframe;
+}
+
+void RenderDevice::destroyGeometry(Geometry& geometry)
+{
+	for (auto& batch : geometry.batches) {
 		if (batch.renderId == -1)
 			continue;
 		GPUModel& m = m_models[batch.renderId];
@@ -216,11 +219,6 @@ void RenderDevice::destroyModel(Model& model)
 		}
 		batch.renderId = -1;
 	}
-}
-
-void RenderDevice::toggleWireframe()
-{
-	m_wireframe = !m_wireframe;
 }
 
 bool RenderDevice::uploadGeometry(Geometry& geometry)

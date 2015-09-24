@@ -23,12 +23,11 @@ public:
 	void loadShaders();
 	bool uploadGeometry(Geometry& geometry);
 	bool uploadMaterial(Material& material);
+	void destroyGeometry(Geometry& geometry);
 
 	void preRender(const Camera& camera, const std::vector<Light>& lights);
 	void render(Model& model);
 	void postRender();
-
-	void destroyModel(Model& model);
 
 	void toggleWireframe();
 
