@@ -248,6 +248,10 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 			shape = new btBoxShape(convert((aabb.max - aabb.min) * 0.5f));
 		} else if (shapeStr == "sphere") {
 			shape = new btSphereShape(model.bounds.radius);
+		} else if (shapeStr == "capsule") {
+			vec3 extents = model.bounds.max - model.bounds.min;
+			float r = glm::max(extents.x, extents.z) * 0.5f;
+			shape = new btCapsuleShape(r, extents.y);
 		} else if (shapeStr == "trimesh") {
 			if (!model.geometry->collisionMesh)
 				model.geometry->generateCollisionTriMesh();
