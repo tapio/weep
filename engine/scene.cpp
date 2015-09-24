@@ -243,13 +243,14 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 
 		btCollisionShape* shape = NULL;
 		const string& shapeStr = bodyDef["shape"].string_value();
+		vec3 extents = model.bounds.max - model.bounds.min;
 		if (shapeStr == "box") {
-			Bounds aabb = model.bounds;
-			shape = new btBoxShape(convert((aabb.max - aabb.min) * 0.5f));
+			shape = new btBoxShape(convert(extents * 0.5f));
 		} else if (shapeStr == "sphere") {
 			shape = new btSphereShape(model.bounds.radius);
+		} else if (shapeStr == "cylinder") {
+			shape = new btCylinderShape(convert(extents * 0.5f));
 		} else if (shapeStr == "capsule") {
-			vec3 extents = model.bounds.max - model.bounds.min;
 			float r = glm::max(extents.x, extents.z) * 0.5f;
 			shape = new btCapsuleShape(r, extents.y);
 		} else if (shapeStr == "trimesh") {
