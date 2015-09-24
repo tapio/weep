@@ -177,6 +177,8 @@ RenderDevice::~RenderDevice()
 	m_materialBlock.destroy();
 	m_lightBlock.destroy();
 	m_textures.clear();
+	for (auto& g : m_geometries)
+		destroyGeometry(g);
 }
 
 void RenderDevice::setEnvironment(Environment* env)
@@ -199,24 +201,29 @@ void RenderDevice::toggleWireframe()
 	m_wireframe = !m_wireframe;
 }
 
+void RenderDevice::destroyGeometry(GPUGeometry& geometry)
+{
+	if (geometry.ebo) {
+		glDeleteBuffers(1, &geometry.ebo);
+		geometry.ebo = 0;
+	}
+	if (geometry.vbo) {
+		glDeleteBuffers(1, &geometry.vbo);
+		geometry.vbo = 0;
+	}
+	if (geometry.vao) {
+		glDeleteVertexArrays(1, &geometry.vao);
+		geometry.vao = 0;
+	}
+}
+
 void RenderDevice::destroyGeometry(Geometry& geometry)
 {
 	for (auto& batch : geometry.batches) {
 		if (batch.renderId == -1)
 			continue;
-		GPUModel& m = m_models[batch.renderId];
-		if (m.ebo) {
-			glDeleteBuffers(1, &m.ebo);
-			m.ebo = 0;
-		}
-		if (m.vbo) {
-			glDeleteBuffers(1, &m.vbo);
-			m.vbo = 0;
-		}
-		if (m.vao) {
-			glDeleteVertexArrays(1, &m.vao);
-			m.vao = 0;
-		}
+		GPUGeometry& g = m_geometries[batch.renderId];
+		destroyGeometry(g);
 		batch.renderId = -1;
 	}
 }
@@ -229,9 +236,9 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 	}
 	glutil::checkGL("Pre geometry upload");
 	for (auto& batch : geometry.batches) {
-		batch.renderId = m_models.size();
-		m_models.emplace_back(GPUModel());
-		GPUModel& model = m_models.back();
+		batch.renderId = m_geometries.size();
+		m_geometries.emplace_back(GPUGeometry());
+		GPUGeometry& model = m_geometries.back();
 
 		if (!model.vao) glGenVertexArrays(1, &model.vao);
 		if (!model.vbo) glGenBuffers(1, &model.vbo);
@@ -377,7 +384,7 @@ void RenderDevice::render(Model& model)
 		if (batch.renderId == -1)
 			uploadGeometry(geom); // TODO: Should not be here!
 
-		GPUModel& gpuData = m_models[batch.renderId];
+		GPUGeometry& gpuData = m_geometries[batch.renderId];
 		glBindVertexArray(gpuData.vao);
 		uint mode = mat.tessellate ? GL_PATCHES : GL_TRIANGLES;
 		if (gpuData.ebo) {

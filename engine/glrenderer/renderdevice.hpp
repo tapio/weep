@@ -44,13 +44,13 @@ public:
 	} stats;
 
 private:
-	struct GPUModel
+	struct GPUGeometry
 	{
 		uint vao = 0;
 		uint vbo = 0;
 		uint ebo = 0;
 	};
-
+	void destroyGeometry(GPUGeometry& geometry);
 
 	FBO m_msaaFbo;
 	FBO m_fbo;
@@ -60,8 +60,8 @@ private:
 	void renderFullscreenQuad();
 	void renderSkybox();
 
-	GPUModel m_fullscreenQuad;
-	GPUModel m_skyboxCube;
+	GPUGeometry m_fullscreenQuad;
+	GPUGeometry m_skyboxCube;
 	Material m_skyboxMat;
 
 	uint m_program = 0;
@@ -73,7 +73,7 @@ private:
 	std::vector<ShaderProgram> m_shaders;
 	std::map<string, int> m_shaderNames;
 	std::map<void*, Texture> m_textures;
-	std::vector<GPUModel> m_models;
+	std::vector<GPUGeometry> m_geometries;
 	Environment* m_env;
 	Resources& m_resources;
 };
