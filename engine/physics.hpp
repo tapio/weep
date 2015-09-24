@@ -11,7 +11,6 @@ public:
 	void reset();
 
 	bool add(Entity entity);
-	void addScene(class SceneLoader& scene);
 
 	void syncTransforms(class SceneLoader& scene);
 	void step(float dt);

@@ -41,10 +41,10 @@ RenderSystem::~RenderSystem()
 	//reset();
 }
 
-void RenderSystem::reset(SceneLoader& scene)
+void RenderSystem::reset(Entities& entities)
 {
 	logDebug("Reseting renderer");
-	scene.world->for_each<Model>([this](Entity, Model& model) {
+	entities.for_each<Model>([this](Entity, Model& model) {
 		m_device->destroyModel(model);
 	});
 }
@@ -64,16 +64,16 @@ void RenderSystem::toggleWireframe()
 	m_device->toggleWireframe();
 }
 
-void RenderSystem::render(SceneLoader& scene, Camera& camera)
+void RenderSystem::render(Entities& entities, Camera& camera)
 {
 	camera.updateViewMatrix();
 	Frustum frustum(camera);
 	std::vector<Light> lights;
-	scene.world->for_each<Light>([&](Entity, Light& light) {
+	entities.for_each<Light>([&](Entity, Light& light) {
 		lights.push_back(light);
 	});
 	m_device->preRender(camera, lights);
-	scene.world->for_each<Model>([&](Entity, Model& model) {
+	entities.for_each<Model>([&](Entity, Model& model) {
 		if (!model.materials.empty() && frustum.visible(model))
 			m_device->render(model);
 	});

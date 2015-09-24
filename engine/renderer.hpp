@@ -14,8 +14,8 @@ public:
 	RenderSystem(Resources& resources);
 	~RenderSystem();
 
-	void render(SceneLoader& scene, Camera& camera);
-	void reset(SceneLoader& scene);
+	void render(Entities& entities, Camera& camera);
+	void reset(Entities& entities);
 
 	Environment& env() { return m_env; }
 

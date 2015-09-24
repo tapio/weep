@@ -90,14 +90,3 @@ bool PhysicsSystem::add(Entity entity)
 	dynamicsWorld->addRigidBody(&body);
 	return true;
 }
-
-void PhysicsSystem::addScene(SceneLoader& scene)
-{
-	uint t0 = Engine::timems();
-	int count = 0;
-	scene.world->for_each<btRigidBody>([this, &count](Entity e, btRigidBody) {
-		count += add(e);
-	});
-	uint t1 = Engine::timems();
-	logDebug("Loaded %d bodies in %dms", count, t1 - t0);
-}

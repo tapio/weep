@@ -165,7 +165,7 @@ int main(int, char*[])
 		float renderTimeMs = 0.f;
 		{
 			uint64 t0 = SDL_GetPerformanceCounter();
-			renderer.render(scene, camera);
+			renderer.render(game.entities, camera);
 			uint64 t1 = SDL_GetPerformanceCounter();
 			renderTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
 		}
@@ -283,7 +283,7 @@ int main(int, char*[])
 
 		if (reload) {
 			game.modules.call($id(DEINIT), &game);
-			renderer.reset(scene);
+			renderer.reset(game.entities);
 			scene.reset();
 			resources.reset();
 			init(game, scene, scenePath);
