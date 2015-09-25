@@ -107,6 +107,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		}
 		case $id(GENERATE_LEVEL):
 		{
+			std::srand(std::time(0));
 			SceneLoader loader(game.entities);
 			loader.load("skyrunner.json", game.resources);
 			const Json& block = loader.prefabs["skyblock"];
