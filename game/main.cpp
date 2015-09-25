@@ -32,7 +32,7 @@ void init(Game& game, SceneLoader& scene, const string& scenePath)
 		cameraEnt.get<Controller>().body = &cameraEnt.get<btRigidBody>();
 }
 
-int main(int, char*[])
+int main(int argc, char* argv[])
 {
 	Game game;
 	Resources& resources = game.resources;
@@ -44,6 +44,7 @@ int main(int, char*[])
 	SceneLoader scene(game.entities);
 
 	char scenePath[128] = "testscene.json";
+	if (argc == 2) strcpy(scenePath, argv[1]);
 	init(game, scene, scenePath);
 
 	ImGui_ImplSDLGL3_Init(Engine::window);
