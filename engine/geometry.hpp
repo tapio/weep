@@ -56,6 +56,7 @@ struct Geometry
 	void calculateNormals();
 	void normalizeNormals();
 	void generateCollisionTriMesh(bool deduplicateVertices = true);
+	void merge(const Geometry& geometry, vec3 offset, int materialIndexOffset = 0);
 
 	std::vector<Batch> batches;
 

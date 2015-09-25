@@ -263,6 +263,17 @@ void Geometry::generateCollisionTriMesh(bool deduplicateVertices)
 	}
 }
 
+void Geometry::merge(const Geometry& geometry, vec3 offset, int materialIndexOffset)
+{
+	for (auto& b : geometry.batches) {
+		batches.push_back(b);
+		Batch& batch = batches.back();
+		batch.materialIndex += materialIndexOffset;
+		for (auto& pos : batch.positions)
+			pos += offset;
+	}
+}
+
 
 // Batch
 
