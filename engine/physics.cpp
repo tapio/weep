@@ -72,9 +72,9 @@ bool PhysicsSystem::testGroundHit(btRigidBody& body)
 	return false;
 }
 
-void PhysicsSystem::syncTransforms(SceneLoader& scene)
+void PhysicsSystem::syncTransforms(Entities& entities)
 {
-	scene.world->for_each<Model, btRigidBody>([](Entity, Model& model, btRigidBody& body) {
+	entities.for_each<Model, btRigidBody>([](Entity, Model& model, btRigidBody& body) {
 		const btTransform& trans = body.getCenterOfMassTransform();
 		model.position = convert(trans.getOrigin());
 		model.rotation = convert(trans.getRotation());

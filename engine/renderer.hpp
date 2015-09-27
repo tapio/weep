@@ -3,7 +3,6 @@
 #include "environment.hpp"
 
 class RenderDevice;
-class SceneLoader;
 class Resources;
 struct Camera;
 struct Model;

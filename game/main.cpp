@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
 		{
 			uint64 t0 = SDL_GetPerformanceCounter();
 			physics.step(Engine::dt);
-			physics.syncTransforms(scene);
+			physics.syncTransforms(game.entities);
 			uint64 t1 = SDL_GetPerformanceCounter();
 			physTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
 		}

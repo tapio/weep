@@ -12,7 +12,7 @@ public:
 
 	bool add(Entity entity);
 
-	void syncTransforms(class SceneLoader& scene);
+	void syncTransforms(Entities& entities);
 	void step(float dt);
 
 	bool testGroundHit(btRigidBody& body);
