@@ -13,11 +13,13 @@ static const int MinimalWindow =
 	ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoSavedSettings;
 
 static ImFont* font = 0;
-static btTransform startPos;
+static vec3 startPos = vec3(0, 1, 0);
 static vec3 goalPos = vec3(INFINITY, INFINITY, INFINITY);
 static float gameTime = 0;
+static float waitTime = 0;
 static bool levelStarted = false;
 static bool levelComplete = false;
+static int level = 1;
 
 void setPos(Entity e, vec3 pos) {
 	// TODO: Need to make this position setting easier on engine level
@@ -40,6 +42,11 @@ void generatePole(const Json& block, vec3 pos, SceneLoader& loader, Resources& r
 	}
 }
 
+void generateLevel1(Game& game, vec3 start);
+void generateLevel2(Game& game, vec3 start);
+void generateLevel3(Game& game, vec3 start);
+
+
 
 EXPORT void ModuleFunc(uint msg, void* param)
 {
@@ -54,13 +61,9 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				string fontPath = game.resources.findPath("fonts/Orbitron-Black.ttf");
 				font = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 48.0f, NULL, io.Fonts->GetGlyphRangesDefault());
 			} else font = io.Fonts->Fonts.back();
-			gameTime = 0;
-			Entity pl = game.entities.get_entity_by_tag("camera");
-			if (!pl.is_alive() || !pl.has<btRigidBody>())
-				return;
 
-			btRigidBody& body = pl.get<btRigidBody>();
-			startPos = body.getCenterOfMassTransform();
+			gameTime = 0;
+			waitTime = 0;
 			break;
 		}
 		case $id(UPDATE):
@@ -73,12 +76,15 @@ EXPORT void ModuleFunc(uint msg, void* param)
 
 			if (!levelComplete)
 				gameTime += game.dt;
+			else waitTime += game.dt;
 
 			btRigidBody& body = pl.get<btRigidBody>();
 			vec3 curPos = convert(body.getCenterOfMassPosition());
 			if (curPos.y < -3) {
-				body.setCenterOfMassTransform(startPos);
+				btTransform trans(convert(quat()), convert(startPos));
+				body.setCenterOfMassTransform(trans);
 				gameTime = 0;
+				waitTime = 0;
 				levelComplete = false;
 			}
 
@@ -90,6 +96,15 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				ImGui::Begin("", NULL, MinimalWindow);
 				ImGui::Text("Good Job! %.2f s", gameTime);
 				ImGui::End();
+				if (waitTime >= 3) {
+					gameTime = 0;
+					waitTime = 0;
+					levelComplete = false;
+					level++;
+					startPos = curPos + vec3(0, 0, -1.5);
+					if (level == 2) generateLevel2(game, startPos);
+					if (level == 3) generateLevel3(game, startPos);
+				}
 			} else if (gameTime < 3) {
 				ImGui::SetNextWindowPosCenter();
 				ImGui::Begin("", NULL, MinimalWindow);
@@ -108,35 +123,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		case $id(GENERATE_LEVEL):
 		{
 			std::srand(std::time(0));
-			SceneLoader loader(game.entities);
-			loader.load("skyrunner.json", game.resources);
-			const Json& block = loader.prefabs["skyblock"];
-			const Json& box = loader.prefabs["skybox"];
-			vec3 pos(0, -1, 0);
-			for (int i = 0; i < 100; i++) {
-				Entity e = loader.instantiate(block, game.resources);
-				setPos(e, pos);
-				// Adjust position
-				float xrand = glm::linearRand(-1.f, 1.f);
-				if (xrand < -0.6f || xrand > 0.6f)
-					pos.x += xrand;
-				else pos.x = 0;
-				if (glm::linearRand(0.f, 1.f) < 0.25f)
-					pos.y += glm::linearRand(-0.5f, 1.2f);
-				if (glm::linearRand(0.f, 1.f) < 0.2f) {
-					pos.z -= glm::linearRand(1.5f, 3.0f);
-					generatePole(block, pos, loader, game.resources);
-				} else pos.z -= 1.f;
-
-				if (glm::linearRand(0.f, 1.f) < 0.35f) {
-					Entity ebox = loader.instantiate(box, game.resources);
-					vec3 offset(glm::linearRand(-0.4, 0.4), 0.8, glm::linearRand(-0.4, 0.4));
-					setPos(ebox, pos + offset);
-				}
-			}
-			Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
-			setPos(e, pos);
-			goalPos = pos + vec3(0, 1, 0);
+			generateLevel1(game, startPos);
 
 			Entity cameraEnt = game.entities.get_entity_by_tag("camera");
 			Camera& camera = cameraEnt.get<Camera>();
@@ -150,3 +137,99 @@ EXPORT void ModuleFunc(uint msg, void* param)
 	}
 }
 
+void generateLevel1(Game& game, vec3 pos)
+{
+	SceneLoader loader(game.entities);
+	loader.load("skyrunner.json", game.resources);
+	const Json& block = loader.prefabs["skyblock1"];
+	const Json& box = loader.prefabs["skybox"];
+	pos.y -= 1;
+	for (int i = 0; i < 100; i++) {
+		Entity e = loader.instantiate(block, game.resources);
+		setPos(e, pos);
+		// Adjust position
+		if (glm::linearRand(0.f, 1.f) < 0.25f)
+			pos.x += glm::linearRand(-0.6f, 0.6f);
+		if (glm::linearRand(0.f, 1.f) < 0.20f)
+			pos.y += glm::linearRand(-0.5f, 0.5f);
+		if (glm::linearRand(0.f, 1.f) < 0.25f) {
+			pos.z -= glm::linearRand(2.0f, 3.5f);
+			generatePole(block, pos, loader, game.resources);
+		} else pos.z -= 1.f;
+
+		if (glm::linearRand(0.f, 1.f) < 0.20f) {
+			Entity ebox = loader.instantiate(box, game.resources);
+			vec3 offset(glm::linearRand(-0.4, 0.4), 0.8, glm::linearRand(-0.4, 0.4));
+			setPos(ebox, pos + offset);
+		}
+	}
+	Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
+	setPos(e, pos);
+	goalPos = pos + vec3(0, 1, 0);
+}
+
+void generateLevel2(Game& game, vec3 pos)
+{
+	SceneLoader loader(game.entities);
+	loader.load("skyrunner.json", game.resources);
+	const Json& block = loader.prefabs["skyblock2"];
+	const Json& box = loader.prefabs["skybox"];
+	pos.y -= 1;
+	for (int i = 0; i < 100; i++) {
+		Entity e = loader.instantiate(block, game.resources);
+		setPos(e, pos);
+		// Adjust position
+		float xrand = glm::linearRand(-1.f, 1.f);
+		if (xrand < -0.6f || xrand > 0.6f)
+			pos.x += xrand;
+		else pos.x = 0;
+		if (glm::linearRand(0.f, 1.f) < 0.25f)
+			pos.y += glm::linearRand(-0.5f, 1.2f);
+		if (glm::linearRand(0.f, 1.f) < 0.2f) {
+			pos.z -= glm::linearRand(1.5f, 3.0f);
+			generatePole(block, pos, loader, game.resources);
+		} else pos.z -= 1.f;
+
+		if (glm::linearRand(0.f, 1.f) < 0.35f) {
+			Entity ebox = loader.instantiate(box, game.resources);
+			vec3 offset(glm::linearRand(-0.4, 0.4), 0.8, glm::linearRand(-0.4, 0.4));
+			setPos(ebox, pos + offset);
+		}
+	}
+	Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
+	setPos(e, pos);
+	goalPos = pos + vec3(0, 1, 0);
+}
+
+void generateLevel3(Game& game, vec3 pos)
+{
+	SceneLoader loader(game.entities);
+	loader.load("skyrunner.json", game.resources);
+	const Json& block = loader.prefabs["skyblock3"];
+	const Json& box = loader.prefabs["skybox"];
+	pos.y -= 1;
+	for (int i = 0; i < 100; i++) {
+		Entity e = loader.instantiate(block, game.resources);
+		setPos(e, pos);
+		// Adjust position
+		float xrand = glm::linearRand(-1.f, 1.f);
+		if (xrand < -0.6f || xrand > 0.6f)
+			pos.x += xrand;
+		else pos.x = 0;
+		if (glm::linearRand(0.f, 1.f) < 0.25f)
+			pos.y += glm::linearRand(-0.5f, 1.2f);
+		if (glm::linearRand(0.f, 1.f) < 0.2f) {
+			pos.z -= glm::linearRand(1.5f, 3.0f);
+			generatePole(block, pos, loader, game.resources);
+		} else pos.z -= 1.f;
+
+		if (glm::linearRand(0.f, 1.f) < 0.35f) {
+			Entity ebox = loader.instantiate(box, game.resources);
+			vec3 offset(glm::linearRand(-0.4, 0.4), 0.8, glm::linearRand(-0.4, 0.4));
+			setPos(ebox, pos + offset);
+		}
+	}
+	Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
+	setPos(e, pos);
+	goalPos = pos + vec3(0, 1, 0);
+}
