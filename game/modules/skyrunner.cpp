@@ -136,7 +136,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			}
 			Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
 			setPos(e, pos);
-			goalPos = pos;
+			goalPos = pos + vec3(0, 1, 0);
 
 			Entity cameraEnt = game.entities.get_entity_by_tag("camera");
 			Camera& camera = cameraEnt.get<Camera>();
