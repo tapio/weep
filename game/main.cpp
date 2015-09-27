@@ -126,23 +126,15 @@ int main(int argc, char* argv[])
 		controller.update(Engine::dt);
 
 		// Modules
-		float moduleTimeMs = 0.f;
-		{
-			uint64 t0 = SDL_GetPerformanceCounter();
-			game.modules.call($id(UPDATE), &game);
-			uint64 t1 = SDL_GetPerformanceCounter();
-			moduleTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
-		}
+		START_MEASURE(moduleTimeMs)
+		game.modules.call($id(UPDATE), &game);
+		END_MEASURE(moduleTimeMs)
 
 		// Physics
-		float physTimeMs = 0.f;
-		{
-			uint64 t0 = SDL_GetPerformanceCounter();
-			physics.step(Engine::dt);
-			physics.syncTransforms(game.entities);
-			uint64 t1 = SDL_GetPerformanceCounter();
-			physTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
-		}
+		START_MEASURE(physTimeMs)
+		physics.step(Engine::dt);
+		physics.syncTransforms(game.entities);
+		END_MEASURE(physTimeMs)
 
 		if (cameraEnt.has<btRigidBody>()) {
 			btRigidBody& body = cameraEnt.get<btRigidBody>();
@@ -154,22 +146,14 @@ int main(int argc, char* argv[])
 		camera.rotation = controller.rotation;
 
 		// Audio
-		float audioTimeMs = 0.f;
-		{
-			uint64 t0 = SDL_GetPerformanceCounter();
-			audio.update(camera);
-			uint64 t1 = SDL_GetPerformanceCounter();
-			audioTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
-		}
+		START_MEASURE(audioTimeMs)
+		audio.update(camera);
+		END_MEASURE(audioTimeMs)
 
 		// Graphics
-		float renderTimeMs = 0.f;
-		{
-			uint64 t0 = SDL_GetPerformanceCounter();
-			renderer.render(game.entities, camera);
-			uint64 t1 = SDL_GetPerformanceCounter();
-			renderTimeMs = (t1 - t0) / (double)SDL_GetPerformanceFrequency() * 1000.0;
-		}
+		START_MEASURE(renderTimeMs)
+		renderer.render(game.entities, camera);
+		END_MEASURE(renderTimeMs)
 
 		if (ImGui::Begin("Debug")) {
 			ImGui::Text("Right mouse button to toggle mouse grab.");

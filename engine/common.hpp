@@ -64,6 +64,14 @@ string replace(string str, const string& search, const string& replace);
 #define EXPORT extern "C"
 #endif
 
+// TODO: Dummy versions for non-debug build
+#define START_MEASURE(var_name) \
+	float var_name = 0.f; { uint64 _t0_##var_name = SDL_GetPerformanceCounter();
+#define END_MEASURE(var_name) \
+	uint64 _t1_##var_name = SDL_GetPerformanceCounter(); \
+	var_name = (_t1_##var_name - _t0_##var_name) / (double)SDL_GetPerformanceFrequency() * 1000.0; }
+
+
 inline vec2 toVec2(const Json& v) {
 	if (v.is_number()) return vec2(v.number_value());
 	ASSERT(v.is_array());
