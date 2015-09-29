@@ -61,9 +61,8 @@ public:
 
     template <unsigned int N>
     ID_CONSTEXPR static unsigned int gen( const char (&str)[N] ) {
-        auto hash = id::fnv1a<N,N>::hash( str ) | 0x80000000;
-        assert( check_for_collisions( hash, str ) );
-        return hash;
+        //assert( check_for_collisions( id::fnv1a<N,N>::hash( str ) | 0x80000000, str ) );
+        return id::fnv1a<N,N>::hash( str ) | 0x80000000;
     }
 
     static unsigned int &gen() {
