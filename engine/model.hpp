@@ -3,7 +3,6 @@
 #include "geometry.hpp"
 
 struct Material;
-class btRigidBody;
 
 struct Model
 {
