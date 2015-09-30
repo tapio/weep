@@ -55,7 +55,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		{
 			ImGuiSystem& imgui = game.entities.get_system<ImGuiSystem>();
 			imgui.applyInternalState();
-			imgui.loadFont("skyrunner_big", game.resources.findPath("fonts/Orbitron-Black.ttf"), 48.f);
+			//imgui.loadFont("skyrunner_big", game.resources.findPath("fonts/Orbitron-Black.ttf"), 48.f);
 			gameTime = 0;
 			waitTime = 0;
 			break;
@@ -139,7 +139,7 @@ void generateLevel1(Game& game, vec3 pos)
 	const Json& block = loader.prefabs["skyblock1"];
 	const Json& box = loader.prefabs["skybox"];
 	pos.y -= 1;
-	for (int i = 0; i < 100; i++) {
+	for (int i = 0; i < 60; i++) {
 		Entity e = loader.instantiate(block, game.resources);
 		setPos(e, pos);
 		// Adjust position
