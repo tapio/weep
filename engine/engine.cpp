@@ -20,11 +20,9 @@ void Engine::init(const string& configPath)
 		panic(SDL_GetError());
 	}
 
-	logInfo("Logical CPU cores: %d", SDL_GetCPUCount());
-	//logInfo("System RAM: %dMB", SDL_GetSystemRAM());
-	logInfo("L1 cache line size: %dkB", SDL_GetCPUCacheLineSize());
-	logInfo("SSE: %d, SSE2: %d, SSE3: %d, SSE4.1: %d, SSE4.2: %d",
-			SDL_HasSSE(), SDL_HasSSE2(), SDL_HasSSE3(), SDL_HasSSE41(), SDL_HasSSE42());
+	logInfo("Logical CPU cores: %d, RAM: %dMB, L1 cache line size: %dkB", SDL_GetCPUCount(), SDL_GetSystemRAM(), SDL_GetCPUCacheLineSize());
+	logInfo("%s%s%s%s%s%s", SDL_HasSSE()?"SSE ":"", SDL_HasSSE2()?"SSE2 ":"",
+		SDL_HasSSE3()?"SSE3 ":"", SDL_HasSSE41()?"SSE4.1 ":"", SDL_HasSSE42()?"SSE4.2 ":"", SDL_HasAVX()?"AVX ":"");
 
 	prevTime = SDL_GetPerformanceCounter();
 
