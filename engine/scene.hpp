@@ -20,5 +20,6 @@ public:
 private:
 	void load_internal(const string& path, Resources& resources);
 
+	Json m_environment;
 	uint numModels = 0, numBodies = 0, numLights = 0;
 };

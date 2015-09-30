@@ -8,7 +8,10 @@
 #include "camera.hpp"
 #include "model.hpp"
 #include "light.hpp"
+#include "environment.hpp"
 #include "gui.hpp"
+#include "renderer.hpp"
+#include "glrenderer/renderdevice.hpp"
 
 #define USE_DEBUG_NAMES
 
@@ -29,7 +32,7 @@ namespace {
 
 	template<typename T> void setNumber(T& dst, const Json& src) {
 		if (src.is_number())
-			dst = src.number_value();
+			dst = (T)src.number_value();
 	}
 
 	void setString(string& dst, const Json& src) {
@@ -124,12 +127,60 @@ namespace {
 			}
 		}
 	}
+
+	Environment parseEnvironment(const Json& def, Resources& resources)
+	{
+		Environment env;
+		ASSERT(def.is_object());
+		if (def["skybox"].is_string()) {
+			const string& skyboxPath = def["skybox"].string_value();
+			if (skyboxPath.back() == '/' || skyboxPath.back() == '\\') {
+				env.skybox[0] = resources.getImage(skyboxPath + "px.jpg");
+				env.skybox[1] = resources.getImage(skyboxPath + "nx.jpg");
+				env.skybox[2] = resources.getImage(skyboxPath + "py.jpg");
+				env.skybox[3] = resources.getImage(skyboxPath + "ny.jpg");
+				env.skybox[4] = resources.getImage(skyboxPath + "pz.jpg");
+				env.skybox[5] = resources.getImage(skyboxPath + "nz.jpg");
+			} else {
+				for (int i = 0; i < 6; i++)
+					env.skybox[i] = resources.getImage(skyboxPath);
+			}
+		} else if (def["skybox"].is_array()) {
+			for (int i = 0; i < 6; i++)
+				env.skybox[i] = resources.getImage(def["skybox"][i].string_value());
+		}
+		for (int i = 0; i < 6; i++)
+			if (env.skybox[i])
+				env.skybox[i]->sRGB = true;
+
+		setNumber(env.exposure, def["exposure"]);
+		setNumber(env.bloomThreshold, def["bloomThreshold"]);
+		setNumber(env.bloomIntensity, def["bloomIntensity"]);
+		setNumber(env.tonemap, def["tonemap"]);
+		if (!def["ambient"].is_null())
+			env.ambient = colorToVec3(def["ambient"]);
+		if (!def["sunDirection"].is_null())
+			env.sunDirection = toVec3(def["sunDirection"]);
+		if (!def["sunColor"].is_null())
+			env.sunColor = colorToVec3(def["sunColor"]);
+		if (!def["fogColor"].is_null())
+			env.fogColor = colorToVec3(def["fogColor"]);
+		setNumber(env.fogDensity, def["fogDensity"]);
+		return env;
+	}
 }
 
 void SceneLoader::load(const string& path, Resources& resources)
 {
 	uint t0 = Engine::timems();
+	m_environment = Json();
 	load_internal(path, resources);
+
+	if (!m_environment.is_null() && world->has_system<RenderSystem>()) {
+		RenderSystem& renderer = world->get_system<RenderSystem>();
+		renderer.env() = parseEnvironment(m_environment, resources);
+		renderer.device().setEnvironment(&renderer.env());
+	}
 
 	Entity cameraEnt = world->get_entity_by_tag("camera");
 	if (!cameraEnt.is_alive()) {
@@ -160,6 +211,11 @@ void SceneLoader::load_internal(const string& path, Resources& resources)
 		} else if (jsonScene["include"].is_array()) {
 			for (auto& includePath : jsonScene["include"].array_items())
 				load_internal(includePath.string_value(), resources);
+		}
+
+		// Parse environment
+		if (jsonScene["environment"].is_object()) {
+			m_environment = assign(m_environment, jsonScene["environment"]);
 		}
 
 		// Parse fonts

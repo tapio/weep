@@ -31,8 +31,6 @@ private:
 RenderSystem::RenderSystem(Resources& resources)
 {
 	m_device.reset(new RenderDevice(resources));
-
-	m_env.load("environment.json", resources);
 	m_device->setEnvironment(&m_env);
 }
 

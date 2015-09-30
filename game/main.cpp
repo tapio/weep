@@ -266,6 +266,7 @@ int main(int argc, char* argv[])
 		if (reload) {
 			game.modules.call($id(DEINIT), &game);
 			renderer.reset(game.entities);
+			physics.reset();
 			scene.reset();
 			resources.reset();
 			init(game, scene, scenePath);

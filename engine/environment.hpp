@@ -5,9 +5,6 @@
 
 struct Environment
 {
-	void load(const string& path, Resources& resources);
-	void reset();
-
 	vec3 ambient = vec3(0.1, 0.1, 0.1);
 	float exposure = 1.f;
 	float bloomThreshold = 0.4f;

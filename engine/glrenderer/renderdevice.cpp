@@ -187,6 +187,8 @@ void RenderDevice::setEnvironment(Environment* env)
 	// TODO: Use uploadMaterial()
 	m_skyboxMat.shaderName = "skybox";
 	m_skyboxMat.shaderId = m_shaders[m_shaderNames["skybox"]].id;
+	if (!m_env->skybox[0])
+		return;
 	Texture& tex = m_textures[m_env->skybox[0]];
 	if (!tex.valid()) {
 		tex.anisotropy = caps.maxAnisotropy;

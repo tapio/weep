@@ -1,5 +1,5 @@
 {
-	"include": "debugprefabs.json",
+	"include": [ "debugprefabs.json", "environment.json" ],
 	"objects": [
 	{
 		"DISABLEDmaterial": {
