@@ -1,6 +1,7 @@
 #include "engine.hpp"
 #include "scene.hpp"
 #include "material.hpp"
+#include "model.hpp"
 #include "camera.hpp"
 #include "renderer.hpp"
 #include "resources.hpp"

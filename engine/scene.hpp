@@ -1,7 +1,5 @@
 #pragma once
 #include "common.hpp"
-#include "model.hpp"
-#include "light.hpp"
 
 class Resources;
 

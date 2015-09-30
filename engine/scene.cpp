@@ -6,6 +6,8 @@
 #include "engine.hpp"
 #include "physics.hpp"
 #include "camera.hpp"
+#include "model.hpp"
+#include "light.hpp"
 
 #define USE_DEBUG_NAMES
 
