@@ -8,6 +8,7 @@
 #include "camera.hpp"
 #include "model.hpp"
 #include "light.hpp"
+#include "gui.hpp"
 
 #define USE_DEBUG_NAMES
 
@@ -159,6 +160,18 @@ void SceneLoader::load_internal(const string& path, Resources& resources)
 		} else if (jsonScene["include"].is_array()) {
 			for (auto& includePath : jsonScene["include"].array_items())
 				load_internal(includePath.string_value(), resources);
+		}
+
+		// Parse fonts
+		if (jsonScene["fonts"].is_object() && world->has_system<ImGuiSystem>()) {
+			const Json::object& fonts = jsonScene["fonts"].object_items();
+			ImGuiSystem& imgui = world->get_system<ImGuiSystem>();
+			for (auto& it : fonts) {
+				ASSERT(it.second.is_object());
+				string path = resources.findPath(it.second["path"].string_value());
+				float size = it.second["size"].number_value();
+				imgui.loadFont(it.first, path, size);
+			}
 		}
 
 		// Parse prefabs
