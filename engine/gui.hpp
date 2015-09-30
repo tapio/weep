@@ -8,6 +8,8 @@ public:
 	ImGuiSystem();
 	~ImGuiSystem();
 
+	NONCOPYABLE(ImGuiSystem);
+
 	void newFrame();
 	void processEvent(union SDL_Event* event);
 	void applyDefaultStyle();
