@@ -4,15 +4,14 @@
 #include "scene.hpp"
 #include "camera.hpp"
 #include "model.hpp"
+#include "gui.hpp"
 #include "../controller.hpp"
 #include "../game.hpp"
-#include "imgui/imgui.h"
 
 static const int MinimalWindow =
 	ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoScrollbar|
 	ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoSavedSettings;
 
-static ImFont* font = 0;
 static vec3 startPos = vec3(0, 1, 0);
 static vec3 goalPos = vec3(INFINITY, INFINITY, INFINITY);
 static float gameTime = 0;
@@ -54,14 +53,9 @@ EXPORT void ModuleFunc(uint msg, void* param)
 	switch (msg) {
 		case $id(INIT):
 		{
-			ImGui::SetInternalState(game.imgui);
-			ImGuiIO& io = ImGui::GetIO();
-			// TODO: Super fragile, figure out a way to get the font
-			if (io.Fonts->Fonts.size() <= 1) {
-				string fontPath = game.resources.findPath("fonts/Orbitron-Black.ttf");
-				font = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 48.0f, NULL, io.Fonts->GetGlyphRangesDefault());
-			} else font = io.Fonts->Fonts.back();
-
+			ImGuiSystem& imgui = game.entities.get_system<ImGuiSystem>();
+			imgui.applyInternalState();
+			imgui.loadFont("skyrunner_big", game.resources.findPath("fonts/Orbitron-Black.ttf"), 48.f);
 			gameTime = 0;
 			waitTime = 0;
 			break;
@@ -88,6 +82,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				levelComplete = false;
 			}
 
+			ImFont* font = game.entities.get_system<ImGuiSystem>().getFont("skyrunner_big");
 			ASSERT(font);
 			ImGui::PushFont(font);
 			if (glm::distance2(curPos, goalPos) < 1.1f || levelComplete) {

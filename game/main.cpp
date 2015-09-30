@@ -9,14 +9,10 @@
 #include "physics.hpp"
 #include "audio.hpp"
 #include "module.hpp"
+#include "gui.hpp"
 #include "glrenderer/renderdevice.hpp"
 #include "game.hpp"
-
 #include <SDL2/SDL.h>
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_sdl_gl3.h"
-
-void SetupImGuiStyle(const string& fontPath = "");
 
 void init(Game& game, SceneLoader& scene, const string& scenePath)
 {
@@ -24,6 +20,8 @@ void init(Game& game, SceneLoader& scene, const string& scenePath)
 	game.entities.add_system<RenderSystem>(game.resources);
 	game.entities.add_system<PhysicsSystem>();
 	game.entities.add_system<AudioSystem>();
+	game.entities.add_system<ImGuiSystem>();
+	game.entities.get_system<ImGuiSystem>().applyDefaultStyle();
 	scene = SceneLoader(game.entities);
 	scene.load(scenePath, game.resources);
 	Entity cameraEnt = scene.world->get_entity_by_tag("camera");
@@ -48,11 +46,6 @@ int main(int argc, char* argv[])
 	if (argc == 2) strcpy(scenePath, argv[1]);
 	init(game, scene, scenePath);
 
-	ImGui_ImplSDLGL3_Init(Engine::window);
-	//SetupImGuiStyle(resources.findPath("fonts/DejaVuSansMono.ttf"));
-	SetupImGuiStyle();
-	game.imgui = ImGui::GetInternalState();
-
 	game.modules.load(Engine::settings["modules"]);
 	game.modules.call($id(INIT), &game);
 
@@ -61,18 +54,19 @@ int main(int argc, char* argv[])
 	bool reload = false;
 	SDL_Event e;
 	while (running) {
-		ImGui_ImplSDLGL3_NewFrame();
-
 		RenderSystem& renderer = game.entities.get_system<RenderSystem>();
 		PhysicsSystem& physics = game.entities.get_system<PhysicsSystem>();
 		AudioSystem& audio = game.entities.get_system<AudioSystem>();
+		ImGuiSystem& imgui = game.entities.get_system<ImGuiSystem>();
 		Entity cameraEnt = game.entities.get_entity_by_tag("camera");
 		Controller& controller = cameraEnt.get<Controller>();
 		Camera& camera = cameraEnt.get<Camera>();
 		game.dt = Engine::dt;
 
+		imgui.newFrame();
+
 		while (SDL_PollEvent(&e)) {
-			ImGui_ImplSDLGL3_ProcessEvent(&e);
+			imgui.processEvent(&e);
 			if (e.type == SDL_QUIT) {
 				running = false;
 				break;
@@ -278,10 +272,9 @@ int main(int argc, char* argv[])
 		}
 	}
 
-	ImGui_ImplSDLGL3_Shutdown();
-
 	game.entities.get_system<RenderSystem>().reset(game.entities); // TODO: Should not be needed...
 
+	game.entities.remove_system<ImGuiSystem>();
 	game.entities.remove_system<AudioSystem>();
 	game.entities.remove_system<PhysicsSystem>();
 	game.entities.remove_system<RenderSystem>();
@@ -289,36 +282,4 @@ int main(int argc, char* argv[])
 	Engine::deinit();
 
 	return EXIT_SUCCESS;
-}
-
-void SetupImGuiStyle(const string& fontPath)
-{
-	ImGuiStyle& style = ImGui::GetStyle();
-	style.WindowRounding = 6.f;
-	style.FrameRounding = 4.f;
-	style.ScrollbarRounding = 5.f;
-	style.GrabRounding = 3.f;
-	style.Colors[ImGuiCol_TitleBg]               = ImVec4(0.50f, 0.86f, 1.00f, 0.45f);
-	style.Colors[ImGuiCol_TitleBgCollapsed]      = ImVec4(0.40f, 0.78f, 0.80f, 0.20f);
-	style.Colors[ImGuiCol_TitleBgActive]         = ImVec4(0.50f, 0.75f, 1.00f, 0.55f);
-	style.Colors[ImGuiCol_MenuBarBg]             = ImVec4(0.40f, 0.55f, 0.55f, 0.80f);
-	style.Colors[ImGuiCol_ScrollbarBg]           = ImVec4(0.13f, 0.13f, 0.13f, 0.67f);
-	style.Colors[ImGuiCol_ScrollbarGrab]         = ImVec4(0.27f, 0.27f, 0.27f, 0.67f);
-	style.Colors[ImGuiCol_ScrollbarGrabHovered]  = ImVec4(0.40f, 0.40f, 0.40f, 0.67f);
-	style.Colors[ImGuiCol_ScrollbarGrabActive]   = ImVec4(0.53f, 0.53f, 0.53f, 0.67f);
-	style.Colors[ImGuiCol_SliderGrab]            = ImVec4(0.53f, 0.53f, 0.53f, 0.67f);
-	style.Colors[ImGuiCol_SliderGrabActive]      = ImVec4(1.00f, 1.00f, 1.00f, 0.67f);
-	style.Colors[ImGuiCol_Button]                = ImVec4(0.25f, 0.38f, 0.00f, 0.67f);
-	style.Colors[ImGuiCol_ButtonHovered]         = ImVec4(0.44f, 0.59f, 0.00f, 0.67f);
-	style.Colors[ImGuiCol_ButtonActive]          = ImVec4(0.09f, 0.19f, 0.00f, 0.67f);
-	style.Colors[ImGuiCol_Header]                = ImVec4(0.40f, 0.78f, 0.90f, 0.45f);
-	style.Colors[ImGuiCol_HeaderHovered]         = ImVec4(0.45f, 0.78f, 0.90f, 0.80f);
-	style.Colors[ImGuiCol_HeaderActive]          = ImVec4(0.53f, 0.71f, 0.78f, 0.80f);
-	style.Colors[ImGuiCol_CloseButton]           = ImVec4(0.50f, 0.78f, 0.90f, 0.50f);
-	style.Colors[ImGuiCol_CloseButtonHovered]    = ImVec4(0.70f, 0.78f, 0.90f, 0.60f);
-	ImGuiIO& io = ImGui::GetIO();
-	io.Fonts->AddFontDefault();
-	if (!fontPath.empty()) {
-		io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 13.0f, NULL, io.Fonts->GetGlyphRangesDefault());
-	}
 }
