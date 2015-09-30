@@ -11,5 +11,5 @@
 		"shadowMapSize": 1024
 	},
 	"moddir": "../weep-media/",
-	"modules": [ "testbed", "skyrunner" ]
+	"modules": [ "logo", "testbed", "skyrunner" ]
 }
