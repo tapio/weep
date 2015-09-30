@@ -35,6 +35,11 @@ namespace {
 			dst = (T)src.number_value();
 	}
 
+	void setColor(vec3& dst, const Json& src) {
+		if (!src.is_null())
+			dst = colorToVec3(src);
+	}
+
 	void setString(string& dst, const Json& src) {
 		if (src.is_string())
 			dst = src.string_value();
@@ -45,14 +50,10 @@ namespace {
 		setString(material->shaderName, def["shaderName"]);
 		if (def["tessellate"].bool_value())
 			material->tessellate = true;
-		if (!def["ambient"].is_null())
-			material->ambient = colorToVec3(def["ambient"]);
-		if (!def["diffuse"].is_null())
-			material->diffuse = colorToVec3(def["diffuse"]);
-		if (!def["specular"].is_null())
-			material->specular = colorToVec3(def["specular"]);
-		if (!def["emissive"].is_null())
-			material->emissive = colorToVec3(def["emissive"]);
+		setColor(material->ambient, def["ambient"]);
+		setColor(material->diffuse, def["diffuse"]);
+		setColor(material->specular, def["specular"]);
+		setColor(material->emissive, def["emissive"]);
 		setNumber(material->shininess, def["shininess"]);
 
 		if (!def["uvOffset"].is_null())
@@ -157,14 +158,11 @@ namespace {
 		setNumber(env.bloomThreshold, def["bloomThreshold"]);
 		setNumber(env.bloomIntensity, def["bloomIntensity"]);
 		setNumber(env.tonemap, def["tonemap"]);
-		if (!def["ambient"].is_null())
-			env.ambient = colorToVec3(def["ambient"]);
+		setColor(env.ambient, def["ambient"]);
 		if (!def["sunDirection"].is_null())
 			env.sunDirection = toVec3(def["sunDirection"]);
-		if (!def["sunColor"].is_null())
-			env.sunColor = colorToVec3(def["sunColor"]);
-		if (!def["fogColor"].is_null())
-			env.fogColor = colorToVec3(def["fogColor"]);
+		setColor(env.sunColor, def["sunColor"]);
+		setColor(env.fogColor, def["fogColor"]);
 		setNumber(env.fogDensity, def["fogDensity"]);
 		return env;
 	}
@@ -286,8 +284,7 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 		else if (lightType == "area") light.type = Light::AREA_LIGHT;
 		else if (lightType == "hemisphere") light.type = Light::HEMISPHERE_LIGHT;
 		else logError("Unknown light type \"%s\"", lightType.c_str());
-		if (!lightDef["color"].is_null())
-			light.color = colorToVec3(lightDef["color"]);
+		setColor(light.color, lightDef["color"]);
 		if (!def["position"].is_null())
 			light.position = toVec3(def["position"]);
 		if (!lightDef["direction"].is_null())
