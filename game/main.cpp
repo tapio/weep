@@ -205,8 +205,10 @@ int main(int argc, char* argv[])
 				for (auto& it : game.modules) {
 					ImGui::Checkbox(it.first.c_str(), &it.second.enabled);
 					ImGui::SameLine();
-					if (ImGui::Button(("Reload##" + it.first).c_str()))
+					if (ImGui::Button(("Reload##" + it.first).c_str())) {
 						game.modules.reload(it.first);
+						break; // Must break as interator will be invalidated
+					}
 				}
 			}
 			if (ImGui::CollapsingHeader("Scene")) {
