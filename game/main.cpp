@@ -256,6 +256,7 @@ int main(int argc, char* argv[])
 		ImGui::End();
 		//ImGui::ShowTestWindow();
 		//ImGui::ShowStyleEditor();
+		//ImGui::ShowMetricsWindow();
 
 		ImGui::Render();
 
