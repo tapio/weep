@@ -32,7 +32,7 @@ namespace ecs
 	class Pool : public BasePool
 	{
 	public:
-		Pool(int size = 1000) { resize(size); }
+		Pool(int size = 2000) { resize(size); }
 
 		virtual ~Pool() {}
 
@@ -73,7 +73,7 @@ namespace ecs
 	struct BaseComponent
 	{
 		using Id = uint8_t;
-		static const Id MAX_COMPONENTS = 64;
+		static const Id MAX_COMPONENTS = 32;
 	protected:
 		static Id id_counter;
 	};
@@ -364,7 +364,7 @@ namespace ecs
 		std::shared_ptr<Pool<T>> accommodate_component();
 
 		// minimum amount of free indices before we reuse one
-		static const std::uint32_t MINIMUM_FREE_IDS = 1024;
+		static const std::uint32_t MINIMUM_FREE_IDS = 256;
 
 		// deque of free entity indices
 		std::deque<Entity::Id> free_ids;
