@@ -18,12 +18,12 @@ namespace ecs
 		return entities && entities->is_entity_alive(*this);
 	}
 
-	void Entity::tag(std::string tag_name)
+	void Entity::tag(const std::string& tag_name)
 	{
 		entities->tag_entity(*this, tag_name);
 	}
 
-	void Entity::group(std::string group_name)
+	void Entity::group(const std::string& group_name)
 	{
 		entities->group_entity(*this, group_name);
 	}
@@ -144,34 +144,34 @@ namespace ecs
 		return component_masks[index];
 	}
 
-	void Entities::tag_entity(Entity e, std::string tag_name)
+	void Entities::tag_entity(Entity e, const std::string& tag_name)
 	{
 		tagged_entities.emplace(tag_name, e);
 	}
 
-	bool Entities::has_tagged_entity(std::string tag_name) const
+	bool Entities::has_tagged_entity(const std::string& tag_name) const
 	{
 		return tagged_entities.find(tag_name) != tagged_entities.end();
 	}
 
-	Entity Entities::get_entity_by_tag(std::string tag_name)
+	Entity Entities::get_entity_by_tag(const std::string& tag_name)
 	{
 		ECS_ASSERT(has_tagged_entity(tag_name));
 		return tagged_entities[tag_name];
 	}
 
-	void Entities::group_entity(Entity e, std::string group_name)
+	void Entities::group_entity(Entity e, const std::string& group_name)
 	{
 		entity_groups.emplace(group_name, std::set<Entity>());
 		entity_groups[group_name].emplace(e);
 	}
 
-	bool Entities::has_entity_group(std::string group_name) const
+	bool Entities::has_entity_group(const std::string& group_name) const
 	{
 		return entity_groups.find(group_name) != entity_groups.end();
 	}
 
-	std::vector<Entity> Entities::get_entity_group(std::string group_name)
+	std::vector<Entity> Entities::get_entity_group(const std::string& group_name)
 	{
 		ECS_ASSERT(has_entity_group(group_name));
 		auto &s = entity_groups[group_name];

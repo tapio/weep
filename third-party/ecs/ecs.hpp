@@ -152,12 +152,12 @@ namespace ecs
 		/*
 		Tags the entity.
 		*/
-		void tag(std::string tag_name);
+		void tag(const std::string& tag_name);
 
 		/*
 		Adds the entity to a certain group.
 		*/
-		void group(std::string group_name);
+		void group(const std::string& group_name);
 
 		/*
 		Returns a string of the entity (id + version).
@@ -341,16 +341,16 @@ namespace ecs
 		/*
 		Tag management.
 		*/
-		void tag_entity(Entity e, std::string tag_name);
-		bool has_tagged_entity(std::string tag_name) const;
-		Entity get_entity_by_tag(std::string tag_name);
+		void tag_entity(Entity e, const std::string& tag_name);
+		bool has_tagged_entity(const std::string& tag_name) const;
+		Entity get_entity_by_tag(const std::string& tag_name);
 
 		/*
 		Group management.
 		*/
-		void group_entity(Entity e, std::string group_name);
-		bool has_entity_group(std::string group_name) const;
-		std::vector<Entity> get_entity_group(std::string group_name);
+		void group_entity(Entity e, const std::string& group_name);
+		bool has_entity_group(const std::string& group_name) const;
+		std::vector<Entity> get_entity_group(const std::string& group_name);
 
 	private:
 
