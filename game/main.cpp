@@ -215,16 +215,31 @@ int main(int argc, char* argv[])
 				}
 			}
 			if (ImGui::CollapsingHeader("Scene")) {
-				ImGui::InputText("", scenePath, sizeof(scenePath));
+				ImGui::InputText("##Scene Path", scenePath, sizeof(scenePath));
 				ImGui::SameLine();
-				if (ImGui::Button("Load##Scene"))
+				if (ImGui::Button("Load##ScenePath"))
 					reload = true;
-				const char* prefabs[scene.prefabs.size()];
+
+				// TODO: Don't do every frame
+				std::vector<string> fileList = resources.listFiles(".", ".json");
+				const char* sceneFiles[fileList.size()];
 				int temp = 0;
+				for (auto& it : fileList)
+					sceneFiles[temp++] = it.c_str();
+				static int selectedScene = 0;
+				ImGui::Combo("##Scenes", &selectedScene, sceneFiles, fileList.size());
+				ImGui::SameLine();
+				if (ImGui::Button("Load##SceneCombo")) {
+					strcpy(scenePath, sceneFiles[selectedScene]);
+					reload = true;
+				}
+
+				const char* prefabs[scene.prefabs.size()];
+				temp = 0;
 				for (auto it : scene.prefabs)
 					prefabs[temp++] = it.first.c_str();
 				static int selectedPrefab = 0;
-				ImGui::Combo("", &selectedPrefab, prefabs, scene.prefabs.size());
+				ImGui::Combo("##Prefabs", &selectedPrefab, prefabs, scene.prefabs.size());
 				bool create = false;
 				vec3 vel(0, 0, 0);
 				ImGui::SameLine();
