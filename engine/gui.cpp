@@ -1,6 +1,7 @@
 #include "gui.hpp"
 #include "engine.hpp"
 #include "imgui/imgui_impl_sdl_gl3.h"
+#include "SDL2/SDL_events.h"
 
 
 ImGuiSystem::ImGuiSystem()
@@ -19,9 +20,33 @@ void ImGuiSystem::newFrame()
 	ImGui_ImplSDLGL3_NewFrame();
 }
 
-void ImGuiSystem::processEvent(SDL_Event* event)
+bool ImGuiSystem::processEvent(SDL_Event* event)
 {
 	ImGui_ImplSDLGL3_ProcessEvent(event);
+	ImGuiIO& io = ImGui::GetIO();
+	switch (event->type) {
+		case SDL_KEYDOWN:
+		case SDL_KEYUP:
+		case SDL_TEXTEDITING:
+		case SDL_TEXTINPUT:
+			return io.WantCaptureKeyboard;
+		case SDL_MOUSEMOTION:
+		case SDL_MOUSEBUTTONDOWN:
+		case SDL_MOUSEBUTTONUP:
+		case SDL_MOUSEWHEEL:
+			return io.WantCaptureMouse;
+	}
+	return false;
+}
+
+bool ImGuiSystem::usingMouse() const
+{
+	return ImGui::GetIO().WantCaptureMouse;
+}
+
+bool ImGuiSystem::usingKeyboard() const
+{
+	return ImGui::GetIO().WantCaptureKeyboard;
 }
 
 void ImGuiSystem::applyInternalState()

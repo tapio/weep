@@ -66,11 +66,13 @@ int main(int argc, char* argv[])
 		imgui.newFrame();
 
 		while (SDL_PollEvent(&e)) {
-			imgui.processEvent(&e);
 			if (e.type == SDL_QUIT) {
 				running = false;
 				break;
 			}
+
+			if (imgui.processEvent(&e))
+				continue;
 
 			if (e.type == SDL_KEYUP) {
 				SDL_Keysym keysym = e.key.keysym;
@@ -118,6 +120,7 @@ int main(int argc, char* argv[])
 			game.modules.call($id(INPUT), &e);
 		}
 
+		controller.enabled = !imgui.usingKeyboard();
 		controller.update(Engine::dt);
 
 		// Modules

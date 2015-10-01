@@ -11,7 +11,9 @@ public:
 	NONCOPYABLE(ImGuiSystem);
 
 	void newFrame();
-	void processEvent(union SDL_Event* event);
+	bool processEvent(union SDL_Event* event);
+	bool usingMouse() const;
+	bool usingKeyboard() const;
 	void applyDefaultStyle();
 	void applyInternalState();
 

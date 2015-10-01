@@ -23,4 +23,5 @@ public:
 
 	bool onGround = true;
 	bool fly = false;
+	bool enabled = true;
 };
