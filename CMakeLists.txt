@@ -16,11 +16,11 @@ endif()
 # Enable C++11 support and other compiler flags...
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	message(STATUS "GCC detected, adding compile flags")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++11 -Wall -Wextra")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++11 -ffast-math -march=native -Wall -Wextra")
 endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	message(STATUS "Clang detected, adding compile flags")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -ffast-math -march=native -Wall -Wextra")
 endif()
 
 find_package(PkgConfig)
