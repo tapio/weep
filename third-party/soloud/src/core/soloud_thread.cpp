@@ -26,7 +26,7 @@ freely, subject to the following restrictions:
 #include "soloud_thread.h"
 
 #ifdef WINDOWS_VERSION
-#include <Windows.h>
+#include <windows.h>
 #else
 #include <pthread.h>
 #include <unistd.h>

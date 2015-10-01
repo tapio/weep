@@ -32,7 +32,7 @@ freely, subject to the following restrictions:
 #define M_PI 3.14159265359
 #endif
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(_WIN32)
 #define WINDOWS_VERSION
 #endif
 
