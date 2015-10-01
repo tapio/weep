@@ -19,6 +19,7 @@ public:
 	void addPath(const string& path);
 	void removePath(const string& path);
 	string findPath(const string& path) const;
+	std::vector<string> listFiles(const string& path, const string& filter = "") const;
 
 	string getText(const string& path, CachePolicy cache);
 	Image* getImage(const string& path);

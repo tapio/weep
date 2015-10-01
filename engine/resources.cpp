@@ -4,6 +4,14 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#if defined(_WIN32) || defined(WIN32)
+	#define WIN32_LEAN_AND_MEAN
+	#include <windows.h>
+#else
+	#include <dirent.h>
+	#include <sys/stat.h>
+#endif
+
 
 static bool fileExists(const string& path)
 {
@@ -15,6 +23,60 @@ static string getCanonicalDir(const string& path)
 {
 	// TODO: Not portable
 	return path.back() == '/' ? path : (path + "/");
+}
+
+// Based on http://stackoverflow.com/a/1932861
+static void findFiles(std::vector<string>& files, const string& path, const string& filter = "")
+{
+#if defined(_WIN32) || defined(WIN32)
+	HANDLE dir;
+	WIN32_FIND_DATA file_data;
+
+	if ((dir = FindFirstFile((path + "*").c_str(), &file_data)) == INVALID_HANDLE_VALUE)
+		return; // No files found
+
+	do {
+		const string file_name = file_data.cFileName;
+		const string full_file_name = path + file_name;
+
+		if (file_name[0] == '.')
+			continue;
+
+		if (!filter.empty() && file_name.find(filter) == string::npos)
+			continue;
+
+		if ((file_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) // Directory?
+			continue;
+
+		files.push_back(file_name);
+	} while (FindNextFile(dir, &file_data));
+
+	FindClose(dir);
+#else
+	struct dirent *ent;
+	struct stat st;
+
+	DIR* dir = opendir(path.c_str());
+	while ((ent = readdir(dir)) != NULL) {
+		const string file_name = ent->d_name;
+		const string full_file_name = path + file_name;
+
+		if (file_name[0] == '.')
+			continue;
+
+		if (!filter.empty() && file_name.find(filter) == string::npos)
+			continue;
+
+		if (stat(full_file_name.c_str(), &st) == -1)
+			continue;
+
+		if ((st.st_mode & S_IFDIR) != 0) // Directory?
+			continue;
+
+		files.push_back(file_name);
+	}
+	closedir(dir);
+#endif
 }
 
 
@@ -55,6 +117,16 @@ string Resources::findPath(const string& path) const
 	logError("Could not find file \"%s\" from any of the resource paths", path.c_str());
 	ASSERT(0);
 	return "";
+}
+
+std::vector<string> Resources::listFiles(const string& path, const string& filter) const
+{
+	std::vector<string> files;
+	for (auto& it : m_paths) {
+		string fullPath = it + getCanonicalDir(path);
+		findFiles(files, fullPath, filter);
+	}
+	return files;
 }
 
 string Resources::getText(const string& path, CachePolicy cache)
