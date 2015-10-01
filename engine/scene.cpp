@@ -30,6 +30,25 @@ namespace {
 		return Json(object);
 	}
 
+	inline vec2 toVec2(const Json& v) {
+		if (v.is_number()) return vec2(v.number_value());
+		ASSERT(v.is_array());
+		return vec2(v[0].number_value(), v[1].number_value());
+
+	}
+
+	inline vec3 toVec3(const Json& v) {
+		if (v.is_number()) return vec3(v.number_value());
+		ASSERT(v.is_array());
+		return vec3(v[0].number_value(), v[1].number_value(), v[2].number_value());
+	}
+
+	inline vec3 colorToVec3(const Json& color) {
+		if (color.is_number()) return vec3(color.number_value());
+		//if (color.is_string()) return TODO;
+		return toVec3(color);
+	}
+
 	template<typename T> void setNumber(T& dst, const Json& src) {
 		if (src.is_number())
 			dst = (T)src.number_value();

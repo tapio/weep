@@ -38,10 +38,6 @@ typedef unsigned uint;
 typedef uint64_t uint64;
 typedef int64_t int64;
 
-static const vec3 xaxis(1, 0, 0);
-static const vec3 yaxis(0, 1, 0);
-static const vec3 zaxis(0, 0, 1);
-
 string vlformat(const char* format, va_list vl);
 
 void logDebug(const char* format, ...);
@@ -71,20 +67,3 @@ string replace(string str, const string& search, const string& replace);
 	uint64 _t1_##var_name = SDL_GetPerformanceCounter(); \
 	var_name = (_t1_##var_name - _t0_##var_name) / (double)SDL_GetPerformanceFrequency() * 1000.0; }
 
-
-inline vec2 toVec2(const Json& v) {
-	if (v.is_number()) return vec2(v.number_value());
-	ASSERT(v.is_array());
-	return vec2(v[0].number_value(), v[1].number_value());
-
-}
-inline vec3 toVec3(const Json& v) {
-	if (v.is_number()) return vec3(v.number_value());
-	ASSERT(v.is_array());
-	return vec3(v[0].number_value(), v[1].number_value(), v[2].number_value());
-}
-inline vec3 colorToVec3(const Json& color) {
-	if (color.is_number()) return vec3(color.number_value());
-	//if (color.is_string()) return TODO;
-	return toVec3(color);
-}
