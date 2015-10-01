@@ -61,7 +61,11 @@ foreach(GAME_MODULE_FILE ${MODULES_SOURCES})
 	add_library(${GAME_MODULE_NAME} SHARED ${GAME_MODULE_FILE})
 endforeach()
 
+set(EXE_NAME weep)
+
 add_library(deps STATIC ${DEPS_SOURCES})
 add_library(engine STATIC ${ENGINE_SOURCES})
-add_executable(app ${GAME_SOURCES} ${SHADER_SOURCES} ${CONFIG_SOURCES})
-target_link_libraries(app engine deps ${LIBS})
+add_executable(${EXE_NAME} ${GAME_SOURCES} ${SHADER_SOURCES} ${CONFIG_SOURCES})
+target_link_libraries(${EXE_NAME} engine deps ${LIBS})
+
+configure_file("WeepEngine.cmake.desktop" "WeepEngine.desktop")
