@@ -1,6 +1,13 @@
 #pragma once
 #include "common.hpp"
 
+#ifdef _WIN32
+// Windows defines these to nothing for some ancient compat reasons...
+#undef near
+#undef far
+#endif
+
+
 struct Camera
 {
 
