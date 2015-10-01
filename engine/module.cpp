@@ -10,9 +10,17 @@ Module::Module(const std::string& moduleName)
 	string path = "lib" + name + ".so";
 #endif
 	handle = SDL_LoadObject(path.c_str());
-	ASSERT(handle);
+	if (!handle) {
+		logError("%s", SDL_GetError()); // SDL already produces a descriptive error
+		ASSERT(!"Module load failed");
+		return;
+	}
 	func = (ModuleFunc)SDL_LoadFunction(handle, "ModuleFunc");
-	ASSERT(func);
+	if (!func) {
+		logError("%s (%s)", SDL_GetError(), path.c_str());
+		ASSERT(!"ModuleFunc load failed");
+		return;
+	}
 	logDebug("Loaded module %s", path.c_str());
 }
 
