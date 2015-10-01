@@ -36,7 +36,7 @@ RenderDevice::RenderDevice(Resources& resources)
 	if (Engine::settings["renderer"]["gldebug"].bool_value())
 		s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_NOTIFICATION;
 	else s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
-	glDebugMessageCallback(debugCallback, NULL);
+	glDebugMessageCallback((GLDEBUGPROC)debugCallback, NULL);
 
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &caps.maxAnisotropy);
 
