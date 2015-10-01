@@ -7,7 +7,7 @@ Module::Module(const std::string& moduleName)
 #if defined(WIN32) || defined(_WIN32)
 	string path = name + ".dll";
 #else
-	string path = "lib" + name + ".so";
+	string path = "./lib" + name + ".so";
 #endif
 	handle = SDL_LoadObject(path.c_str());
 	if (!handle) {
