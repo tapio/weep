@@ -1,7 +1,11 @@
 // ImGui GLFW binding with OpenGL3 + shaders
 // https://github.com/ocornut/imgui
 
+#ifdef _WIN32
+#include "glad/glad.h"
+#else
 #include "GL/glcorearb.h"
+#endif
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 #include "imgui.h"

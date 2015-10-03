@@ -1,6 +1,9 @@
 #include "engine.hpp"
 
 #include <SDL2/SDL.h>
+#ifdef _WIN32
+#include "glad/glad.h"
+#endif
 
 namespace
 {
@@ -64,6 +67,12 @@ void Engine::init(const string& configPath)
 	if (!s_glcontext) {
 		panic(SDL_GetError());
 	}
+
+#ifdef _WIN32
+	if (!gladLoadGL()) {
+		panic("Failed to load OpenGL functions");
+	}
+#endif
 
 	vsync(settings["renderer"]["vsync"].bool_value());
 

@@ -16,7 +16,10 @@ endif()
 # Enable C++11 support and other compiler flags...
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	message(STATUS "GCC detected, adding compile flags")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -std=c++11 -ffast-math -march=native -Wall -Wextra")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -ffast-math -march=native -Wall -Wextra")
+	if(NOT WIN32)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+	endif()
 endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	message(STATUS "Clang detected, adding compile flags")
@@ -59,21 +62,28 @@ link_directories(${PROJECT_BINARY_DIR})
 set(EXE_NAME weep)
 set(INSTALL_DIR weep)
 
+add_library(deps STATIC ${DEPS_SOURCES})
+add_library(engine STATIC ${ENGINE_SOURCES})
+add_library(game STATIC ${GAME_SOURCES})
+
 foreach(GAME_MODULE_FILE ${MODULES_SOURCES})
 	get_filename_component(GAME_MODULE_NAME ${GAME_MODULE_FILE} NAME_WE)
 	add_library(${GAME_MODULE_NAME} SHARED ${GAME_MODULE_FILE})
+	if (WIN32) # On Linux, somehow stuff work without explicitly linking
+		target_link_libraries(${GAME_MODULE_NAME} game engine deps ${LIBS})
+	endif()
 	install(TARGETS ${GAME_MODULE_NAME} DESTINATION ${INSTALL_DIR}/bin
 			PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
 						GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ)
 endforeach()
 
-add_library(deps STATIC ${DEPS_SOURCES})
-add_library(engine STATIC ${ENGINE_SOURCES})
 add_executable(${EXE_NAME} ${GAME_SOURCES} ${SHADER_SOURCES} ${CONFIG_SOURCES})
 target_link_libraries(${EXE_NAME} engine deps ${LIBS})
 install(TARGETS ${EXE_NAME} DESTINATION ${INSTALL_DIR}/bin)
 
-configure_file("WeepEngine.cmake.desktop" "WeepEngine.desktop")
+if(UNIX AND NOT APPLE)
+	configure_file("WeepEngine.cmake.desktop" "WeepEngine.desktop")
+endif()
 
 install(DIRECTORY data DESTINATION ${INSTALL_DIR})
 install(DIRECTORY weep-media OPTIONAL DESTINATION ${INSTALL_DIR} PATTERN ".git" EXCLUDE)

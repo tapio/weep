@@ -1,7 +1,11 @@
 #pragma once
 #include "common.hpp"
 #include "shader.hpp"
-#include <GL/glcorearb.h>
+#ifdef _WIN32
+#include "glad/glad.h"
+#else
+#include "GL/glcorearb.h"
+#endif
 
 namespace glutil
 {
