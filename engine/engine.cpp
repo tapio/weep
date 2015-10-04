@@ -54,7 +54,7 @@ void Engine::init(const string& configPath)
 
 	s_width = settings["screen"]["width"].int_value();
 	s_height = settings["screen"]["height"].int_value();
-	int fullscreen = settings["screen"]["fullscreen"].bool_value() ? SDL_WINDOW_FULLSCREEN : 0;
+	int fullscreen = settings["screen"]["fullscreen"].bool_value() ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0;
 
 	window = SDL_CreateWindow("App",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, s_width, s_height,
@@ -107,6 +107,29 @@ void Engine::vsync(bool enable)
 bool Engine::vsync()
 {
 	return SDL_GL_GetSwapInterval() != 0;
+}
+
+void Engine::fullscreen(bool enable)
+{
+	if (SDL_SetWindowFullscreen(window, enable ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0))
+		logError("Fullscreen %s failed: %s", enable ? "enabling" : "disabling", SDL_GetError());
+	else if (enable) {
+		SDL_DisplayMode mode;
+		if (SDL_GetWindowDisplayMode(window, &mode) == 0) {
+			s_width = mode.w;
+			s_height = mode.h;
+		}
+		logInfo("Fullscreen enabled (%dx%d)", s_width, s_height);
+	} else {
+		s_width = settings["screen"]["width"].int_value();
+		s_height = settings["screen"]["height"].int_value();
+		logInfo("Fullscreen disabled");
+	}
+}
+
+bool Engine::fullscreen()
+{
+	return (SDL_GetWindowFlags(window) & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP)) != 0;
 }
 
 uint Engine::timems()

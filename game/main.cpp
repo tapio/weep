@@ -85,7 +85,12 @@ int main(int argc, char* argv[])
 					break;
 				}
 
-				if (keysym.mod == KMOD_LCTRL && keysym.sym == SDLK_r) {
+				if ((keysym.mod == KMOD_LALT || keysym.mod == KMOD_RALT) && keysym.sym == SDLK_RETURN) {
+					Engine::fullscreen(!Engine::fullscreen());
+					renderer.device().resizeRenderTargets();
+					continue;
+				}
+				else if (keysym.mod == KMOD_LCTRL && keysym.sym == SDLK_r) {
 					reload = true;
 					continue;
 				}
@@ -186,6 +191,14 @@ int main(int argc, char* argv[])
 				ImGui::Checkbox("V-sync", &vsync);
 				if (vsync != oldVsync)
 					Engine::vsync(vsync);
+				ImGui::SameLine();
+				bool fullscreen = Engine::fullscreen();
+				bool oldFullscreen = fullscreen;
+				ImGui::Checkbox("Fullscreen", &fullscreen);
+				if (fullscreen != oldFullscreen) {
+					Engine::fullscreen(fullscreen);
+					renderer.device().resizeRenderTargets();
+				}
 			}
 			if (ImGui::CollapsingHeader("Environment")) {
 				Environment& env = renderer.env();

@@ -29,6 +29,7 @@ public:
 	void render(Model& model);
 	void postRender();
 
+	void resizeRenderTargets();
 	void toggleWireframe();
 
 	struct Caps {

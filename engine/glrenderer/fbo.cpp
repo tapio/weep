@@ -57,4 +57,7 @@ void FBO::destroy()
 {
 	glDeleteTextures(numTextures, tex);
 	glDeleteFramebuffers(1, &fbo);
+	fbo = 0;
+	for (uint i = 0; i < MAX_TEXTURES; ++i)
+		tex[i] = 0;
 }

@@ -7,8 +7,11 @@ public:
 	static void init(const string& configPath);
 	static void deinit();
 	static void swap();
+
 	static void vsync(bool enable);
 	static bool vsync();
+	static void fullscreen(bool enable);
+	static bool fullscreen();
 
 	static int width();
 	static int height();

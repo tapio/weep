@@ -66,6 +66,25 @@ RenderDevice::RenderDevice(Resources& resources)
 	glVertexAttribPointer(ATTR_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glDisableVertexAttribArray(ATTR_NORMAL);
 
+	resizeRenderTargets();
+
+	m_commonBlock.create();
+	m_objectBlock.create();
+	m_materialBlock.create();
+	m_lightBlock.create();
+}
+
+void RenderDevice::resizeRenderTargets()
+{
+	if (m_msaaFbo.valid())
+		m_msaaFbo.destroy();
+	if (m_fbo.valid())
+		m_fbo.destroy();
+	for (int i = 0; i < 2; ++i)
+		if (m_pingPongFbo[i].valid())
+			m_pingPongFbo[i].destroy();
+	if (m_shadowFbo.valid())
+		m_shadowFbo.destroy();
 	// Set up floating point framebuffer to render HDR scene to
 	int samples = Engine::settings["renderer"]["msaa"].number_value();
 	if (samples > 1) {
@@ -92,11 +111,6 @@ RenderDevice::RenderDevice(Resources& resources)
 	m_shadowFbo.depthAttachment = 0;
 	m_shadowFbo.create();
 	glutil::checkGL("Post framebuffer create");
-
-	m_commonBlock.create();
-	m_objectBlock.create();
-	m_materialBlock.create();
-	m_lightBlock.create();
 }
 
 void RenderDevice::loadShaders()
@@ -300,6 +314,7 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 	ASSERT(m_env);
 	if (m_msaaFbo.valid()) m_msaaFbo.bind();
 	else m_fbo.bind();
+	glViewport(0, 0, Engine::width(), Engine::height());
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	stats = Stats();
 	m_program = 0;
@@ -542,4 +557,3 @@ void RenderDevice::postRender()
 	glUseProgram(0);
 	glutil::checkGL("Post render");
 }
-
