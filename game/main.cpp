@@ -223,7 +223,7 @@ int main(int argc, char* argv[])
 					ImGui::SameLine();
 					if (ImGui::Button(("Reload##" + it.first).c_str())) {
 						game.modules.reload(it.first);
-						break; // Must break as interator will be invalidated
+						break; // Must break as iterator will be invalidated
 					}
 				}
 			}
