@@ -22,6 +22,7 @@ public:
 	std::vector<string> listFiles(const string& path, const string& filter = "") const;
 
 	string getText(const string& path, CachePolicy cache);
+	std::vector<char>& getBinary(const string& path);
 	Image* getImage(const string& path);
 	Geometry* getGeometry(const string& path);
 	Geometry* getHeightmap(const string& path);
@@ -29,6 +30,7 @@ public:
 private:
 	std::vector<string> m_paths;
 	std::map<string, string> m_texts;
+	std::map<string, std::unique_ptr<std::vector<char>>> m_binaries;
 	std::map<string, std::unique_ptr<Image>> m_images;
 	std::map<string, std::unique_ptr<Geometry>> m_geoms;
 };

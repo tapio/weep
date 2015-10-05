@@ -2,6 +2,7 @@
 #include "common.hpp"
 #include "soloud.h"
 #include "soloud_wav.h"
+#include <unordered_map>
 
 struct Camera;
 
@@ -13,5 +14,11 @@ public:
 	void reset();
 	void update(Camera& camera);
 
+	void add(const string& name, const std::vector<char>& data);
+	void play(const string& name);
+
 	std::unique_ptr<SoLoud::Soloud> soloud;
+
+private:
+	std::unordered_map<string, std::vector<std::unique_ptr<SoLoud::Wav>>> m_samples;
 };

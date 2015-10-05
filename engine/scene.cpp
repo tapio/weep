@@ -5,6 +5,7 @@
 #include "image.hpp"
 #include "engine.hpp"
 #include "physics.hpp"
+#include "audio.hpp"
 #include "camera.hpp"
 #include "model.hpp"
 #include "light.hpp"
@@ -244,6 +245,22 @@ void SceneLoader::load_internal(const string& path, Resources& resources)
 				string path = resources.findPath(it.second["path"].string_value());
 				float size = it.second["size"].number_value();
 				imgui.loadFont(it.first, path, size);
+			}
+		}
+
+		// Parse sounds
+		if (jsonScene["sounds"].is_object() && world->has_system<AudioSystem>()) {
+			const Json::object& sounds = jsonScene["sounds"].object_items();
+			AudioSystem& audio = world->get_system<AudioSystem>();
+			for (auto& it : sounds) {
+				if (it.second.is_string()) {
+					audio.add(it.first, resources.getBinary(it.second.string_value()));
+				} else if (it.second.is_array()) {
+					for (auto& it2 : it.second.array_items()) {
+						ASSERT(it2.is_string());
+						audio.add(it.first, resources.getBinary(it2.string_value()));
+					}
+				}
 			}
 		}
 

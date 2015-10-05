@@ -92,6 +92,7 @@ void Resources::reset()
 {
 	// Paths are not dropped
 	m_texts.clear();
+	m_binaries.clear();
 	m_images.clear();
 	m_geoms.clear();
 	logDebug("Resource cache dropped");
@@ -142,6 +143,27 @@ string Resources::getText(const string& path, CachePolicy cache)
 	if (cache == USE_CACHE)
 		m_texts[path] = buffer.str();
 	return buffer.str();
+}
+
+std::vector<char>& Resources::getBinary(const std::string& path)
+{
+	auto& ptr = m_binaries[path];
+	if (!ptr) ptr.reset(new std::vector<char>);
+	auto& vec = *ptr;
+	if (!vec.empty())
+		return vec;
+	std::ifstream f(findPath(path), std::ios_base::in | std::ios_base::binary);
+	if (!f.eof() && !f.fail())
+	{
+		f.seekg(0, std::ios_base::end);
+		std::streampos fileSize = f.tellg();
+		vec.resize(fileSize);
+		f.seekg(0, std::ios_base::beg);
+		f.read(&vec[0], fileSize);
+		return vec;
+	}
+	logError("Reading %s failed", path.c_str());
+	return vec;
 }
 
 Image* Resources::getImage(const string& path)
