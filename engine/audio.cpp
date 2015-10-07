@@ -30,14 +30,14 @@ void AudioSystem::update(Camera& camera)
 	soloud->update3dAudio();
 }
 
-void AudioSystem::add(const std::string& name, const std::vector<char>& data)
+void AudioSystem::add(const string& name, const std::vector<char>& data)
 {
 	auto& samples = m_samples[name];
 	samples.emplace_back(new SoLoud::Wav);
 	samples.back()->loadMem((unsigned char*)&data[0], data.size(), false, false);
 }
 
-void AudioSystem::play(const std::string& name)
+void AudioSystem::play(const string& name)
 {
 	auto& samples = m_samples[name];
 	if (samples.empty()) {
@@ -46,4 +46,15 @@ void AudioSystem::play(const std::string& name)
 	}
 	int sampleIndex = glm::linearRand(0, (int)(samples.size() - 1));
 	soloud->play(*samples[sampleIndex]);
+}
+
+void AudioSystem::play(const string& name, vec3 position)
+{
+	auto& samples = m_samples[name];
+	if (samples.empty()) {
+		logWarning("Can't play %s as it's not loaded", name.c_str());
+		return;
+	}
+	int sampleIndex = glm::linearRand(0, (int)(samples.size() - 1));
+	soloud->play3d(*samples[sampleIndex], position.x, position.y, position.z);
 }

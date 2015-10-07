@@ -394,6 +394,16 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 			world->get_system<PhysicsSystem>().add(entity);
 	}
 
+	if (!def["movesound"].is_null()) {
+		const Json& soundDef = def["movesound"];
+		MoveSound sound;
+		setString(sound.event, soundDef["event"]);
+		setNumber(sound.stepLength, soundDef["step"]);
+		ASSERT(!sound.event.empty());
+		ASSERT(entity.has<btRigidBody>()); // TODO: Remove requirement once we have Transform component
+		entity.add(sound);
+	}
+
 	return entity;
 }
 

@@ -16,9 +16,19 @@ public:
 
 	void add(const string& name, const std::vector<char>& data);
 	void play(const string& name);
+	void play(const string &name, vec3 position);
 
 	std::unique_ptr<SoLoud::Soloud> soloud;
 
 private:
 	std::unordered_map<string, std::vector<std::unique_ptr<SoLoud::Wav>>> m_samples;
+};
+
+
+struct MoveSound
+{
+	string event = "";
+	float stepLength = 0.5f;
+	float delta = 0.0f;
+	bool needsGroundContact = true;
 };

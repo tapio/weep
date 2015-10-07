@@ -151,6 +151,17 @@ int main(int argc, char* argv[])
 		// Audio
 		START_MEASURE(audioTimeMs)
 		audio.update(camera);
+		// Move sounds TODO: Move inside audio system
+		game.entities.for_each<MoveSound, btRigidBody>([&](Entity, MoveSound& sound, btRigidBody& body) {
+			if (!sound.needsGroundContact || physics.testGroundHit(body)) {
+				sound.delta += body.getLinearVelocity().length() * Engine::dt;
+				ImGui::Text("%f %f %f", sound.delta, body.getLinearVelocity().length(), body.getLinearVelocity().length() * Engine::dt);
+				if (sound.delta > sound.stepLength) {
+					audio.play(sound.event);
+					sound.delta = 0;
+				}
+			}
+		});
 		END_MEASURE(audioTimeMs)
 
 		// Graphics
