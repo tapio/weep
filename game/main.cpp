@@ -210,6 +210,11 @@ int main(int argc, char* argv[])
 					Engine::fullscreen(fullscreen);
 					renderer.device().resizeRenderTargets();
 				}
+				float volume = audio.soloud->getGlobalVolume();
+				float oldVolume = volume;
+				ImGui::SliderFloat("Volume", &volume, 0.f, 1.25f);
+				if (volume != oldVolume)
+					audio.soloud->setGlobalVolume(volume);
 			}
 			if (ImGui::CollapsingHeader("Environment")) {
 				Environment& env = renderer.env();
