@@ -20,7 +20,7 @@ void init(Game& game, SceneLoader& scene, const string& scenePath)
 	game.entities.add_system<RenderSystem>(game.resources);
 	game.entities.add_system<PhysicsSystem>();
 	game.entities.add_system<AudioSystem>();
-	game.entities.add_system<ImGuiSystem>();
+	game.entities.add_system<ImGuiSystem>(game.engine.window);
 	game.entities.get_system<ImGuiSystem>().applyDefaultStyle();
 	scene = SceneLoader(game.entities);
 	scene.load(scenePath, game.resources);
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
 	Game game;
 	Resources& resources = game.resources;
 	resources.addPath("../data/");
-	Engine::init(resources.findPath("settings.json"));
+	game.engine.init(resources.findPath("settings.json"));
 	if (Engine::settings["moddir"].is_string())
 		resources.addPath(Engine::settings["moddir"].string_value());
 
@@ -61,7 +61,6 @@ int main(int argc, char* argv[])
 		Entity cameraEnt = game.entities.get_entity_by_tag("camera");
 		Controller& controller = cameraEnt.get<Controller>();
 		Camera& camera = cameraEnt.get<Camera>();
-		game.dt = Engine::dt;
 
 		imgui.newFrame();
 
@@ -80,13 +79,13 @@ int main(int argc, char* argv[])
 				if (keysym.sym == SDLK_ESCAPE) {
 					if (active) {
 						active = false;
-						Engine::grabMouse(false);
+						game.engine.grabMouse(false);
 					} else running = false;
 					break;
 				}
 
 				if ((keysym.mod == KMOD_LALT || keysym.mod == KMOD_RALT) && keysym.sym == SDLK_RETURN) {
-					Engine::fullscreen(!Engine::fullscreen());
+					game.engine.fullscreen(!game.engine.fullscreen());
 					renderer.device().resizeRenderTargets();
 					continue;
 				}
@@ -99,7 +98,7 @@ int main(int argc, char* argv[])
 					continue;
 				}
 				else if (keysym.sym == SDLK_F3) {
-					Engine::vsync(!Engine::vsync());
+					game.engine.vsync(!game.engine.vsync());
 					continue;
 				}
 				else if (keysym.sym == SDLK_F4) {
@@ -115,7 +114,7 @@ int main(int argc, char* argv[])
 
 			if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_RIGHT) {
 				active = !active;
-				Engine::grabMouse(active);
+				game.engine.grabMouse(active);
 			}
 			else if (e.type == SDL_MOUSEMOTION && active) {
 				controller.angles.x += -0.05f * e.motion.yrel;
@@ -126,7 +125,7 @@ int main(int argc, char* argv[])
 		}
 
 		controller.enabled = !imgui.usingKeyboard();
-		controller.update(Engine::dt);
+		controller.update(game.engine.dt);
 
 		// Modules
 		START_MEASURE(moduleTimeMs)
@@ -135,7 +134,7 @@ int main(int argc, char* argv[])
 
 		// Physics
 		START_MEASURE(physTimeMs)
-		physics.step(game.entities, Engine::dt);
+		physics.step(game.entities, game.engine.dt);
 		END_MEASURE(physTimeMs)
 
 		if (cameraEnt.has<btRigidBody>()) {
@@ -153,7 +152,7 @@ int main(int argc, char* argv[])
 		// Move sounds TODO: Move inside audio system
 		game.entities.for_each<MoveSound, btRigidBody>([&](Entity, MoveSound& sound, btRigidBody& body) {
 			if (!sound.needsGroundContact || physics.testGroundHit(body)) {
-				sound.delta += body.getLinearVelocity().length() * Engine::dt;
+				sound.delta += body.getLinearVelocity().length() * game.engine.dt;
 				if (sound.delta > sound.stepLength) {
 					audio.play(sound.event);
 					sound.delta = 0;
@@ -169,7 +168,7 @@ int main(int argc, char* argv[])
 
 		if (ImGui::Begin("Debug")) {
 			ImGui::Text("Right mouse button to toggle mouse grab.");
-			ImGui::Text("FPS: %d (%.3fms)", int(1.0 / Engine::dt), Engine::dt * 1000.f);
+			ImGui::Text("FPS: %d (%.3fms)", int(1.0 / game.engine.dt), game.engine.dt * 1000.f);
 			if (ImGui::CollapsingHeader("Stats")) {
 				ImGui::Text("Physics:      %.3fms", physTimeMs);
 				ImGui::Text("Audio:        %.3fms", audioTimeMs);
@@ -195,17 +194,17 @@ int main(int argc, char* argv[])
 				ImGui::SliderFloat("Jump force", &controller.jumpForce, 0.0f, 10000.0f);
 			}
 			if (ImGui::CollapsingHeader("Settings")) {
-				bool vsync = Engine::vsync();
+				bool vsync = game.engine.vsync();
 				bool oldVsync = vsync;
 				ImGui::Checkbox("V-sync", &vsync);
 				if (vsync != oldVsync)
-					Engine::vsync(vsync);
+					game.engine.vsync(vsync);
 				ImGui::SameLine();
-				bool fullscreen = Engine::fullscreen();
+				bool fullscreen = game.engine.fullscreen();
 				bool oldFullscreen = fullscreen;
 				ImGui::Checkbox("Fullscreen", &fullscreen);
 				if (fullscreen != oldFullscreen) {
-					Engine::fullscreen(fullscreen);
+					game.engine.fullscreen(fullscreen);
 					renderer.device().resizeRenderTargets();
 				}
 				float volume = audio.soloud->getGlobalVolume();
@@ -305,7 +304,7 @@ int main(int argc, char* argv[])
 
 		ImGui::Render();
 
-		Engine::swap();
+		game.engine.swap();
 
 		game.entities.update();
 
@@ -328,7 +327,7 @@ int main(int argc, char* argv[])
 	game.entities.remove_system<PhysicsSystem>();
 	game.entities.remove_system<RenderSystem>();
 
-	Engine::deinit();
+	game.engine.deinit();
 
 	return EXIT_SUCCESS;
 }

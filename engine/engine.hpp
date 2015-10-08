@@ -4,23 +4,34 @@
 class Engine
 {
 public:
-	static void init(const string& configPath);
-	static void deinit();
-	static void swap();
+	Engine();
+	~Engine();
 
-	static void vsync(bool enable);
-	static bool vsync();
-	static void fullscreen(bool enable);
-	static bool fullscreen();
+	void init(const string& configPath);
+	void deinit();
+	void swap();
+
+	void vsync(bool enable);
+	bool vsync();
+	void fullscreen(bool enable);
+	bool fullscreen();
 
 	static int width();
 	static int height();
 
-	static void grabMouse(bool grab);
+	void grabMouse(bool grab);
 
 	static uint timems();
 
-	static float dt;
+	float dt = 0.f;
+	struct SDL_Window* window = nullptr;
+
 	static Json settings;
-	static struct SDL_Window* window;
+
+private:
+	static Engine* s_singleton;
+	int m_width = 0;
+	int m_height = 0;
+	uint64 m_prevTime = 0;
+	void* m_glcontext;
 };

@@ -56,8 +56,8 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				return;
 
 			if (!levelComplete)
-				gameTime += game.dt;
-			else waitTime += game.dt;
+				gameTime += game.engine.dt;
+			else waitTime += game.engine.dt;
 
 			Transform& transform = pl.get<Transform>();
 			vec3 curPos = transform.position;

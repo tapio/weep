@@ -5,7 +5,7 @@
 class ImGuiSystem : public System
 {
 public:
-	ImGuiSystem();
+	ImGuiSystem(struct SDL_Window* window);
 	~ImGuiSystem();
 
 	NONCOPYABLE(ImGuiSystem);

@@ -5,17 +5,18 @@
 #include "glad/glad.h"
 #endif
 
-namespace
+Json Engine::settings = Json();
+Engine* Engine::s_singleton = nullptr;
+
+Engine::Engine()
 {
-	static SDL_GLContext s_glcontext = nullptr;
-	static int s_width = 0;
-	static int s_height = 0;
-	static uint64 prevTime = 0;
+	s_singleton = this;
 }
 
-float Engine::dt = 0;
-Json Engine::settings = Json();
-SDL_Window* Engine::window = nullptr;
+Engine::~Engine()
+{
+	s_singleton = nullptr;
+}
 
 void Engine::init(const string& configPath)
 {
@@ -27,7 +28,7 @@ void Engine::init(const string& configPath)
 	logInfo("%s%s%s%s%s%s", SDL_HasSSE()?"SSE ":"", SDL_HasSSE2()?"SSE2 ":"",
 		SDL_HasSSE3()?"SSE3 ":"", SDL_HasSSE41()?"SSE4.1 ":"", SDL_HasSSE42()?"SSE4.2 ":"", SDL_HasAVX()?"AVX ":"");
 
-	prevTime = SDL_GetPerformanceCounter();
+	m_prevTime = SDL_GetPerformanceCounter();
 
 	std::string err;
 	settings = Json::parse(readFile(configPath), err);
@@ -52,19 +53,19 @@ void Engine::init(const string& configPath)
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, msaa);
 	}
 
-	s_width = settings["screen"]["width"].int_value();
-	s_height = settings["screen"]["height"].int_value();
+	m_width = settings["screen"]["width"].int_value();
+	m_height = settings["screen"]["height"].int_value();
 	int fullscreen = settings["screen"]["fullscreen"].bool_value() ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0;
 
 	window = SDL_CreateWindow("App",
-		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, s_width, s_height,
+		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_width, m_height,
 		SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | fullscreen);
 	if (!window) {
 		panic(SDL_GetError());
 	}
 
-	s_glcontext = SDL_GL_CreateContext(window);
-	if (!s_glcontext) {
+	m_glcontext = SDL_GL_CreateContext(window);
+	if (!m_glcontext) {
 		panic(SDL_GetError());
 	}
 
@@ -84,7 +85,7 @@ void Engine::init(const string& configPath)
 
 void Engine::deinit()
 {
-	SDL_GL_DeleteContext(s_glcontext);
+	SDL_GL_DeleteContext(m_glcontext);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }
@@ -93,8 +94,8 @@ void Engine::swap()
 {
 	SDL_GL_SwapWindow(window);
 	Uint64 curTime = SDL_GetPerformanceCounter();
-	dt = (curTime - prevTime) / (float)SDL_GetPerformanceFrequency();
-	prevTime = curTime;
+	dt = (curTime - m_prevTime) / (float)SDL_GetPerformanceFrequency();
+	m_prevTime = curTime;
 }
 
 void Engine::vsync(bool enable)
@@ -116,13 +117,13 @@ void Engine::fullscreen(bool enable)
 	else if (enable) {
 		SDL_DisplayMode mode;
 		if (SDL_GetWindowDisplayMode(window, &mode) == 0) {
-			s_width = mode.w;
-			s_height = mode.h;
+			m_width = mode.w;
+			m_height = mode.h;
 		}
-		logInfo("Fullscreen enabled (%dx%d)", s_width, s_height);
+		logInfo("Fullscreen enabled (%dx%d)", m_width, m_height);
 	} else {
-		s_width = settings["screen"]["width"].int_value();
-		s_height = settings["screen"]["height"].int_value();
+		m_width = settings["screen"]["width"].int_value();
+		m_height = settings["screen"]["height"].int_value();
 		logInfo("Fullscreen disabled");
 	}
 }
@@ -139,12 +140,14 @@ uint Engine::timems()
 
 int Engine::width()
 {
-	return s_width;
+	ASSERT(s_singleton);
+	return s_singleton->m_width;
 }
 
 int Engine::height()
 {
-	return s_height;
+	ASSERT(s_singleton);
+	return s_singleton->m_height;
 }
 
 void Engine::grabMouse(bool grab)

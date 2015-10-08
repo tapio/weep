@@ -4,9 +4,9 @@
 #include "SDL2/SDL_events.h"
 
 
-ImGuiSystem::ImGuiSystem()
+ImGuiSystem::ImGuiSystem(SDL_Window* window)
 {
-	ImGui_ImplSDLGL3_Init(Engine::window);
+	ImGui_ImplSDLGL3_Init(window);
 	m_imguiState = ImGui::GetInternalState();
 }
 
