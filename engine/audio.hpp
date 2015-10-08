@@ -15,11 +15,11 @@ public:
 	void update(Entities& entities, Camera& camera);
 
 	void add(const string& name, const std::vector<char>& data);
-	void play(const string& name);
-	void play(const string &name, vec3 position);
+	void play(uint eventId);
+	void play(uint eventId, vec3 position);
 
 	std::unique_ptr<SoLoud::Soloud> soloud;
 
 private:
-	std::unordered_map<string, std::vector<std::unique_ptr<SoLoud::Wav>>> m_samples;
+	std::unordered_map<uint, std::vector<std::unique_ptr<SoLoud::Wav>>> m_samples;
 };

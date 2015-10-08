@@ -414,9 +414,10 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 	if (!def["moveSound"].is_null()) {
 		const Json& soundDef = def["moveSound"];
 		MoveSound sound;
-		setString(sound.event, soundDef["event"]);
+		if (soundDef["event"].is_string())
+			sound.event = id::hash(soundDef["event"].string_value());
 		setNumber(sound.stepLength, soundDef["step"]);
-		ASSERT(!sound.event.empty());
+		ASSERT(sound.event);
 		ASSERT(entity.has<Transform>());
 		sound.prevPos = entity.get<Transform>().position;
 		entity.add(sound);

@@ -62,9 +62,9 @@ struct Light
 
 struct MoveSound
 {
-	string event = "";
 	vec3 prevPos = vec3();
 	float delta = 0.0f;
 	float stepLength = 0.5f;
+	uint event = 0;
 	bool needsGroundContact = true;
 };

@@ -47,27 +47,27 @@ void AudioSystem::update(Entities& entities, Camera& camera)
 
 void AudioSystem::add(const string& name, const std::vector<char>& data)
 {
-	auto& samples = m_samples[name];
+	auto& samples = m_samples[id::hash(name)];
 	samples.emplace_back(new SoLoud::Wav);
 	samples.back()->loadMem((unsigned char*)&data[0], data.size(), false, false);
 }
 
-void AudioSystem::play(const string& name)
+void AudioSystem::play(uint eventId)
 {
-	auto& samples = m_samples[name];
+	auto& samples = m_samples[eventId];
 	if (samples.empty()) {
-		logWarning("Can't play %s as it's not loaded", name.c_str());
+		logWarning("Can't play event %d as it's not loaded", eventId);
 		return;
 	}
 	int sampleIndex = glm::linearRand(0, (int)(samples.size() - 1));
 	soloud->play(*samples[sampleIndex]);
 }
 
-void AudioSystem::play(const string& name, vec3 position)
+void AudioSystem::play(uint eventId, vec3 position)
 {
-	auto& samples = m_samples[name];
+	auto& samples = m_samples[eventId];
 	if (samples.empty()) {
-		logWarning("Can't play %s as it's not loaded", name.c_str());
+		logWarning("Can't play event %d as it's not loaded", eventId);
 		return;
 	}
 	int sampleIndex = glm::linearRand(0, (int)(samples.size() - 1));
