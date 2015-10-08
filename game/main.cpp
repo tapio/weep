@@ -135,8 +135,7 @@ int main(int argc, char* argv[])
 
 		// Physics
 		START_MEASURE(physTimeMs)
-		physics.step(Engine::dt);
-		physics.syncTransforms(game.entities);
+		physics.step(game.entities, Engine::dt);
 		END_MEASURE(physTimeMs)
 
 		if (cameraEnt.has<btRigidBody>()) {

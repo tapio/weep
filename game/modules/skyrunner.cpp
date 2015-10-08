@@ -20,23 +20,11 @@ static bool levelStarted = false;
 static bool levelComplete = false;
 static int level = 1;
 
-
-void setPos(Entity e, vec3 pos) {
-	// TODO: Need to make this position setting easier on engine level
-	if (e.has<Transform>())
-		e.get<Transform>().position = pos;
-	if (e.has<btRigidBody>()) {
-		btRigidBody& body = e.get<btRigidBody>();
-		btTransform trans(body.getCenterOfMassTransform().getRotation(), convert(pos));
-		body.setWorldTransform(trans);
-	}
-}
-
 void generatePole(const Json& block, vec3 pos, SceneLoader& loader, Resources& resources) {
 	for (int i = 0; i < 10; ++i) {
 		pos.y -= 1.f;
 		Entity e = loader.instantiate(block, resources);
-		setPos(e, pos);
+		e.get<Transform>().setPosition(pos);
 	}
 }
 
@@ -71,11 +59,11 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				gameTime += game.dt;
 			else waitTime += game.dt;
 
-			btRigidBody& body = pl.get<btRigidBody>();
-			vec3 curPos = convert(body.getCenterOfMassPosition());
+			Transform& transform = pl.get<Transform>();
+			vec3 curPos = transform.position;
 			if (curPos.y < -3) {
-				btTransform trans(convert(quat()), convert(startPos));
-				body.setCenterOfMassTransform(trans);
+				transform.rotation = quat();
+				transform.setPosition(startPos);
 				gameTime = 0;
 				waitTime = 0;
 				levelComplete = false;
@@ -140,7 +128,7 @@ void generateLevel1(Game& game, vec3 pos)
 	pos.y -= 1;
 	for (int i = 0; i < 60; i++) {
 		Entity e = loader.instantiate(block, game.resources);
-		setPos(e, pos);
+		e.get<Transform>().setPosition(pos);
 		// Adjust position
 		if (glm::linearRand(0.f, 1.f) < 0.25f)
 			pos.x += glm::linearRand(-0.6f, 0.6f);
@@ -154,11 +142,11 @@ void generateLevel1(Game& game, vec3 pos)
 		if (glm::linearRand(0.f, 1.f) < 0.20f) {
 			Entity ebox = loader.instantiate(box, game.resources);
 			vec3 offset(glm::linearRand(-0.4, 0.4), 0.8, glm::linearRand(-0.4, 0.4));
-			setPos(ebox, pos + offset);
+			ebox.get<Transform>().setPosition(pos + offset);
 		}
 	}
 	Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
-	setPos(e, pos);
+	e.get<Transform>().setPosition(pos);
 	goalPos = pos + vec3(0, 1, 0);
 }
 
@@ -171,7 +159,7 @@ void generateLevel2(Game& game, vec3 pos)
 	pos.y -= 1;
 	for (int i = 0; i < 100; i++) {
 		Entity e = loader.instantiate(block, game.resources);
-		setPos(e, pos);
+		e.get<Transform>().setPosition(pos);
 		// Adjust position
 		float xrand = glm::linearRand(-1.f, 1.f);
 		if (xrand < -0.6f || xrand > 0.6f)
@@ -187,11 +175,11 @@ void generateLevel2(Game& game, vec3 pos)
 		if (glm::linearRand(0.f, 1.f) < 0.35f) {
 			Entity ebox = loader.instantiate(box, game.resources);
 			vec3 offset(glm::linearRand(-0.4, 0.4), 0.8, glm::linearRand(-0.4, 0.4));
-			setPos(ebox, pos + offset);
+			ebox.get<Transform>().setPosition(pos + offset);
 		}
 	}
 	Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
-	setPos(e, pos);
+	e.get<Transform>().setPosition(pos);
 	goalPos = pos + vec3(0, 1, 0);
 }
 
@@ -204,7 +192,7 @@ void generateLevel3(Game& game, vec3 pos)
 	pos.y -= 1;
 	for (int i = 0; i < 100; i++) {
 		Entity e = loader.instantiate(block, game.resources);
-		setPos(e, pos);
+		e.get<Transform>().setPosition(pos);
 		// Adjust position
 		float xrand = glm::linearRand(-1.f, 1.f);
 		if (xrand < -0.6f || xrand > 0.6f)
@@ -220,10 +208,10 @@ void generateLevel3(Game& game, vec3 pos)
 		if (glm::linearRand(0.f, 1.f) < 0.35f) {
 			Entity ebox = loader.instantiate(box, game.resources);
 			vec3 offset(glm::linearRand(-0.4, 0.4), 0.8, glm::linearRand(-0.4, 0.4));
-			setPos(ebox, pos + offset);
+			ebox.get<Transform>().setPosition(pos + offset);
 		}
 	}
 	Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
-	setPos(e, pos);
+	e.get<Transform>().setPosition(pos);
 	goalPos = pos + vec3(0, 1, 0);
 }

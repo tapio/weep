@@ -12,8 +12,7 @@ public:
 
 	bool add(Entity entity);
 
-	void syncTransforms(Entities& entities);
-	void step(float dt);
+	void step(Entities& entities, float dt);
 
 	bool testGroundHit(btRigidBody& body);
 

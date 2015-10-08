@@ -51,10 +51,26 @@ void PhysicsSystem::reset()
 	collisionShapes.clear();
 }
 
-void PhysicsSystem::step(float dt)
+void PhysicsSystem::step(Entities& entities, float dt)
 {
+	// Update manual transform changes to physics
+	entities.for_each<btRigidBody, Transform>([](Entity, btRigidBody& body, Transform& transform) {
+		if (transform.dirty) {
+			btTransform trans(convert(transform.rotation), convert(transform.position));
+			body.setCenterOfMassTransform(trans);
+		}
+	});
+
+	// Simulate
 	ASSERT(dynamicsWorld);
 	dynamicsWorld->stepSimulation(dt);
+
+	// Sync physics results to entity transforms
+	entities.for_each<btRigidBody, Transform>([](Entity, btRigidBody& body, Transform& transform) {
+		const btTransform& trans = body.getCenterOfMassTransform();
+		transform.position = convert(trans.getOrigin());
+		transform.rotation = convert(trans.getRotation());
+	});
 }
 
 bool PhysicsSystem::testGroundHit(btRigidBody& body)
@@ -70,15 +86,6 @@ bool PhysicsSystem::testGroundHit(btRigidBody& body)
 		return res.m_hitPointWorld.distance2(from) <= d * d;
 	}
 	return false;
-}
-
-void PhysicsSystem::syncTransforms(Entities& entities)
-{
-	entities.for_each<btRigidBody, Transform>([](Entity, btRigidBody& body, Transform& transform) {
-		const btTransform& trans = body.getCenterOfMassTransform();
-		transform.position = convert(trans.getOrigin());
-		transform.rotation = convert(trans.getRotation());
-	});
 }
 
 bool PhysicsSystem::add(Entity entity)
