@@ -29,7 +29,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			}
 			//ImGui::SetNextWindowPos(ImVec2(20, 20));
 			//ImGui::Begin("", NULL, MinimalWindow);
-			ImFont* font = game.entities.get_system<ImGuiSystem>().getFont("logo-font");
+			ImFont* font = game.entities.get_system<ImGuiSystem>().getFont($id(logo-font));
 			ASSERT(font);
 			ImGui::PushFont(font);
 			ImGui::Image(reinterpret_cast<ImTextureID>(logoTex.id), ImVec2(32, 32));

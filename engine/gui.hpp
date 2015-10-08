@@ -1,6 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include "imgui/imgui.h"
+#include <unordered_map>
 
 class ImGuiSystem : public System
 {
@@ -18,9 +19,9 @@ public:
 	void applyInternalState();
 
 	ImFont* loadFont(const string& name, const string& path, float size);
-	ImFont* getFont(const string& name) const;
+	ImFont* getFont(uint id) const;
 
 private:
 	void* m_imguiState = nullptr;
-	std::map<string, ImFont*> m_fonts;
+	std::unordered_map<uint, ImFont*> m_fonts;
 };

@@ -56,9 +56,10 @@ void ImGuiSystem::applyInternalState()
 
 ImFont* ImGuiSystem::loadFont(const string& name, const string& path, float size)
 {
-	if (m_fonts.find(name) != m_fonts.end()) {
+	uint id = id::hash(name);
+	if (m_fonts.find(id) != m_fonts.end()) {
 		logWarning("Font %s already loaded", name.c_str());
-		return m_fonts[name];
+		return m_fonts[id];
 	}
 	ImGuiIO& io = ImGui::GetIO();
 	ImFont* font = io.Fonts->AddFontFromFileTTF(path.c_str(), size, NULL, io.Fonts->GetGlyphRangesDefault());
@@ -66,16 +67,16 @@ ImFont* ImGuiSystem::loadFont(const string& name, const string& path, float size
 		logError("Failed to load font %s from \"%s\"", name.c_str(), path.c_str());
 		return nullptr;
 	}
-	m_fonts[name] = font;
+	m_fonts[id] = font;
 	logDebug("Loaded font %s from \"%s\" (size: %.1f)", name.c_str(), path.c_str(), size);
 	return font;
 }
 
-ImFont* ImGuiSystem::getFont(const string& name) const
+ImFont* ImGuiSystem::getFont(uint id) const
 {
-	auto it = m_fonts.find(name);
+	auto it = m_fonts.find(id);
 	if (it == m_fonts.end()) {
-		logWarning("Can't find font %s", name.c_str());
+		logWarning("Can't find font id %d", id);
 		return nullptr;
 	}
 	ASSERT(it->second);

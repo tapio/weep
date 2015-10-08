@@ -70,7 +70,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				levelComplete = false;
 			}
 
-			ImFont* font = game.entities.get_system<ImGuiSystem>().getFont("skyrunner_big");
+			ImFont* font = game.entities.get_system<ImGuiSystem>().getFont($id(skyrunner_big));
 			ASSERT(font);
 			ImGui::PushFont(font);
 			if (glm::distance2(curPos, goalPos) < 1.1f || levelComplete) {
