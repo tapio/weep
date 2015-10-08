@@ -154,7 +154,6 @@ int main(int argc, char* argv[])
 		game.entities.for_each<MoveSound, btRigidBody>([&](Entity, MoveSound& sound, btRigidBody& body) {
 			if (!sound.needsGroundContact || physics.testGroundHit(body)) {
 				sound.delta += body.getLinearVelocity().length() * Engine::dt;
-				ImGui::Text("%f %f %f", sound.delta, body.getLinearVelocity().length(), body.getLinearVelocity().length() * Engine::dt);
 				if (sound.delta > sound.stepLength) {
 					audio.play(sound.event);
 					sound.delta = 0;
