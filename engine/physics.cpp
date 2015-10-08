@@ -1,5 +1,5 @@
 #include "physics.hpp"
-#include "model.hpp"
+#include "components.hpp"
 #include "geometry.hpp"
 #include "scene.hpp"
 #include "engine.hpp"

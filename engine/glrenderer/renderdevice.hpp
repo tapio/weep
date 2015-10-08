@@ -2,7 +2,7 @@
 #include "common.hpp"
 #include "uniforms.hpp"
 #include "shader.hpp"
-#include "light.hpp"
+#include "components.hpp"
 #include "texture.hpp"
 #include "material.hpp"
 #include "fbo.hpp"

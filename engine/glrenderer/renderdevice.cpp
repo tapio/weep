@@ -1,12 +1,11 @@
 #include "renderdevice.hpp"
 #include "glutil.hpp"
-#include "model.hpp"
+#include "components.hpp"
 #include "geometry.hpp"
 #include "material.hpp"
 #include "texture.hpp"
 #include "camera.hpp"
 #include "engine.hpp"
-#include "light.hpp"
 #include "resources.hpp"
 #include "environment.hpp"
 

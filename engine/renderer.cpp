@@ -1,6 +1,6 @@
 #include "renderer.hpp"
 #include "glrenderer/renderdevice.hpp"
-#include "model.hpp"
+#include "components.hpp"
 #include "geometry.hpp"
 #include "camera.hpp"
 #include "scene.hpp"

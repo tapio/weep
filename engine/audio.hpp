@@ -23,13 +23,3 @@ public:
 private:
 	std::unordered_map<string, std::vector<std::unique_ptr<SoLoud::Wav>>> m_samples;
 };
-
-
-struct MoveSound
-{
-	string event = "";
-	vec3 prevPos = vec3();
-	float delta = 0.0f;
-	float stepLength = 0.5f;
-	bool needsGroundContact = true;
-};

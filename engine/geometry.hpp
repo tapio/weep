@@ -1,5 +1,6 @@
 #pragma once
 #include "common.hpp"
+#include "components.hpp"
 
 struct Image;
 
@@ -9,13 +10,6 @@ enum GeometryAttributeIndex {
 	ATTR_NORMAL,
 	ATTR_COLOR,
 	ATTR_MAX
-};
-
-struct Bounds
-{
-	vec3 min = vec3(INFINITY, INFINITY, INFINITY);
-	vec3 max = vec3(INFINITY, INFINITY, INFINITY);
-	float radius = INFINITY;
 };
 
 struct Batch

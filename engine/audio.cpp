@@ -1,8 +1,7 @@
 #include "audio.hpp"
 #include "camera.hpp"
 #include "soloud.h"
-#include "model.hpp"
-#include "physics.hpp"
+#include "components.hpp"
 
 using namespace SoLoud;
 

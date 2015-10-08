@@ -3,7 +3,7 @@
 #include "renderer.hpp"
 #include "scene.hpp"
 #include "camera.hpp"
-#include "model.hpp"
+#include "components.hpp"
 #include "audio.hpp"
 #include "gui.hpp"
 #include "../controller.hpp"

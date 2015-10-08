@@ -1,6 +1,5 @@
 #include "common.hpp"
-#include "model.hpp"
-#include "light.hpp"
+#include "components.hpp"
 #include "material.hpp"
 #include "engine.hpp"
 #include "../game.hpp"
