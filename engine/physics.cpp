@@ -74,10 +74,10 @@ bool PhysicsSystem::testGroundHit(btRigidBody& body)
 
 void PhysicsSystem::syncTransforms(Entities& entities)
 {
-	entities.for_each<Model, btRigidBody>([](Entity, Model& model, btRigidBody& body) {
+	entities.for_each<btRigidBody, Transform>([](Entity, btRigidBody& body, Transform& transform) {
 		const btTransform& trans = body.getCenterOfMassTransform();
-		model.position = convert(trans.getOrigin());
-		model.rotation = convert(trans.getRotation());
+		transform.position = convert(trans.getOrigin());
+		transform.rotation = convert(trans.getRotation());
 	});
 }
 

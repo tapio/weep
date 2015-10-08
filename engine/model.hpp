@@ -4,21 +4,23 @@
 
 struct Material;
 
-struct Model
+struct Transform
 {
 	vec3 position = vec3();
 	quat rotation = quat();
 	vec3 scale = vec3(1, 1, 1);
-	mat4 transform = mat4();
-
-	Bounds bounds;
+	mat4 matrix = mat4();
 
 	void updateMatrix() {
-		transform = glm::translate(position);
-		transform = glm::scale(transform, scale);
-		transform *= glm::mat4_cast(rotation);
+		matrix = glm::translate(position);
+		matrix = glm::scale(matrix, scale);
+		matrix *= glm::mat4_cast(rotation);
 	}
+};
 
+struct Model
+{
+	Bounds bounds;
 	Geometry* geometry = nullptr;
 	std::vector<Material*> materials;
 };

@@ -283,10 +283,10 @@ int main(int argc, char* argv[])
 				if (create) {
 					Entity e = scene.instantiate(scene.prefabs[prefabs[selectedPrefab]], resources);
 					vec3 pos = camera.position + glm::rotate(camera.rotation, vec3(0, 0, -2));
-					if (e.has<Model>()) {
-						Model& model = e.get<Model>();
-						model.position = pos;
-						model.rotation = camera.rotation;
+					if (e.has<Transform>()) {
+						Transform& trans = e.get<Transform>();
+						trans.position = pos;
+						trans.rotation = camera.rotation;
 					}
 					if (e.has<btRigidBody>()) {
 						btRigidBody& body = e.get<btRigidBody>();

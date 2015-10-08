@@ -351,12 +351,11 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
-void RenderDevice::render(Model& model)
+void RenderDevice::render(Model& model, Transform& transform)
 {
 	Geometry& geom = *model.geometry;
 
-	model.updateMatrix();
-	m_objectBlock.uniforms.modelMatrix = model.transform;
+	m_objectBlock.uniforms.modelMatrix = transform.matrix;
 	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_objectBlock.uniforms.modelMatrix;
 	m_objectBlock.uniforms.modelViewMatrix = modelView;
 	m_objectBlock.uniforms.normalMatrix = glm::inverseTranspose(modelView);

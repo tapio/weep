@@ -16,11 +16,10 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				/**/ if (lightIndex == 0) light.position.x = 5.f * glm::sin(Engine::timems() / 800.f);
 				else if (lightIndex == 1) light.position.x = 4.f * glm::sin(Engine::timems() / 500.f);
 				else if (lightIndex == 2) light.position.y = 1.f + 1.5f * glm::sin(Engine::timems() / 1000.f);
-				if (e.has<Model>()) {
-					Model& model = e.get<Model>();
-					model.position = light.position;
-					model.materials[0]->emissive = light.color * 1.f;
-				}
+				if (e.has<Transform>())
+					e.get<Transform>().position = light.position;
+				if (e.has<Model>())
+					e.get<Model>().materials[0]->emissive = light.color * 1.f;
 				lightIndex++;
 			});
 			break;

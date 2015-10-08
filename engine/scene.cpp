@@ -55,6 +55,11 @@ namespace {
 			dst = (T)src.number_value();
 	}
 
+	void setVec3(vec3& dst, const Json& src) {
+		if (!src.is_null())
+			dst = toVec3(src);
+	}
+
 	void setColor(vec3& dst, const Json& src) {
 		if (!src.is_null())
 			dst = colorToVec3(src);
@@ -110,24 +115,6 @@ namespace {
 			if (defGeom.is_string())
 				model.geometry = resources.getGeometry(defGeom.string_value());
 			else model.geometry = resources.getHeightmap(defGeom["heightmap"].string_value());
-		}
-
-		// Parse transform
-		if (!def["position"].is_null()) {
-			model.position = toVec3(def["position"]);
-		}
-		if (!def["rotation"].is_null()) {
-			model.rotation = quat(toVec3(def["rotation"]));
-		}
-		if (!def["scale"].is_null()) {
-			const Json& scaleDef = def["scale"];
-			model.scale = scaleDef.is_number() ? vec3(scaleDef.number_value()) : toVec3(scaleDef);
-		}
-
-		if (model.geometry) {
-			model.bounds.min = model.geometry->bounds.min * model.scale;
-			model.bounds.max = model.geometry->bounds.max * model.scale;
-			model.bounds.radius = model.geometry->bounds.radius * glm::compMax(model.scale);
 		}
 
 		// Parse material
@@ -308,6 +295,16 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 #endif
 	}
 
+	// Parse transform
+	if (!def["position"].is_null() || !def["rotation"].is_null() || !def["scale"].is_null() || !def["geometry"].is_null()) {
+		Transform transform;
+		setVec3(transform.position, def["position"]);
+		setVec3(transform.scale, def["scale"]);
+		if (!def["rotation"].is_null())
+			transform.rotation = quat(toVec3(def["rotation"]));
+		entity.add(transform);
+	}
+
 	// Parse light
 	const Json& lightDef = def["light"];
 	if (!lightDef.is_null()) {
@@ -338,12 +335,24 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 		numModels++;
 	}
 
+	// Patch bounding box
+	// TODO: Bounding box is not correct if scale changed at runtime
+	if (entity.has<Model>() && entity.has<Transform>()) {
+		Model& model = entity.get<Model>();
+		const Transform& trans = entity.get<Transform>();
+		model.bounds.min = model.geometry->bounds.min * trans.scale;
+		model.bounds.max = model.geometry->bounds.max * trans.scale;
+		model.bounds.radius = model.geometry->bounds.radius * glm::compMax(trans.scale);
+	}
+
 	// Parse body (needs to be after geometry, transform, bounds...)
 	if (!def["body"].is_null()) {
 		const Json& bodyDef = def["body"];
 		ASSERT(bodyDef.is_object());
 		ASSERT(entity.has<Model>());
+		ASSERT(entity.has<Transform>());
 		const Model& model = entity.get<Model>();
+		const Transform& transform = entity.get<Transform>();
 
 		btCollisionShape* shape = NULL;
 		const string& shapeStr = bodyDef["shape"].string_value();
@@ -373,7 +382,7 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 		shape->calculateLocalInertia(mass, inertia);
 
 		btRigidBody::btRigidBodyConstructionInfo info(mass, NULL, shape, inertia);
-		info.m_startWorldTransform = btTransform(convert(model.rotation), convert(model.position));
+		info.m_startWorldTransform = btTransform(convert(transform.rotation), convert(transform.position));
 		setNumber(info.m_friction, bodyDef["friction"]);
 		setNumber(info.m_rollingFriction, bodyDef["rollingFriction"]);
 		setNumber(info.m_restitution, bodyDef["restitution"]);

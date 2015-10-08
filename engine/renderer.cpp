@@ -16,9 +16,9 @@ public:
 		m_center = camera.position + dir * m_radius;
 	}
 
-	bool visible(const Model& model) {
+	bool visible(const Transform& transform, const Model& model) {
 		float maxDist = model.bounds.radius + m_radius;
-		return glm::distance2(m_center, model.position) < maxDist * maxDist;
+		return glm::distance2(m_center, transform.position) < maxDist * maxDist;
 	}
 
 private:
@@ -72,9 +72,10 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 		lights.push_back(light);
 	});
 	m_device->preRender(camera, lights);
-	entities.for_each<Model>([&](Entity, Model& model) {
-		if (!model.materials.empty() && frustum.visible(model))
-			m_device->render(model);
+	entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
+		transform.updateMatrix();
+		if (!model.materials.empty() && frustum.visible(transform, model))
+			m_device->render(model, transform);
 	});
 	m_device->postRender();
 }

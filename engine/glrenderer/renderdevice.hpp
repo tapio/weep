@@ -9,6 +9,7 @@
 
 class Resources;
 struct Model;
+struct Transform;
 struct Geometry;
 struct Camera;
 struct Environment;
@@ -26,7 +27,7 @@ public:
 	void destroyGeometry(Geometry& geometry);
 
 	void preRender(const Camera& camera, const std::vector<Light>& lights);
-	void render(Model& model);
+	void render(Model& model, Transform& transform);
 	void postRender();
 
 	void resizeRenderTargets();

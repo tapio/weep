@@ -20,12 +20,11 @@ static bool levelStarted = false;
 static bool levelComplete = false;
 static int level = 1;
 
+
 void setPos(Entity e, vec3 pos) {
 	// TODO: Need to make this position setting easier on engine level
-	if (e.has<Model>()) {
-		Model& model = e.get<Model>();
-		model.position = pos;
-	}
+	if (e.has<Transform>())
+		e.get<Transform>().position = pos;
 	if (e.has<btRigidBody>()) {
 		btRigidBody& body = e.get<btRigidBody>();
 		btTransform trans(body.getCenterOfMassTransform().getRotation(), convert(pos));
