@@ -192,11 +192,13 @@ void SceneLoader::load(const string& path, Resources& resources)
 		cameraEnt = world->create();
 		cameraEnt.tag("camera");
 	}
-	cameraEnt.add<Camera>();
-	Camera& camera = cameraEnt.get<Camera>();
-	float ar = Engine::width() / (float)Engine::height();
-	camera.makePerspective(45, ar, 0.1, 1000);
-	camera.view = glm::lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
+	if (!cameraEnt.has<Camera>()) {
+		cameraEnt.add<Camera>();
+		Camera& camera = cameraEnt.get<Camera>();
+		float ar = Engine::width() / (float)Engine::height();
+		camera.makePerspective(45, ar, 0.1, 1000);
+		camera.view = glm::lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
+	}
 
 	uint t1 = Engine::timems();
 	logDebug("Loaded scene in %dms with %d models, %d bodies, %d lights, %d prefabs", t1 - t0, numModels, numBodies, numLights, prefabs.size());
@@ -403,13 +405,19 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 			world->get_system<PhysicsSystem>().add(entity);
 	}
 
-	if (!def["movesound"].is_null()) {
-		const Json& soundDef = def["movesound"];
+	if (def["trackGround"].bool_value()) {
+		ASSERT(entity.has<btRigidBody>());
+		entity.add<GroundTracker>();
+	}
+
+	if (!def["moveSound"].is_null()) {
+		const Json& soundDef = def["moveSound"];
 		MoveSound sound;
 		setString(sound.event, soundDef["event"]);
 		setNumber(sound.stepLength, soundDef["step"]);
 		ASSERT(!sound.event.empty());
-		ASSERT(entity.has<btRigidBody>()); // TODO: Remove requirement once we have Transform component
+		ASSERT(entity.has<Transform>());
+		sound.prevPos = entity.get<Transform>().position;
 		entity.add(sound);
 	}
 

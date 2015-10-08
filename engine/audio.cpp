@@ -1,6 +1,8 @@
 #include "audio.hpp"
 #include "camera.hpp"
 #include "soloud.h"
+#include "model.hpp"
+#include "physics.hpp"
 
 using namespace SoLoud;
 
@@ -20,13 +22,27 @@ void AudioSystem::reset()
 {
 }
 
-void AudioSystem::update(Camera& camera)
+void AudioSystem::update(Entities& entities, Camera& camera)
 {
 	vec3 forward = glm::rotate(camera.rotation, vec3(0, 0, -1));
 	vec3 up = glm::rotate(camera.rotation, vec3(0, 1, 0));
 	soloud->set3dListenerPosition(camera.position.x, camera.position.y, camera.position.z);
 	soloud->set3dListenerAt(forward.x, forward.y, forward.z);
 	soloud->set3dListenerUp(up.x, up.y, up.z);
+
+	// Move sounds
+	entities.for_each<MoveSound, Transform>([&](Entity e, MoveSound& sound, Transform& trans) {
+		ASSERT(!sound.needsGroundContact || e.has<GroundTracker>());
+		if (!sound.needsGroundContact || e.get<GroundTracker>().onGround) {
+			sound.delta += length(sound.prevPos - trans.position);
+			sound.prevPos = trans.position;
+			if (sound.delta > sound.stepLength) {
+				play(sound.event);
+				sound.delta = 0;
+			}
+		}
+	});
+
 	soloud->update3dAudio();
 }
 

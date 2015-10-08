@@ -4,6 +4,7 @@
 #include "scene.hpp"
 #include "camera.hpp"
 #include "model.hpp"
+#include "audio.hpp"
 #include "gui.hpp"
 #include "../controller.hpp"
 #include "../game.hpp"
@@ -105,14 +106,21 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		case $id(GENERATE_LEVEL):
 		{
 			std::srand(std::time(0));
+			// TODO: Make it possible to actually kill entities
+			Entity cameraEnt = game.entities.get_entity_by_tag("camera");
+			//cameraEnt.remove<GroundTracker>();
+			//cameraEnt.remove<MoveSound>();
+			//cameraEnt.remove<Controller>();
 			generateLevel1(game, startPos);
 
-			Entity cameraEnt = game.entities.get_entity_by_tag("camera");
+			cameraEnt = game.entities.get_entity_by_tag("camera");
 			Camera& camera = cameraEnt.get<Camera>();
-			cameraEnt.add<Controller>(camera.position, camera.rotation);
-			Controller& controller = cameraEnt.get<Controller>();
-			if (cameraEnt.has<btRigidBody>())
-				controller.body = &cameraEnt.get<btRigidBody>();
+			if (cameraEnt.has<Controller>()) {
+				cameraEnt.add<Controller>(camera.position, camera.rotation);
+				Controller& controller = cameraEnt.get<Controller>();
+				if (cameraEnt.has<btRigidBody>())
+					controller.body = &cameraEnt.get<btRigidBody>();
+			}
 			levelStarted = true;
 			break;
 		}

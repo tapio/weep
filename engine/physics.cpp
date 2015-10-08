@@ -71,6 +71,11 @@ void PhysicsSystem::step(Entities& entities, float dt)
 		transform.position = convert(trans.getOrigin());
 		transform.rotation = convert(trans.getRotation());
 	});
+
+	// GroundTracker
+	entities.for_each<GroundTracker, btRigidBody>([&](Entity, GroundTracker& tracker, btRigidBody& body) {
+		tracker.onGround = testGroundHit(body);
+	});
 }
 
 bool PhysicsSystem::testGroundHit(btRigidBody& body)

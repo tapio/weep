@@ -140,7 +140,8 @@ int main(int argc, char* argv[])
 		if (cameraEnt.has<btRigidBody>()) {
 			btRigidBody& body = cameraEnt.get<btRigidBody>();
 			camera.position = convert(body.getCenterOfMassPosition());
-			controller.onGround = physics.testGroundHit(body);
+			if (cameraEnt.has<GroundTracker>())
+				controller.onGround = cameraEnt.get<GroundTracker>().onGround;
 		} else {
 			camera.position = controller.position;
 		}
@@ -148,17 +149,7 @@ int main(int argc, char* argv[])
 
 		// Audio
 		START_MEASURE(audioTimeMs)
-		audio.update(camera);
-		// Move sounds TODO: Move inside audio system
-		game.entities.for_each<MoveSound, btRigidBody>([&](Entity, MoveSound& sound, btRigidBody& body) {
-			if (!sound.needsGroundContact || physics.testGroundHit(body)) {
-				sound.delta += body.getLinearVelocity().length() * game.engine.dt;
-				if (sound.delta > sound.stepLength) {
-					audio.play(sound.event);
-					sound.delta = 0;
-				}
-			}
-		});
+		audio.update(game.entities, camera);
 		END_MEASURE(audioTimeMs)
 
 		// Graphics

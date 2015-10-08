@@ -12,7 +12,7 @@ public:
 	AudioSystem();
 	~AudioSystem();
 	void reset();
-	void update(Camera& camera);
+	void update(Entities& entities, Camera& camera);
 
 	void add(const string& name, const std::vector<char>& data);
 	void play(const string& name);
@@ -28,7 +28,8 @@ private:
 struct MoveSound
 {
 	string event = "";
-	float stepLength = 0.5f;
+	vec3 prevPos = vec3();
 	float delta = 0.0f;
+	float stepLength = 0.5f;
 	bool needsGroundContact = true;
 };

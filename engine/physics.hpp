@@ -24,6 +24,11 @@ public:
 	btDiscreteDynamicsWorld* dynamicsWorld;
 };
 
+struct GroundTracker
+{
+	bool onGround = false;
+};
+
 vec3 inline convert(const btVector3& vector) {
 	return vec3(vector.x(), vector.y(), vector.z());
 }
