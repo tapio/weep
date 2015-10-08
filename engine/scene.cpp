@@ -186,8 +186,10 @@ void SceneLoader::load(const string& path, Resources& resources)
 		renderer.device().setEnvironment(&renderer.env());
 	}
 
-	Entity cameraEnt = world->get_entity_by_tag("camera");
-	if (!cameraEnt.is_alive()) {
+	Entity cameraEnt;
+	if (world->has_tagged_entity("camera")) {
+		cameraEnt = world->get_entity_by_tag("camera");
+	} else {
 		cameraEnt = world->create();
 		cameraEnt.tag("camera");
 	}

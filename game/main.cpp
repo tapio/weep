@@ -24,7 +24,8 @@ void init(Game& game, SceneLoader& scene, const string& scenePath)
 	game.entities.get_system<ImGuiSystem>().applyDefaultStyle();
 	scene = SceneLoader(game.entities);
 	scene.load(scenePath, game.resources);
-	Entity cameraEnt = scene.world->get_entity_by_tag("camera");
+	Entity cameraEnt = game.entities.get_entity_by_tag("camera");
+	ASSERT(cameraEnt.is_alive());
 	Camera& camera = cameraEnt.get<Camera>();
 	cameraEnt.add<Controller>(camera.position, camera.rotation);
 	if (cameraEnt.has<btRigidBody>())
@@ -43,7 +44,10 @@ int main(int argc, char* argv[])
 	SceneLoader scene(game.entities);
 
 	char scenePath[128] = "testscene.json";
-	if (argc == 2) strcpy(scenePath, argv[1]);
+	if (argc == 2)
+		strcpy(scenePath, argv[1]);
+	else if (Engine::settings["scene"].is_string())
+		strcpy(scenePath, Engine::settings["scene"].string_value().c_str());
 	init(game, scene, scenePath);
 
 	game.modules.load(Engine::settings["modules"]);
