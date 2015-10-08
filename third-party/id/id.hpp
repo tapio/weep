@@ -63,6 +63,20 @@ public:
         return /*assert( check_for_collisions( id::fnv1a<N,N>::hash( str ) | 0x80000000, str ) ),*/ id::fnv1a<N,N>::hash( str ) | 0x80000000;
     }
 
+    static unsigned int hash( const char* str ) {
+        assert(str);
+        unsigned int i = 0, ret = ( 2166136261u ^ str[0] ) * 16777619u;
+        while (str[i++])
+            ret = ( ret ^ str[i] ) * 16777619u;
+        ret |= 0x80000000;
+        assert( check_for_collisions( ret, str ) );
+        return ret;
+    }
+
+    static unsigned int hash( const std::string& str) {
+        return hash( str.c_str() );
+    }
+
     // sequential IDs have MSB flag disabled
     static unsigned int &gen() {
         static unsigned int seq = 0;

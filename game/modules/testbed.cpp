@@ -8,6 +8,12 @@ EXPORT void ModuleFunc(uint msg, void* param)
 {
 	Game& game = *static_cast<Game*>(param);
 	switch (msg) {
+		case $id(INIT):
+		{
+			ASSERT($id(Qwerty#¤%) == id::hash("Qwerty#¤%"));
+			ASSERT($id(Qwerty#¤%) != 0);
+			ASSERT(id::gen("") == id::hash(""));
+		}
 		case $id(UPDATE):
 		{
 			int lightIndex = 0;
