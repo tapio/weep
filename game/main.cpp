@@ -56,6 +56,7 @@ int main(int argc, char* argv[])
 	bool running = true;
 	bool active = false;
 	bool reload = false;
+	bool devtools = true;
 	SDL_Event e;
 	while (running) {
 		RenderSystem& renderer = game.entities.get_system<RenderSystem>();
@@ -114,6 +115,10 @@ int main(int argc, char* argv[])
 					}
 					continue;
 				}
+				else if (keysym.sym == SDLK_F12) {
+					devtools = !devtools;
+					continue;
+				}
 			}
 
 			if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_RIGHT) {
@@ -161,7 +166,7 @@ int main(int argc, char* argv[])
 		renderer.render(game.entities, camera);
 		END_MEASURE(renderTimeMs)
 
-		if (ImGui::Begin("Debug")) {
+		if (devtools && ImGui::Begin("Debug")) {
 			ImGui::Text("Right mouse button to toggle mouse grab.");
 			ImGui::Text("FPS: %d (%.3fms)", int(1.0 / game.engine.dt), game.engine.dt * 1000.f);
 			if (ImGui::CollapsingHeader("Stats")) {
@@ -292,7 +297,8 @@ int main(int argc, char* argv[])
 				}
 			}
 		}
-		ImGui::End();
+		if (devtools)
+			ImGui::End();
 		//ImGui::ShowTestWindow();
 		//ImGui::ShowStyleEditor();
 		//ImGui::ShowMetricsWindow();
