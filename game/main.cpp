@@ -212,6 +212,21 @@ int main(int argc, char* argv[])
 				ImGui::SliderFloat("Volume", &volume, 0.f, 1.25f);
 				if (volume != oldVolume)
 					audio.soloud->setGlobalVolume(volume);
+
+				int oldMsaa = Engine::settings["renderer"]["msaa"].number_value();
+				float msaa = log2(oldMsaa);
+				ImGui::SliderFloat("MSAA", &msaa, 0.f, 3.f, "%.0f");
+				int newMsaa = powf(2, msaa);
+				ImGui::SameLine(); ImGui::Text("%dx", newMsaa);
+				if (newMsaa != oldMsaa) {
+					// Aargh, I want mutable Json
+					Json::object settings = Engine::settings.object_items();
+					Json::object rendererSettings = settings["renderer"].object_items();
+					rendererSettings["msaa"] = Json(newMsaa);
+					settings["renderer"] = Json(rendererSettings);
+					Engine::settings = Json(settings);
+					renderer.device().resizeRenderTargets();
+				}
 			}
 			if (ImGui::CollapsingHeader("Environment")) {
 				Environment& env = renderer.env();
