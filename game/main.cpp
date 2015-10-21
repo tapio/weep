@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 	bool running = true;
 	bool active = false;
 	bool reload = false;
-	bool devtools = true;
+	bool devtools = Engine::settings["devtools"].bool_value();
 	SDL_Event e;
 	while (running) {
 		RenderSystem& renderer = game.entities.get_system<RenderSystem>();

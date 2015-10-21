@@ -10,6 +10,7 @@
 		"msaa": 8,
 		"shadowMapSize": 1024
 	},
+	"devtools": true,
 	"scene": "debugscene.json",
 	"moddir": "../weep-media/",
 	"modules": [ "logo", "testbed", "skyrunner" ]
