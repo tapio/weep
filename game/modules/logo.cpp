@@ -23,8 +23,9 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				logoTex.create();
 				logoTex.upload(*logoImg);
 			}
-			//ImGui::SetNextWindowPos(ImVec2(20, 20));
-			//ImGui::Begin("", NULL, MinimalWindow);
+			ImGui::SetNextWindowPos(ImVec2(10, ImGui::GetIO().DisplaySize.y - 32 - 10));
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+			ImGui::Begin("", NULL, ImVec2(0, 0), 0.f, ImGuiSystem::MinimalWindow);
 			ImFont* font = game.entities.get_system<ImGuiSystem>().getFont($id(logo-font));
 			ASSERT(font);
 			ImGui::PushFont(font);
@@ -32,7 +33,8 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			ImGui::SameLine();
 			ImGui::Text("Powered by\nWeepEngine");
 			ImGui::PopFont();
-			//ImGui::End();
+			ImGui::End();
+			ImGui::PopStyleVar();
 			break;
 		}
 	}
