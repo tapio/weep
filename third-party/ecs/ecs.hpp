@@ -203,6 +203,9 @@ namespace ecs
 		// if the entity is not alive anymore (during processing), the entity should be removed
 		void remove_entity(Entity e);
 
+		// called when the entity is destroyed to allow extra clean-up
+		virtual void destroy(Entity) {}
+
 		const ComponentMask& get_component_mask() const { return component_mask; }
 
 	private:

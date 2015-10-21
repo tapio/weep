@@ -11,6 +11,7 @@ public:
 	void reset();
 
 	bool add(Entity entity);
+	void destroy(Entity entity) override;
 
 	void step(Entities& entities, float dt);
 

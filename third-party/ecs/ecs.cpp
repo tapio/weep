@@ -125,6 +125,15 @@ namespace ecs
 		const auto index = e.get_index();
 		ECS_ASSERT(index < versions.size());        // sanity check
 		ECS_ASSERT(index < component_masks.size());
+
+		for (auto &it : systems) {
+			auto& system = it.second;
+			//const auto &system_component_mask = system->get_component_mask();
+			//auto interest = (entity_component_mask & system_component_mask) == system_component_mask;
+			//if (interest)
+				system->destroy(e);
+		}
+
 		++versions[index];                      // increase the version for that id
 		free_ids.push_back(index);              // make the id available for reuse
 		component_masks[index].reset();         // reset the component mask for that id

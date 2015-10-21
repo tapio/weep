@@ -102,3 +102,16 @@ bool PhysicsSystem::add(Entity entity)
 	dynamicsWorld->addRigidBody(&body);
 	return true;
 }
+
+void PhysicsSystem::destroy(Entity entity)
+{
+	if (!entity.has<btRigidBody>()) return;
+	btRigidBody& body = entity.get<btRigidBody>();
+	ASSERT(body.isInWorld());
+	if (body.getMotionState())
+		delete body.getMotionState();
+	dynamicsWorld->removeRigidBody(&body);
+	ASSERT(body.getCollisionShape());
+	collisionShapes.remove(body.getCollisionShape());
+	delete body.getCollisionShape();
+}
