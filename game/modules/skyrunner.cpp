@@ -9,10 +9,6 @@
 #include "../controller.hpp"
 #include "../game.hpp"
 
-static const int MinimalWindow =
-	ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoScrollbar|
-	ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoSavedSettings;
-
 static vec3 startPos = vec3(0, 1, 0);
 static vec3 goalPos = vec3(INFINITY, INFINITY, INFINITY);
 static float gameTime = 0;
@@ -76,7 +72,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			if (glm::distance2(curPos, goalPos) < 1.1f || levelComplete) {
 				levelComplete = true;
 				ImGui::SetNextWindowPosCenter();
-				ImGui::Begin("", NULL, MinimalWindow);
+				ImGui::Begin("", NULL, ImGuiSystem::MinimalWindow);
 				ImGui::Text("Good Job! %.2f s", gameTime);
 				ImGui::End();
 				if (waitTime >= 3) {
@@ -90,12 +86,12 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				}
 			} else if (gameTime < 3) {
 				ImGui::SetNextWindowPosCenter();
-				ImGui::Begin("", NULL, MinimalWindow);
+				ImGui::Begin("", NULL, ImGuiSystem::MinimalWindow);
 				ImGui::Text("Run to the end!");
 				ImGui::End();
 			} else {
 				ImGui::SetNextWindowPos(ImVec2(20, 20));
-				ImGui::Begin("", NULL, MinimalWindow);
+				ImGui::Begin("", NULL, ImGuiSystem::MinimalWindow);
 				ImGui::Text("Time: %.2f", gameTime);
 				ImGui::End();
 			}

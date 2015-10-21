@@ -21,6 +21,10 @@ public:
 	ImFont* loadFont(const string& name, const string& path, float size);
 	ImFont* getFont(uint id) const;
 
+	static const int MinimalWindow =
+		ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoScrollbar|
+		ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoSavedSettings;
+
 private:
 	void* m_imguiState = nullptr;
 	std::unordered_map<uint, ImFont*> m_fonts;

@@ -3,10 +3,6 @@
 #include "glrenderer/texture.hpp"
 #include "../game.hpp"
 
-static const int MinimalWindow =
-	ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoScrollbar|
-	ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoSavedSettings;
-
 static Texture logoTex;
 
 EXPORT void ModuleFunc(uint msg, void* param)
