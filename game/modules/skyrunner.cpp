@@ -85,8 +85,8 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					levelComplete = false;
 					level++;
 					startPos = curPos + vec3(0, 0, -1.5);
-					if (level == 2) generateLevel2(game, startPos);
-					if (level == 3) generateLevel3(game, startPos);
+					if (level <= 3)
+						ModuleFunc($id(GENERATE_LEVEL), param);
 				}
 			} else if (gameTime < 3) {
 				ImGui::SetNextWindowPosCenter();
@@ -106,21 +106,24 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		case $id(GENERATE_LEVEL):
 		{
 			std::srand(std::time(0));
-			// TODO: Make it possible to actually kill entities
+			// TODO: Simplify
 			Entity cameraEnt = game.entities.get_entity_by_tag("camera");
-			//cameraEnt.remove<GroundTracker>();
-			//cameraEnt.remove<MoveSound>();
-			//cameraEnt.remove<Controller>();
-			generateLevel1(game, startPos);
+			cameraEnt.kill();
+			game.entities.update();
+			ASSERT(!game.entities.has_tagged_entity("camera"));
+			if (level <= 1) generateLevel1(game, startPos);
+			else if (level == 2) generateLevel2(game, startPos);
+			else if (level == 3) generateLevel3(game, startPos);
 
+			ASSERT(game.entities.has_tagged_entity("camera"));
 			cameraEnt = game.entities.get_entity_by_tag("camera");
+			ASSERT(cameraEnt.is_alive());
+			cameraEnt.get<Transform>().setPosition(startPos);
 			Camera& camera = cameraEnt.get<Camera>();
-			if (cameraEnt.has<Controller>()) {
-				cameraEnt.add<Controller>(camera.position, camera.rotation);
-				Controller& controller = cameraEnt.get<Controller>();
-				if (cameraEnt.has<btRigidBody>())
-					controller.body = &cameraEnt.get<btRigidBody>();
-			}
+			cameraEnt.add<Controller>(camera.position, camera.rotation);
+			Controller& controller = cameraEnt.get<Controller>();
+			controller.body = &cameraEnt.get<btRigidBody>();
+
 			levelStarted = true;
 			break;
 		}

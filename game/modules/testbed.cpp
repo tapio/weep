@@ -13,6 +13,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			ASSERT($id(Qwerty#¤%) == id::hash("Qwerty#¤%"));
 			ASSERT($id(Qwerty#¤%) != 0);
 			ASSERT(id::gen("") == id::hash(""));
+			break;
 		}
 		case $id(UPDATE):
 		{
