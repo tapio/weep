@@ -146,12 +146,13 @@ namespace ecs
 
 	void Entities::tag_entity(Entity e, const std::string& tag_name)
 	{
-		tagged_entities.emplace(tag_name, e);
+		tagged_entities[tag_name] = e;
 	}
 
 	bool Entities::has_tagged_entity(const std::string& tag_name) const
 	{
-		return tagged_entities.find(tag_name) != tagged_entities.end();
+		auto it = tagged_entities.find(tag_name);
+		return it != tagged_entities.end() && it->second.is_alive();
 	}
 
 	Entity Entities::get_entity_by_tag(const std::string& tag_name)
