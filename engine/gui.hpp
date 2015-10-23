@@ -29,3 +29,16 @@ private:
 	void* m_imguiState = nullptr;
 	std::unordered_map<uint, ImFont*> m_fonts;
 };
+
+
+struct ScopedFont
+{
+	ScopedFont(Entities& entities, uint id) {
+		ImFont* font = entities.get_system<ImGuiSystem>().getFont(id);
+		ASSERT(font);
+		ImGui::PushFont(font);
+	}
+	~ScopedFont() {
+		ImGui::PopFont();
+	}
+};

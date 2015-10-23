@@ -30,6 +30,54 @@ void generateLevel2(Game& game, vec3 start);
 void generateLevel3(Game& game, vec3 start);
 
 
+void startNextLevel(Game& game)
+{
+	std::srand(std::time(0));
+	// TODO: Simplify
+	Entity cameraEnt = game.entities.get_entity_by_tag("camera");
+	cameraEnt.kill();
+	game.entities.update();
+	ASSERT(!game.entities.has_tagged_entity("camera"));
+	if (level <= 1) generateLevel1(game, startPos);
+	else if (level == 2) generateLevel2(game, startPos);
+	else if (level == 3) generateLevel3(game, startPos);
+
+	ASSERT(game.entities.has_tagged_entity("camera"));
+	cameraEnt = game.entities.get_entity_by_tag("camera");
+	ASSERT(cameraEnt.is_alive());
+	cameraEnt.get<Transform>().setPosition(startPos);
+	Camera& camera = cameraEnt.get<Camera>();
+	cameraEnt.add<Controller>(camera.position, camera.rotation);
+	Controller& controller = cameraEnt.get<Controller>();
+	controller.body = &cameraEnt.get<btRigidBody>();
+
+	levelStarted = true;
+}
+
+void doMainMenu(Game& game)
+{
+	ImGui::SetNextWindowPosCenter();
+	ImGui::Begin("##SkyrunnerMenu", NULL, ImGuiSystem::MinimalWindow);
+	{
+		ScopedFont sf(game.entities, $id(skyrunner_big));
+		ImGui::Text("SkyRunner");
+	}{
+		ScopedFont sf(game.entities, $id(skyrunner_menu));
+		ImVec2 bsize(300.f, 0.f);
+		if (ImGui::Button("New Game", bsize)) {
+			if (!levelStarted)
+				startNextLevel(game);
+		}
+		if (ImGui::Button("Options", bsize)) {
+			// TODO
+		}
+		if (ImGui::Button("Exit", bsize)) {
+			std::exit(0);
+		}
+	}
+	ImGui::End();
+}
+
 
 EXPORT void ModuleFunc(uint msg, void* param)
 {
@@ -39,15 +87,16 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		{
 			ImGuiSystem& imgui = game.entities.get_system<ImGuiSystem>();
 			imgui.applyInternalState();
-			//imgui.loadFont("skyrunner_big", game.resources.findPath("fonts/Orbitron-Black.ttf"), 48.f);
 			gameTime = 0;
 			waitTime = 0;
 			break;
 		}
 		case $id(UPDATE):
 		{
-			if (!levelStarted)
+			if (!levelStarted) {
+				//doMainMenu(game);
 				return;
+			}
 			Entity pl = game.entities.get_entity_by_tag("camera");
 			if (!pl.is_alive() || !pl.has<btRigidBody>())
 				return;
@@ -66,9 +115,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				levelComplete = false;
 			}
 
-			ImFont* font = game.entities.get_system<ImGuiSystem>().getFont($id(skyrunner_big));
-			ASSERT(font);
-			ImGui::PushFont(font);
+			ScopedFont sf(game.entities, $id(skyrunner_big));
 			if (glm::distance2(curPos, goalPos) < 1.1f || levelComplete) {
 				levelComplete = true;
 				ImGui::SetNextWindowPosCenter();
@@ -82,7 +129,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					level++;
 					startPos = curPos + vec3(0, 0, -1.5);
 					if (level <= 3)
-						ModuleFunc($id(GENERATE_LEVEL), param);
+						startNextLevel(game);
 				}
 			} else if (gameTime < 3) {
 				ImGui::SetNextWindowPosCenter();
@@ -95,32 +142,12 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				ImGui::Text("Time: %.2f", gameTime);
 				ImGui::End();
 			}
-			ImGui::PopFont();
 
 			break;
 		}
 		case $id(GENERATE_LEVEL):
 		{
-			std::srand(std::time(0));
-			// TODO: Simplify
-			Entity cameraEnt = game.entities.get_entity_by_tag("camera");
-			cameraEnt.kill();
-			game.entities.update();
-			ASSERT(!game.entities.has_tagged_entity("camera"));
-			if (level <= 1) generateLevel1(game, startPos);
-			else if (level == 2) generateLevel2(game, startPos);
-			else if (level == 3) generateLevel3(game, startPos);
-
-			ASSERT(game.entities.has_tagged_entity("camera"));
-			cameraEnt = game.entities.get_entity_by_tag("camera");
-			ASSERT(cameraEnt.is_alive());
-			cameraEnt.get<Transform>().setPosition(startPos);
-			Camera& camera = cameraEnt.get<Camera>();
-			cameraEnt.add<Controller>(camera.position, camera.rotation);
-			Controller& controller = cameraEnt.get<Controller>();
-			controller.body = &cameraEnt.get<btRigidBody>();
-
-			levelStarted = true;
+			startNextLevel(game);
 			break;
 		}
 	}
