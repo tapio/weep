@@ -48,6 +48,7 @@ void panic(const char* format, ...);
 
 string readFile(const string& path);
 string replace(string str, const string& search, const string& replace);
+uint timestamp(const string& path);
 
 #define NONCOPYABLE(T) \
 	T(T&&) = default; \

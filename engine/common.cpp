@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <SDL2/SDL.h>
+#include <sys/stat.h>
 
 string vlformat(const char* format, va_list vl)
 {
@@ -87,4 +88,19 @@ string replace(string str, const string& search, const string& replace)
 		str.replace(pos, search.length(), replace);
 	}
 	return str;
+}
+
+uint timestamp(const string& path)
+{
+#if defined(_MSC_VER) || defined(__MINGW32__)
+	struct _stat buf;
+	// TODO: Unicode
+	if (_stat(path.c_str(), &buf) == 0)
+		return buf.st_mtime;
+#else
+	struct stat buf;
+	if (stat(path.c_str(), &buf) == 0)
+		return buf.st_mtime;
+#endif
+	return 0;
 }

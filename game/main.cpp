@@ -56,6 +56,7 @@ int main(int argc, char* argv[])
 	bool running = true;
 	bool active = false;
 	bool reload = false;
+	bool autoReloadModules = true;
 	bool devtools = Engine::settings["devtools"].bool_value();
 	SDL_Event e;
 	while (running) {
@@ -245,6 +246,8 @@ int main(int argc, char* argv[])
 					game.modules.load(Engine::settings["modules"]);
 					game.modules.call($id(INIT), &game);
 				}
+				ImGui::SameLine();
+				ImGui::Checkbox("Auto Reload##Modules", &autoReloadModules);
 				ImGui::Text("Active modules:");
 				for (auto& it : game.modules) {
 					ImGui::Checkbox(it.first.c_str(), &it.second.enabled);
@@ -323,6 +326,9 @@ int main(int argc, char* argv[])
 		game.engine.swap();
 
 		game.entities.update();
+
+		if (autoReloadModules)
+			game.modules.autoReload();
 
 		if (reload) {
 			game.modules.call($id(DEINIT), &game);

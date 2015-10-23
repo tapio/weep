@@ -10,6 +10,7 @@ struct Module {
 	ModuleFunc func = nullptr;
 	bool enabled = true;
 	void* handle = nullptr;
+	uint mtime = 0;
 	string name;
 };
 
@@ -19,6 +20,7 @@ class Modules : public std::map<string, Module>
 public:
 	void load(const Json& modules);
 	void reload(const string& name);
+	bool autoReload();
 
 	void call(uint msg, void* param = nullptr);
 	void call(const string& module, uint msg, void* param = nullptr);

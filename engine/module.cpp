@@ -1,14 +1,21 @@
 #include "module.hpp"
+#include <chrono>
+#include <thread>
 #include <SDL2/SDL_loadso.h>
 
-Module::Module(const std::string& moduleName)
+static inline string getPath(const string& moduleName)
+{
+#if defined(WIN32) || defined(_WIN32)
+	return moduleName + ".dll";
+#else
+	return "./lib" + moduleName + ".so";
+#endif
+}
+
+Module::Module(const string& moduleName)
 {
 	name = moduleName;
-#if defined(WIN32) || defined(_WIN32)
-	string path = name + ".dll";
-#else
-	string path = "./lib" + name + ".so";
-#endif
+	string path = getPath(moduleName);
 	handle = SDL_LoadObject(path.c_str());
 	if (!handle) {
 		logError("%s", SDL_GetError()); // SDL already produces a descriptive error
@@ -21,6 +28,7 @@ Module::Module(const std::string& moduleName)
 		ASSERT(!"ModuleFunc load failed");
 		return;
 	}
+	mtime = timestamp(path);
 	logDebug("Loaded module %s", path.c_str());
 }
 
@@ -46,6 +54,20 @@ void Modules::reload(const string& name)
 {
 	erase(name);
 	emplace(name, name);
+}
+
+bool Modules::autoReload()
+{
+	for (auto& it : *this) {
+		string name = it.second.name;
+		string path = getPath(name);
+		if (timestamp(path) > it.second.mtime) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(300));
+			reload(name);
+			return true; // Iterators are now invalid
+		}
+	}
+	return false;
 }
 
 void Modules::call(uint msg, void* param)
