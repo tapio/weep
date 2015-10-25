@@ -69,7 +69,7 @@ static void doMainMenu(Game& game)
 	ImGui::Begin("##SkyrunnerMenu", NULL, ImGuiSystem::MinimalWindow);
 	{
 		ScopedFont sf(game.entities, $id(skyrunner_big));
-		ImGui::Text("SkyRunner!!!");
+		ImGui::Text("SkyRunner");
 	}{
 		ScopedFont sf(game.entities, $id(skyrunner_menu));
 		ImVec2 bsize(300.f, 0.f);
@@ -186,7 +186,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 	}
 }
 
-void generateLevel1(Game& game, vec3 pos)
+static void generateLevel1(Game& game, vec3 pos)
 {
 	SceneLoader loader(game.entities);
 	loader.load("skyrunner.json", game.resources);
@@ -217,7 +217,7 @@ void generateLevel1(Game& game, vec3 pos)
 	goalPos = pos + vec3(0, 1, 0);
 }
 
-void generateLevel2(Game& game, vec3 pos)
+static void generateLevel2(Game& game, vec3 pos)
 {
 	SceneLoader loader(game.entities);
 	loader.load("skyrunner.json", game.resources);
@@ -250,7 +250,7 @@ void generateLevel2(Game& game, vec3 pos)
 	goalPos = pos + vec3(0, 1, 0);
 }
 
-void generateLevel3(Game& game, vec3 pos)
+static void generateLevel3(Game& game, vec3 pos)
 {
 	SceneLoader loader(game.entities);
 	loader.load("skyrunner.json", game.resources);
