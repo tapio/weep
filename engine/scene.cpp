@@ -10,6 +10,7 @@
 #include "components.hpp"
 #include "environment.hpp"
 #include "gui.hpp"
+#include "module.hpp"
 #include "renderer.hpp"
 #include "glrenderer/renderdevice.hpp"
 
@@ -219,6 +220,11 @@ void SceneLoader::load_internal(const string& path, Resources& resources)
 		} else if (jsonScene["include"].is_array()) {
 			for (auto& includePath : jsonScene["include"].array_items())
 				load_internal(includePath.string_value(), resources);
+		}
+
+		// Parse modules
+		if (jsonScene["modules"].is_array() && world->has_system<ModuleSystem>()) {
+			world->get_system<ModuleSystem>().load(jsonScene["modules"], false);
 		}
 
 		// Parse environment

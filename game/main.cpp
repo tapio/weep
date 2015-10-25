@@ -21,6 +21,7 @@ void init(Game& game, SceneLoader& scene, const string& scenePath)
 	game.entities.add_system<PhysicsSystem>();
 	game.entities.add_system<AudioSystem>();
 	game.entities.add_system<ModuleSystem>();
+	game.entities.get_system<ModuleSystem>().load(Engine::settings["modules"], false);
 	game.entities.add_system<ImGuiSystem>(game.engine.window);
 	game.entities.get_system<ImGuiSystem>().applyDefaultStyle();
 	scene = SceneLoader(game.entities);
@@ -31,6 +32,7 @@ void init(Game& game, SceneLoader& scene, const string& scenePath)
 	cameraEnt.add<Controller>(camera.position, camera.rotation);
 	if (cameraEnt.has<btRigidBody>())
 		cameraEnt.get<Controller>().body = &cameraEnt.get<btRigidBody>();
+	game.entities.get_system<ModuleSystem>().call($id(INIT), &game);
 }
 
 int main(int argc, char* argv[])
@@ -50,9 +52,6 @@ int main(int argc, char* argv[])
 	else if (Engine::settings["scene"].is_string())
 		strcpy(scenePath, Engine::settings["scene"].string_value().c_str());
 	init(game, scene, scenePath);
-
-	game.entities.get_system<ModuleSystem>().load(Engine::settings["modules"], false);
-	game.entities.get_system<ModuleSystem>().call($id(INIT), &game);
 
 	bool running = true;
 	bool active = false;
@@ -339,7 +338,6 @@ int main(int argc, char* argv[])
 			scene.reset();
 			resources.reset();
 			init(game, scene, scenePath);
-			modules.call($id(INIT), &game);
 			reload = false;
 		}
 	}

@@ -112,7 +112,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		case $id(UPDATE):
 		{
 			if (!levelStarted) {
-				//doMainMenu(game);
+				doMainMenu(game);
 				return;
 			}
 			Entity pl = game.entities.get_entity_by_tag("camera");
