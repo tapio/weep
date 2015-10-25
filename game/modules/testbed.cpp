@@ -10,8 +10,8 @@ EXPORT void ModuleFunc(uint msg, void* param)
 	switch (msg) {
 		case $id(INIT):
 		{
-			ASSERT($id(Qwerty#¤%) == id::hash("Qwerty#¤%"));
-			ASSERT($id(Qwerty#¤%) != 0);
+			ASSERT($id(Qwerty#$%) == id::hash("Qwerty#$%"));
+			ASSERT($id(Qwerty#$%) != 0);
 			ASSERT(id::gen("") == id::hash(""));
 			break;
 		}
