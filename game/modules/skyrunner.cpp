@@ -56,6 +56,7 @@ void startNextLevel(Game& game)
 	cameraEnt.add<Controller>(camera.position, camera.rotation);
 	Controller& controller = cameraEnt.get<Controller>();
 	controller.body = &cameraEnt.get<btRigidBody>();
+	controller.fast = 1.f;
 
 	levelStarted = true;
 }
