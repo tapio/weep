@@ -51,7 +51,7 @@ void ModuleSystem::load(const Json& modulesDef, bool clear)
 	}
 }
 
-void ModuleSystem::reload(const string& name)
+void ModuleSystem::reload(string name) // Needs to be by value to support passing module.name
 {
 	modules.erase(name);
 	modules.emplace(name, name);

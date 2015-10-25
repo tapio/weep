@@ -19,7 +19,7 @@ class ModuleSystem : public System
 {
 public:
 	void load(const Json& modules, bool clear = true);
-	void reload(const string& name);
+	void reload(string name);
 	bool autoReload();
 
 	void call(uint msg, void* param = nullptr);
