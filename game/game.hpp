@@ -8,5 +8,4 @@ struct Game {
 	Engine engine = {};
 	Entities entities = {};
 	Resources resources = {};
-	ModuleSystem modules = {};
 };

@@ -15,10 +15,10 @@ struct Module {
 };
 
 
-class ModuleSystem
+class ModuleSystem : public System
 {
 public:
-	void load(const Json& modules);
+	void load(const Json& modules, bool clear = true);
 	void reload(const string& name);
 	bool autoReload();
 

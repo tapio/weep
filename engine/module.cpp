@@ -41,9 +41,10 @@ Module::~Module()
 	}
 }
 
-void ModuleSystem::load(const Json& modulesDef)
+void ModuleSystem::load(const Json& modulesDef, bool clear)
 {
-	modules.clear();
+	if (clear)
+		modules.clear();
 	if (modulesDef.is_array()) {
 		for (auto& it : modulesDef.array_items())
 			modules.emplace(it.string_value(), it.string_value());

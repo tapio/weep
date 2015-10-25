@@ -20,6 +20,7 @@ void init(Game& game, SceneLoader& scene, const string& scenePath)
 	game.entities.add_system<RenderSystem>(game.resources);
 	game.entities.add_system<PhysicsSystem>();
 	game.entities.add_system<AudioSystem>();
+	game.entities.add_system<ModuleSystem>();
 	game.entities.add_system<ImGuiSystem>(game.engine.window);
 	game.entities.get_system<ImGuiSystem>().applyDefaultStyle();
 	scene = SceneLoader(game.entities);
@@ -50,8 +51,8 @@ int main(int argc, char* argv[])
 		strcpy(scenePath, Engine::settings["scene"].string_value().c_str());
 	init(game, scene, scenePath);
 
-	game.modules.load(Engine::settings["modules"]);
-	game.modules.call($id(INIT), &game);
+	game.entities.get_system<ModuleSystem>().load(Engine::settings["modules"], false);
+	game.entities.get_system<ModuleSystem>().call($id(INIT), &game);
 
 	bool running = true;
 	bool active = false;
@@ -63,6 +64,7 @@ int main(int argc, char* argv[])
 		RenderSystem& renderer = game.entities.get_system<RenderSystem>();
 		PhysicsSystem& physics = game.entities.get_system<PhysicsSystem>();
 		AudioSystem& audio = game.entities.get_system<AudioSystem>();
+		ModuleSystem& modules = game.entities.get_system<ModuleSystem>();
 		ImGuiSystem& imgui = game.entities.get_system<ImGuiSystem>();
 		Entity cameraEnt = game.entities.get_entity_by_tag("camera");
 		Controller& controller = cameraEnt.get<Controller>();
@@ -131,7 +133,7 @@ int main(int argc, char* argv[])
 				controller.angles.y += -0.05f * e.motion.xrel;
 			}
 
-			game.modules.call($id(INPUT), &e);
+			modules.call($id(INPUT), &e);
 		}
 
 		controller.enabled = !imgui.usingKeyboard();
@@ -139,7 +141,7 @@ int main(int argc, char* argv[])
 
 		// Modules
 		START_MEASURE(moduleTimeMs)
-		game.modules.call($id(UPDATE), &game);
+		modules.call($id(UPDATE), &game);
 		END_MEASURE(moduleTimeMs)
 
 		// Physics
@@ -243,17 +245,17 @@ int main(int argc, char* argv[])
 			}
 			if (ImGui::CollapsingHeader("Modules")) {
 				if (ImGui::Button("Reload all##Modules")) {
-					game.modules.load(Engine::settings["modules"]);
-					game.modules.call($id(INIT), &game);
+					modules.load(Engine::settings["modules"]);
+					modules.call($id(INIT), &game);
 				}
 				ImGui::SameLine();
 				ImGui::Checkbox("Auto Reload##Modules", &autoReloadModules);
 				ImGui::Text("Active modules:");
-				for (auto& it : game.modules.modules) {
+				for (auto& it : modules.modules) {
 					ImGui::Checkbox(it.first.c_str(), &it.second.enabled);
 					ImGui::SameLine();
 					if (ImGui::Button(("Reload##" + it.first).c_str())) {
-						game.modules.reload(it.first);
+						modules.reload(it.first);
 						break; // Must break as iterator will be invalidated
 					}
 				}
@@ -311,7 +313,7 @@ int main(int argc, char* argv[])
 					}
 				}
 				if (ImGui::Button("Generate skyrunner level")) {
-					game.modules.call("skyrunner", $id(GENERATE_LEVEL), &game);
+					modules.call("skyrunner", $id(GENERATE_LEVEL), &game);
 				}
 			}
 		}
@@ -328,16 +330,16 @@ int main(int argc, char* argv[])
 		game.entities.update();
 
 		if (autoReloadModules)
-			game.modules.autoReload();
+			modules.autoReload();
 
 		if (reload) {
-			game.modules.call($id(DEINIT), &game);
+			modules.call($id(DEINIT), &game);
 			renderer.reset(game.entities);
 			physics.reset();
 			scene.reset();
 			resources.reset();
 			init(game, scene, scenePath);
-			game.modules.call($id(INIT), &game);
+			modules.call($id(INIT), &game);
 			reload = false;
 		}
 	}
@@ -345,6 +347,7 @@ int main(int argc, char* argv[])
 	game.entities.get_system<RenderSystem>().reset(game.entities); // TODO: Should not be needed...
 
 	game.entities.remove_system<ImGuiSystem>();
+	game.entities.remove_system<ModuleSystem>();
 	game.entities.remove_system<AudioSystem>();
 	game.entities.remove_system<PhysicsSystem>();
 	game.entities.remove_system<RenderSystem>();
