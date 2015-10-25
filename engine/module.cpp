@@ -41,7 +41,7 @@ Module::~Module()
 	}
 }
 
-void Modules::load(const Json& modulesDef)
+void ModuleSystem::load(const Json& modulesDef)
 {
 	modules.clear();
 	if (modulesDef.is_array()) {
@@ -50,13 +50,13 @@ void Modules::load(const Json& modulesDef)
 	}
 }
 
-void Modules::reload(const string& name)
+void ModuleSystem::reload(const string& name)
 {
 	modules.erase(name);
 	modules.emplace(name, name);
 }
 
-bool Modules::autoReload()
+bool ModuleSystem::autoReload()
 {
 	for (auto& it : modules) {
 		string name = it.second.name;
@@ -70,14 +70,14 @@ bool Modules::autoReload()
 	return false;
 }
 
-void Modules::call(uint msg, void* param)
+void ModuleSystem::call(uint msg, void* param)
 {
 	for (auto& it : modules)
 		if (it.second.func && it.second.enabled)
 			it.second.func(msg, param);
 }
 
-void Modules::call(const string& module, uint msg, void* param)
+void ModuleSystem::call(const string& module, uint msg, void* param)
 {
 	const auto it = modules.find(module);
 	if (it != modules.end() && it->second.func && it->second.enabled)

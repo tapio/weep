@@ -15,7 +15,7 @@ struct Module {
 };
 
 
-class Modules
+class ModuleSystem
 {
 public:
 	void load(const Json& modules);
