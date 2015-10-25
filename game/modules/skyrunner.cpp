@@ -8,6 +8,7 @@
 #include "gui.hpp"
 #include "../controller.hpp"
 #include "../game.hpp"
+#include "SDL2/SDL_events.h"
 
 static vec3 startPos = vec3(0, 1, 0);
 static vec3 goalPos = vec3(INFINITY, INFINITY, INFINITY);
@@ -17,11 +18,12 @@ static bool levelStarted = false;
 static bool levelComplete = false;
 static int level = 1;
 static enum {
+	MENU_HIDDEN,
 	MENU_MAIN,
 	MENU_PAUSE,
 	MENU_HELP,
 	MENU_OPTIONS
-} menuState;
+} menuState = MENU_MAIN;
 
 void generatePole(const Json& block, vec3 pos, SceneLoader& loader, Resources& resources) {
 	for (int i = 0; i < 10; ++i) {
@@ -73,8 +75,9 @@ void doMainMenu(Game& game)
 		ImVec2 bsize(300.f, 0.f);
 		if (menuState == MENU_MAIN || menuState == MENU_PAUSE) {
 			if (ImGui::Button(menuState == MENU_MAIN ? "New Game" : "Continue", bsize)) {
-				if (!levelStarted)
+				if (menuState == MENU_MAIN)
 					startNextLevel(game);
+				menuState = MENU_HIDDEN;
 			}
 			if (ImGui::Button("Instructions", bsize))
 				menuState = MENU_HELP;
@@ -111,9 +114,24 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			waitTime = 0;
 			break;
 		}
+		case $id(INPUT):
+		{
+			const SDL_Event& e = *static_cast<SDL_Event*>(param);
+			if (e.type == SDL_KEYUP) {
+				SDL_Keysym keysym = e.key.keysym;
+
+				if (keysym.sym == SDLK_ESCAPE) {
+					if (menuState == MENU_HIDDEN)
+						menuState = MENU_PAUSE;
+					else if (menuState == MENU_PAUSE)
+						menuState = MENU_HIDDEN;
+				}
+			}
+			break;
+		}
 		case $id(UPDATE):
 		{
-			if (!levelStarted) {
+			if (menuState != MENU_HIDDEN) {
 				doMainMenu(game);
 				return;
 			}

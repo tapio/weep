@@ -87,8 +87,7 @@ int main(int argc, char* argv[])
 					if (active) {
 						active = false;
 						game.engine.grabMouse(false);
-					} else running = false;
-					break;
+					} //else running = false;
 				}
 
 				if ((keysym.mod == KMOD_LALT || keysym.mod == KMOD_RALT) && keysym.sym == SDLK_RETURN) {
