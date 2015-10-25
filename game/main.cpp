@@ -249,7 +249,7 @@ int main(int argc, char* argv[])
 				ImGui::SameLine();
 				ImGui::Checkbox("Auto Reload##Modules", &autoReloadModules);
 				ImGui::Text("Active modules:");
-				for (auto& it : game.modules) {
+				for (auto& it : game.modules.modules) {
 					ImGui::Checkbox(it.first.c_str(), &it.second.enabled);
 					ImGui::SameLine();
 					if (ImGui::Button(("Reload##" + it.first).c_str())) {

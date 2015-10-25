@@ -15,7 +15,7 @@ struct Module {
 };
 
 
-class Modules : public std::map<string, Module>
+class Modules
 {
 public:
 	void load(const Json& modules);
@@ -24,4 +24,6 @@ public:
 
 	void call(uint msg, void* param = nullptr);
 	void call(const string& module, uint msg, void* param = nullptr);
+
+	std::map<string, Module> modules = {};
 };

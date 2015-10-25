@@ -41,24 +41,24 @@ Module::~Module()
 	}
 }
 
-void Modules::load(const Json& modules)
+void Modules::load(const Json& modulesDef)
 {
-	clear();
-	if (modules.is_array()) {
-		for (auto& it : modules.array_items())
-			emplace(it.string_value(), it.string_value());
+	modules.clear();
+	if (modulesDef.is_array()) {
+		for (auto& it : modulesDef.array_items())
+			modules.emplace(it.string_value(), it.string_value());
 	}
 }
 
 void Modules::reload(const string& name)
 {
-	erase(name);
-	emplace(name, name);
+	modules.erase(name);
+	modules.emplace(name, name);
 }
 
 bool Modules::autoReload()
 {
-	for (auto& it : *this) {
+	for (auto& it : modules) {
 		string name = it.second.name;
 		string path = getPath(name);
 		if (timestamp(path) > it.second.mtime) {
@@ -72,14 +72,14 @@ bool Modules::autoReload()
 
 void Modules::call(uint msg, void* param)
 {
-	for (auto& it : *this)
+	for (auto& it : modules)
 		if (it.second.func && it.second.enabled)
 			it.second.func(msg, param);
 }
 
 void Modules::call(const string& module, uint msg, void* param)
 {
-	const auto it = find(module);
-	if (it != end() && it->second.func && it->second.enabled)
+	const auto it = modules.find(module);
+	if (it != modules.end() && it->second.func && it->second.enabled)
 		it->second.func(msg, param);
 }
