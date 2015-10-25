@@ -164,11 +164,6 @@ EXPORT void ModuleFunc(uint msg, void* param)
 
 			break;
 		}
-		case $id(GENERATE_LEVEL):
-		{
-			startNextLevel(game);
-			break;
-		}
 	}
 }
 

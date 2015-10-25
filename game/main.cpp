@@ -279,9 +279,6 @@ int main(int argc, char* argv[])
 						body.setLinearVelocity(convert(vel));
 					}
 				}
-				if (ImGui::Button("Generate skyrunner level")) {
-					modules.call("skyrunner", $id(GENERATE_LEVEL), &game);
-				}
 			}
 		}
 		if (devtools)
