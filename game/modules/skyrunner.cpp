@@ -25,7 +25,7 @@ static enum {
 	MENU_OPTIONS
 } menuState = MENU_MAIN;
 
-void generatePole(const Json& block, vec3 pos, SceneLoader& loader, Resources& resources) {
+static void generatePole(const Json& block, vec3 pos, SceneLoader& loader, Resources& resources) {
 	for (int i = 0; i < 10; ++i) {
 		pos.y -= 1.f;
 		Entity e = loader.instantiate(block, resources);
@@ -33,12 +33,12 @@ void generatePole(const Json& block, vec3 pos, SceneLoader& loader, Resources& r
 	}
 }
 
-void generateLevel1(Game& game, vec3 start);
-void generateLevel2(Game& game, vec3 start);
-void generateLevel3(Game& game, vec3 start);
+static void generateLevel1(Game& game, vec3 start);
+static void generateLevel2(Game& game, vec3 start);
+static void generateLevel3(Game& game, vec3 start);
 
 
-void startNextLevel(Game& game)
+static void startNextLevel(Game& game)
 {
 	std::srand(std::time(0));
 	// TODO: Simplify
@@ -63,13 +63,13 @@ void startNextLevel(Game& game)
 	levelStarted = true;
 }
 
-void doMainMenu(Game& game)
+static void doMainMenu(Game& game)
 {
 	ImGui::SetNextWindowPosCenter();
 	ImGui::Begin("##SkyrunnerMenu", NULL, ImGuiSystem::MinimalWindow);
 	{
 		ScopedFont sf(game.entities, $id(skyrunner_big));
-		ImGui::Text("SkyRunner");
+		ImGui::Text("SkyRunner!!!");
 	}{
 		ScopedFont sf(game.entities, $id(skyrunner_menu));
 		ImVec2 bsize(300.f, 0.f);
@@ -86,9 +86,9 @@ void doMainMenu(Game& game)
 			if (ImGui::Button("Exit", bsize))
 				std::exit(0);
 		} else if (menuState == MENU_HELP) {
-			ImGui::Text("Run to the end as fast as you can.");
-			ImGui::Text("Look around: mouse");
-			ImGui::Text("Move around: arrow keys");
+			ImGui::Text("Run to the end as\nfast as you can.");
+			ImGui::Text("Look: mouse");
+			ImGui::Text("Move: arrow keys");
 			ImGui::Text("Jump: space");
 			if (ImGui::Button("Back", bsize))
 				menuState = MENU_MAIN;
