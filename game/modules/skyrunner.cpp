@@ -89,6 +89,7 @@ void doMainMenu(Game& game)
 			if (ImGui::Button("Back", bsize))
 				menuState = MENU_MAIN;
 		} else if (menuState == MENU_OPTIONS) {
+			game.entities.get_system<ModuleSystem>().call("settings", $id(DRAW_SETTINGS_MENU), &game);
 			if (ImGui::Button("Back", bsize))
 				menuState = MENU_MAIN;
 		}

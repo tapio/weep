@@ -196,39 +196,7 @@ int main(int argc, char* argv[])
 				ImGui::SliderFloat("Jump force", &controller.jumpForce, 0.0f, 10000.0f);
 			}
 			if (ImGui::CollapsingHeader("Settings")) {
-				bool vsync = game.engine.vsync();
-				bool oldVsync = vsync;
-				ImGui::Checkbox("V-sync", &vsync);
-				if (vsync != oldVsync)
-					game.engine.vsync(vsync);
-				ImGui::SameLine();
-				bool fullscreen = game.engine.fullscreen();
-				bool oldFullscreen = fullscreen;
-				ImGui::Checkbox("Fullscreen", &fullscreen);
-				if (fullscreen != oldFullscreen) {
-					game.engine.fullscreen(fullscreen);
-					renderer.device().resizeRenderTargets();
-				}
-				float volume = audio.soloud->getGlobalVolume();
-				float oldVolume = volume;
-				ImGui::SliderFloat("Volume", &volume, 0.f, 1.25f);
-				if (volume != oldVolume)
-					audio.soloud->setGlobalVolume(volume);
-
-				int oldMsaa = Engine::settings["renderer"]["msaa"].number_value();
-				float msaa = log2(oldMsaa);
-				ImGui::SliderFloat("MSAA", &msaa, 0.f, 3.f, "%.0f");
-				int newMsaa = powf(2, msaa);
-				ImGui::SameLine(); ImGui::Text("%dx", newMsaa);
-				if (newMsaa != oldMsaa) {
-					// Aargh, I want mutable Json
-					Json::object settings = Engine::settings.object_items();
-					Json::object rendererSettings = settings["renderer"].object_items();
-					rendererSettings["msaa"] = Json(newMsaa);
-					settings["renderer"] = Json(rendererSettings);
-					Engine::settings = Json(settings);
-					renderer.device().resizeRenderTargets();
-				}
+				modules.call("settings", $id(DRAW_SETTINGS_MENU), &game);
 			}
 			if (ImGui::CollapsingHeader("Environment")) {
 				Environment& env = renderer.env();

@@ -1,0 +1,60 @@
+#include "common.hpp"
+#include "renderer.hpp"
+#include "glrenderer/renderdevice.hpp"
+#include "audio.hpp"
+#include "gui.hpp"
+#include "../game.hpp"
+
+
+EXPORT void ModuleFunc(uint msg, void* param)
+{
+	Game& game = *static_cast<Game*>(param);
+	switch (msg) {
+		case $id(INIT):
+		{
+			ImGuiSystem& imgui = game.entities.get_system<ImGuiSystem>();
+			imgui.applyInternalState();
+			break;
+		}
+		case $id(DRAW_SETTINGS_MENU):
+		{
+			RenderSystem& renderer = game.entities.get_system<RenderSystem>();
+			AudioSystem& audio = game.entities.get_system<AudioSystem>();
+
+			bool vsync = game.engine.vsync();
+			bool oldVsync = vsync;
+			ImGui::Checkbox("V-sync", &vsync);
+			if (vsync != oldVsync)
+				game.engine.vsync(vsync);
+			ImGui::SameLine();
+			bool fullscreen = game.engine.fullscreen();
+			bool oldFullscreen = fullscreen;
+			ImGui::Checkbox("Fullscreen", &fullscreen);
+			if (fullscreen != oldFullscreen) {
+				game.engine.fullscreen(fullscreen);
+				renderer.device().resizeRenderTargets();
+			}
+			float volume = audio.soloud->getGlobalVolume();
+			float oldVolume = volume;
+			ImGui::SliderFloat("Volume", &volume, 0.f, 1.25f);
+			if (volume != oldVolume)
+				audio.soloud->setGlobalVolume(volume);
+
+			int oldMsaa = Engine::settings["renderer"]["msaa"].number_value();
+			float msaa = log2(oldMsaa);
+			ImGui::SliderFloat("MSAA", &msaa, 0.f, 3.f, "%.0f");
+			int newMsaa = powf(2, msaa);
+			ImGui::SameLine(); ImGui::Text("%dx", newMsaa);
+			if (newMsaa != oldMsaa) {
+				// Aargh, I want mutable Json
+				Json::object settings = Engine::settings.object_items();
+				Json::object rendererSettings = settings["renderer"].object_items();
+				rendererSettings["msaa"] = Json(newMsaa);
+				settings["renderer"] = Json(rendererSettings);
+				Engine::settings = Json(settings);
+				renderer.device().resizeRenderTargets();
+			}
+			break;
+		}
+	}
+}
