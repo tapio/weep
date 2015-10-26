@@ -47,26 +47,29 @@ void ModuleSystem::load(const Json& modulesDef, bool clear)
 		modules.clear();
 	if (modulesDef.is_array()) {
 		for (auto& it : modulesDef.array_items()) {
-			if (!modules.emplace(it.string_value(), it.string_value()).second)
+			if (!modules.emplace(id::hash(it.string_value()), it.string_value()).second)
 				logWarning("Module %s already loaded", it.string_value().c_str());
 		}
 	}
 }
 
-void ModuleSystem::reload(string name) // Needs to be by value to support passing module.name
+void ModuleSystem::reload(uint module)
 {
-	modules.erase(name);
-	modules.emplace(name, name);
+	const auto it = modules.find(module);
+	if (it != modules.end()) {
+		string name = it->second.name;
+		modules.erase(it);
+		modules.emplace(module, name);
+	}
 }
 
 bool ModuleSystem::autoReload()
 {
 	for (auto& it : modules) {
-		string name = it.second.name;
-		string path = getPath(name);
+		string path = getPath(it.second.name);
 		if (timestamp(path) > it.second.mtime) {
 			std::this_thread::sleep_for(std::chrono::milliseconds(300));
-			reload(name);
+			reload(it.first);
 			return true; // Iterators are now invalid
 		}
 	}
@@ -80,7 +83,7 @@ void ModuleSystem::call(uint msg, void* param)
 			it.second.func(msg, param);
 }
 
-void ModuleSystem::call(const string& module, uint msg, void* param)
+void ModuleSystem::call(uint module, uint msg, void* param)
 {
 	const auto it = modules.find(module);
 	if (it != modules.end() && it->second.func && it->second.enabled)

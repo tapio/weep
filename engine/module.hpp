@@ -19,11 +19,11 @@ class ModuleSystem : public System
 {
 public:
 	void load(const Json& modules, bool clear = true);
-	void reload(string name);
+	void reload(uint module);
 	bool autoReload();
 
 	void call(uint msg, void* param = nullptr);
-	void call(const string& module, uint msg, void* param = nullptr);
+	void call(uint module, uint msg, void* param = nullptr);
 
-	std::map<string, Module> modules = {};
+	std::map<uint, Module> modules = {};
 };

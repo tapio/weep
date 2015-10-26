@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
 				ImGui::SliderFloat("Jump force", &controller.jumpForce, 0.0f, 10000.0f);
 			}
 			if (ImGui::CollapsingHeader("Settings")) {
-				modules.call("settings", $id(DRAW_SETTINGS_MENU), &game);
+				modules.call($id(settings), $id(DRAW_SETTINGS_MENU), &game);
 			}
 			if (ImGui::CollapsingHeader("Environment")) {
 				Environment& env = renderer.env();
@@ -218,9 +218,9 @@ int main(int argc, char* argv[])
 				ImGui::Checkbox("Auto Reload##Modules", &autoReloadModules);
 				ImGui::Text("Active modules:");
 				for (auto& it : modules.modules) {
-					ImGui::Checkbox(it.first.c_str(), &it.second.enabled);
+					ImGui::Checkbox(it.second.name.c_str(), &it.second.enabled);
 					ImGui::SameLine();
-					if (ImGui::Button(("Reload##" + it.first).c_str())) {
+					if (ImGui::Button(("Reload##" + it.second.name).c_str())) {
 						modules.reload(it.first);
 						break; // Must break as iterator will be invalidated
 					}
