@@ -38,7 +38,7 @@ Module::~Module()
 		SDL_UnloadObject(handle);
 		handle = 0;
 		logDebug("Unloaded module %s", name.c_str());
-	}
+	} else logWarning("Invalid module handle when destructing %s", name.c_str());
 }
 
 void ModuleSystem::load(const Json& modulesDef, bool clear)
@@ -46,8 +46,10 @@ void ModuleSystem::load(const Json& modulesDef, bool clear)
 	if (clear)
 		modules.clear();
 	if (modulesDef.is_array()) {
-		for (auto& it : modulesDef.array_items())
-			modules.emplace(it.string_value(), it.string_value());
+		for (auto& it : modulesDef.array_items()) {
+			if (!modules.emplace(it.string_value(), it.string_value()).second)
+				logWarning("Module %s already loaded", it.string_value().c_str());
+		}
 	}
 }
 
