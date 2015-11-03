@@ -52,6 +52,13 @@ void main()
 	if (bloomThreshold > 0)
 		hdrColor += texture(bloomMap, inData.texcoord).rgb; // Bloom
 
+	// Vignette
+	if (vignette.x > 0) {
+		float d = distance(inData.texcoord, vec2(0.5, 0.5));
+		float vig = smoothstep(vignette.x, vignette.x - vignette.y, d);
+		hdrColor = mix(hdrColor, hdrColor * vig, vignette.z);
+	}
+
 #if 0 // Visualize depth
 	hdrColor = vec3(linearizeDepth(texture(depthMap, inData.texcoord).r) / far);
 #endif

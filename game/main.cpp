@@ -208,6 +208,7 @@ int main(int argc, char* argv[])
 				ImGui::SliderFloat3("Sun Dir", (float*)&env.sunDirection, -3.f, 3.f);
 				ImGui::ColorEdit3("Fog Color", (float*)&env.fogColor);
 				ImGui::SliderFloat("Fog Density", &env.fogDensity, 0.0f, 1.0f);
+				ImGui::SliderFloat3("Vignette", (float*)&env.vignette, 0.0f, 1.0f);
 			}
 			if (ImGui::CollapsingHeader("Modules")) {
 				if (ImGui::Button("Reload all##Modules")) {
