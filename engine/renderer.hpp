@@ -18,7 +18,6 @@ public:
 
 	Environment& env() { return m_env; }
 
-	void dumpStats() const;
 	void toggleWireframe();
 
 	RenderDevice& device() { return *m_device; }

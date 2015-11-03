@@ -48,16 +48,6 @@ void RenderSystem::reset(Entities& entities)
 	});
 }
 
-void RenderSystem::dumpStats() const
-{
-	RenderDevice::Stats& stats = m_device->stats;
-	logDebug("RenderDevice frame stats:\n"
-		"\ttriangles:  %d\n"
-		"\tprograms:   %d\n"
-		"\tdraw calls: %d",
-		stats.triangles, stats.programs, stats.drawCalls);
-}
-
 void RenderSystem::toggleWireframe()
 {
 	m_device->toggleWireframe();
