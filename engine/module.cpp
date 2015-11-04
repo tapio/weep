@@ -5,7 +5,9 @@
 
 static inline string getPath(const string& moduleName)
 {
-#if defined(WIN32) || defined(_WIN32)
+#if defined(__MINGW32__)
+	return "./lib" + moduleName + ".dll";
+#elif defined(WIN32) || defined(_WIN32)
 	return moduleName + ".dll";
 #else
 	return "./lib" + moduleName + ".so";
