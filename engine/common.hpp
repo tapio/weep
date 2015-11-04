@@ -50,6 +50,8 @@ string readFile(const string& path);
 string replace(string str, const string& search, const string& replace);
 uint timestamp(const string& path);
 
+void sleep(uint ms);
+
 #define NONCOPYABLE(T) \
 	T(T&&) = default; \
 	T(const T&) = delete; \

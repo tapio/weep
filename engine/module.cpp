@@ -68,7 +68,7 @@ bool ModuleSystem::autoReload()
 	for (auto& it : modules) {
 		string path = getPath(it.second.name);
 		if (timestamp(path) > it.second.mtime) {
-			std::this_thread::sleep_for(std::chrono::milliseconds(300));
+			sleep(300);
 			reload(it.first);
 			return true; // Iterators are now invalid
 		}

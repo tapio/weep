@@ -2,8 +2,15 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <thread>
+#include <chrono>
 #include <SDL2/SDL.h>
 #include <sys/stat.h>
+
+#if defined(_WIN32) || defined(WIN32)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h> // For Sleep
+#endif
 
 string vlformat(const char* format, va_list vl)
 {
@@ -103,4 +110,13 @@ uint timestamp(const string& path)
 		return buf.st_mtime;
 #endif
 	return 0;
+}
+
+void sleep(uint ms)
+{
+#if defined(_WIN32) || defined(WIN32)
+	Sleep(ms);
+#else
+	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+#endif
 }
