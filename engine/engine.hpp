@@ -8,6 +8,7 @@ public:
 	~Engine();
 
 	void init(const string& configPath);
+	void moduleInit(); // Call in each module's INIT handler
 	void deinit();
 	void swap();
 

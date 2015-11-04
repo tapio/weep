@@ -11,6 +11,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 	switch (msg) {
 		case $id(INIT):
 		{
+			game.engine.moduleInit();
 			ImGuiSystem& imgui = game.entities.get_system<ImGuiSystem>();
 			imgui.applyInternalState();
 			imgui.loadFont("logo-font", game.resources.findPath("fonts/Orbitron-Regular.ttf"), 14.f);

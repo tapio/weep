@@ -69,11 +69,7 @@ void Engine::init(const string& configPath)
 		panic(SDL_GetError());
 	}
 
-#ifdef _WIN32
-	if (!gladLoadGL()) {
-		panic("Failed to load OpenGL functions");
-	}
-#endif
+	moduleInit();
 
 	vsync(settings["renderer"]["vsync"].bool_value());
 
@@ -81,6 +77,16 @@ void Engine::init(const string& configPath)
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
 	logInfo("OpenGL Context:  %d.%d", major, minor);
+}
+
+void Engine::moduleInit()
+{
+	s_singleton = this;
+#ifdef _WIN32
+	if (!gladLoadGL()) {
+		panic("Failed to load OpenGL functions");
+	}
+#endif
 }
 
 void Engine::deinit()

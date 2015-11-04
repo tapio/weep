@@ -10,6 +10,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 	switch (msg) {
 		case $id(INIT):
 		{
+			game.engine.moduleInit();
 			ASSERT($id(Qwerty#$%) == id::hash("Qwerty#$%"));
 			ASSERT($id(Qwerty#$%) != 0);
 			ASSERT(id::gen("") == id::hash(""));
@@ -17,6 +18,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		}
 		case $id(UPDATE):
 		{
+#ifndef _WIN32 // TODO: Crashes with MinGW build
 			int lightIndex = 0;
 			game.entities.for_each<Light>([&](Entity e, Light& light) {
 				/**/ if (lightIndex == 0) light.position.x = 5.f * glm::sin(Engine::timems() / 800.f);
@@ -28,6 +30,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					e.get<Model>().materials[0]->emissive = light.color * 1.f;
 				lightIndex++;
 			});
+#endif
 			break;
 		}
 	}
