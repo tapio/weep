@@ -72,7 +72,9 @@ foreach(GAME_MODULE_FILE ${MODULES_SOURCES})
 	if (WIN32) # On Linux, somehow stuff work without explicitly linking
 		target_link_libraries(${GAME_MODULE_NAME} game engine deps ${LIBS})
 	endif()
-	install(TARGETS ${GAME_MODULE_NAME} DESTINATION ${INSTALL_DIR}/bin
+	install(TARGETS ${GAME_MODULE_NAME}
+			RUNTIME DESTINATION ${INSTALL_DIR}/bin
+			LIBRARY DESTINATION ${INSTALL_DIR}/bin
 			PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
 						GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ)
 endforeach()
