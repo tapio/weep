@@ -17,7 +17,9 @@ endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 	message(STATUS "GCC detected, adding compile flags")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -ffast-math -march=native -Wall -Wextra")
-	if(NOT WIN32)
+	if(WIN32)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--export-all-symbols")
+	else()
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 	endif()
 endif()
@@ -64,14 +66,17 @@ set(INSTALL_DIR weep)
 
 add_library(deps STATIC ${DEPS_SOURCES})
 add_library(engine STATIC ${ENGINE_SOURCES})
-add_library(game STATIC ${GAME_SOURCES})
 
+add_executable(${EXE_NAME} ${GAME_SOURCES} ${SHADER_SOURCES} ${CONFIG_SOURCES})
+set_target_properties(${EXE_NAME} PROPERTIES ENABLE_EXPORTS ON POSITION_INDEPENDENT_CODE ON)
+target_link_libraries(${EXE_NAME} engine deps ${LIBS})
+install(TARGETS ${EXE_NAME} DESTINATION ${INSTALL_DIR}/bin)
+
+# Game module plugins
 foreach(GAME_MODULE_FILE ${MODULES_SOURCES})
 	get_filename_component(GAME_MODULE_NAME ${GAME_MODULE_FILE} NAME_WE)
-	add_library(${GAME_MODULE_NAME} SHARED ${GAME_MODULE_FILE})
-	if (WIN32) # On Linux, somehow stuff work without explicitly linking
-		target_link_libraries(${GAME_MODULE_NAME} game engine deps ${LIBS})
-	endif()
+	add_library(${GAME_MODULE_NAME} MODULE ${GAME_MODULE_FILE})
+	target_link_libraries(${GAME_MODULE_NAME} ${EXE_NAME})
 	install(TARGETS ${GAME_MODULE_NAME}
 			RUNTIME DESTINATION ${INSTALL_DIR}/bin
 			LIBRARY DESTINATION ${INSTALL_DIR}/bin
@@ -79,9 +84,6 @@ foreach(GAME_MODULE_FILE ${MODULES_SOURCES})
 						GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ)
 endforeach()
 
-add_executable(${EXE_NAME} ${GAME_SOURCES} ${SHADER_SOURCES} ${CONFIG_SOURCES})
-target_link_libraries(${EXE_NAME} engine deps ${LIBS})
-install(TARGETS ${EXE_NAME} DESTINATION ${INSTALL_DIR}/bin)
 
 if(UNIX AND NOT APPLE)
 	configure_file("WeepEngine.cmake.desktop" "WeepEngine.desktop")
