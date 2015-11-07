@@ -10,7 +10,7 @@ endif()
 # Add a sensible build type default and warning because empty means no optimization and no debug info.
 if(NOT CMAKE_BUILD_TYPE)
 	message("WARNING: CMAKE_BUILD_TYPE is not defined!\n         Defaulting to CMAKE_BUILD_TYPE=RelWithDebInfo.\n         Use ccmake to set a proper value.")
-	SET(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
+	set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif()
 
 # Enable C++11 support and other compiler flags...
@@ -57,6 +57,7 @@ file(GLOB_RECURSE CONFIG_SOURCES "data/*.json")
 set_source_files_properties(${SHADER_SOURCES} PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties(${CONFIG_SOURCES} PROPERTIES HEADER_FILE_ONLY TRUE)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 link_directories(${PROJECT_BINARY_DIR})
@@ -68,8 +69,8 @@ add_library(deps STATIC ${DEPS_SOURCES})
 add_library(engine STATIC ${ENGINE_SOURCES})
 
 add_executable(${EXE_NAME} ${GAME_SOURCES} ${SHADER_SOURCES} ${CONFIG_SOURCES})
-set_target_properties(${EXE_NAME} PROPERTIES ENABLE_EXPORTS ON POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(${EXE_NAME} engine deps ${LIBS})
+set_target_properties(${EXE_NAME} PROPERTIES ENABLE_EXPORTS ON)
+target_link_libraries(${EXE_NAME} PRIVATE engine deps ${LIBS})
 install(TARGETS ${EXE_NAME} DESTINATION ${INSTALL_DIR}/bin)
 
 # Game module plugins
