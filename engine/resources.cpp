@@ -86,10 +86,13 @@ Resources::Resources()
 
 Resources::~Resources()
 {
+	if (m_loadingThread.joinable())
+		m_loadingThread.join();
 }
 
 void Resources::reset()
 {
+	ASSERT(!m_loadingActive);
 	// Paths are not dropped
 	m_texts.clear();
 	m_binaries.clear();
