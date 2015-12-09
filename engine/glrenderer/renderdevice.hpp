@@ -65,6 +65,7 @@ private:
 	GPUGeometry m_fullscreenQuad;
 	GPUGeometry m_skyboxCube;
 	Material m_skyboxMat;
+	Texture m_placeholderTex;
 
 	uint m_program = 0;
 	bool m_wireframe = false;

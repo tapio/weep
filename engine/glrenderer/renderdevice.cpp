@@ -66,6 +66,15 @@ RenderDevice::RenderDevice(Resources& resources)
 	glVertexAttribPointer(ATTR_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glDisableVertexAttribArray(ATTR_NORMAL);
 
+	// Create placeholder texture
+	Image temp;
+	temp.width = 1;
+	temp.height = 1;
+	temp.channels = 3;
+	temp.data = {64, 64, 64};
+	m_placeholderTex.create();
+	m_placeholderTex.upload(temp);
+
 	resizeRenderTargets();
 
 	m_commonBlock.create();
@@ -297,9 +306,11 @@ bool RenderDevice::uploadMaterial(Material& material)
 
 	bool dirty = false;
 	for (uint i = 0; i < material.map.size(); ++i) {
-		if (!material.map[i] || material.tex[i])
+		bool goodTex = material.tex[i] && material.tex[i] != m_placeholderTex.id;
+		if (goodTex || !material.map[i])
 			continue;
-		if (!material.tex[i] && material.map[i] && material.map[i]->data.empty()) {
+		if (!goodTex && material.map[i] && material.map[i]->data.empty()) {
+			material.tex[i] = m_placeholderTex.id;
 			dirty = true;
 			continue;
 		}
