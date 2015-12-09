@@ -74,7 +74,7 @@ namespace {
 		ASSERT(def.is_object());
 		setString(material->shaderName, def["shaderName"]);
 		if (def["tessellate"].bool_value())
-			material->tessellate = true;
+			material->flags |= Material::TESSELLATE;
 		setColor(material->ambient, def["ambient"]);
 		setColor(material->diffuse, def["diffuse"]);
 		setColor(material->specular, def["specular"]);
@@ -87,23 +87,23 @@ namespace {
 			material->uvRepeat = toVec2(def["uvRepeat"]);
 
 		if (!def["diffuseMap"].is_null()) {
-			material->map[Material::DIFFUSE_MAP] = resources.getImage(def["diffuseMap"].string_value());
+			material->map[Material::DIFFUSE_MAP] = resources.getImageAsync(def["diffuseMap"].string_value());
 			material->map[Material::DIFFUSE_MAP]->sRGB = true;
 		}
 		if (!def["specularMap"].is_null()) {
-			material->map[Material::SPECULAR_MAP] = resources.getImage(def["specularMap"].string_value());
+			material->map[Material::SPECULAR_MAP] = resources.getImageAsync(def["specularMap"].string_value());
 			material->map[Material::SPECULAR_MAP]->sRGB = true;
 		}
 		if (!def["emissionMap"].is_null()) {
-			material->map[Material::EMISSION_MAP] = resources.getImage(def["emissionMap"].string_value());
+			material->map[Material::EMISSION_MAP] = resources.getImageAsync(def["emissionMap"].string_value());
 			material->map[Material::EMISSION_MAP]->sRGB = true;
 		}
 		if (!def["normalMap"].is_null())
-			material->map[Material::NORMAL_MAP] = resources.getImage(def["normalMap"].string_value());
+			material->map[Material::NORMAL_MAP] = resources.getImageAsync(def["normalMap"].string_value());
 		if (!def["heightMap"].is_null())
-			material->map[Material::HEIGHT_MAP] = resources.getImage(def["heightMap"].string_value());
+			material->map[Material::HEIGHT_MAP] = resources.getImageAsync(def["heightMap"].string_value());
 		if (!def["reflectionMap"].is_null())
-			material->map[Material::REFLECTION_MAP] = resources.getImage(def["reflectionMap"].string_value());
+			material->map[Material::REFLECTION_MAP] = resources.getImageAsync(def["reflectionMap"].string_value());
 
 		return material;
 	}
@@ -201,6 +201,8 @@ void SceneLoader::load(const string& path, Resources& resources)
 		camera.makePerspective(45, ar, 0.1, 1000);
 		camera.view = glm::lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
 	}
+
+	resources.startAsyncLoading();
 
 	uint t1 = Engine::timems();
 	logDebug("Loaded scene in %dms with %d models, %d bodies, %d lights, %d prefabs", t1 - t0, numModels, numBodies, numLights, prefabs.size());

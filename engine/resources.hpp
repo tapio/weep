@@ -1,5 +1,6 @@
 #pragma once
 #include "common.hpp"
+#include <thread>
 
 struct Image;
 struct Geometry;
@@ -24,8 +25,11 @@ public:
 	string getText(const string& path, CachePolicy cache);
 	std::vector<char>& getBinary(const string& path);
 	Image* getImage(const string& path);
+	Image* getImageAsync(const string& path);
 	Geometry* getGeometry(const string& path);
 	Geometry* getHeightmap(const string& path);
+
+	void startAsyncLoading();
 
 private:
 	std::vector<string> m_paths;
@@ -33,4 +37,8 @@ private:
 	std::map<string, std::unique_ptr<std::vector<char>>> m_binaries;
 	std::map<string, std::unique_ptr<Image>> m_images;
 	std::map<string, std::unique_ptr<Geometry>> m_geoms;
+
+	volatile bool m_loadingActive = false;
+	std::vector<Image*> m_loadQueue;
+	std::thread m_loadingThread;
 };

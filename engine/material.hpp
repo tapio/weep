@@ -27,7 +27,12 @@ struct Material
 	std::vector<Image*> map = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 	std::vector<uint> tex = { 0, 0, 0, 0, 0, 0, 0 };
 
-	bool tessellate = false;
+	enum Flags {
+		TESSELLATE = 1 << 0,
+		DIRTY_MAPS = 2 << 0,
+	};
+	uint flags = DIRTY_MAPS;
+
 	string shaderName = "";
 	int shaderId = -1; // Automatic
 };

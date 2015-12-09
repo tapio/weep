@@ -11,5 +11,6 @@ struct Image {
 	int height = 0;
 	int channels = 0;
 	bool sRGB = false;
+	std::string path;
 	std::vector<unsigned char> data;
 };

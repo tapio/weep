@@ -8,6 +8,7 @@
 #include "engine.hpp"
 #include "resources.hpp"
 #include "environment.hpp"
+#include "image.hpp"
 
 static GLenum s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
 
@@ -294,9 +295,14 @@ bool RenderDevice::uploadMaterial(Material& material)
 	}
 	material.shaderId = it->second;
 
+	bool dirty = false;
 	for (uint i = 0; i < material.map.size(); ++i) {
 		if (!material.map[i] || material.tex[i])
 			continue;
+		if (!material.tex[i] && material.map[i] && material.map[i]->data.empty()) {
+			dirty = true;
+			continue;
+		}
 		Texture& tex = m_textures[material.map[i]];
 		if (!tex.valid()) {
 			tex.anisotropy = caps.maxAnisotropy;
@@ -305,6 +311,8 @@ bool RenderDevice::uploadMaterial(Material& material)
 		}
 		material.tex[i] = tex.id;
 	}
+	if (!dirty)
+		material.flags &= ~Material::DIRTY_MAPS;
 	return true;
 }
 
@@ -370,7 +378,7 @@ void RenderDevice::render(Model& model, Transform& transform)
 	for (auto& batch : geom.batches) {
 
 		Material& mat = *model.materials[batch.materialIndex];
-		if (mat.shaderId < 0)
+		if (mat.shaderId < 0 || (mat.flags & Material::DIRTY_MAPS))
 			uploadMaterial(mat); // TODO: Should not be here!
 
 		uint programId = m_shaders[mat.shaderId].id;
@@ -402,7 +410,7 @@ void RenderDevice::render(Model& model, Transform& transform)
 
 		GPUGeometry& gpuData = m_geometries[batch.renderId];
 		glBindVertexArray(gpuData.vao);
-		uint mode = mat.tessellate ? GL_PATCHES : GL_TRIANGLES;
+		uint mode = (mat.flags & Material::TESSELLATE) ? GL_PATCHES : GL_TRIANGLES;
 		if (gpuData.ebo) {
 			glDrawElements(mode, batch.indices.size(), GL_UNSIGNED_INT, 0);
 			stats.triangles += batch.indices.size() / 3;

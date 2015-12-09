@@ -7,9 +7,10 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image/stb_image.h>
 
-bool Image::load(const std::string& path, int forceChannels)
+bool Image::load(const std::string& path_, int forceChannels)
 {
 	START_MEASURE(loadTimeMs)
+	path = path_;
 	unsigned char *pixels = stbi_load(path.c_str(), &width, &height, &channels, forceChannels);
 	if (!pixels) {
 		logError("Failed to load image %s", path.c_str());

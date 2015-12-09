@@ -173,6 +173,18 @@ Image* Resources::getImage(const string& path)
 	return ptr.get();
 }
 
+Image*Resources::getImageAsync(const std::string& path)
+{
+	ASSERT(!m_loadingActive);
+	auto& ptr = m_images[path];
+	if (!ptr) {
+		ptr.reset(new Image());
+		ptr->path = findPath(path);
+		m_loadQueue.push_back(ptr.get());
+	}
+	return ptr.get();
+}
+
 Geometry* Resources::getGeometry(const string& path)
 {
 	auto& ptr = m_geoms[path];
@@ -185,4 +197,19 @@ Geometry* Resources::getHeightmap(const string& path)
 	auto& ptr = m_geoms[path];
 	if (!ptr) ptr.reset(new Geometry(*getImage(findPath(path))));
 	return ptr.get();
+}
+
+void Resources::startAsyncLoading()
+{
+	if (m_loadingActive || m_loadQueue.empty())
+		return;
+	if (m_loadingThread.joinable())
+		m_loadingThread.join();
+	m_loadingThread = std::thread([&]() {
+		m_loadingActive = true;
+		for (auto& it : m_loadQueue)
+			it->load(it->path, 4);
+		m_loadQueue.clear();
+		m_loadingActive = false;
+	});
 }
