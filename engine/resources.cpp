@@ -204,7 +204,7 @@ Geometry* Resources::getHeightmap(const string& path)
 
 void Resources::startAsyncLoading()
 {
-	if (m_loadingActive || m_loadQueue.empty())
+	if (m_loadQueue.empty())
 		return;
 	if (m_loadingThread.joinable())
 		m_loadingThread.join();

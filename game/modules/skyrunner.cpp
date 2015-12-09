@@ -216,6 +216,7 @@ static void generateLevel1(Game& game, vec3 pos)
 	Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
 	e.get<Transform>().setPosition(pos);
 	goalPos = pos + vec3(0, 1, 0);
+	game.resources.startAsyncLoading();
 }
 
 static void generateLevel2(Game& game, vec3 pos)
@@ -249,6 +250,7 @@ static void generateLevel2(Game& game, vec3 pos)
 	Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
 	e.get<Transform>().setPosition(pos);
 	goalPos = pos + vec3(0, 1, 0);
+	game.resources.startAsyncLoading();
 }
 
 static void generateLevel3(Game& game, vec3 pos)
@@ -282,4 +284,5 @@ static void generateLevel3(Game& game, vec3 pos)
 	Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
 	e.get<Transform>().setPosition(pos);
 	goalPos = pos + vec3(0, 1, 0);
+	game.resources.startAsyncLoading();
 }
