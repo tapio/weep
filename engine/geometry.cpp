@@ -17,6 +17,7 @@ namespace {
 
 Geometry::Geometry(const string& path)
 {
+	START_MEASURE(loadTimeMs);
 	uint lineNumber = 0;
 	std::string row;
 	std::ifstream file(path, std::ios::binary);
@@ -106,13 +107,14 @@ Geometry::Geometry(const string& path)
 	}
 	calculateBoundingSphere();
 	calculateBoundingBox();
-	logDebug("Loaded mesh %s with %d batches, bound r: %f",
-		path.c_str(), batches.size(), bounds.radius);
 	if (batch[0].normals.empty())
 		calculateNormals();
 	else normalizeNormals();
 	for (auto& batch : batches)
 		batch.setupAttributes();
+	END_MEASURE(loadTimeMs)
+	logDebug("Loaded mesh %s in %.1fms with %d batches, bound r: %f",
+		path.c_str(), loadTimeMs, batches.size(), bounds.radius);
 }
 
 Geometry::Geometry(const Image& heightmap)

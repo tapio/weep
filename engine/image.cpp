@@ -9,6 +9,7 @@
 
 bool Image::load(const std::string& path, int forceChannels)
 {
+	START_MEASURE(loadTimeMs)
 	unsigned char *pixels = stbi_load(path.c_str(), &width, &height, &channels, forceChannels);
 	if (!pixels) {
 		logError("Failed to load image %s", path.c_str());
@@ -20,5 +21,7 @@ bool Image::load(const std::string& path, int forceChannels)
 	unsigned n = width * height * channels;
 	data = std::vector<unsigned char>(pixels, pixels + n);
 	stbi_image_free(pixels);
+	END_MEASURE(loadTimeMs)
+	logDebug("Loaded image %s %dx%d in %.1fms", path.c_str(), width, height, loadTimeMs);
 	return true;
 }

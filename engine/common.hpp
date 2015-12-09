@@ -21,6 +21,7 @@
 #define SDL_ASSERT_LEVEL 2
 #include <SDL2/SDL_assert.h>
 #define ASSERT SDL_assert
+#include <SDL2/SDL_timer.h>
 #define ECS_ASSERT ASSERT
 #include <ecs/ecs.hpp>
 
