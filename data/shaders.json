@@ -31,6 +31,12 @@
 			"frag": "shaders/blur.frag"
 		}
 	},
+	"depth": {
+		"shaders" : {
+			"vert": "shaders/depth.vert",
+			"frag": "shaders/depth.frag"
+		}
+	},
 	"skybox": {
 		"defines": [
 			"USE_ENV_MAP"
