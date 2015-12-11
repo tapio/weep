@@ -25,6 +25,13 @@ static void debugCallback(GLenum /*source*/, GLenum type, GLuint id, GLenum seve
 	}
 }
 
+static const mat4 s_shadowBiasMatrix(
+	0.5f, 0.0f, 0.0f, 0.0f,
+	0.0f, 0.5f, 0.0f, 0.0f,
+	0.0f, 0.0f, 0.5f, 0.0f,
+	0.5f, 0.5f, 0.5f, 1.0f
+);
+
 RenderDevice::RenderDevice(Resources& resources)
 	: m_resources(resources)
 {
@@ -327,6 +334,76 @@ bool RenderDevice::uploadMaterial(Material& material)
 	return true;
 }
 
+// TODO: TEMP TEMP!!!
+static mat4 lightProjection;
+static mat4 lightView;
+
+void RenderDevice::setupShadowPass(const Camera& camera)
+{
+	ASSERT(m_env);
+	m_shadowFbo.bind();
+	glViewport(0, 0, m_shadowFbo.width, m_shadowFbo.height);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	m_program = m_shaders[m_shaderNames["depth"]].id;
+	glUseProgram(m_program);
+	// TODO: Configure
+	float size = 12.f, near = 0.1f, far = 20.f;
+	lightProjection = glm::ortho(-size, size, -size, size, near, far);
+
+	vec3 pos = camera.position + normalize(m_env->sunDirection) * 10.f;
+	lightView = glm::lookAt(pos, camera.position, vec3(0, 1, 0));
+
+	m_commonBlock.uniforms.projectionMatrix = lightProjection;
+	m_commonBlock.uniforms.viewMatrix = lightView;
+	/*m_commonBlock.uniforms.cameraPosition = m_env->sunDirection;
+	m_commonBlock.uniforms.globalAmbient = m_env->ambient;
+	m_commonBlock.uniforms.exposure = m_env->exposure;
+	m_commonBlock.uniforms.tonemap = m_env->tonemap;
+	m_commonBlock.uniforms.bloomThreshold = m_env->bloomThreshold;
+	m_commonBlock.uniforms.sunDirection = glm::normalize(m_env->sunDirection);
+	m_commonBlock.uniforms.sunColor = m_env->sunColor;
+	m_commonBlock.uniforms.fogColor = m_env->fogColor;
+	m_commonBlock.uniforms.fogDensity = m_env->fogDensity;
+	m_commonBlock.uniforms.near = camera.near;
+	m_commonBlock.uniforms.far = camera.far;
+	m_commonBlock.uniforms.vignette = m_env->vignette;*/
+	m_commonBlock.upload();
+}
+
+void RenderDevice::renderShadow(Model& model, Transform& transform)
+{
+	Geometry& geom = *model.geometry;
+
+	m_objectBlock.uniforms.modelMatrix = transform.matrix;
+	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_objectBlock.uniforms.modelMatrix;
+	m_objectBlock.uniforms.modelViewMatrix = modelView;
+	m_objectBlock.uniforms.normalMatrix = glm::inverseTranspose(modelView);
+	m_objectBlock.upload();
+
+	for (auto& batch : geom.batches) {
+
+		Material& mat = *model.materials[batch.materialIndex];
+		// TODO: Check material's shadow flag
+
+		if (batch.renderId == -1)
+			uploadGeometry(geom); // TODO: Should not be here!
+
+		GPUGeometry& gpuData = m_geometries[batch.renderId];
+		glBindVertexArray(gpuData.vao);
+		uint mode = (mat.flags & Material::TESSELLATE) ? GL_PATCHES : GL_TRIANGLES;
+		if (gpuData.ebo) {
+			glDrawElements(mode, batch.indices.size(), GL_UNSIGNED_INT, 0);
+			//stats.triangles += batch.indices.size() / 3;
+		} else {
+			glDrawArrays(mode, 0, batch.numVertices);
+			//stats.triangles += batch.numVertices / 3;
+		}
+		//++stats.drawCalls;
+	}
+	glBindVertexArray(0);
+	glutil::checkGL("Post shadow draw");
+}
+
 void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lights)
 {
 	ASSERT(m_env);
@@ -378,6 +455,7 @@ void RenderDevice::render(Model& model, Transform& transform)
 	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_objectBlock.uniforms.modelMatrix;
 	m_objectBlock.uniforms.modelViewMatrix = modelView;
 	m_objectBlock.uniforms.normalMatrix = glm::inverseTranspose(modelView);
+	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (lightProjection * (lightView * transform.matrix));
 	m_objectBlock.upload();
 
 	if (m_skyboxMat.shaderId != -1) {
@@ -385,6 +463,11 @@ void RenderDevice::render(Model& model, Transform& transform)
 		glActiveTexture(GL_TEXTURE10 + Material::ENV_MAP);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
 	}
+
+	// Shadow map texture
+	// TODO: Check if material uses shadow?
+	glActiveTexture(GL_TEXTURE17);
+	glBindTexture(GL_TEXTURE_2D, m_shadowFbo.tex[0]);
 
 	for (auto& batch : geom.batches) {
 

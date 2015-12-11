@@ -26,6 +26,9 @@ public:
 	bool uploadMaterial(Material& material);
 	void destroyGeometry(Geometry& geometry);
 
+	void setupShadowPass(const Camera& camera);
+	void renderShadow(Model& model, Transform& transform);
+
 	void preRender(const Camera& camera, const std::vector<Light>& lights);
 	void render(Model& model, Transform& transform);
 	void postRender();

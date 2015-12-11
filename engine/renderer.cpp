@@ -61,6 +61,13 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	entities.for_each<Light>([&](Entity, Light& light) {
 		lights.push_back(light);
 	});
+	m_device->setupShadowPass(camera);
+	entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
+		transform.updateMatrix();
+		// TODO: Shadow frustum culling
+		if (!model.materials.empty() /* && frustum.visible(transform, model) */)
+			m_device->renderShadow(model, transform);
+	});
 	m_device->preRender(camera, lights);
 	entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
 		transform.updateMatrix();

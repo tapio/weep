@@ -23,7 +23,7 @@ void FBO::create()
 	for (uint i = 0; i < numTextures; ++i) {
 		glBindTexture(texType, tex[i]);
 		bool depth = i == depthAttachment;
-		uint internalFormat = depth ? GL_DEPTH_COMPONENT24 : GL_RGB16F;
+		uint internalFormat = depth ? GL_DEPTH_COMPONENT : GL_RGB16F;
 		if (samples > 1)
 			glTexImage2DMultisample(texType, samples, internalFormat, width, height, GL_TRUE);
 		else {
