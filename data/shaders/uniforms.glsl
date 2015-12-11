@@ -24,6 +24,7 @@ UBO_PREFIX(UniformCommonBlock, 0)
 UBO_PREFIX(UniformObjectBlock, 1)
 	mat4 modelMatrix;
 	mat4 modelViewMatrix;
+	mat4 shadowMatrix;
 	mat4 normalMatrix; // Problems with alignment if sent as mat3
 };
 
@@ -70,6 +71,9 @@ layout(binding = 15) uniform sampler2D reflectionMap;
 #endif
 #ifdef USE_ENV_MAP
 layout(binding = 16) uniform samplerCube envMap;
+#endif
+#ifdef USE_SHADOW_MAP
+layout(binding = 17) uniform sampler2D shadowMap;
 #endif
 
 #endif // __cplusplus
