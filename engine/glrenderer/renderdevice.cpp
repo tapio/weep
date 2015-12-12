@@ -390,7 +390,7 @@ void RenderDevice::renderShadow(Model& model, Transform& transform)
 
 		GPUGeometry& gpuData = m_geometries[batch.renderId];
 		glBindVertexArray(gpuData.vao);
-		uint mode = (mat.flags & Material::TESSELLATE) ? GL_PATCHES : GL_TRIANGLES;
+		uint mode = GL_TRIANGLES;
 		if (gpuData.ebo) {
 			glDrawElements(mode, batch.indices.size(), GL_UNSIGNED_INT, 0);
 			//stats.triangles += batch.indices.size() / 3;

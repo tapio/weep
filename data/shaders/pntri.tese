@@ -34,7 +34,6 @@ void main()
 
 #ifdef USE_SHADOW_MAP
 	// Trivial shadowcoord
-	// TODO: Fix
 	vec4 sc0 = tc.x * inp[0].shadowcoord;
 	vec4 sc1 = tc.y * inp[1].shadowcoord;
 	vec4 sc2 = tc.z * inp[2].shadowcoord;
