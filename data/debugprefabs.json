@@ -17,7 +17,9 @@
 		"pointlight": {
 			"material": {
 				"shaderName": "color",
-				"emissive": 1.0
+				"emissive": 1.0,
+				"castShadow": false,
+				"receiveShadow": false
 			},
 			"geometry": "debug/sphere.obj",
 			"scale": 0.1

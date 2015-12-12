@@ -29,9 +29,11 @@ struct Material
 
 	enum Flags {
 		TESSELLATE = 1 << 0,
-		DIRTY_MAPS = 2 << 0,
+		DIRTY_MAPS = 1 << 1,
+		CAST_SHADOW = 1 << 2,
+		RECEIVE_SHADOW = 1 << 3
 	};
-	uint flags = DIRTY_MAPS;
+	uint flags = DIRTY_MAPS | CAST_SHADOW | RECEIVE_SHADOW;
 
 	string shaderName = "";
 	int shaderId = -1; // Automatic

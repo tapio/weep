@@ -55,6 +55,13 @@ namespace {
 			dst = (T)src.number_value();
 	}
 
+	template<typename T> void setFlag(T& dst, uint flag, const Json& src) {
+		if (src.is_bool()) {
+			if (src.bool_value()) dst |= flag;
+			else dst &= ~flag;
+		}
+	}
+
 	void setVec3(vec3& dst, const Json& src) {
 		if (!src.is_null())
 			dst = toVec3(src);
@@ -73,8 +80,9 @@ namespace {
 	Material* parseMaterial(Material* material, const Json& def, Resources& resources) {
 		ASSERT(def.is_object());
 		setString(material->shaderName, def["shaderName"]);
-		if (def["tessellate"].bool_value())
-			material->flags |= Material::TESSELLATE;
+		setFlag(material->flags, Material::TESSELLATE, def["tessellate"]);
+		setFlag(material->flags, Material::CAST_SHADOW, def["castShadow"]);
+		setFlag(material->flags, Material::RECEIVE_SHADOW, def["receiveShadow"]);
 		setColor(material->ambient, def["ambient"]);
 		setColor(material->diffuse, def["diffuse"]);
 		setColor(material->specular, def["specular"]);

@@ -382,8 +382,9 @@ void RenderDevice::renderShadow(Model& model, Transform& transform)
 
 	for (auto& batch : geom.batches) {
 
-		//Material& mat = *model.materials[batch.materialIndex];
-		// TODO: Check material's shadow flag
+		Material& mat = *model.materials[batch.materialIndex];
+		if (!(mat.flags & Material::CAST_SHADOW))
+			continue;
 
 		if (batch.renderId == -1)
 			uploadGeometry(geom); // TODO: Should not be here!
