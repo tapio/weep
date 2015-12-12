@@ -347,7 +347,7 @@ void RenderDevice::setupShadowPass(const Camera& camera)
 	m_program = m_shaders[m_shaderNames["depth"]].id;
 	glUseProgram(m_program);
 	// TODO: Configure
-	float size = 12.f, near = 0.1f, far = 20.f;
+	float size = 20.f, near = 1.f, far = 50.f;
 	lightProjection = glm::ortho(-size, size, -size, size, near, far);
 
 	vec3 pos = camera.position + normalize(m_env->sunPosition) * 10.f;

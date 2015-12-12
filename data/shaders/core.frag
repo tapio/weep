@@ -90,13 +90,10 @@ vec2 parallax_mapping(vec2 texcoord, vec3 viewDir)
 float shadow_mapping()
 {
 	vec4 pos = input.shadowcoord;
-	if (input.shadowcoord.w < 0.0)
-		return 0.0;
-
 	vec3 projCoords = pos.xyz / pos.w;
 
-	//if (projCoords.z > 1.0)
-	//	return 0.0;
+	if (projCoords.z > 1.0)
+		return 0.0;
 	if (projCoords.x > 1.0 || projCoords.x < 0.0 || projCoords.y > 1.0 || projCoords.y < 0.0)
 		return 0.0;
 
