@@ -105,15 +105,27 @@ float shadow_mapping()
 	if (projCoords.x > 1.0 || projCoords.x < 0.0 || projCoords.y > 1.0 || projCoords.y < 0.0)
 		return 0.0;
 
-	// Get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-	float closestDepth = texture(shadowMap, projCoords.xy).r;
+	const float bias = 0.005;
 	// Get depth of current fragment from light's perspective
-	float currentDepth = projCoords.z;
-	// Check whether current frag pos is in shadow
-	float bias = 0.005;
-	float shadow = currentDepth - bias > closestDepth ? 1.0 : 0.0;
+	float currentDepth = projCoords.z - bias;
 
-	return shadow;
+#define USE_PCF
+#ifdef USE_PCF
+#define PCF_HALF_SIZE 2
+	float shadow = 0.0;
+	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+	for (int x = -PCF_HALF_SIZE; x <= PCF_HALF_SIZE; ++x) {
+		for (int y = -PCF_HALF_SIZE; y <= PCF_HALF_SIZE; ++y) {
+			float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+			shadow += currentDepth > pcfDepth ? 1.0 : 0.0;
+		}
+	}
+	const int totalSamples = (2 * PCF_HALF_SIZE + 1) * (2 * PCF_HALF_SIZE + 1);
+	return shadow / float(totalSamples);
+#else
+	float closestDepth = texture(shadowMap, projCoords.xy).r;
+	return currentDepth > closestDepth ? 1.0 : 0.0;
+#endif
 }
 #endif
 
