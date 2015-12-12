@@ -166,8 +166,8 @@ namespace {
 		setNumber(env.bloomIntensity, def["bloomIntensity"]);
 		setNumber(env.tonemap, def["tonemap"]);
 		setColor(env.ambient, def["ambient"]);
-		if (!def["sunDirection"].is_null())
-			env.sunDirection = toVec3(def["sunDirection"]);
+		if (!def["sunPosition"].is_null())
+			env.sunPosition = toVec3(def["sunPosition"]);
 		setColor(env.sunColor, def["sunColor"]);
 		setColor(env.fogColor, def["fogColor"]);
 		setNumber(env.fogDensity, def["fogDensity"]);

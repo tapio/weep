@@ -17,7 +17,7 @@ struct Environment
 		TONEMAP_COUNT
 	} tonemap = TONEMAP_REINHARD;
 
-	vec3 sunDirection = vec3(0, -1, 0);
+	vec3 sunPosition = vec3(0, 1, 0);
 	vec3 sunColor = vec3(0, 0, 0);
 
 	vec3 fogColor = vec3(0.5, 0.5, 0.5);

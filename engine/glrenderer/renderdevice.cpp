@@ -350,17 +350,17 @@ void RenderDevice::setupShadowPass(const Camera& camera)
 	float size = 12.f, near = 0.1f, far = 20.f;
 	lightProjection = glm::ortho(-size, size, -size, size, near, far);
 
-	vec3 pos = camera.position + normalize(m_env->sunDirection) * 10.f;
+	vec3 pos = camera.position + normalize(m_env->sunPosition) * 10.f;
 	lightView = glm::lookAt(pos, camera.position, vec3(0, 1, 0));
 
 	m_commonBlock.uniforms.projectionMatrix = lightProjection;
 	m_commonBlock.uniforms.viewMatrix = lightView;
-	/*m_commonBlock.uniforms.cameraPosition = m_env->sunDirection;
+	/*m_commonBlock.uniforms.cameraPosition = m_env->sunPosition;
 	m_commonBlock.uniforms.globalAmbient = m_env->ambient;
 	m_commonBlock.uniforms.exposure = m_env->exposure;
 	m_commonBlock.uniforms.tonemap = m_env->tonemap;
 	m_commonBlock.uniforms.bloomThreshold = m_env->bloomThreshold;
-	m_commonBlock.uniforms.sunDirection = glm::normalize(m_env->sunDirection);
+	m_commonBlock.uniforms.sunPosition = glm::normalize(m_env->sunPosition);
 	m_commonBlock.uniforms.sunColor = m_env->sunColor;
 	m_commonBlock.uniforms.fogColor = m_env->fogColor;
 	m_commonBlock.uniforms.fogDensity = m_env->fogDensity;
@@ -382,7 +382,7 @@ void RenderDevice::renderShadow(Model& model, Transform& transform)
 
 	for (auto& batch : geom.batches) {
 
-		Material& mat = *model.materials[batch.materialIndex];
+		//Material& mat = *model.materials[batch.materialIndex];
 		// TODO: Check material's shadow flag
 
 		if (batch.renderId == -1)
@@ -421,7 +421,7 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 	m_commonBlock.uniforms.exposure = m_env->exposure;
 	m_commonBlock.uniforms.tonemap = m_env->tonemap;
 	m_commonBlock.uniforms.bloomThreshold = m_env->bloomThreshold;
-	m_commonBlock.uniforms.sunDirection = glm::normalize(m_env->sunDirection);
+	m_commonBlock.uniforms.sunPosition = glm::normalize(m_env->sunPosition);
 	m_commonBlock.uniforms.sunColor = m_env->sunColor;
 	m_commonBlock.uniforms.fogColor = m_env->fogColor;
 	m_commonBlock.uniforms.fogDensity = m_env->fogDensity;

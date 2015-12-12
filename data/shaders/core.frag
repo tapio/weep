@@ -180,7 +180,7 @@ void main()
 #if defined(USE_DIFFUSE) || defined(USE_SPECULAR)
 
 	if (sunColor.r > 0 || sunColor.g > 0 || sunColor.b > 0) {
-		vec3 sunDir = normalize(-(viewMatrix * vec4(sunDirection, 0.0)).xyz);
+		vec3 sunDir = normalize((viewMatrix * vec4(sunPosition, 0.0)).xyz);
 		sunAmount = max(dot(viewDir, -sunDir), 0.0);
 		// Sun diffuse
 #ifdef USE_DIFFUSE
