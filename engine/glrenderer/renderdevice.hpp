@@ -70,6 +70,9 @@ private:
 	Material m_skyboxMat;
 	Texture m_placeholderTex;
 
+	mat4 m_shadowProj[MAX_SHADOWS];
+	mat4 m_shadowView[MAX_SHADOWS];
+
 	uint m_program = 0;
 	bool m_wireframe = false;
 	UBO<UniformCommonBlock> m_commonBlock;

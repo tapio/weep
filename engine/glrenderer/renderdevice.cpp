@@ -334,10 +334,6 @@ bool RenderDevice::uploadMaterial(Material& material)
 	return true;
 }
 
-// TODO: TEMP TEMP!!!
-static mat4 lightProjection;
-static mat4 lightView;
-
 void RenderDevice::setupShadowPass(const Camera& camera)
 {
 	ASSERT(m_env);
@@ -348,13 +344,13 @@ void RenderDevice::setupShadowPass(const Camera& camera)
 	glUseProgram(m_program);
 	// TODO: Configure
 	float size = 20.f, near = 1.f, far = 50.f;
-	lightProjection = glm::ortho(-size, size, -size, size, near, far);
+	m_shadowProj[0] = glm::ortho(-size, size, -size, size, near, far);
 
 	vec3 pos = camera.position + normalize(m_env->sunPosition) * 10.f;
-	lightView = glm::lookAt(pos, camera.position, vec3(0, 1, 0));
+	m_shadowView[0] = glm::lookAt(pos, camera.position, vec3(0, 1, 0));
 
-	m_commonBlock.uniforms.projectionMatrix = lightProjection;
-	m_commonBlock.uniforms.viewMatrix = lightView;
+	m_commonBlock.uniforms.projectionMatrix = m_shadowProj[0];
+	m_commonBlock.uniforms.viewMatrix = m_shadowView[0];
 	/*m_commonBlock.uniforms.cameraPosition = m_env->sunPosition;
 	m_commonBlock.uniforms.globalAmbient = m_env->ambient;
 	m_commonBlock.uniforms.exposure = m_env->exposure;
@@ -456,7 +452,7 @@ void RenderDevice::render(Model& model, Transform& transform)
 	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_objectBlock.uniforms.modelMatrix;
 	m_objectBlock.uniforms.modelViewMatrix = modelView;
 	m_objectBlock.uniforms.normalMatrix = glm::inverseTranspose(modelView);
-	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (lightProjection * (lightView * transform.matrix));
+	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (m_shadowProj[0] * (m_shadowView[0] * transform.matrix));
 	m_objectBlock.upload();
 
 	if (m_skyboxMat.shaderId != -1) {
