@@ -1,17 +1,9 @@
 
 layout(vertices = 3) out;
 
-in VertexData {
-	vec3 position;
-	vec2 texcoord;
-	vec3 normal;
-} inp[];
+VERTEX_DATA(in, inp[]);
+VERTEX_DATA(out, outp[]);
 
-out VertexData {
-	vec3 position;
-	vec2 texcoord;
-	vec3 normal;
-} outp[];
 
 #define ID gl_InvocationID
 
@@ -20,6 +12,9 @@ void main()
 	outp[ID].position = inp[ID].position;
 	outp[ID].texcoord = inp[ID].texcoord;
 	outp[ID].normal = inp[ID].normal;
+#ifdef USE_SHADOW_MAP
+	outp[ID].shadowcoord = inp[ID].shadowcoord;
+#endif
 
 	if (ID == 0) {
 		float dist2 = dot(inp[0].position, inp[0].position);

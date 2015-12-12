@@ -1,9 +1,5 @@
 
-in VertexData {
-	vec3 position;
-	vec2 texcoord;
-	vec3 normal;
-} input;
+VERTEX_DATA(in, input);
 
 layout(location = 0) out vec4 fragment;
 

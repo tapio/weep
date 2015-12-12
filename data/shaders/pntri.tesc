@@ -1,17 +1,8 @@
 
 layout(vertices = 3) out;
 
-in VertexData {
-	vec3 position;
-	vec2 texcoord;
-	vec3 normal;
-} inp[];
-
-out VertexData {
-	vec3 position;
-	vec2 texcoord;
-	vec3 normal;
-} outp[];
+VERTEX_DATA(in, inp[]);
+VERTEX_DATA(out, outp[]);
 
 out float curvature[];
 
@@ -24,6 +15,9 @@ void main()
 	outp[ID].position = inp[ID].position;
 	outp[ID].texcoord = inp[ID].texcoord;
 	outp[ID].normal = inp[ID].normal;
+#ifdef USE_SHADOW_MAP
+	outp[ID].shadowcoord = inp[ID].shadowcoord;
+#endif
 
 	// Calculate curvature factors for each edge
 	// Uses the angles between the corner normals of the patch

@@ -51,6 +51,15 @@ UBO_PREFIX(UniformLightBlock, 3)
 
 #ifndef __cplusplus
 
+#define VERTEX_DATA(inout, name) \
+	inout VertexData { \
+		vec3 position; \
+		vec2 texcoord; \
+		vec3 normal; \
+		vec4 shadowcoord; \
+	} name;
+
+
 #ifdef USE_DIFFUSE_MAP
 layout(binding = 10) uniform sampler2D diffuseMap;
 #endif

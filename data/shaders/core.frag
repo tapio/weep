@@ -1,10 +1,5 @@
 
-in VertexData {
-	vec3 position;
-	vec2 texcoord;
-	vec3 normal;
-	vec4 shadowcoord;
-} input;
+VERTEX_DATA(in, input);
 
 layout(location = 0) out vec4 fragment;
 layout(location = 1) out vec4 brightFragment;

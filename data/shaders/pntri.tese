@@ -1,19 +1,9 @@
 
 layout(triangles, equal_spacing, ccw) in;
 
-in VertexData {
-	vec3 position;
-	vec2 texcoord;
-	vec3 normal;
-} inp[];
-
+VERTEX_DATA(in, inp[]);
 in float curvature[];
-
-out VertexData {
-	vec3 position;
-	vec2 texcoord;
-	vec3 normal;
-} outp;
+VERTEX_DATA(out, outp);
 
 #define tc gl_TessCoord
 
@@ -41,6 +31,15 @@ void main()
 	vec3 n1 = tc.y * inp[1].normal;
 	vec3 n2 = tc.z * inp[2].normal;
 	outp.normal = normalize(n0 + n1 + n2);
+
+#ifdef USE_SHADOW_MAP
+	// Trivial shadowcoord
+	// TODO: Fix
+	vec4 sc0 = tc.x * inp[0].shadowcoord;
+	vec4 sc1 = tc.y * inp[1].shadowcoord;
+	vec4 sc2 = tc.z * inp[2].shadowcoord;
+	outp.shadowcoord = sc0 + sc1 + sc2;
+#endif
 
 	// Calculate distance to each edge
 	float d0 = tc.y * tc.z;

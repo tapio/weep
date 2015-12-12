@@ -48,7 +48,7 @@
 	},
 	"normal": {
 		"shaders" : {
-			"vert": "shaders/normal.vert",
+			"vert": "shaders/core.vert",
 			"frag": "shaders/normal.frag"
 		}
 	},
