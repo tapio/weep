@@ -58,8 +58,13 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	camera.updateViewMatrix();
 	Frustum frustum(camera);
 	std::vector<Light> lights;
+	// TODO: Prioritize lights
 	entities.for_each<Light>([&](Entity, Light& light) {
 		lights.push_back(light);
+	});
+
+	entities.for_each<Model, Transform>([&](Entity, Model&, Transform& transform) {
+		transform.updateMatrix();
 	});
 
 	Light sun;
@@ -68,26 +73,27 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	sun.target = camera.position;
 	m_device->setupShadowPass(sun, 0);
 	entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
-		transform.updateMatrix();
 		// TODO: Shadow frustum culling
 		if (!model.materials.empty() /* && frustum.visible(transform, model) */)
 			m_device->renderShadow(model, transform);
 	});
 
+	// TODO: Prioritize shadow casters
 	uint numCubeShadows = std::min((uint)lights.size(), (uint)MAX_SHADOW_CUBES);
 	for (uint i = 0; i < numCubeShadows; ++i) {
-		m_device->setupShadowPass(lights[i], 1+i);
+		Light& light = lights[i];
+		m_device->setupShadowPass(light, 1+i);
 		entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
-			transform.updateMatrix();
-			// TODO: Shadow frustum culling
-			if (!model.materials.empty() /* && frustum.visible(transform, model) */)
+			if (model.materials.empty())
+				return;
+			float maxDist = model.bounds.radius + light.distance;
+			if (glm::distance2(light.position, transform.position) < maxDist * maxDist)
 				m_device->renderShadow(model, transform);
 		});
 	}
 
 	m_device->preRender(camera, lights);
 	entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
-		transform.updateMatrix();
 		if (!model.materials.empty() && frustum.visible(transform, model))
 			m_device->render(model, transform);
 	});
