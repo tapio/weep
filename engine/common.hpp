@@ -53,6 +53,10 @@ uint timestamp(const string& path);
 
 void sleep(uint ms);
 
+template <typename T, std::size_t N>
+constexpr std::size_t countof(T const (&)[N]) noexcept { return N; }
+
+
 #define NONCOPYABLE(T) \
 	T(T&&) = default; \
 	T(const T&) = delete; \

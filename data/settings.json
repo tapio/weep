@@ -8,7 +8,8 @@
 		"gldebug": true,
 		"vsync": true,
 		"msaa": 8,
-		"shadowMapSize": 2048
+		"shadowMapSize": 2048,
+		"shadowCubeSize": 1024
 	},
 	"devtools": true,
 	"scene": "debugscene.json",

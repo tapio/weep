@@ -96,11 +96,12 @@ void RenderDevice::resizeRenderTargets()
 		m_msaaFbo.destroy();
 	if (m_fbo.valid())
 		m_fbo.destroy();
-	for (int i = 0; i < 2; ++i)
+	for (uint i = 0; i < countof(m_pingPongFbo); ++i)
 		if (m_pingPongFbo[i].valid())
 			m_pingPongFbo[i].destroy();
-	if (m_shadowFbo.valid())
-		m_shadowFbo.destroy();
+	for (uint i = 0; i < countof(m_shadowFbo); ++i)
+		if (m_shadowFbo[i].valid())
+			m_shadowFbo[i].destroy();
 	// Set up floating point framebuffer to render HDR scene to
 	int samples = Engine::settings["renderer"]["msaa"].number_value();
 	if (samples > 1) {
@@ -116,16 +117,26 @@ void RenderDevice::resizeRenderTargets()
 	m_fbo.numTextures = 3;
 	m_fbo.depthAttachment = 2;
 	m_fbo.create();
-	for (int i = 0; i < 2; ++i) {
+	for (uint i = 0; i < countof(m_pingPongFbo); ++i) {
 		m_pingPongFbo[i].width = Engine::width();
 		m_pingPongFbo[i].height = Engine::height();
 		m_pingPongFbo[i].numTextures = 1;
 		m_pingPongFbo[i].create();
 	}
-	m_shadowFbo.width = Engine::settings["renderer"]["shadowMapSize"].number_value();
-	m_shadowFbo.height = m_shadowFbo.width;
-	m_shadowFbo.depthAttachment = 0;
-	m_shadowFbo.create();
+	for (uint i = 0; i < MAX_SHADOW_MAPS; ++i) {
+		m_shadowFbo[i].width = Engine::settings["renderer"]["shadowMapSize"].number_value();
+		m_shadowFbo[i].height = m_shadowFbo[i].width;
+		m_shadowFbo[i].depthAttachment = 0;
+		m_shadowFbo[i].cube = false;
+		m_shadowFbo[i].create();
+	}
+	for (uint i = MAX_SHADOW_MAPS; i < MAX_SHADOW_CUBES; ++i) {
+		m_shadowFbo[i].width = Engine::settings["renderer"]["shadowCubeSize"].number_value();
+		m_shadowFbo[i].height = m_shadowFbo[i].width;
+		m_shadowFbo[i].depthAttachment = 0;
+		m_shadowFbo[i].cube = true;
+		m_shadowFbo[i].create();
+	}
 	glutil::checkGL("Post framebuffer create");
 }
 
@@ -337,8 +348,8 @@ bool RenderDevice::uploadMaterial(Material& material)
 void RenderDevice::setupShadowPass(const Camera& camera)
 {
 	ASSERT(m_env);
-	m_shadowFbo.bind();
-	glViewport(0, 0, m_shadowFbo.width, m_shadowFbo.height);
+	m_shadowFbo[0].bind();
+	glViewport(0, 0, m_shadowFbo[0].width, m_shadowFbo[0].height);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	m_program = m_shaders[m_shaderNames["depth"]].id;
 	glUseProgram(m_program);
@@ -464,7 +475,7 @@ void RenderDevice::render(Model& model, Transform& transform)
 	// Shadow map texture
 	// TODO: Check if material uses shadow?
 	glActiveTexture(GL_TEXTURE17);
-	glBindTexture(GL_TEXTURE_2D, m_shadowFbo.tex[0]);
+	glBindTexture(GL_TEXTURE_2D, m_shadowFbo[0].tex[0]);
 
 	for (auto& batch : geom.batches) {
 

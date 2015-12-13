@@ -1,6 +1,8 @@
 
 #define MAX_LIGHTS 4
-#define MAX_SHADOWS 1
+#define MAX_SHADOW_MAPS 1
+#define MAX_SHADOW_CUBES 2
+#define MAX_SHADOWS (MAX_SHADOW_MAPS + MAX_SHADOW_CUBES)
 
 #ifdef __cplusplus
 #define UBO_PREFIX(name, bindpoint) struct name { static const uint binding = bindpoint;
