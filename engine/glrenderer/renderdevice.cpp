@@ -465,7 +465,7 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 
 	// Shadow map textures
 	for (uint i = 0; i < countof(m_shadowFbo); ++i) {
-		glActiveTexture(GL_TEXTURE17 + i);
+		glActiveTexture(GL_TEXTURE0 + BINDING_SHADOW_MAP + i);
 		glBindTexture(m_shadowFbo[i].cube ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, m_shadowFbo[i].tex[0]);
 	}
 
@@ -486,7 +486,7 @@ void RenderDevice::render(Model& model, Transform& transform)
 
 	if (m_skyboxMat.shaderId != -1) {
 		uint tex = m_skyboxMat.tex[Material::ENV_MAP];
-		glActiveTexture(GL_TEXTURE10 + Material::ENV_MAP);
+		glActiveTexture(GL_TEXTURE0 + BINDING_ENV_MAP);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
 	}
 
@@ -515,7 +515,7 @@ void RenderDevice::render(Model& model, Transform& transform)
 		for (uint i = 0; i < Material::ENV_MAP; ++i) {
 			uint tex = mat.tex[i];
 			if (!tex) continue;
-			glActiveTexture(GL_TEXTURE10 + i);
+			glActiveTexture(GL_TEXTURE0 + BINDING_MATERIAL_MAP_START + i);
 			glBindTexture(GL_TEXTURE_2D, tex);
 			//glUniform1i(i, i);
 		}
@@ -610,7 +610,7 @@ void RenderDevice::renderSkybox()
 	m_commonBlock.uniforms.viewMatrix = glm::mat4(glm::mat3(m_commonBlock.uniforms.viewMatrix));
 	m_commonBlock.upload();
 	glBindVertexArray(m_skyboxCube.vao);
-	glActiveTexture(GL_TEXTURE10 + Material::ENV_MAP);
+	glActiveTexture(GL_TEXTURE0 + BINDING_ENV_MAP);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyboxMat.tex[Material::ENV_MAP]);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);

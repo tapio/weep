@@ -56,6 +56,18 @@ UBO_PREFIX(UniformCubeShadowBlock, 4)
 
 #undef UBO_PREFIX
 
+#define BINDING_MATERIAL_MAP_START 8
+#define BINDING_DIFFUSE_MAP 8
+#define BINDING_NORMAL_MAP 9
+#define BINDING_SPECULAR_MAP 10
+#define BINDING_HEIGHT_MAP 11
+#define BINDING_EMISSION_MAP 12
+#define BINDING_REFLECTION_MAP 13
+#define BINDING_ENV_MAP 14
+#define BINDING_SHADOW_MAP 15
+#define BINDING_SHADOW_CUBE 16
+
+
 #ifndef __cplusplus
 
 #define VERTEX_DATA(inout, name) \
@@ -69,29 +81,29 @@ UBO_PREFIX(UniformCubeShadowBlock, 4)
 
 
 #ifdef USE_DIFFUSE_MAP
-layout(binding = 10) uniform sampler2D diffuseMap;
+layout(binding = BINDING_DIFFUSE_MAP) uniform sampler2D diffuseMap;
 #endif
 #ifdef USE_NORMAL_MAP
-layout(binding = 11) uniform sampler2D normalMap;
+layout(binding = BINDING_NORMAL_MAP) uniform sampler2D normalMap;
 #endif
 #ifdef USE_SPECULAR_MAP
-layout(binding = 12) uniform sampler2D specularMap;
+layout(binding = BINDING_SPECULAR_MAP) uniform sampler2D specularMap;
 #endif
 #if defined(USE_HEIGHT_MAP) || defined(USE_PARALLAX_MAP)
-layout(binding = 13) uniform sampler2D heightMap;
+layout(binding = BINDING_HEIGHT_MAP) uniform sampler2D heightMap;
 #endif
 #ifdef USE_EMISSION_MAP
-layout(binding = 14) uniform sampler2D emissionMap;
+layout(binding = BINDING_EMISSION_MAP) uniform sampler2D emissionMap;
 #endif
 #ifdef USE_REFLECTION_MAP
-layout(binding = 15) uniform sampler2D reflectionMap;
+layout(binding = BINDING_REFLECTION_MAP) uniform sampler2D reflectionMap;
 #endif
 #ifdef USE_ENV_MAP
-layout(binding = 16) uniform samplerCube envMap;
+layout(binding = BINDING_ENV_MAP) uniform samplerCube envMap;
 #endif
 #ifdef USE_SHADOW_MAP
-layout(binding = 17) uniform sampler2D shadowMap;
-layout(binding = 18) uniform samplerCube shadowCube[MAX_SHADOW_CUBES];
+layout(binding = BINDING_SHADOW_MAP) uniform sampler2D shadowMap;
+layout(binding = BINDING_SHADOW_CUBE) uniform samplerCube shadowCube[MAX_SHADOW_CUBES];
 #endif
 
 #endif // __cplusplus
