@@ -413,12 +413,12 @@ void RenderDevice::renderShadow(Model& model, Transform& transform)
 		uint mode = GL_TRIANGLES;
 		if (gpuData.ebo) {
 			glDrawElements(mode, batch.indices.size(), GL_UNSIGNED_INT, 0);
-			//stats.triangles += batch.indices.size() / 3;
+			stats.triangles += batch.indices.size() / 3;
 		} else {
 			glDrawArrays(mode, 0, batch.numVertices);
-			//stats.triangles += batch.numVertices / 3;
+			stats.triangles += batch.numVertices / 3;
 		}
-		//++stats.drawCalls;
+		++stats.drawCalls;
 	}
 	glBindVertexArray(0);
 	glutil::checkGL("Post shadow draw");
@@ -431,7 +431,6 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 	else m_fbo.bind();
 	glViewport(0, 0, Engine::width(), Engine::height());
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	stats = Stats();
 	m_program = 0;
 	glUseProgram(0);
 	m_commonBlock.uniforms.projectionMatrix = camera.projection;

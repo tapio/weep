@@ -55,6 +55,7 @@ void RenderSystem::toggleWireframe()
 
 void RenderSystem::render(Entities& entities, Camera& camera)
 {
+	m_device->stats = RenderDevice::Stats();
 	camera.updateViewMatrix();
 	Frustum frustum(camera);
 	std::vector<Light> lights;
