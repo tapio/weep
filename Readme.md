@@ -6,8 +6,8 @@ This is a small personal game engine. It's mainly a platform for me to experimen
 ## Features
 
 * OpenGL 4 forward renderer
-	- Multiple point lights
 	- One directional sun light with shadow mapping
+	- Multiple point lights with omnidirectional shadow maps
 	- HDR with multiple tonemap functions
 	- Bloom / glow
 	- Diffuse / normal / specular / emission map support
