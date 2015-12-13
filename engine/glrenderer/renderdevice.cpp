@@ -131,7 +131,7 @@ void RenderDevice::resizeRenderTargets()
 		m_shadowFbo[i].cube = false;
 		m_shadowFbo[i].create();
 	}
-	for (uint i = MAX_SHADOW_MAPS; i < MAX_SHADOW_CUBES; ++i) {
+	for (uint i = MAX_SHADOW_MAPS; i < MAX_SHADOWS; ++i) {
 		m_shadowFbo[i].width = Engine::settings["renderer"]["shadowCubeSize"].number_value();
 		m_shadowFbo[i].height = m_shadowFbo[i].width;
 		m_shadowFbo[i].depthAttachment = 0;
