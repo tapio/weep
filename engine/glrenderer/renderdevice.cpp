@@ -345,23 +345,21 @@ bool RenderDevice::uploadMaterial(Material& material)
 	return true;
 }
 
-void RenderDevice::setupShadowPass(const Camera& camera)
+void RenderDevice::setupShadowPass(const Light& light, uint index)
 {
 	ASSERT(m_env);
-	m_shadowFbo[0].bind();
-	glViewport(0, 0, m_shadowFbo[0].width, m_shadowFbo[0].height);
+	m_shadowFbo[index].bind();
+	glViewport(0, 0, m_shadowFbo[index].width, m_shadowFbo[index].height);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	m_program = m_shaders[m_shaderNames["depth"]].id;
 	glUseProgram(m_program);
 	// TODO: Configure
 	float size = 20.f, near = 1.f, far = 50.f;
-	m_shadowProj[0] = glm::ortho(-size, size, -size, size, near, far);
+	m_shadowProj[index] = glm::ortho(-size, size, -size, size, near, far);
+	m_shadowView[index] = glm::lookAt(light.position, light.target, vec3(0, 1, 0));
 
-	vec3 pos = camera.position + normalize(m_env->sunPosition) * 10.f;
-	m_shadowView[0] = glm::lookAt(pos, camera.position, vec3(0, 1, 0));
-
-	m_commonBlock.uniforms.projectionMatrix = m_shadowProj[0];
-	m_commonBlock.uniforms.viewMatrix = m_shadowView[0];
+	m_commonBlock.uniforms.projectionMatrix = m_shadowProj[index];
+	m_commonBlock.uniforms.viewMatrix = m_shadowView[index];
 	/*m_commonBlock.uniforms.cameraPosition = m_env->sunPosition;
 	m_commonBlock.uniforms.globalAmbient = m_env->ambient;
 	m_commonBlock.uniforms.exposure = m_env->exposure;

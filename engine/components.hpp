@@ -55,6 +55,7 @@ struct Light
 	vec3 color = vec3(1, 1, 1);
 	vec3 position = vec3();
 	vec3 direction = vec3();
+	vec3 target = vec3();
 	float distance = 1.0f;
 	float decay = 1.0f;
 };
