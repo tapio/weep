@@ -21,4 +21,5 @@ struct FBO {
 	uint height = 0;
 	uint samples = 0;
 	uint depthAttachment = -1;
+	bool cube = false;
 };

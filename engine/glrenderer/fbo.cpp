@@ -16,7 +16,10 @@ FBO::~FBO()
 void FBO::create()
 {
 	ASSERT(width && height);
-	uint texType = samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+	ASSERT(!cube || samples <= 1);
+	uint texType = GL_TEXTURE_2D;
+	if (cube) texType = GL_TEXTURE_CUBE_MAP;
+	else if (samples > 1) texType = GL_TEXTURE_2D_MULTISAMPLE;
 	glGenFramebuffers(1, &fbo);
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	glGenTextures(numTextures, tex);
@@ -27,11 +30,19 @@ void FBO::create()
 		if (samples > 1)
 			glTexImage2DMultisample(texType, samples, internalFormat, width, height, GL_TRUE);
 		else {
-			glTexImage2D(texType, 0, internalFormat, width, height, 0, depth ? GL_DEPTH_COMPONENT : GL_RGB, GL_FLOAT, NULL);
+			if (cube) {
+				for (uint j = 0; j < 6; ++j)
+					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + j, 0, internalFormat, width, height, 0,
+						depth ? GL_DEPTH_COMPONENT : GL_RGB, GL_FLOAT, NULL);
+			} else {
+				glTexImage2D(texType, 0, internalFormat, width, height, 0, depth ? GL_DEPTH_COMPONENT : GL_RGB, GL_FLOAT, NULL);
+			}
 			glTexParameteri(texType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(texType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(texType, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(texType, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			if (cube)
+				glTexParameteri(texType, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		}
 		uint attach = depth ? GL_DEPTH_ATTACHMENT : (GL_COLOR_ATTACHMENT0 + i);
 		glFramebufferTexture(GL_FRAMEBUFFER, attach, tex[i], 0);
