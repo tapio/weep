@@ -41,8 +41,6 @@ struct GroundTracker
 
 struct Light
 {
-	Light() {}
-
 	enum Type {
 		AMBIENT_LIGHT,
 		POINT_LIGHT,

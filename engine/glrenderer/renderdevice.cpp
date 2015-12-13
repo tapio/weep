@@ -88,6 +88,7 @@ RenderDevice::RenderDevice(Resources& resources)
 	m_objectBlock.create();
 	m_materialBlock.create();
 	m_lightBlock.create();
+	m_cubeShadowBlock.create();
 }
 
 void RenderDevice::resizeRenderTargets()
@@ -219,6 +220,7 @@ RenderDevice::~RenderDevice()
 	m_objectBlock.destroy();
 	m_materialBlock.destroy();
 	m_lightBlock.destroy();
+	m_cubeShadowBlock.destroy();
 	m_textures.clear();
 	for (auto& g : m_geometries)
 		destroyGeometry(g);
@@ -353,27 +355,36 @@ void RenderDevice::setupShadowPass(const Light& light, uint index)
 	m_shadowFbo[index].bind();
 	glViewport(0, 0, m_shadowFbo[index].width, m_shadowFbo[index].height);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	m_program = m_shaders[m_shaderNames["depth"]].id;
-	glUseProgram(m_program);
-	// TODO: Configure
-	float size = 20.f, near = 1.f, far = 50.f;
-	m_shadowProj[index] = glm::ortho(-size, size, -size, size, near, far);
-	m_shadowView[index] = glm::lookAt(light.position, light.target, vec3(0, 1, 0));
+	float& near = m_commonBlock.uniforms.near;
+	float& far = m_commonBlock.uniforms.far;
+	if (light.type == Light::POINT_LIGHT) {
+		m_program = m_shaders[m_shaderNames["depthcube"]].id;
+		float aspect = (float)m_shadowFbo[index].width / (float)m_shadowFbo[index].height;
+		near = 0.2f; far = light.distance;
+		m_shadowProj[index] = glm::perspective(90.0f, aspect, near, far);
 
+		vec3 pos = light.position;
+		mat4* shadowMatrices = &m_cubeShadowBlock.uniforms.shadowMatrixCube[0];
+		shadowMatrices[0] = m_shadowProj[index] * glm::lookAt(pos, pos + vec3(1, 0, 0), vec3(0, -1, 0));
+		shadowMatrices[1] = m_shadowProj[index] * glm::lookAt(pos, pos + vec3(-1, 0, 0), vec3(0, -1, 0));
+		shadowMatrices[2] = m_shadowProj[index] * glm::lookAt(pos, pos + vec3(0, 1, 0), vec3(0, 0, 1));
+		shadowMatrices[3] = m_shadowProj[index] * glm::lookAt(pos, pos + vec3(0, -1, 0), vec3(0, 0, -1));
+		shadowMatrices[4] = m_shadowProj[index] * glm::lookAt(pos, pos + vec3(0, 0, 1), vec3(0, -1, 0));
+		shadowMatrices[5] = m_shadowProj[index] * glm::lookAt(pos, pos + vec3(0, 0, -1), vec3(0, -1, 0));
+		m_cubeShadowBlock.upload();
+
+	} else if (light.type == Light::DIRECTIONAL_LIGHT) {
+		m_program = m_shaders[m_shaderNames["depth"]].id;
+		// TODO: Configure
+		float size = 20.f;
+		near = 1.f; far = 50.f;
+		m_shadowProj[index] = glm::ortho(-size, size, -size, size, near, far);
+		m_shadowView[index] = glm::lookAt(light.position, light.target, vec3(0, 1, 0));
+	} else ASSERT(!"Unsupported light type for shadow pass");
+
+	glUseProgram(m_program);
 	m_commonBlock.uniforms.projectionMatrix = m_shadowProj[index];
 	m_commonBlock.uniforms.viewMatrix = m_shadowView[index];
-	/*m_commonBlock.uniforms.cameraPosition = m_env->sunPosition;
-	m_commonBlock.uniforms.globalAmbient = m_env->ambient;
-	m_commonBlock.uniforms.exposure = m_env->exposure;
-	m_commonBlock.uniforms.tonemap = m_env->tonemap;
-	m_commonBlock.uniforms.bloomThreshold = m_env->bloomThreshold;
-	m_commonBlock.uniforms.sunPosition = glm::normalize(m_env->sunPosition);
-	m_commonBlock.uniforms.sunColor = m_env->sunColor;
-	m_commonBlock.uniforms.fogColor = m_env->fogColor;
-	m_commonBlock.uniforms.fogDensity = m_env->fogDensity;
-	m_commonBlock.uniforms.near = camera.near;
-	m_commonBlock.uniforms.far = camera.far;
-	m_commonBlock.uniforms.vignette = m_env->vignette;*/
 	m_commonBlock.upload();
 }
 

@@ -74,6 +74,17 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 			m_device->renderShadow(model, transform);
 	});
 
+	uint numCubeShadows = std::min((uint)lights.size(), (uint)MAX_SHADOW_CUBES);
+	for (uint i = 0; i < numCubeShadows; ++i) {
+		m_device->setupShadowPass(lights[i], 1+i);
+		entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
+			transform.updateMatrix();
+			// TODO: Shadow frustum culling
+			if (!model.materials.empty() /* && frustum.visible(transform, model) */)
+				m_device->renderShadow(model, transform);
+		});
+	}
+
 	m_device->preRender(camera, lights);
 	entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
 		transform.updateMatrix();

@@ -30,3 +30,4 @@ template class UBO<UniformCommonBlock>;
 template class UBO<UniformObjectBlock>;
 template class UBO<UniformMaterialBlock>;
 template class UBO<UniformLightBlock>;
+template class UBO<UniformCubeShadowBlock>;

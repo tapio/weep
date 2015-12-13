@@ -79,6 +79,7 @@ private:
 	UBO<UniformObjectBlock> m_objectBlock;
 	UBO<UniformMaterialBlock> m_materialBlock;
 	UBO<UniformLightBlock> m_lightBlock;
+	UBO<UniformCubeShadowBlock> m_cubeShadowBlock;
 	std::vector<ShaderProgram> m_shaders;
 	std::map<string, int> m_shaderNames;
 	std::map<void*, Texture> m_textures;
