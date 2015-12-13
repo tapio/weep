@@ -99,10 +99,11 @@ void ShaderProgram::use() const
 
 void ShaderProgram::destroy()
 {
-	logDebug("Shader destructing");
+	//logDebug("Shader %s destructing", name.c_str());
 	for (auto& i : m_shaderIds) {
 		if (i > 0) { glDeleteShader(i); i = 0; }
 	}
-	glDeleteProgram(id);
+	if (id)
+		glDeleteProgram(id);
 	id = 0;
 }

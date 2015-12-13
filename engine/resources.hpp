@@ -16,6 +16,7 @@ public:
 	Resources();
 	~Resources();
 	void reset();
+	void clearTextCache();
 
 	void addPath(const string& path);
 	void removePath(const string& path);

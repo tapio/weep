@@ -101,6 +101,11 @@ void Resources::reset()
 	logDebug("Resource cache dropped");
 }
 
+void Resources::clearTextCache()
+{
+	m_texts.clear();
+}
+
 void Resources::addPath(const string& path)
 {
 	m_paths.insert(m_paths.begin(), getCanonicalDir(path));

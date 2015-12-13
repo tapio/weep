@@ -35,6 +35,18 @@ void init(Game& game, SceneLoader& scene, const string& scenePath)
 	game.entities.get_system<ModuleSystem>().call($id(INIT), &game);
 }
 
+void reloadShaders(Game& game)
+{
+	game.resources.clearTextCache();
+	RenderSystem& renderer = game.entities.get_system<RenderSystem>();
+	renderer.device().loadShaders();
+	renderer.device().setEnvironment(&renderer.env());
+	game.entities.for_each<Model>([&](Entity, Model& model) {
+		for (auto& material : model.materials)
+			material->shaderId = -1;
+	});
+}
+
 int main(int argc, char* argv[])
 {
 	Game game;
@@ -96,6 +108,10 @@ int main(int argc, char* argv[])
 					continue;
 				}
 				else if (keysym.mod == KMOD_LCTRL && keysym.sym == SDLK_r) {
+					reloadShaders(game);
+					continue;
+				}
+				else if (keysym.mod == (KMOD_LCTRL|KMOD_LSHIFT) && keysym.sym == SDLK_r) {
 					reload = true;
 					continue;
 				}
@@ -228,6 +244,8 @@ int main(int argc, char* argv[])
 				}
 			}
 			if (ImGui::CollapsingHeader("Scene")) {
+				if (ImGui::Button("Reload Shaders"))
+					reloadShaders(game);
 				ImGui::InputText("##Scene Path", scenePath, sizeof(scenePath));
 				ImGui::SameLine();
 				if (ImGui::Button("Load##ScenePath"))

@@ -143,6 +143,8 @@ void RenderDevice::resizeRenderTargets()
 void RenderDevice::loadShaders()
 {
 	uint t0 = Engine::timems();
+	for (auto& it : m_shaders)
+		it.destroy();
 	m_shaders.clear();
 	m_shaderNames.clear();
 	std::string err;
