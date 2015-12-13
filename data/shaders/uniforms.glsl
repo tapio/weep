@@ -90,6 +90,7 @@ layout(binding = 16) uniform samplerCube envMap;
 #endif
 #ifdef USE_SHADOW_MAP
 layout(binding = 17) uniform sampler2D shadowMap;
+layout(binding = 18) uniform samplerCube shadowCube[MAX_SHADOW_CUBES];
 #endif
 
 #endif // __cplusplus

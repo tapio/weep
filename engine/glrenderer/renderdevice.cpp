@@ -462,6 +462,13 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 	}
 	m_lightBlock.upload();
 	m_commonBlock.upload();
+
+	// Shadow map textures
+	for (uint i = 0; i < countof(m_shadowFbo); ++i) {
+		glActiveTexture(GL_TEXTURE17 + i);
+		glBindTexture(m_shadowFbo[i].cube ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, m_shadowFbo[i].tex[0]);
+	}
+
 	if (m_wireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
@@ -482,11 +489,6 @@ void RenderDevice::render(Model& model, Transform& transform)
 		glActiveTexture(GL_TEXTURE10 + Material::ENV_MAP);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
 	}
-
-	// Shadow map texture
-	// TODO: Check if material uses shadow?
-	glActiveTexture(GL_TEXTURE17);
-	glBindTexture(GL_TEXTURE_2D, m_shadowFbo[0].tex[0]);
 
 	for (auto& batch : geom.batches) {
 
