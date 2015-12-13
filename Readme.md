@@ -7,7 +7,7 @@ This is a small personal game engine. It's mainly a platform for me to experimen
 
 * OpenGL 4 forward renderer
 	- Multiple point lights
-	- One directional sun light
+	- One directional sun light with shadow mapping
 	- HDR with multiple tonemap functions
 	- Bloom / glow
 	- Diffuse / normal / specular / emission map support
@@ -20,6 +20,7 @@ This is a small personal game engine. It's mainly a platform for me to experimen
 * JSON based configuration and scene declaration
 * ImGui user interface integration
 * Sound system
+* Runs on Linux and Windows (mostly)
 
 ## Dependencies
 
@@ -33,6 +34,11 @@ The core repository only includes some debug assets, so you probably also want t
 	cd build
 	cmake ..
 	make
+
+## Acknowledgements
+
+Renderer code, especially shader code owes a lot to various tutorials, among others
+http://learnopengl.com/ and http://www.opengl-tutorial.org/
 
 ## License
 
