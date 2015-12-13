@@ -207,10 +207,17 @@ void main()
 	if (sunColor.r > 0 || sunColor.g > 0 || sunColor.b > 0) {
 		vec3 sunDir = normalize((viewMatrix * vec4(sunPosition, 0.0)).xyz);
 		sunAmount = max(dot(viewDir, -sunDir), 0.0);
+
+#ifdef USE_SHADOW_MAP
+		float visibility = max(1.0 - shadow_mapping(), 0.001);
+#else
+		float visibility = 1.0;
+#endif
+
 		// Sun diffuse
 #ifdef USE_DIFFUSE
 		float diff = max(dot(normal, sunDir), 0.0);
-		diffuseComp += diff * material.diffuse * sunColor * diffuseTex.rgb;
+		diffuseComp += visibility * diff * material.diffuse * sunColor * diffuseTex.rgb;
 #endif
 		// Sun specular
 #ifdef USE_SPECULAR
@@ -223,7 +230,7 @@ void main()
 		vec3 halfDir = normalize(sunDir + viewDir);
 		float spec = energy * pow(max(dot(normal, halfDir), 0.0), material.shininess);
 #endif
-		specularComp += spec * material.specular * sunColor * specularTex.rgb;
+		specularComp += visibility * spec * material.specular * sunColor * specularTex.rgb;
 #endif
 	}
 
@@ -242,10 +249,15 @@ void main()
 
 		vec3 lightDir = normalize(lightPos - input.position);
 
+		// Shadow
+		float visibility = 1.0;
+#ifdef USE_SHADOW_MAP
+#endif
+
 		// Diffuse
 #ifdef USE_DIFFUSE
 		float diff = max(dot(normal, lightDir), 0.0);
-		diffuseComp += attenuation * diff * material.diffuse * light.color * diffuseTex.rgb;
+		diffuseComp += visibility * attenuation * diff * material.diffuse * light.color * diffuseTex.rgb;
 #endif
 
 		// Specular
@@ -259,17 +271,10 @@ void main()
 		vec3 halfDir = normalize(lightDir + viewDir);
 		float spec = energy * pow(max(dot(normal, halfDir), 0.0), material.shininess);
 #endif
-		specularComp += attenuation * spec * material.specular * light.color * specularTex.rgb;
+		specularComp += visibility * attenuation * spec * material.specular * light.color * specularTex.rgb;
 #endif
 	}
 #endif // defined(USE_DIFFUSE) || defined(USE_SPECULAR)
-
-#ifdef USE_SHADOW_MAP
-	float shadow = max(1.0 - shadow_mapping(), 0.1);
-	diffuseComp *= shadow;
-	specularComp *= shadow;
-	//ambientComp *= shadow;
-#endif
 
 #ifdef USE_ENV_MAP
 	vec3 worldNormal = normalize((vec4(normal, 0.0) * viewMatrix).xyz);
