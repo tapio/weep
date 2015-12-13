@@ -10,6 +10,8 @@
 namespace glutil
 {
 
+int getInt(GLenum pname);
+
 const char* getErrorString(uint error);
 
 bool checkGL(const char* format, ...);

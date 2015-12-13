@@ -1,6 +1,14 @@
 #include "glutil.hpp"
 #include <GL/glcorearb.h>
 
+
+int glutil::getInt(GLenum pname)
+{
+	GLint value;
+	glGetIntegerv(pname, &value);
+	return value;
+}
+
 const char* glutil::getErrorString(uint error)
 {
 	switch (error) {
