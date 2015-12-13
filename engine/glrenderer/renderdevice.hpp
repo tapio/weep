@@ -38,6 +38,8 @@ public:
 
 	struct Caps {
 		float maxAnisotropy;
+		int maxSamples;
+		int maxSamplers;
 	} caps;
 
 	struct Stats

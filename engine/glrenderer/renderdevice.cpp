@@ -46,6 +46,9 @@ RenderDevice::RenderDevice(Resources& resources)
 	glDebugMessageCallback((GLDEBUGPROC)debugCallback, NULL);
 
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &caps.maxAnisotropy);
+	glGetIntegerv(GL_MAX_COLOR_TEXTURE_SAMPLES, &caps.maxSamples);
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &caps.maxSamplers);
+	//logDebug("%.1f %d %d", caps.maxAnisotropy, caps.maxSamples, caps.maxSamplers);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glViewport(0, 0, Engine::width(), Engine::height());
