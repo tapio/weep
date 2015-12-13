@@ -107,6 +107,12 @@ const vec2 poissonDisk[SHADOW_TAPS] = vec2[](
 	vec2(0.14383161, -0.14100790)
 );
 
+float random(vec3 seed, int i) {
+	vec4 seed4 = vec4(seed, i);
+	float dot_product = dot(seed4, vec4(12.9898, 78.233, 45.164, 94.673));
+	return fract(sin(dot_product) * 43758.5453);
+}
+
 float shadow_mapping()
 {
 	vec4 pos = input.shadowcoord;
@@ -125,13 +131,17 @@ float shadow_mapping()
 #ifdef USE_PCF
 #define PCF_HALF_SIZE 2
 	float shadow = 0.0;
-	float pcfRadius = 1.0;
+	float pcfRadius = 0.75;
 	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-	for (int i = 0; i < SHADOW_TAPS; ++i) {
-		float pcfDepth = texture(shadowMap, projCoords.xy + poissonDisk[i] * texelSize * pcfRadius).r;
+	const int samples = 4;
+	for (int i = 0; i < samples; ++i) {
+		//int index = i;
+		int index = int(16.0 * random(gl_FragCoord.xyy, i)) % 16;
+		//int index = int(16.0 * random(floor(input.position.xyz * 1000.0), i)) % 16;
+		float pcfDepth = texture(shadowMap, projCoords.xy + poissonDisk[index] * texelSize * pcfRadius).r;
 		shadow += currentDepth > pcfDepth ? 1.0 : 0.0;
 	}
-	return shadow / float(SHADOW_TAPS);
+	return shadow / float(samples);
 #else
 	float closestDepth = texture(shadowMap, projCoords.xy).r;
 	return currentDepth > closestDepth ? 1.0 : 0.0;
