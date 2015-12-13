@@ -361,7 +361,7 @@ void RenderDevice::setupShadowPass(const Light& light, uint index)
 		m_program = m_shaders[m_shaderNames["depthcube"]].id;
 		float aspect = (float)m_shadowFbo[index].width / (float)m_shadowFbo[index].height;
 		near = 0.2f; far = light.distance;
-		m_shadowProj[index] = glm::perspective(90.0f, aspect, near, far);
+		m_shadowProj[index] = glm::perspective(glm::radians(90.0f), aspect, near, far);
 
 		vec3 pos = light.position;
 		mat4* shadowMatrices = &m_cubeShadowBlock.uniforms.shadowMatrixCube[0];
@@ -385,6 +385,7 @@ void RenderDevice::setupShadowPass(const Light& light, uint index)
 	glUseProgram(m_program);
 	m_commonBlock.uniforms.projectionMatrix = m_shadowProj[index];
 	m_commonBlock.uniforms.viewMatrix = m_shadowView[index];
+	m_commonBlock.uniforms.cameraPosition = light.position;
 	m_commonBlock.upload();
 }
 

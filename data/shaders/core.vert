@@ -10,6 +10,7 @@ void main()
 	outData.texcoord = texcoord * material.uvRepeat + material.uvOffset;
 	outData.normal = mat3(normalMatrix) * normal;
 	outData.position = (modelViewMatrix * vec4(position, 1.0)).xyz;
+	outData.worldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
 #ifdef USE_SHADOW_MAP
 	outData.shadowcoord = shadowMatrix * vec4(position, 1.0);
 #endif

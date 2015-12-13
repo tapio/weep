@@ -147,6 +147,20 @@ float shadow_mapping()
 	return currentDepth > closestDepth ? 1.0 : 0.0;
 #endif
 }
+
+float shadow_mapping_cube(in int lightIndex, in int shadowIndex)
+{
+	vec3 fragToLight = input.worldPosition - lights[lightIndex].position;
+
+	const float bias = 0.005;
+	float currentDepth = length(fragToLight) - bias;
+
+	float closestDepth = texture(shadowCube[shadowIndex], fragToLight).r;
+	float far = lights[lightIndex].params.x;
+	closestDepth *= far;
+
+	return currentDepth > closestDepth ? 1.0 : 0.0;
+}
 #endif // USE_SHADOW_MAP
 
 void main()
@@ -252,6 +266,8 @@ void main()
 		// Shadow
 		float visibility = 1.0;
 #ifdef USE_SHADOW_MAP
+		if (i < MAX_SHADOW_CUBES)
+			visibility = max(1.0 - shadow_mapping_cube(i, i), 0.001);
 #endif
 
 		// Diffuse

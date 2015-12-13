@@ -1,7 +1,7 @@
 
 #define MAX_LIGHTS 4
 #define MAX_SHADOW_MAPS 1
-#define MAX_SHADOW_CUBES 2
+#define MAX_SHADOW_CUBES 3
 #define MAX_SHADOWS (MAX_SHADOW_MAPS + MAX_SHADOW_CUBES)
 
 #ifdef __cplusplus
@@ -64,6 +64,7 @@ UBO_PREFIX(UniformCubeShadowBlock, 4)
 		vec2 texcoord; \
 		vec3 normal; \
 		vec4 shadowcoord; \
+		vec3 worldPosition; \
 	} name;
 
 
