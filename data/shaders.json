@@ -37,6 +37,14 @@
 			"frag": "shaders/depth.frag"
 		}
 	},
+	"depthcube": {
+		"defines": [ "USE_DEPTH_CUBE" ],
+		"shaders" : {
+			"vert": "shaders/depth.vert",
+			"geom": "shaders/depth.geom",
+			"frag": "shaders/depth.frag"
+		}
+	},
 	"skybox": {
 		"defines": [
 			"USE_ENV_MAP"

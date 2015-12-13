@@ -50,6 +50,10 @@ UBO_PREFIX(UniformLightBlock, 3)
 	UniformLightData lights[MAX_LIGHTS];
 };
 
+UBO_PREFIX(UniformCubeShadowBlock, 4)
+	mat4 shadowMatrixCube[6];
+};
+
 #undef UBO_PREFIX
 
 #ifndef __cplusplus
