@@ -38,7 +38,10 @@ The core repository only includes some debug assets, so you probably also want t
 ## Acknowledgements
 
 Renderer code, especially shader code owes a lot to various tutorials, among others
-http://learnopengl.com/ and http://www.opengl-tutorial.org/
+
+* http://learnopengl.com/
+* http://www.opengl-tutorial.org/
+* http://www.sunandblackcat.com/other.php?l=eng
 
 ## License
 
