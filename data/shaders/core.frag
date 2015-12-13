@@ -244,7 +244,7 @@ void main()
 		sunAmount = max(dot(viewDir, -sunDir), 0.0);
 
 #ifdef USE_SHADOW_MAP
-		float visibility = max(1.0 - shadow_mapping(), 0.001);
+		float visibility = max(1.0 - shadow_mapping(), 0.01);
 #else
 		float visibility = 1.0;
 #endif
@@ -288,7 +288,7 @@ void main()
 		float visibility = 1.0;
 #ifdef USE_SHADOW_MAP
 		if (i < MAX_SHADOW_CUBES)
-			visibility = max(1.0 - shadow_mapping_cube(i, i), 0.001);
+			visibility = max(1.0 - shadow_mapping_cube(i, i), 0.01);
 #endif
 
 		// Diffuse
