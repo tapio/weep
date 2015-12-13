@@ -87,6 +87,7 @@ vec2 parallax_mapping(vec2 texcoord, vec3 viewDir)
 #endif
 
 #ifdef USE_SHADOW_MAP
+#define USE_PCF
 #define SHADOW_TAPS 16
 const vec2 poissonDisk[SHADOW_TAPS] = vec2[](
 	vec2(-0.94201624, -0.39906216),
@@ -105,6 +106,14 @@ const vec2 poissonDisk[SHADOW_TAPS] = vec2[](
 	vec2(-0.81409955, 0.91437590),
 	vec2(0.19984126, 0.78641367),
 	vec2(0.14383161, -0.14100790)
+);
+
+const vec3 gridSamplingDisk[20] = vec3[](
+	vec3(1, 1, 1), vec3(1, -1, 1), vec3(-1, -1, 1), vec3(-1, 1, 1),
+	vec3(1, 1, -1), vec3(1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+	vec3(1, 1, 0), vec3(1, -1, 0), vec3(-1, -1, 0), vec3(-1, 1, 0),
+	vec3(1, 0, 1), vec3(-1, 0, 1), vec3(1, 0, -1), vec3(-1, 0, -1),
+	vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
 );
 
 float random(vec3 seed, int i) {
@@ -127,9 +136,7 @@ float shadow_mapping()
 	// Get depth of current fragment from light's perspective
 	float currentDepth = projCoords.z - bias;
 
-#define USE_PCF
 #ifdef USE_PCF
-#define PCF_HALF_SIZE 2
 	float shadow = 0.0;
 	float pcfRadius = 0.75;
 	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
@@ -137,9 +144,9 @@ float shadow_mapping()
 	for (int i = 0; i < samples; ++i) {
 		//int index = i;
 		int index = int(16.0 * random(gl_FragCoord.xyy, i)) % 16;
-		//int index = int(16.0 * random(floor(input.position.xyz * 1000.0), i)) % 16;
-		float pcfDepth = texture(shadowMap, projCoords.xy + poissonDisk[index] * texelSize * pcfRadius).r;
-		shadow += currentDepth > pcfDepth ? 1.0 : 0.0;
+		//int index = int(16.0 * random(floor(input.worldPosition.xyz * 1000.0), i)) % 16;
+		float closestDepth = texture(shadowMap, projCoords.xy + poissonDisk[index] * texelSize * pcfRadius).r;
+		shadow += currentDepth > closestDepth ? 1.0 : 0.0;
 	}
 	return shadow / float(samples);
 #else
@@ -151,15 +158,29 @@ float shadow_mapping()
 float shadow_mapping_cube(in int lightIndex, in int shadowIndex)
 {
 	vec3 fragToLight = input.worldPosition - lights[lightIndex].position;
-
+	float far = lights[lightIndex].params.x;
 	const float bias = 0.005;
 	float currentDepth = length(fragToLight) - bias;
-
+#if 0 && defined(USE_PCF)
+	float shadow = 0.0;
+	float viewDistance = length(cameraPosition - input.worldPosition);
+	float pcfRadius = (1.0 + (viewDistance / far)) / 100.0;
+	const int samples = 4;
+	for (int i = 0; i < samples; ++i) {
+		int index = i;
+		//int index = int(20.0 * random(gl_FragCoord.xyy, i)) % 20;
+		//int index = int(20.0 * random(floor(input.worldPosition.xyz * 1000.0), i)) % 20;
+		vec3 uvw = fragToLight + gridSamplingDisk[index] * pcfRadius;
+		float closestDepth = texture(shadowCube[shadowIndex], uvw).r;
+		closestDepth *= far;
+		shadow += currentDepth > closestDepth ? 1.0 : 0.0;
+	}
+	return shadow / float(samples);
+#else
 	float closestDepth = texture(shadowCube[shadowIndex], fragToLight).r;
-	float far = lights[lightIndex].params.x;
 	closestDepth *= far;
-
 	return currentDepth > closestDepth ? 1.0 : 0.0;
+#endif
 }
 #endif // USE_SHADOW_MAP
 
