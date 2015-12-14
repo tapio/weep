@@ -35,6 +35,7 @@ using glm::mat2;
 using glm::mat3;
 using glm::mat4;
 using glm::quat;
+typedef uint8_t uint8;
 typedef unsigned uint;
 typedef uint64_t uint64;
 typedef int64_t int64;

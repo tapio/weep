@@ -13,11 +13,86 @@ namespace {
 			elems.push_back(item);
 		return elems;
 	}
+
+	bool endsWith (const string& str, const string& ending) {
+		const int strLen = str.length(), endingLen = ending.length();
+		return strLen >= endingLen &&
+			str.compare(strLen - endingLen, endingLen, ending) == 0;
+	}
 }
 
 Geometry::Geometry(const string& path)
 {
 	START_MEASURE(loadTimeMs);
+
+	if (endsWith(path, ".obj")) loadObj(path);
+	else if (endsWith(path, ".iqm")) loadIqm(path);
+	else {
+		logError("Unsupported file format for geometry %s", path.c_str());
+		return;
+	}
+
+	calculateBoundingSphere();
+	calculateBoundingBox();
+	if (!batches.empty() && batches.back().normals.empty())
+		calculateNormals();
+	else normalizeNormals();
+	for (auto& batch : batches)
+		batch.setupAttributes();
+	END_MEASURE(loadTimeMs)
+	logDebug("Loaded mesh %s in %.1fms with %d batches, bound r: %f",
+		path.c_str(), loadTimeMs, batches.size(), bounds.radius);
+}
+
+Geometry::Geometry(const Image& heightmap)
+{
+	batches.emplace_back();
+	Batch& batch = batches.back();
+	auto& indices = batch.indices;
+	auto& positions = batch.positions;
+	auto& texcoords = batch.texcoords;
+	auto& normals = batch.normals;
+
+	int wpoints = heightmap.width + 1;
+	int numVerts = wpoints * (heightmap.height + 1);
+	positions.resize(numVerts);
+	texcoords.resize(numVerts);
+	normals.resize(numVerts);
+	for (int j = 0; j <= heightmap.height; ++j) {
+		for (int i = 0; i <= heightmap.width; ++i) {
+			// Create the vertex
+			float x = i - heightmap.width * 0.5f;
+			float z = j - heightmap.height * 0.5f;
+			float y = heightmap.data[heightmap.channels * (j * heightmap.width + i)] / 255.0f;
+			int vert = j * wpoints + i;
+			positions[vert] = vec3(x, y, z);
+			texcoords[vert] = vec2((float)i / heightmap.width, (float)j / heightmap.height);
+			normals[vert] = vec3(0, 1, 0);
+			// Indexed faces
+			if (i == heightmap.width || j == heightmap.height)
+				continue;
+			uint a = i + wpoints * j;
+			uint b = i + wpoints * (j + 1);
+			uint c = (i + 1) + wpoints * (j + 1);
+			uint d = (i + 1) + wpoints * j;
+			uint triangles[] = { a, b, d, b, c, d };
+			indices.insert(indices.end(), triangles, triangles + 6);
+		}
+	}
+	calculateBoundingSphere();
+	calculateBoundingBox();
+	calculateNormals();
+	batch.setupAttributes();
+}
+
+Geometry::~Geometry()
+{
+	if (collisionMesh)
+		delete collisionMesh;
+}
+
+void Geometry::loadObj(const string& path)
+{
 	uint lineNumber = 0;
 	std::string row;
 	std::ifstream file(path, std::ios::binary);
@@ -105,63 +180,11 @@ Geometry::Geometry(const string& path)
 			}
 		}
 	}
-	calculateBoundingSphere();
-	calculateBoundingBox();
-	if (batch[0].normals.empty())
-		calculateNormals();
-	else normalizeNormals();
-	for (auto& batch : batches)
-		batch.setupAttributes();
-	END_MEASURE(loadTimeMs)
-	logDebug("Loaded mesh %s in %.1fms with %d batches, bound r: %f",
-		path.c_str(), loadTimeMs, batches.size(), bounds.radius);
 }
 
-Geometry::Geometry(const Image& heightmap)
+void Geometry::loadIqm(const string& path)
 {
-	batches.emplace_back();
-	Batch& batch = batches.back();
-	auto& indices = batch.indices;
-	auto& positions = batch.positions;
-	auto& texcoords = batch.texcoords;
-	auto& normals = batch.normals;
-
-	int wpoints = heightmap.width + 1;
-	int numVerts = wpoints * (heightmap.height + 1);
-	positions.resize(numVerts);
-	texcoords.resize(numVerts);
-	normals.resize(numVerts);
-	for (int j = 0; j <= heightmap.height; ++j) {
-		for (int i = 0; i <= heightmap.width; ++i) {
-			// Create the vertex
-			float x = i - heightmap.width * 0.5f;
-			float z = j - heightmap.height * 0.5f;
-			float y = heightmap.data[heightmap.channels * (j * heightmap.width + i)] / 255.0f;
-			int vert = j * wpoints + i;
-			positions[vert] = vec3(x, y, z);
-			texcoords[vert] = vec2((float)i / heightmap.width, (float)j / heightmap.height);
-			normals[vert] = vec3(0, 1, 0);
-			// Indexed faces
-			if (i == heightmap.width || j == heightmap.height)
-				continue;
-			uint a = i + wpoints * j;
-			uint b = i + wpoints * (j + 1);
-			uint c = (i + 1) + wpoints * (j + 1);
-			uint d = (i + 1) + wpoints * j;
-			uint triangles[] = { a, b, d, b, c, d };
-			indices.insert(indices.end(), triangles, triangles + 6);
-		}
-	}
-	calculateBoundingSphere();
-	calculateBoundingBox();
-	calculateNormals();
-	batch.setupAttributes();
-}
-
-Geometry::~Geometry()
-{
-	if (collisionMesh)
-		delete collisionMesh;
+	(void)path;
 }
 
 void Geometry::calculateBoundingSphere()

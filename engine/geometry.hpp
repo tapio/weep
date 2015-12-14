@@ -57,4 +57,8 @@ struct Geometry
 	Bounds bounds;
 
 	class btTriangleMesh* collisionMesh = nullptr;
+
+private:
+	void loadObj(const string& path);
+	void loadIqm(const string& path);
 };
