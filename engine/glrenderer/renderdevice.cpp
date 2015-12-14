@@ -333,7 +333,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 	material.shaderId = it->second;
 
 	bool dirty = false;
-	for (uint i = 0; i < material.map.size(); ++i) {
+	for (uint i = 0; i < countof(material.map); ++i) {
 		bool goodTex = material.tex[i] && material.tex[i] != m_placeholderTex.id;
 		if (goodTex || !material.map[i])
 			continue;

@@ -24,8 +24,8 @@ struct Material
 		MAX_MAPS
 	};
 
-	std::vector<Image*> map = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-	std::vector<uint> tex = { 0, 0, 0, 0, 0, 0, 0 };
+	Image* map[MAX_MAPS] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+	uint tex[MAX_MAPS] = { 0, 0, 0, 0, 0, 0, 0 };
 
 	enum Flags {
 		TESSELLATE = 1 << 0,

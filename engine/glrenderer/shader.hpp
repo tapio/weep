@@ -29,5 +29,5 @@ struct ShaderProgram
 	string name;
 
 private:
-	std::vector<uint> m_shaderIds = { 0, 0, 0, 0, 0, 0 };
+	uint m_shaderIds[6] = { 0, 0, 0, 0, 0, 0 };
 };
