@@ -59,6 +59,6 @@ struct Geometry
 	class btTriangleMesh* collisionMesh = nullptr;
 
 private:
-	void loadObj(const string& path);
-	void loadIqm(const string& path);
+	bool loadObj(const string& path);
+	bool loadIqm(const string& path);
 };

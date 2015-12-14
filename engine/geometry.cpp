@@ -1,6 +1,7 @@
 #include "geometry.hpp"
 #include "image.hpp"
 #include "physics.hpp"
+#include "iqm/iqm.h"
 #include <sstream>
 #include <fstream>
 
@@ -91,14 +92,14 @@ Geometry::~Geometry()
 		delete collisionMesh;
 }
 
-void Geometry::loadObj(const string& path)
+bool Geometry::loadObj(const string& path)
 {
 	uint lineNumber = 0;
 	std::string row;
 	std::ifstream file(path, std::ios::binary);
 	if (!file) {
-		logError("Failed to load object %s", path.c_str());
-		return;
+		logError("Failed to open file %s", path.c_str());
+		return false;
 	}
 
 	batches.emplace_back();
@@ -180,11 +181,37 @@ void Geometry::loadObj(const string& path)
 			}
 		}
 	}
+	return true;
 }
 
-void Geometry::loadIqm(const string& path)
+bool Geometry::loadIqm(const string& path)
 {
-	(void)path;
+	std::ifstream file(path, std::ios::binary);
+	if (!file) {
+		logError("Failed to open file %s", path.c_str());
+		return false;
+	}
+	iqmheader header;
+	file.read(reinterpret_cast<char*>(&header), sizeof(header));
+	if (file.fail() || memcmp(header.magic, IQM_MAGIC, sizeof(header.magic))) {
+		logError("File %s is not in IQM format", path.c_str());
+		return false;
+	}
+	if (header.version != IQM_VERSION) {
+		logError("Unsupported IQM version %u (expected %d) in %s", header.version, IQM_VERSION, path.c_str());
+		return false;
+	}
+	std::vector<uint8> data;
+	data.resize(header.filesize - sizeof(header));
+	file.read(reinterpret_cast<char*>(&data[0]), data.size());
+	if (file.fail()) {
+		logError("Failed to read data from %s", path.c_str());
+		return false;
+	}
+
+	logDebug("IQM file %s has %u meshes and %u animations", path.c_str(), header.num_meshes, header.num_anims);
+
+	return true;
 }
 
 void Geometry::calculateBoundingSphere()
