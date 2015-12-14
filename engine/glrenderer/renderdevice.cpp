@@ -196,19 +196,22 @@ void RenderDevice::loadShaders()
 		if (!file.empty()) program.compile(TESS_CONTROL_SHADER, m_resources.getText(file, Resources::USE_CACHE), defineText);
 		file = shaderFiles["tese"].string_value();
 		if (!file.empty()) program.compile(TESS_EVALUATION_SHADER, m_resources.getText(file, Resources::USE_CACHE), defineText);
+		file = shaderFiles["comp"].string_value();
+		if (!file.empty()) program.compile(COMPUTE_SHADER, m_resources.getText(file, Resources::USE_CACHE), defineText);
 
 		if (!program.link())
 			continue;
 
 		m_shaderNames[it.first] = m_shaders.size() - 1;
-		logDebug("Shader \"%s\" initialized as %d (shader mask: %d%d%d%d%d)",
+		logDebug("Shader \"%s\" initialized as %d (shader mask: %c%c%c%c%c%c)",
 			it.first.c_str(),
 			program.id,
-			program.has(VERTEX_SHADER),
-			program.has(FRAGMENT_SHADER),
-			program.has(GEOMETRY_SHADER),
-			program.has(TESS_CONTROL_SHADER),
-			program.has(TESS_EVALUATION_SHADER)
+			program.has(VERTEX_SHADER) ? 'v' : '-',
+			program.has(FRAGMENT_SHADER) ? 'f' : '-',
+			program.has(GEOMETRY_SHADER) ? 'g' : '-',
+			program.has(TESS_CONTROL_SHADER) ? 'c' : '-',
+			program.has(TESS_EVALUATION_SHADER) ? 'e' : '-',
+			program.has(COMPUTE_SHADER) ? 'C' : '-'
 		);
 	}
 	uint t1 = Engine::timems();

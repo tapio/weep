@@ -7,7 +7,8 @@ enum ShaderType
 	FRAGMENT_SHADER,
 	GEOMETRY_SHADER,
 	TESS_CONTROL_SHADER,
-	TESS_EVALUATION_SHADER
+	TESS_EVALUATION_SHADER,
+	COMPUTE_SHADER
 };
 
 struct ShaderProgram
@@ -21,11 +22,12 @@ struct ShaderProgram
 	bool link();
 	bool has(ShaderType type) const;
 	void use() const;
+	void compute(uint x_size, uint y_size, uint z_size) const;
 	void destroy();
 
 	uint id = 0;
 	string name;
 
 private:
-	std::vector<uint> m_shaderIds = { 0, 0, 0, 0, 0 };
+	std::vector<uint> m_shaderIds = { 0, 0, 0, 0, 0, 0 };
 };

@@ -2,7 +2,7 @@
 #include "glutil.hpp"
 
 static const char* s_shaderTypeNames[] = {
-	"vertex", "fragment", "geometry", "tess control", "tess eval"
+	"vertex", "fragment", "geometry", "tess control", "tess eval", "compute"
 };
 
 ShaderProgram::ShaderProgram(const std::string& debugName)
@@ -95,6 +95,12 @@ void ShaderProgram::use() const
 {
 	ASSERT(id);
 	glUseProgram(id);
+}
+
+void ShaderProgram::compute(uint x_size, uint y_size, uint z_size) const
+{
+	ASSERT(id && has(COMPUTE_SHADER));
+	glDispatchCompute(x_size, y_size, z_size);
 }
 
 void ShaderProgram::destroy()

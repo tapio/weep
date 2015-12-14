@@ -40,7 +40,6 @@ bool glutil::checkGL(const char* format, ...)
 	return false;
 }
 
-
 GLenum glutil::toGL(ShaderType type)
 {
 	switch (type) {
@@ -49,6 +48,7 @@ GLenum glutil::toGL(ShaderType type)
 		case GEOMETRY_SHADER: return GL_GEOMETRY_SHADER;
 		case TESS_CONTROL_SHADER: return GL_TESS_CONTROL_SHADER;
 		case TESS_EVALUATION_SHADER: return GL_TESS_EVALUATION_SHADER;
+		case COMPUTE_SHADER: return GL_COMPUTE_SHADER;
 	}
 	logError("Invalid ShaderType %d", type);
 	return 0;
