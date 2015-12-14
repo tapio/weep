@@ -184,6 +184,18 @@ bool Geometry::loadObj(const string& path)
 	return true;
 }
 
+template<class vector_t, class T = typename vector_t::value_type>
+static bool iqmAssign(vector_t& dst, uint8* data, uint wantedFormat, uint wantedSize, iqmvertexarray& va, iqmmesh& mesh)
+{
+	if (va.format != wantedFormat || va.size != wantedSize)
+		return false;
+	uint start = va.offset + va.size * sizeof(float) * mesh.first_vertex;
+	uint end = start + va.size * sizeof(float) * mesh.num_vertexes;
+	dst.assign((T*)&data[start], (T*)&data[end]);
+	ASSERT(dst.size() == mesh.num_vertexes);
+	return true;
+}
+
 bool Geometry::loadIqm(const string& path)
 {
 	std::ifstream file(path, std::ios::binary);
@@ -224,12 +236,13 @@ bool Geometry::loadIqm(const string& path)
 			iqmvertexarray &va = vas[i];
 			switch (va.type) {
 				case IQM_POSITION:
-					if (va.format != IQM_FLOAT || va.size != 3)
-						return false;
-					uint start = va.offset + va.size * sizeof(float) * mesh.first_vertex;
-					uint end = start + va.size * sizeof(float) * mesh.num_vertexes;
-					batch.positions.assign((vec3*)&data[start], (vec3*)&data[end]);
-					ASSERT(batch.positions.size() == mesh.num_vertexes);
+					iqmAssign(batch.positions, &data[0], IQM_FLOAT, 3, va, mesh);
+					break;
+				case IQM_TEXCOORD:
+					iqmAssign(batch.texcoords, &data[0], IQM_FLOAT, 2, va, mesh);
+					break;
+				case IQM_NORMAL:
+					iqmAssign(batch.normals, &data[0], IQM_FLOAT, 3, va, mesh);
 					break;
 			}
 		}
