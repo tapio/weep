@@ -202,14 +202,38 @@ bool Geometry::loadIqm(const string& path)
 		return false;
 	}
 	std::vector<uint8> data;
-	data.resize(header.filesize - sizeof(header));
-	file.read(reinterpret_cast<char*>(&data[0]), data.size());
+	data.resize(header.filesize);
+	file.read(reinterpret_cast<char*>(&data[sizeof(header)]), header.filesize - sizeof(header));
 	if (file.fail()) {
 		logError("Failed to read data from %s", path.c_str());
 		return false;
 	}
 
-	logDebug("IQM file %s has %u meshes and %u animations", path.c_str(), header.num_meshes, header.num_anims);
+	iqmvertexarray* vas = (iqmvertexarray*)&data[header.ofs_vertexarrays];
+	iqmmesh* meshes = (iqmmesh*)&data[header.ofs_meshes];
+	iqmtriangle* tris = (iqmtriangle*)&data[header.ofs_triangles];
+	ASSERT(header.num_triangles);
+	//iqmjoint* joints = (iqmjoint*)&data[header.ofs_joints];
+
+	for (uint m = 0; m < header.num_meshes; ++m) {
+		batches.emplace_back();
+		Batch& batch = batches.back();
+		iqmmesh& mesh = meshes[m];
+		batch.indices.assign((uint*)&tris[mesh.first_triangle], (uint*)&tris[mesh.first_triangle + mesh.num_triangles]);
+		for (uint i = 0; i < header.num_vertexarrays; ++i) {
+			iqmvertexarray &va = vas[i];
+			switch (va.type) {
+				case IQM_POSITION:
+					if (va.format != IQM_FLOAT || va.size != 3)
+						return false;
+					uint start = va.offset + va.size * sizeof(float) * mesh.first_vertex;
+					uint end = start + va.size * sizeof(float) * mesh.num_vertexes;
+					batch.positions.assign((vec3*)&data[start], (vec3*)&data[end]);
+					ASSERT(batch.positions.size() == mesh.num_vertexes);
+					break;
+			}
+		}
+	}
 
 	return true;
 }
@@ -254,8 +278,8 @@ void Geometry::calculateNormals()
 		// Indexed elements
 		if (!indices.empty()) {
 			// Reset existing normals
-			for (auto& normal : normals)
-				normal = vec3();
+			normals.clear();
+			normals.resize(positions.size());
 			for (uint i = 0, len = indices.size(); i < len; i += 3) {
 				vec3 normal = glm::triangleNormal(positions[indices[i]], positions[indices[i+1]], positions[indices[i+2]]);
 				normals[indices[i+0]] += normal;
