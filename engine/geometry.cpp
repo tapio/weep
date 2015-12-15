@@ -2,6 +2,7 @@
 #include "image.hpp"
 #include "physics.hpp"
 #include "iqm/iqm.h"
+#include "glrenderer/glutil.hpp"
 #include <sstream>
 #include <fstream>
 
@@ -189,8 +190,10 @@ static bool iqmAssign(vector_t& dst, uint8* data, uint wantedFormat, uint wanted
 {
 	if (va.format != wantedFormat || va.size != wantedSize)
 		return false;
-	uint start = va.offset + va.size * sizeof(float) * mesh.first_vertex;
-	uint end = start + va.size * sizeof(float) * mesh.num_vertexes;
+	ASSERT(wantedFormat == IQM_UBYTE || wantedFormat == IQM_FLOAT);
+	uint compSize = wantedFormat == IQM_UBYTE ? sizeof(uint8) : sizeof(float);
+	uint start = va.offset + va.size * compSize * mesh.first_vertex;
+	uint end = start + va.size * compSize * mesh.num_vertexes;
 	dst.assign((T*)&data[start], (T*)&data[end]);
 	ASSERT(dst.size() == mesh.num_vertexes);
 	return true;
@@ -243,6 +246,12 @@ bool Geometry::loadIqm(const string& path)
 					break;
 				case IQM_NORMAL:
 					iqmAssign(batch.normals, &data[0], IQM_FLOAT, 3, va, mesh);
+					break;
+				case IQM_BLENDINDEXES:
+					iqmAssign(batch.boneindices, &data[0], IQM_UBYTE, 4, va, mesh);
+					break;
+				case IQM_BLENDWEIGHTS:
+					iqmAssign(batch.boneweights, &data[0], IQM_UBYTE, 4, va, mesh);
 					break;
 			}
 		}
@@ -379,6 +388,7 @@ void Batch::setupAttributes()
 	if (!positions.empty()) {
 		Attribute& attr = attributes[ATTR_POSITION];
 		attr.components = 3;
+		attr.type = GL_FLOAT;
 		attr.offset = offset;
 		offset += sizeof(positions[0]);
 		numVertices = positions.size();
@@ -387,6 +397,7 @@ void Batch::setupAttributes()
 	if (!positions2d.empty()) {
 		Attribute& attr = attributes[ATTR_POSITION];
 		attr.components = 2;
+		attr.type = GL_FLOAT;
 		attr.offset = offset;
 		offset += sizeof(positions2d[0]);
 		numVertices = positions2d.size();
@@ -395,6 +406,7 @@ void Batch::setupAttributes()
 	if (!texcoords.empty()) {
 		Attribute& attr = attributes[ATTR_TEXCOORD];
 		attr.components = 2;
+		attr.type = GL_FLOAT;
 		attr.offset = offset;
 		offset += sizeof(texcoords[0]);
 		dataArrays[ATTR_TEXCOORD] = (char*)&texcoords[0];
@@ -402,9 +414,26 @@ void Batch::setupAttributes()
 	if (!normals.empty()) {
 		Attribute& attr = attributes[ATTR_NORMAL];
 		attr.components = 3;
+		attr.type = GL_FLOAT;
 		attr.offset = offset;
 		offset += sizeof(normals[0]);
 		dataArrays[ATTR_NORMAL] = (char*)&normals[0];
+	}
+	if (!boneindices.empty()) {
+		Attribute& attr = attributes[ATTR_BONE_INDEX];
+		attr.components = 4;
+		attr.type = GL_UNSIGNED_BYTE;
+		attr.offset = offset;
+		offset += sizeof(boneindices[0]);
+		dataArrays[ATTR_BONE_INDEX] = (char*)&boneindices[0];
+	}
+	if (!boneweights.empty()) {
+		Attribute& attr = attributes[ATTR_BONE_WEIGHT];
+		attr.components = 4;
+		attr.type = GL_UNSIGNED_BYTE;
+		attr.offset = offset;
+		offset += sizeof(boneweights[0]);
+		dataArrays[ATTR_BONE_WEIGHT] = (char*)&boneweights[0];
 	}
 	vertexSize = offset;
 	vertexData.resize(numVertices * vertexSize);
@@ -412,7 +441,7 @@ void Batch::setupAttributes()
 		char* dst = &vertexData[i * vertexSize];
 		for (uint a = 0; a < ATTR_MAX; ++a) {
 			if (dataArrays[a]) {
-				uint elementSize = attributes[a].components * sizeof(float);
+				uint elementSize = attributes[a].components * glutil::getTypeSize(attributes[a].type);
 				std::memcpy(dst + attributes[a].offset, dataArrays[a] + i * elementSize, elementSize);
 			}
 		}

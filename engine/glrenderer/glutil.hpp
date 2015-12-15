@@ -12,6 +12,8 @@ namespace glutil
 
 int getInt(GLenum pname);
 
+uint getTypeSize(GLenum type);
+
 const char* getErrorString(uint error);
 
 bool checkGL(const char* format, ...);

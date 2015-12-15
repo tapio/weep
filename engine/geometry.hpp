@@ -9,6 +9,8 @@ enum GeometryAttributeIndex {
 	ATTR_TEXCOORD,
 	ATTR_NORMAL,
 	ATTR_COLOR,
+	ATTR_BONE_INDEX,
+	ATTR_BONE_WEIGHT,
 	ATTR_MAX
 };
 
@@ -21,6 +23,7 @@ struct Batch
 
 	struct Attribute {
 		int components = 0;
+		int type = 0;
 		int offset = 0;
 	} attributes[ATTR_MAX];
 	int vertexSize = 0;
@@ -30,6 +33,8 @@ struct Batch
 	std::vector<vec2> positions2d;
 	std::vector<vec2> texcoords;
 	std::vector<vec3> normals;
+	std::vector<u8vec4> boneindices;
+	std::vector<u8vec4> boneweights;
 	std::vector<uint> indices;
 	std::vector<char> vertexData;
 

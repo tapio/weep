@@ -53,3 +53,23 @@ GLenum glutil::toGL(ShaderType type)
 	logError("Invalid ShaderType %d", type);
 	return 0;
 }
+
+uint glutil::getTypeSize(GLenum type)
+{
+	switch (type) {
+		case GL_BYTE:
+		case GL_UNSIGNED_BYTE:
+			return 1;
+		case GL_SHORT:
+		case GL_UNSIGNED_SHORT:
+			return 2;
+		case GL_FLOAT:
+		case GL_INT:
+		case GL_UNSIGNED_INT:
+			return 4;
+		case GL_DOUBLE:
+			return 8;
+	}
+	ASSERT(!"Unknown gl type qieried for size");
+	return 0;
+}
