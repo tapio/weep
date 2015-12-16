@@ -33,6 +33,7 @@ struct Material
 		CAST_SHADOW = 1 << 2,
 		RECEIVE_SHADOW = 1 << 3,
 		ANIMATED = 1 << 4,
+		ALPHA_TEST = 1 << 5
 	};
 	uint flags = DIRTY_MAPS | CAST_SHADOW | RECEIVE_SHADOW;
 

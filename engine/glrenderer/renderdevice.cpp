@@ -413,6 +413,25 @@ void RenderDevice::renderShadow(Model& model, Transform& transform)
 		Material& mat = *model.materials[batch.materialIndex];
 		if (!(mat.flags & Material::CAST_SHADOW))
 			continue;
+		// TODO: Optimize, refactor
+		bool alphaTestActive = m_program == m_shaders[m_shaderNames["depth_alphatest"]].id
+			|| m_program == m_shaders[m_shaderNames["depthcube_alphatest"]].id;
+		bool needsAlphaTest = mat.flags & Material::ALPHA_TEST;
+		if (alphaTestActive && !needsAlphaTest) {
+			if (m_program == m_shaders[m_shaderNames["depth_alphatest"]].id)
+				m_program = m_shaders[m_shaderNames["depth"]].id;
+			else m_program = m_shaders[m_shaderNames["depthcube"]].id;
+			glUseProgram(m_program);
+		} else if (!alphaTestActive && needsAlphaTest) {
+			if (m_program == m_shaders[m_shaderNames["depth"]].id)
+				m_program = m_shaders[m_shaderNames["depth_alphatest"]].id;
+			else m_program = m_shaders[m_shaderNames["depthcube_alphatest"]].id;
+			glUseProgram(m_program);
+		}
+		if (needsAlphaTest) {
+			glActiveTexture(GL_TEXTURE0 + BINDING_DIFFUSE_MAP);
+			glBindTexture(GL_TEXTURE_2D, mat.tex[Material::DIFFUSE_MAP]);
+		}
 
 		if (batch.renderId == -1)
 			uploadGeometry(geom); // TODO: Should not be here!

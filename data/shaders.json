@@ -45,6 +45,21 @@
 			"frag": "shaders/depth.frag"
 		}
 	},
+	"depth_alphatest": {
+		"defines": [ "USE_ALPHA_TEST", "USE_DIFFUSE_MAP" ],
+		"shaders" : {
+			"vert": "shaders/depth.vert",
+			"frag": "shaders/depth.frag"
+		}
+	},
+	"depthcube_alphatest": {
+		"defines": [ "USE_ALPHA_TEST", "USE_DIFFUSE_MAP", "USE_DEPTH_CUBE" ],
+		"shaders" : {
+			"vert": "shaders/depth.vert",
+			"geom": "shaders/depth.geom",
+			"frag": "shaders/depth.frag"
+		}
+	},
 	"skybox": {
 		"defines": [
 			"USE_ENV_MAP"
