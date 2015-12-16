@@ -95,6 +95,19 @@
 			"frag": "shaders/core.frag"
 		}
 	},
+	"anim": {
+		"defines": [
+			"USE_FOG",
+			"USE_DIFFUSE",
+			"USE_SPECULAR",
+			"USE_SHADOW_MAP",
+			"USE_SKINNING"
+		],
+		"shaders" : {
+			"vert": "shaders/core.vert",
+			"frag": "shaders/core.frag"
+		}
+	},
 	"basic": {
 		"defines": [
 			"USE_DIFFUSE_MAP"
