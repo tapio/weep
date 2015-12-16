@@ -25,6 +25,7 @@ struct Batch
 		int components = 0;
 		int type = 0;
 		int offset = 0;
+		bool normalized = false;
 	} attributes[ATTR_MAX];
 	int vertexSize = 0;
 	uint numVertices = 0;

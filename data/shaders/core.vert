@@ -5,7 +5,7 @@ layout(location = 2) in vec3 normal;
 layout(location = 3) in vec4 color;
 #ifdef USE_SKINNING
 layout(location = 4) in vec4 boneWeights;
-layout(location = 5) in ivec4 boneIndices;
+layout(location = 5) in vec4 boneIndices;
 #endif
 
 VERTEX_DATA(out, outData);
@@ -13,10 +13,10 @@ VERTEX_DATA(out, outData);
 void main()
 {
 #ifdef USE_SKINNING
-	mat3x4 m = boneMatrices[boneIndices.x] * boneWeights.x;
-	m += boneMatrices[boneIndices.y] * boneWeights.y;
-	m += boneMatrices[boneIndices.z] * boneWeights.z;
-	m += boneMatrices[boneIndices.w] * boneWeights.w;
+	mat3x4 m = boneMatrices[int(boneIndices.x)] * boneWeights.x;
+	m += boneMatrices[int(boneIndices.y)] * boneWeights.y;
+	m += boneMatrices[int(boneIndices.z)] * boneWeights.z;
+	m += boneMatrices[int(boneIndices.w)] * boneWeights.w;
 	vec4 mpos = vec4(position, 1.0);
 	mpos = vec4(mpos * m, 1.0);
 	gl_Position = modelViewProjMatrix * mpos;

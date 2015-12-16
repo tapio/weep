@@ -432,6 +432,7 @@ void Batch::setupAttributes()
 		attr.components = 4;
 		attr.type = GL_UNSIGNED_BYTE;
 		attr.offset = offset;
+		attr.normalized = true;
 		offset += sizeof(boneweights[0]);
 		dataArrays[ATTR_BONE_WEIGHT] = (char*)&boneweights[0];
 	}

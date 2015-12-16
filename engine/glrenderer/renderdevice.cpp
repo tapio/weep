@@ -306,7 +306,7 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 			Batch::Attribute& attr = batch.attributes[i];
 			if (attr.components) {
 				glEnableVertexAttribArray(i);
-				glVertexAttribPointer(i, attr.components, attr.type, GL_FALSE, batch.vertexSize, (GLvoid*)(uintptr_t)attr.offset);
+				glVertexAttribPointer(i, attr.components, attr.type, attr.normalized ? GL_TRUE : GL_FALSE, batch.vertexSize, (GLvoid*)(uintptr_t)attr.offset);
 			} else {
 				glDisableVertexAttribArray(i);
 			}

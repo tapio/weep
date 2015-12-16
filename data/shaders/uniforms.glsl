@@ -3,7 +3,7 @@
 #define MAX_SHADOW_MAPS 1
 #define MAX_SHADOW_CUBES 3
 #define MAX_SHADOWS (MAX_SHADOW_MAPS + MAX_SHADOW_CUBES)
-#define MAX_BONES 64
+#define MAX_BONES 80
 
 #ifdef __cplusplus
 #define UBO_PREFIX(name, bindpoint) struct name { static const uint binding = bindpoint;
