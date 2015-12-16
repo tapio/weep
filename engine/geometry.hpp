@@ -38,7 +38,6 @@ struct Batch
 	std::vector<u8vec4> boneweights;
 	std::vector<uint> indices;
 	std::vector<char> vertexData;
-	std::vector<mat3x4> bones;
 	uint materialIndex = 0;
 	int renderId = -1;
 };
@@ -59,6 +58,7 @@ struct Geometry
 	void merge(const Geometry& geometry, vec3 offset, int materialIndexOffset = 0);
 
 	std::vector<Batch> batches;
+	std::vector<mat3x4> bones;
 
 	Bounds bounds;
 

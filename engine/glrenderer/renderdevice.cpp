@@ -519,6 +519,13 @@ void RenderDevice::render(Model& model, Transform& transform)
 		glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
 	}
 
+	if (!geom.bones.empty()) {
+		ASSERT(geom.bones.size() <= MAX_BONES);
+		uint numBones = std::min((uint)geom.bones.size(), (uint)MAX_BONES);
+		memcpy(&m_skinningBlock.uniforms.boneMatrices[0], &geom.bones[0], numBones * sizeof(mat3x4));
+		m_skinningBlock.upload();
+	}
+
 	for (auto& batch : geom.batches) {
 
 		Material& mat = *model.materials[batch.materialIndex];
@@ -530,13 +537,6 @@ void RenderDevice::render(Model& model, Transform& transform)
 			m_program = programId;
 			glUseProgram(m_program);
 			++stats.programs;
-		}
-
-		if (mat.flags & Material::ANIMATED) {
-			ASSERT(batch.bones.size() <= MAX_BONES);
-			uint numBones = std::min((uint)batch.bones.size(), (uint)MAX_BONES);
-			memcpy(&m_skinningBlock.uniforms.boneMatrices[0], &batch.bones[0], numBones * sizeof(mat3x4));
-			m_skinningBlock.upload();
 		}
 
 		m_materialBlock.uniforms.ambient = mat.ambient;

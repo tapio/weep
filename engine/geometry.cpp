@@ -42,8 +42,8 @@ Geometry::Geometry(const string& path)
 	for (auto& batch : batches)
 		batch.setupAttributes();
 	END_MEASURE(loadTimeMs)
-	logDebug("Loaded mesh %s in %.1fms with %d batches, bound r: %f",
-		path.c_str(), loadTimeMs, batches.size(), bounds.radius);
+	logDebug("Loaded mesh %s in %.1fms with %d batches, %d bones, bound r: %f",
+		path.c_str(), loadTimeMs, batches.size(), bones.size(), bounds.radius);
 }
 
 Geometry::Geometry(const Image& heightmap)
