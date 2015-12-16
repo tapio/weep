@@ -38,6 +38,11 @@ void main()
 	vec4 sc1 = tc.y * inp[1].shadowcoord;
 	vec4 sc2 = tc.z * inp[2].shadowcoord;
 	outp.shadowcoord = sc0 + sc1 + sc2;
+
+	vec3 wp0 = tc.x * inp[0].worldPosition;
+	vec3 wp1 = tc.y * inp[1].worldPosition;
+	vec3 wp2 = tc.z * inp[2].worldPosition;
+	outp.worldPosition = wp0 + wp1 + wp2;
 #endif
 
 	// Calculate distance to each edge

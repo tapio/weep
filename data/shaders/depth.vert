@@ -6,7 +6,7 @@ void main()
 #ifdef USE_DEPTH_CUBE
 	gl_Position = modelMatrix * vec4(position, 1.0);
 #else
-	gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+	gl_Position = modelViewProjMatrix * vec4(position, 1.0);
 #endif
 }
 

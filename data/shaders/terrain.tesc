@@ -14,6 +14,7 @@ void main()
 	outp[ID].normal = inp[ID].normal;
 #ifdef USE_SHADOW_MAP
 	outp[ID].shadowcoord = inp[ID].shadowcoord;
+	outp[ID].worldPosition = inp[ID].worldPosition;
 #endif
 
 	if (ID == 0) {

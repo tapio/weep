@@ -17,6 +17,7 @@ void main()
 	outp[ID].normal = inp[ID].normal;
 #ifdef USE_SHADOW_MAP
 	outp[ID].shadowcoord = inp[ID].shadowcoord;
+	outp[ID].worldPosition = inp[ID].worldPosition;
 #endif
 
 	// Calculate curvature factors for each edge

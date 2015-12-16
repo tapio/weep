@@ -402,6 +402,7 @@ void RenderDevice::renderShadow(Model& model, Transform& transform)
 	m_objectBlock.uniforms.modelMatrix = transform.matrix;
 	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_objectBlock.uniforms.modelMatrix;
 	m_objectBlock.uniforms.modelViewMatrix = modelView;
+	m_objectBlock.uniforms.modelViewProjMatrix = m_commonBlock.uniforms.projectionMatrix * modelView;
 	m_objectBlock.uniforms.normalMatrix = glm::inverseTranspose(modelView);
 	m_objectBlock.upload();
 
@@ -486,6 +487,7 @@ void RenderDevice::render(Model& model, Transform& transform)
 	m_objectBlock.uniforms.modelMatrix = transform.matrix;
 	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_objectBlock.uniforms.modelMatrix;
 	m_objectBlock.uniforms.modelViewMatrix = modelView;
+	m_objectBlock.uniforms.modelViewProjMatrix = m_commonBlock.uniforms.projectionMatrix * modelView;
 	m_objectBlock.uniforms.normalMatrix = glm::inverseTranspose(modelView);
 	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (m_shadowProj[0] * (m_shadowView[0] * transform.matrix));
 	m_objectBlock.upload();

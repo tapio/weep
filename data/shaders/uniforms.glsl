@@ -3,6 +3,7 @@
 #define MAX_SHADOW_MAPS 1
 #define MAX_SHADOW_CUBES 3
 #define MAX_SHADOWS (MAX_SHADOW_MAPS + MAX_SHADOW_CUBES)
+#define MAX_BONES 64
 
 #ifdef __cplusplus
 #define UBO_PREFIX(name, bindpoint) struct name { static const uint binding = bindpoint;
@@ -27,6 +28,7 @@ UBO_PREFIX(UniformCommonBlock, 0)
 UBO_PREFIX(UniformObjectBlock, 1)
 	mat4 modelMatrix;
 	mat4 modelViewMatrix;
+	mat4 modelViewProjMatrix;
 	mat4 shadowMatrix;
 	mat4 normalMatrix; // Problems with alignment if sent as mat3
 };
@@ -54,6 +56,10 @@ UBO_PREFIX(UniformCubeShadowBlock, 4)
 	mat4 shadowMatrixCube[6];
 };
 
+UBO_PREFIX(UniformSkinningBlock, 5)
+	mat4 boneMatrices[MAX_BONES];
+};
+
 #undef UBO_PREFIX
 
 #define BINDING_MATERIAL_MAP_START 8
@@ -70,13 +76,18 @@ UBO_PREFIX(UniformCubeShadowBlock, 4)
 
 #ifndef __cplusplus
 
+#ifdef USE_SHADOW_MAP
+#define SHADOW_VARYINGS vec4 shadowcoord; vec3 worldPosition;
+#else
+#define SHADOW_VARYINGS
+#endif
+
 #define VERTEX_DATA(inout, name) \
 	inout VertexData { \
 		vec3 position; \
 		vec2 texcoord; \
 		vec3 normal; \
-		vec4 shadowcoord; \
-		vec3 worldPosition; \
+		SHADOW_VARYINGS \
 	} name;
 
 
