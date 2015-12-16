@@ -4,8 +4,8 @@ layout(location = 1) in vec2 texcoord;
 layout(location = 2) in vec3 normal;
 layout(location = 3) in vec4 color;
 #ifdef USE_SKINNING
-layout(location = 4) in vec4 boneWeights;
-layout(location = 5) in vec4 boneIndices;
+layout(location = 4) in vec4 boneIndices;
+layout(location = 5) in vec4 boneWeights;
 #endif
 
 VERTEX_DATA(out, outData);
