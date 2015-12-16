@@ -227,8 +227,8 @@ bool Geometry::loadIqm(const string& path)
 	iqmvertexarray* vas = (iqmvertexarray*)&data[header.ofs_vertexarrays];
 	iqmmesh* meshes = (iqmmesh*)&data[header.ofs_meshes];
 	iqmtriangle* tris = (iqmtriangle*)&data[header.ofs_triangles];
+	iqmjoint* joints = (iqmjoint*)&data[header.ofs_joints];
 	ASSERT(header.num_triangles);
-	//iqmjoint* joints = (iqmjoint*)&data[header.ofs_joints];
 
 	for (uint m = 0; m < header.num_meshes; ++m) {
 		batches.emplace_back();
@@ -254,6 +254,23 @@ bool Geometry::loadIqm(const string& path)
 					iqmAssign(batch.boneweights, &data[0], IQM_UBYTE, 4, va, mesh);
 					break;
 			}
+		}
+	}
+
+	std::vector<mat3x4> inverseBones;
+	bones.resize(header.num_joints);
+	inverseBones.resize(header.num_joints);
+	for (uint i = 0; i < header.num_joints; ++i)
+	{
+		iqmjoint &j = joints[i];
+		mat4 matrix = glm::mat4_cast(quat(j.rotate[3], j.rotate[0], j.rotate[1], j.rotate[2]));
+		matrix = glm::scale(matrix, vec3(j.scale[0], j.scale[1], j.scale[2]));
+		matrix = glm::translate(vec3(j.translate[0], j.translate[1], j.translate[2]));
+		bones[i] = mat3x4(matrix);
+		inverseBones[i] = mat3x4(glm::inverse(matrix));
+		if (j.parent >= 0) {
+			bones[i] = mat3x4(mat4(bones[j.parent]) * mat4(bones[i]));
+			inverseBones[i] = mat3x4(mat4(inverseBones[i]) * mat4(inverseBones[j.parent]));
 		}
 	}
 
