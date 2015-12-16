@@ -57,7 +57,7 @@ UBO_PREFIX(UniformCubeShadowBlock, 4)
 };
 
 UBO_PREFIX(UniformSkinningBlock, 5)
-	mat4 boneMatrices[MAX_BONES];
+	mat3x4 boneMatrices[MAX_BONES];
 };
 
 #undef UBO_PREFIX

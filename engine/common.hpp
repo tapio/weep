@@ -35,6 +35,7 @@ using glm::u8vec4;
 using glm::mat2;
 using glm::mat3;
 using glm::mat4;
+using glm::mat3x4;
 using glm::quat;
 typedef uint8_t uint8;
 typedef unsigned uint;

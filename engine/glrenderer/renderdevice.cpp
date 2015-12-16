@@ -92,6 +92,7 @@ RenderDevice::RenderDevice(Resources& resources)
 	m_materialBlock.create();
 	m_lightBlock.create();
 	m_cubeShadowBlock.create();
+	m_skinningBlock.create();
 }
 
 void RenderDevice::resizeRenderTargets()
@@ -227,6 +228,7 @@ RenderDevice::~RenderDevice()
 	m_materialBlock.destroy();
 	m_lightBlock.destroy();
 	m_cubeShadowBlock.destroy();
+	m_skinningBlock.destroy();
 	m_textures.clear();
 	for (auto& g : m_geometries)
 		destroyGeometry(g);
@@ -509,6 +511,13 @@ void RenderDevice::render(Model& model, Transform& transform)
 			m_program = programId;
 			glUseProgram(m_program);
 			++stats.programs;
+		}
+
+		if (mat.flags & Material::ANIMATED) {
+			ASSERT(batch.bones.size() <= MAX_BONES);
+			uint numBones = std::min((uint)batch.bones.size(), (uint)MAX_BONES);
+			memcpy(&m_skinningBlock.uniforms.boneMatrices[0], &batch.bones[0], numBones * sizeof(mat3x4));
+			m_skinningBlock.upload();
 		}
 
 		m_materialBlock.uniforms.ambient = mat.ambient;

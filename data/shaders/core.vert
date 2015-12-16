@@ -13,11 +13,11 @@ VERTEX_DATA(out, outData);
 void main()
 {
 #ifdef USE_SKINNING
-	mat4 m = boneMatrices[boneIndices.x] * boneWeights.x;
+	mat3x4 m = boneMatrices[boneIndices.x] * boneWeights.x;
 	m += boneMatrices[boneIndices.y] * boneWeights.y;
 	m += boneMatrices[boneIndices.z] * boneWeights.z;
 	m += boneMatrices[boneIndices.w] * boneWeights.w;
-	gl_Position = modelViewProjMatrix * m * vec4(position, 1.0);
+	gl_Position = modelViewProjMatrix * vec4(position * m, 1.0);
 #endif
 	outData.texcoord = texcoord * material.uvRepeat + material.uvOffset;
 	outData.normal = mat3(normalMatrix) * normal;

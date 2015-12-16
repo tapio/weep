@@ -83,6 +83,7 @@ namespace {
 		setFlag(material->flags, Material::TESSELLATE, def["tessellate"]);
 		setFlag(material->flags, Material::CAST_SHADOW, def["castShadow"]);
 		setFlag(material->flags, Material::RECEIVE_SHADOW, def["receiveShadow"]);
+		setFlag(material->flags, Material::ANIMATED, def["animated"]);
 		setColor(material->ambient, def["ambient"]);
 		setColor(material->diffuse, def["diffuse"]);
 		setColor(material->specular, def["specular"]);

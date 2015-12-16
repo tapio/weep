@@ -31,7 +31,8 @@ struct Material
 		TESSELLATE = 1 << 0,
 		DIRTY_MAPS = 1 << 1,
 		CAST_SHADOW = 1 << 2,
-		RECEIVE_SHADOW = 1 << 3
+		RECEIVE_SHADOW = 1 << 3,
+		ANIMATED = 1 << 4,
 	};
 	uint flags = DIRTY_MAPS | CAST_SHADOW | RECEIVE_SHADOW;
 
