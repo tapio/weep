@@ -188,8 +188,10 @@ bool Geometry::loadObj(const string& path)
 template<class vector_t, class T = typename vector_t::value_type>
 static bool iqmAssign(vector_t& dst, uint8* data, uint wantedFormat, uint wantedSize, iqmvertexarray& va, iqmmesh& mesh)
 {
-	if (va.format != wantedFormat || va.size != wantedSize)
+	if (va.format != wantedFormat || va.size != wantedSize) {
+		logWarning("Unsupported iqm vertex array type");
 		return false;
+	}
 	ASSERT(wantedFormat == IQM_UBYTE || wantedFormat == IQM_FLOAT);
 	uint compSize = wantedFormat == IQM_UBYTE ? sizeof(uint8) : sizeof(float);
 	uint start = va.offset + va.size * compSize * mesh.first_vertex;
@@ -297,8 +299,7 @@ bool Geometry::loadIqm(const string& path)
 			scale.x = p.channeloffset[7]; if (p.mask&0x80) scale.x += *framedata++ * p.channelscale[7];
 			scale.y = p.channeloffset[8]; if (p.mask&0x100) scale.y += *framedata++ * p.channelscale[8];
 			scale.z = p.channeloffset[9]; if (p.mask&0x200) scale.z += *framedata++ * p.channelscale[9];
-			rotate = normalize(rotate);
-			mat4 matrix = glm::mat4_cast(rotate);
+			mat4 matrix = glm::mat4_cast(normalize(rotate));
 			matrix = glm::scale(matrix, scale);
 			matrix = glm::translate(matrix, translate);
 			if (p.parent >= 0) animFrames[i * header.num_poses + j] = mat3x4(mat4(bones[p.parent]) * matrix * inverseBones[j]);

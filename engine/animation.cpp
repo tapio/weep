@@ -22,7 +22,7 @@ void AnimationSystem::update(Entities& entities, float dt)
 		Geometry& geom = *model.geometry;
 		Geometry::Animation a = geom.animations[anim.animation];
 		anim.time += dt * anim.speed * a.frameRate;
-		float alpha = anim.time - (int)anim.time; // TODO
+		float alpha = 0.f; // TODO
 		uint frameA = (int)std::floor(anim.time) % a.length;
 		uint frameB = (frameA + 1) % a.length;
 		mat3x4* matA = &geom.animFrames[frameA * geom.bones.size()];
@@ -31,6 +31,7 @@ void AnimationSystem::update(Entities& entities, float dt)
 		for (uint i = 0; i < anim.bones.size(); ++i) {
 			mat3x4 mat = matA[i] * (1.f - alpha) + matB[i] * alpha;
 			int parent = geom.boneParents[i];
+			ASSERT(parent < (int)i);
 			if (parent >= 0) anim.bones[i] = mat3x4(mat4(anim.bones[parent]) * mat4(mat));
 			else anim.bones[i] = mat;
 		}
