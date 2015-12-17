@@ -57,6 +57,8 @@ static void findFiles(std::vector<string>& files, const string& path, const stri
 	struct stat st;
 
 	DIR* dir = opendir(path.c_str());
+	if (!dir)
+		return;
 	while ((ent = readdir(dir)) != NULL) {
 		const string file_name = ent->d_name;
 		const string full_file_name = path + file_name;
