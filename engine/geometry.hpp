@@ -61,13 +61,14 @@ struct Geometry
 
 	struct Animation {
 		uint start = 0;
-		uint frames = 0;
+		uint length = 0;
 		float frameRate = 1.f;
 		string name;
 	};
 
 	std::vector<mat3x4> bones;
 	std::vector<mat3x4> animFrames;
+	std::vector<int> boneParents;
 	std::vector<Animation> animations;
 
 	Bounds bounds;

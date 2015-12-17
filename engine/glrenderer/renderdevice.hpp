@@ -30,7 +30,7 @@ public:
 	void renderShadow(Model& model, Transform& transform);
 
 	void preRender(const Camera& camera, const std::vector<Light>& lights);
-	void render(Model& model, Transform& transform);
+	void render(Model& model, Transform& transform, Animation* animation = nullptr);
 	void postRender();
 
 	void resizeRenderTargets();

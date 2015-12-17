@@ -27,6 +27,17 @@ struct Bounds
 	float radius = INFINITY;
 };
 
+struct Animation
+{
+	std::vector<mat3x4> bones;
+	enum State {
+		STOPPED, PLAYING, PAUSED
+	} state = STOPPED;
+	uint animation = 0;
+	float time = 0.f;
+	float speed = 1.f;
+};
+
 struct Model
 {
 	Bounds bounds;

@@ -259,12 +259,14 @@ bool Geometry::loadIqm(const string& path)
 
 	std::vector<mat4> inverseBones;
 	bones.resize(header.num_joints);
+	boneParents.resize(header.num_joints);
 	inverseBones.resize(header.num_joints);
 	for (uint i = 0; i < header.num_joints; ++i) {
 		iqmjoint &j = joints[i];
 		mat4 matrix = glm::mat4_cast(quat(j.rotate[3], j.rotate[0], j.rotate[1], j.rotate[2]));
 		matrix = glm::scale(matrix, vec3(j.scale[0], j.scale[1], j.scale[2]));
 		matrix = glm::translate(vec3(j.translate[0], j.translate[1], j.translate[2]));
+		boneParents[i] = j.parent;
 		bones[i] = mat3x4(matrix);
 		inverseBones[i] = glm::inverse(matrix);
 		if (j.parent >= 0) {
@@ -309,7 +311,7 @@ bool Geometry::loadIqm(const string& path)
 		Animation anim;
 		anim.frameRate = a.framerate;
 		anim.start = a.first_frame;
-		anim.frames = a.num_frames;
+		anim.length = a.num_frames;
 		anim.name = &str[a.name];
 		animations.push_back(std::move(anim));
 	}

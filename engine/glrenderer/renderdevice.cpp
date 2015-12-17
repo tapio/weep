@@ -501,7 +501,7 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
-void RenderDevice::render(Model& model, Transform& transform)
+void RenderDevice::render(Model& model, Transform& transform, Animation* animation)
 {
 	Geometry& geom = *model.geometry;
 
@@ -519,10 +519,10 @@ void RenderDevice::render(Model& model, Transform& transform)
 		glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
 	}
 
-	if (!geom.bones.empty()) {
-		ASSERT(geom.bones.size() <= MAX_BONES);
-		uint numBones = std::min((uint)geom.bones.size(), (uint)MAX_BONES);
-		memcpy(&m_skinningBlock.uniforms.boneMatrices[0], &geom.bones[0], numBones * sizeof(mat3x4));
+	if (animation && !animation->bones.empty()) {
+		ASSERT(animation->bones.size() <= MAX_BONES);
+		uint numBones = std::min((uint)animation->bones.size(), (uint)MAX_BONES);
+		memcpy(&m_skinningBlock.uniforms.boneMatrices[0], &animation->bones[0], numBones * sizeof(mat3x4));
 		m_skinningBlock.upload();
 	}
 

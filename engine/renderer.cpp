@@ -94,9 +94,13 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	}
 
 	m_device->preRender(camera, lights);
-	entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
-		if (!model.materials.empty() && frustum.visible(transform, model))
-			m_device->render(model, transform);
+	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
+		if (!model.materials.empty() && frustum.visible(transform, model)) {
+			if (e.has<Animation>())
+				m_device->render(model, transform, &e.get<Animation>());
+			else
+				m_device->render(model, transform);
+		}
 	});
 	m_device->postRender();
 }
