@@ -263,15 +263,15 @@ bool Geometry::loadIqm(const string& path)
 	inverseBones.resize(header.num_joints);
 	for (uint i = 0; i < header.num_joints; ++i) {
 		iqmjoint &j = joints[i];
-		mat4 matrix = glm::mat4_cast(quat(j.rotate[3], j.rotate[0], j.rotate[1], j.rotate[2]));
-		matrix = glm::scale(matrix, vec3(j.scale[0], j.scale[1], j.scale[2]));
-		matrix = glm::translate(vec3(j.translate[0], j.translate[1], j.translate[2]));
 		boneParents[i] = j.parent;
+		mat4 matrix = glm::mat4_cast(normalize(quat(j.rotate[3], j.rotate[0], j.rotate[1], j.rotate[2])));
+		matrix = glm::scale(matrix, vec3(j.scale[0], j.scale[1], j.scale[2]));
+		matrix = glm::translate(matrix, vec3(j.translate[0], j.translate[1], j.translate[2]));
 		bones[i] = mat3x4(matrix);
 		inverseBones[i] = glm::inverse(matrix);
 		if (j.parent >= 0) {
 			bones[i] = mat3x4(mat4(bones[j.parent]) * mat4(bones[i]));
-			inverseBones[i] = inverseBones[i] * inverseBones[j.parent];
+			inverseBones[i] *= inverseBones[j.parent];
 		}
 	}
 
