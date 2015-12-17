@@ -58,7 +58,17 @@ struct Geometry
 	void merge(const Geometry& geometry, vec3 offset, int materialIndexOffset = 0);
 
 	std::vector<Batch> batches;
+
+	struct Animation {
+		uint start = 0;
+		uint frames = 0;
+		float frameRate = 1.f;
+		string name;
+	};
+
 	std::vector<mat3x4> bones;
+	std::vector<mat3x4> animFrames;
+	std::vector<Animation> animations;
 
 	Bounds bounds;
 

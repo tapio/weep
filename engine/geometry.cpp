@@ -42,8 +42,8 @@ Geometry::Geometry(const string& path)
 	for (auto& batch : batches)
 		batch.setupAttributes();
 	END_MEASURE(loadTimeMs)
-	logDebug("Loaded mesh %s in %.1fms with %d batches, %d bones, bound r: %f",
-		path.c_str(), loadTimeMs, batches.size(), bones.size(), bounds.radius);
+	logDebug("Loaded mesh %s in %.1fms with %d batches, %d bones, %d anims, bound r: %f",
+		path.c_str(), loadTimeMs, batches.size(), bones.size(), animations.size(), bounds.radius);
 }
 
 Geometry::Geometry(const Image& heightmap)
@@ -257,21 +257,61 @@ bool Geometry::loadIqm(const string& path)
 		}
 	}
 
-	std::vector<mat3x4> inverseBones;
+	std::vector<mat4> inverseBones;
 	bones.resize(header.num_joints);
 	inverseBones.resize(header.num_joints);
-	for (uint i = 0; i < header.num_joints; ++i)
-	{
+	for (uint i = 0; i < header.num_joints; ++i) {
 		iqmjoint &j = joints[i];
 		mat4 matrix = glm::mat4_cast(quat(j.rotate[3], j.rotate[0], j.rotate[1], j.rotate[2]));
 		matrix = glm::scale(matrix, vec3(j.scale[0], j.scale[1], j.scale[2]));
 		matrix = glm::translate(vec3(j.translate[0], j.translate[1], j.translate[2]));
 		bones[i] = mat3x4(matrix);
-		inverseBones[i] = mat3x4(glm::inverse(matrix));
+		inverseBones[i] = glm::inverse(matrix);
 		if (j.parent >= 0) {
 			bones[i] = mat3x4(mat4(bones[j.parent]) * mat4(bones[i]));
-			inverseBones[i] = mat3x4(mat4(inverseBones[i]) * mat4(inverseBones[j.parent]));
+			inverseBones[i] = inverseBones[i] * inverseBones[j.parent];
 		}
+	}
+
+	const char *str = header.ofs_text ? (char*)&data[header.ofs_text] : "";
+
+	iqmanim* anims = (iqmanim*)&data[header.ofs_anims];
+	iqmpose* poses = (iqmpose*)&data[header.ofs_poses];
+	ushort* framedata = (ushort*)&data[header.ofs_frames];
+	animFrames.resize(header.num_frames * header.num_poses);
+
+	for (uint i = 0; i < header.num_frames; ++i) {
+		for (uint j = 0; j < header.num_poses; ++j) {
+			iqmpose &p = poses[j];
+			quat rotate;
+			vec3 translate, scale;
+			translate.x = p.channeloffset[0]; if (p.mask&0x01) translate.x += *framedata++ * p.channelscale[0];
+			translate.y = p.channeloffset[1]; if (p.mask&0x02) translate.y += *framedata++ * p.channelscale[1];
+			translate.z = p.channeloffset[2]; if (p.mask&0x04) translate.z += *framedata++ * p.channelscale[2];
+			rotate.x = p.channeloffset[3]; if (p.mask&0x08) rotate.x += *framedata++ * p.channelscale[3];
+			rotate.y = p.channeloffset[4]; if (p.mask&0x10) rotate.y += *framedata++ * p.channelscale[4];
+			rotate.z = p.channeloffset[5]; if (p.mask&0x20) rotate.z += *framedata++ * p.channelscale[5];
+			rotate.w = p.channeloffset[6]; if (p.mask&0x40) rotate.w += *framedata++ * p.channelscale[6];
+			scale.x = p.channeloffset[7]; if (p.mask&0x80) scale.x += *framedata++ * p.channelscale[7];
+			scale.y = p.channeloffset[8]; if (p.mask&0x100) scale.y += *framedata++ * p.channelscale[8];
+			scale.z = p.channeloffset[9]; if (p.mask&0x200) scale.z += *framedata++ * p.channelscale[9];
+			rotate = normalize(rotate);
+			mat4 matrix = glm::mat4_cast(rotate);
+			matrix = glm::scale(matrix, scale);
+			matrix = glm::translate(translate);
+			if (p.parent >= 0) animFrames[i * header.num_poses + j] = mat3x4(mat4(bones[p.parent]) * matrix * inverseBones[j]);
+			else animFrames[i * header.num_poses + j] = mat3x4(matrix * inverseBones[j]);
+		}
+	}
+
+	for (uint i = 0; i < header.num_anims; ++i) {
+		iqmanim &a = anims[i];
+		Animation anim;
+		anim.frameRate = a.framerate;
+		anim.start = a.first_frame;
+		anim.frames = a.num_frames;
+		anim.name = &str[a.name];
+		animations.push_back(std::move(anim));
 	}
 
 	return true;
