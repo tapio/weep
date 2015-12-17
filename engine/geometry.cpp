@@ -300,7 +300,7 @@ bool Geometry::loadIqm(const string& path)
 			rotate = normalize(rotate);
 			mat4 matrix = glm::mat4_cast(rotate);
 			matrix = glm::scale(matrix, scale);
-			matrix = glm::translate(translate);
+			matrix = glm::translate(matrix, translate);
 			if (p.parent >= 0) animFrames[i * header.num_poses + j] = mat3x4(mat4(bones[p.parent]) * matrix * inverseBones[j]);
 			else animFrames[i * header.num_poses + j] = mat3x4(matrix * inverseBones[j]);
 		}
