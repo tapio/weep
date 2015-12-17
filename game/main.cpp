@@ -7,6 +7,7 @@
 #include "resources.hpp"
 #include "controller.hpp"
 #include "physics.hpp"
+#include "animation.hpp"
 #include "audio.hpp"
 #include "module.hpp"
 #include "gui.hpp"
@@ -18,6 +19,7 @@ void init(Game& game, SceneLoader& scene, const string& scenePath)
 {
 	game.entities = Entities();
 	game.entities.add_system<RenderSystem>(game.resources);
+	game.entities.add_system<AnimationSystem>();
 	game.entities.add_system<PhysicsSystem>();
 	game.entities.add_system<AudioSystem>();
 	game.entities.add_system<ModuleSystem>();
@@ -75,6 +77,7 @@ int main(int argc, char* argv[])
 		RenderSystem& renderer = game.entities.get_system<RenderSystem>();
 		PhysicsSystem& physics = game.entities.get_system<PhysicsSystem>();
 		AudioSystem& audio = game.entities.get_system<AudioSystem>();
+		AnimationSystem& animation = game.entities.get_system<AnimationSystem>();
 		ModuleSystem& modules = game.entities.get_system<ModuleSystem>();
 		ImGuiSystem& imgui = game.entities.get_system<ImGuiSystem>();
 		Entity cameraEnt = game.entities.get_entity_by_tag("camera");
@@ -158,6 +161,11 @@ int main(int argc, char* argv[])
 		modules.call($id(UPDATE), &game);
 		END_MEASURE(moduleTimeMs)
 
+		// Animation
+		START_MEASURE(animTimeMs)
+		animation.update(game.entities, game.engine.dt);
+		END_MEASURE(animTimeMs)
+
 		// Physics
 		START_MEASURE(physTimeMs)
 		physics.step(game.entities, game.engine.dt);
@@ -188,6 +196,7 @@ int main(int argc, char* argv[])
 			ImGui::Text("FPS: %d (%.3fms)", int(1.0 / game.engine.dt), game.engine.dt * 1000.f);
 			if (ImGui::CollapsingHeader("Stats")) {
 				ImGui::Text("Physics:      %.3fms", physTimeMs);
+				ImGui::Text("Animation:    %.3fms", animTimeMs);
 				ImGui::Text("Audio:        %.3fms", audioTimeMs);
 				ImGui::Text("CPU Render:   %.3fms", renderTimeMs);
 				ImGui::Text("Module upd:   %.3fms", moduleTimeMs);
@@ -331,6 +340,7 @@ int main(int argc, char* argv[])
 	game.entities.remove_system<ModuleSystem>();
 	game.entities.remove_system<AudioSystem>();
 	game.entities.remove_system<PhysicsSystem>();
+	game.entities.remove_system<AnimationSystem>();
 	game.entities.remove_system<RenderSystem>();
 
 	game.engine.deinit();
