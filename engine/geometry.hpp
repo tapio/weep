@@ -54,6 +54,7 @@ struct Geometry
 	void calculateBoundingBox();
 	void calculateNormals();
 	void normalizeNormals();
+	void applyMatrix(mat4 transform);
 	void generateCollisionTriMesh(bool deduplicateVertices = true);
 	void merge(const Geometry& geometry, vec3 offset, int materialIndexOffset = 0);
 

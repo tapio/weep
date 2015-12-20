@@ -389,6 +389,17 @@ void Geometry::normalizeNormals()
 			normal = glm::normalize(normal);
 }
 
+void Geometry::applyMatrix(mat4 transform)
+{
+	mat3 normalTransform = mat3(glm::inverseTranspose(transform));
+	for (auto& batch : batches) {
+		for (auto& pos : batch.positions)
+			pos = vec3(transform * vec4(pos, 1.0f));
+		for (auto& normal : batch.normals)
+			normal = normalTransform * normal;
+	}
+}
+
 void Geometry::generateCollisionTriMesh(bool deduplicateVertices)
 {
 	ASSERT(!collisionMesh);
