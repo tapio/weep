@@ -16,12 +16,14 @@ static void debugCallback(GLenum /*source*/, GLenum type, GLuint id, GLenum seve
 {
 	if (id == 131185) // Filter out NVIDIA "Buffer detailed info"
 		return;
+	if (id == 131218) // Filter out NVIDIA "Fragment Shader is going to be recompiled"
+		return;
 	if (severity >= s_debugMsgSeverityLevel) {
 		if (type == GL_DEBUG_TYPE_ERROR)
-			logError("OpenGL: %s", msg);
+			logError("OpenGL: %s (%u)", msg, id);
 		else if (type == GL_DEBUG_TYPE_OTHER || type == GL_DEBUG_TYPE_MARKER)
-			logDebug("OpenGL: %s", msg);
-		else logWarning("OpenGL: %s", msg);
+			logDebug("OpenGL: %s (%u)", msg, id);
+		else logWarning("OpenGL: %s (%u)", msg, id);
 	}
 }
 
