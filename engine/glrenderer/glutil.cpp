@@ -70,6 +70,6 @@ uint glutil::getTypeSize(GLenum type)
 		case GL_DOUBLE:
 			return 8;
 	}
-	ASSERT(!"Unknown gl type qieried for size");
+	ASSERT(!"Unknown gl type queried for size");
 	return 0;
 }
