@@ -293,6 +293,7 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 	}
 	glutil::checkGL("Pre geometry upload");
 	for (auto& batch : geometry.batches) {
+		ASSERT(batch.renderId == -1);
 		batch.renderId = m_geometries.size();
 		m_geometries.emplace_back(GPUGeometry());
 		GPUGeometry& model = m_geometries.back();
