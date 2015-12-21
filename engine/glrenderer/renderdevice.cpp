@@ -295,12 +295,13 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 	for (auto& batch : geometry.batches) {
 		ASSERT(batch.renderId == -1);
 		batch.renderId = m_geometries.size();
-		m_geometries.emplace_back(GPUGeometry());
+		m_geometries.emplace_back();
 		GPUGeometry& model = m_geometries.back();
 
 		if (!model.vao) glGenVertexArrays(1, &model.vao);
 		if (!model.vbo) glGenBuffers(1, &model.vbo);
 		if (!model.ebo && !batch.indices.empty()) glGenBuffers(1, &model.ebo);
+		ASSERT(model.vao && model.vbo);
 		glBindVertexArray(model.vao);
 		glBindBuffer(GL_ARRAY_BUFFER, model.vbo);
 		glBufferData(GL_ARRAY_BUFFER, batch.vertexData.size(), &batch.vertexData.front(), GL_STATIC_DRAW);
