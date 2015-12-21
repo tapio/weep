@@ -40,6 +40,7 @@ struct Batch
 	std::vector<char> vertexData;
 	uint materialIndex = 0;
 	int renderId = -1;
+	string name;
 };
 
 

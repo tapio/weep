@@ -120,12 +120,14 @@ bool Geometry::loadObj(const string& path)
 			srow >> tempst >> materialName;
 			if (mtlMap.empty()) {
 				mtlMap[materialName] = 0;
+				batch->name = materialName;
 			} else if (mtlMap.find(materialName) == mtlMap.end()) {
 				uint newIndex = batches.size();
 				mtlMap[materialName] = newIndex;
 				batches.emplace_back();
 				batch = &batches.back();
 				batch->materialIndex = newIndex;
+				batch->name = materialName;
 			} else {
 				batch = &batches.at(mtlMap[materialName]);
 			}
@@ -230,12 +232,14 @@ bool Geometry::loadIqm(const string& path)
 	iqmmesh* meshes = (iqmmesh*)&data[header.ofs_meshes];
 	iqmtriangle* tris = (iqmtriangle*)&data[header.ofs_triangles];
 	iqmjoint* joints = (iqmjoint*)&data[header.ofs_joints];
+	const char *str = header.ofs_text ? (char*)&data[header.ofs_text] : "";
 	ASSERT(header.num_triangles);
 
 	for (uint m = 0; m < header.num_meshes; ++m) {
 		batches.emplace_back();
 		Batch& batch = batches.back();
 		iqmmesh& mesh = meshes[m];
+		batch.name = &str[mesh.name];
 		batch.indices.assign((uint*)&tris[mesh.first_triangle], (uint*)&tris[mesh.first_triangle + mesh.num_triangles]);
 		for (uint i = 0; i < header.num_vertexarrays; ++i) {
 			iqmvertexarray &va = vas[i];
@@ -276,8 +280,6 @@ bool Geometry::loadIqm(const string& path)
 			inverseBones[i] *= inverseBones[j.parent];
 		}
 	}
-
-	const char *str = header.ofs_text ? (char*)&data[header.ofs_text] : "";
 
 	iqmanim* anims = (iqmanim*)&data[header.ofs_anims];
 	iqmpose* poses = (iqmpose*)&data[header.ofs_poses];
