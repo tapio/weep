@@ -531,6 +531,7 @@ void RenderDevice::render(Model& model, Transform& transform, Animation* animati
 
 	for (auto& batch : geom.batches) {
 
+		ASSERT(batch.materialIndex < model.materials.size());
 		Material& mat = *model.materials[batch.materialIndex];
 		if (mat.shaderId < 0 || (mat.flags & Material::DIRTY_MAPS))
 			uploadMaterial(mat); // TODO: Should not be here!
