@@ -1,9 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <memory>
 #include <string>
-#include <cstring>
 #include <cstdarg>
 #include <json11/json11.hpp>
 #define GLM_FORCE_RADIANS
