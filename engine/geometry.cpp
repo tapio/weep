@@ -242,6 +242,9 @@ bool Geometry::loadIqm(const string& path)
 		iqmmesh& mesh = meshes[m];
 		batch.name = &str[mesh.name];
 		batch.indices.assign((uint*)&tris[mesh.first_triangle], (uint*)&tris[mesh.first_triangle + mesh.num_triangles]);
+		// Fix triangle winding
+		for (uint i = 0; i < mesh.num_triangles; ++i)
+			std::swap(batch.indices[i*3], batch.indices[i*3+2]);
 		for (uint i = 0; i < header.num_vertexarrays; ++i) {
 			iqmvertexarray &va = vas[i];
 			switch (va.type) {
