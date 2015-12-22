@@ -6,23 +6,23 @@
 
 ImGuiSystem::ImGuiSystem(SDL_Window* window)
 {
-	ImGui_ImplSDLGL3_Init(window);
+	ImGui_ImplSdlGL3_Init(window);
 	m_imguiState = ImGui::GetInternalState();
 }
 
 ImGuiSystem::~ImGuiSystem()
 {
-	ImGui_ImplSDLGL3_Shutdown();
+	ImGui_ImplSdlGL3_Shutdown();
 }
 
 void ImGuiSystem::newFrame()
 {
-	ImGui_ImplSDLGL3_NewFrame();
+	ImGui_ImplSdlGL3_NewFrame();
 }
 
 bool ImGuiSystem::processEvent(SDL_Event* event)
 {
-	ImGui_ImplSDLGL3_ProcessEvent(event);
+	ImGui_ImplSdlGL3_ProcessEvent(event);
 	ImGuiIO& io = ImGui::GetIO();
 	switch (event->type) {
 		case SDL_KEYDOWN:
