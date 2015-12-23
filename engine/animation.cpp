@@ -22,7 +22,7 @@ void AnimationSystem::update(Entities& entities, float dt)
 		Geometry& geom = *model.geometry;
 		Geometry::Animation a = geom.animations[anim.animation];
 		anim.time += dt * anim.speed * a.frameRate;
-		float alpha = 0.f; // TODO
+		float alpha = glm::fract(anim.time);
 		uint frameA = (int)std::floor(anim.time) % a.length;
 		uint frameB = (frameA + 1) % a.length;
 		mat3x4* matA = &geom.animFrames[frameA * geom.bones.size()];
