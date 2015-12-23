@@ -414,6 +414,7 @@ void RenderDevice::renderShadow(Model& model, Transform& transform)
 
 	for (auto& batch : geom.batches) {
 
+		ASSERT(batch.materialIndex <= model.materials.size());
 		Material& mat = *model.materials[batch.materialIndex];
 		if (!(mat.flags & Material::CAST_SHADOW))
 			continue;

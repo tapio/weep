@@ -259,6 +259,7 @@ bool Geometry::loadIqm(const string& path)
 	iqmjoint* joints = (iqmjoint*)&data[header.ofs_joints];
 	const char *str = header.ofs_text ? (char*)&data[header.ofs_text] : "";
 	ASSERT(header.num_triangles);
+	std::map<string, uint> mtlMap;
 
 	for (uint m = 0; m < header.num_meshes; ++m) {
 		batches.emplace_back();
@@ -266,6 +267,16 @@ bool Geometry::loadIqm(const string& path)
 		iqmmesh& mesh = meshes[m];
 		batch.name = &str[mesh.name];
 		batch.indices.assign((uint*)&tris[mesh.first_triangle], (uint*)&tris[mesh.first_triangle + mesh.num_triangles]);
+		string materialName = &str[mesh.material];
+		if (mtlMap.empty()) {
+			mtlMap[materialName] = 0;
+		} else if (mtlMap.find(materialName) == mtlMap.end()) {
+			uint newIndex = mtlMap.size();
+			mtlMap[materialName] = newIndex;
+			batch.materialIndex = newIndex;
+		} else {
+			batch.materialIndex = mtlMap[materialName];
+		}
 		// Fix triangle winding
 		for (uint i = 0; i < mesh.num_triangles; ++i)
 			std::swap(batch.indices[i*3], batch.indices[i*3+2]);
