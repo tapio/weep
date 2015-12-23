@@ -81,3 +81,11 @@ private:
 	bool loadObj(const string& path);
 	bool loadIqm(const string& path);
 };
+
+
+inline mat3x4 multiplyBones(const mat3x4& lhs, const mat3x4& rhs) {
+	return mat3x4(
+		vec4(rhs[0] * lhs[0].x + rhs[1] * lhs[0].y + rhs[2] * lhs[0].z + vec4(0, 0, 0, lhs[0].w)),
+		vec4(rhs[0] * lhs[1].x + rhs[1] * lhs[1].y + rhs[2] * lhs[1].z + vec4(0, 0, 0, lhs[1].w)),
+		vec4(rhs[0] * lhs[2].x + rhs[1] * lhs[2].y + rhs[2] * lhs[2].z + vec4(0, 0, 0, lhs[2].w)));
+}

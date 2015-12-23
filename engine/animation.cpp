@@ -32,7 +32,7 @@ void AnimationSystem::update(Entities& entities, float dt)
 			mat3x4 mat = matA[i] * (1.f - alpha) + matB[i] * alpha;
 			int parent = geom.boneParents[i];
 			ASSERT(parent < (int)i);
-			if (parent >= 0) anim.bones[i] = mat3x4(mat4(anim.bones[parent]) * mat4(mat));
+			if (parent >= 0) anim.bones[i] = multiplyBones(anim.bones[parent], mat);
 			else anim.bones[i] = mat;
 		}
 	});

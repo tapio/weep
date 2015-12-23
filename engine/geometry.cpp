@@ -22,6 +22,31 @@ namespace {
 		return strLen >= endingLen &&
 			str.compare(strLen - endingLen, endingLen, ending) == 0;
 	}
+
+	mat3x4 invert(mat3x4 mat) {
+		mat3 invrot(vec3(mat[0].x, mat[1].x, mat[2].x), vec3(mat[0].y, mat[1].y, mat[2].y), vec3(mat[0].z, mat[1].z, mat[2].z));
+		invrot[0] /= glm::length2(invrot[0]);
+		invrot[1] /= glm::length2(invrot[1]);
+		invrot[2] /= glm::length2(invrot[2]);
+		vec3 trans(mat[0].w, mat[1].w, mat[2].w);
+		mat3x4 ret;
+		ret[0] = vec4(invrot[0], -glm::dot(invrot[0], trans));
+		ret[1] = vec4(invrot[1], -glm::dot(invrot[1], trans));
+		ret[2] = vec4(invrot[2], -glm::dot(invrot[2], trans));
+		return ret;
+	}
+
+	mat3x4 jointToMatrix(quat rot, vec3 scale, vec3 transl) {
+		float x = rot.x, y = rot.y, z = rot.z, w = rot.w,
+			tx = 2*x, ty = 2*y, tz = 2*z,
+			txx = tx*x, tyy = ty*y, tzz = tz*z,
+			txy = tx*y, txz = tx*z, tyz = ty*z,
+			twx = w*tx, twy = w*ty, twz = w*tz;
+		vec3 a = vec3(1 - (tyy + tzz), txy - twz, txz + twy);
+		vec3 b = vec3(txy + twz, 1 - (txx + tzz), tyz - twx);
+		vec3 c = vec3(txz - twy, tyz + twx, 1 - (txx + tyy));
+		return mat3x4(vec4(a * scale, transl.x), vec4(b * scale, transl.y), vec4(c * scale, transl.z));
+	}
 }
 
 Geometry::Geometry(const string& path)
@@ -267,21 +292,21 @@ bool Geometry::loadIqm(const string& path)
 		}
 	}
 
-	std::vector<mat4> inverseBones;
+	std::vector<mat3x4> inverseBones;
 	bones.resize(header.num_joints);
 	boneParents.resize(header.num_joints);
 	inverseBones.resize(header.num_joints);
 	for (uint i = 0; i < header.num_joints; ++i) {
 		iqmjoint &j = joints[i];
 		boneParents[i] = j.parent;
-		mat4 matrix = glm::mat4_cast(normalize(quat(j.rotate[3], j.rotate[0], j.rotate[1], j.rotate[2])));
-		matrix = glm::scale(matrix, vec3(j.scale[0], j.scale[1], j.scale[2]));
-		matrix = glm::translate(matrix, vec3(j.translate[0], j.translate[1], j.translate[2]));
-		bones[i] = mat3x4(matrix);
-		inverseBones[i] = glm::inverse(matrix);
+		quat rot = normalize(quat(j.rotate[3], j.rotate[0], j.rotate[1], j.rotate[2]));
+		vec3 scale(j.scale[0], j.scale[1], j.scale[2]);
+		vec3 transl(j.translate[0], j.translate[1], j.translate[2]);
+		bones[i] = jointToMatrix(rot, scale, transl);
+		inverseBones[i] = invert(bones[i]);
 		if (j.parent >= 0) {
-			bones[i] = mat3x4(mat4(bones[j.parent]) * mat4(bones[i]));
-			inverseBones[i] *= inverseBones[j.parent];
+			bones[i] = multiplyBones(bones[j.parent], bones[i]);
+			inverseBones[i] = multiplyBones(inverseBones[i], inverseBones[j.parent]);
 		}
 	}
 
@@ -305,11 +330,9 @@ bool Geometry::loadIqm(const string& path)
 			scale.x = p.channeloffset[7]; if (p.mask&0x80) scale.x += *framedata++ * p.channelscale[7];
 			scale.y = p.channeloffset[8]; if (p.mask&0x100) scale.y += *framedata++ * p.channelscale[8];
 			scale.z = p.channeloffset[9]; if (p.mask&0x200) scale.z += *framedata++ * p.channelscale[9];
-			mat4 matrix = glm::mat4_cast(normalize(rotate));
-			matrix = glm::scale(matrix, scale);
-			matrix = glm::translate(matrix, translate);
-			if (p.parent >= 0) animFrames[i * header.num_poses + j] = mat3x4(mat4(bones[p.parent]) * matrix * inverseBones[j]);
-			else animFrames[i * header.num_poses + j] = mat3x4(matrix * inverseBones[j]);
+			mat3x4 matrix = jointToMatrix(rotate, scale, translate);
+			if (p.parent >= 0) animFrames[i * header.num_poses + j] = multiplyBones(multiplyBones(bones[p.parent], matrix), inverseBones[j]);
+			else animFrames[i * header.num_poses + j] = multiplyBones(matrix, inverseBones[j]);
 		}
 	}
 
