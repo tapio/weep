@@ -68,6 +68,18 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 		transform.updateMatrix();
 	});
 
+	// Fixed amount of time for uploading each frame?
+	entities.for_each<Model>([&](Entity, Model&) {
+		// Upload geometry
+		Geometry& geom = *model.geometry;
+		if (!geom.batches.empty() && geom.batches.front().renderId < 0)
+			m_device->uploadGeometry(geom);
+		// Upload materials
+		for (auto mat : model.materials)
+			if (mat->shaderId[0] < 0 || (mat->flags & Material::DIRTY_MAPS))
+				m_device->uploadMaterial(*mat);
+	});
+
 	Light sun;
 	sun.type = Light::DIRECTIONAL_LIGHT;
 	sun.position = camera.position + normalize(m_env.sunPosition) * 10.f;

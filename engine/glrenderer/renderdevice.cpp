@@ -563,9 +563,6 @@ void RenderDevice::renderShadow(Model& model, Transform& transform)
 		if (!(mat.flags & Material::CAST_SHADOW))
 			continue;
 
-		if (mat.shaderId[m_tech] < 0) // TODO: Get rid of this
-			continue;
-
 		useProgram(m_shaders[mat.shaderId[m_tech]]);
 
 		if (mat.flags & Material::ALPHA_TEST) {
@@ -573,9 +570,7 @@ void RenderDevice::renderShadow(Model& model, Transform& transform)
 			glBindTexture(GL_TEXTURE_2D, mat.tex[Material::DIFFUSE_MAP]);
 		}
 
-		if (batch.renderId == -1)
-			uploadGeometry(geom); // TODO: Should not be here!
-
+		ASSERT(batch.renderId >= 0);
 		GPUGeometry& gpuData = m_geometries[batch.renderId];
 		glBindVertexArray(gpuData.vao);
 		uint mode = GL_TRIANGLES;
@@ -671,8 +666,7 @@ void RenderDevice::render(Model& model, Transform& transform, Animation* animati
 
 		ASSERT(batch.materialIndex < model.materials.size());
 		Material& mat = *model.materials[batch.materialIndex];
-		if (mat.shaderId[m_tech] < 0 || (mat.flags & Material::DIRTY_MAPS))
-			uploadMaterial(mat); // TODO: Should not be here!
+		ASSERT(mat.shaderId[m_tech] >= 0);
 
 		useProgram(m_shaders[mat.shaderId[m_tech]]);
 
@@ -693,9 +687,7 @@ void RenderDevice::render(Model& model, Transform& transform, Animation* animati
 			//glUniform1i(i, i);
 		}
 
-		if (batch.renderId == -1)
-			uploadGeometry(geom); // TODO: Should not be here!
-
+		ASSERT(batch.renderId >= 0);
 		GPUGeometry& gpuData = m_geometries[batch.renderId];
 		glBindVertexArray(gpuData.vao);
 		uint mode = (mat.flags & Material::TESSELLATE) ? GL_PATCHES : GL_TRIANGLES;
