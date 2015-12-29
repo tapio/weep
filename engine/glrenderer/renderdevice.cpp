@@ -494,6 +494,16 @@ bool RenderDevice::uploadMaterial(Material& material)
 	return true;
 }
 
+void RenderDevice::useProgram(const ShaderProgram& program)
+{
+	uint programId = program.id;
+	if (m_program != programId) {
+		m_program = programId;
+		glUseProgram(m_program);
+		++stats.programs;
+	}
+}
+
 void RenderDevice::setupShadowPass(const Light& light, uint index)
 {
 	ASSERT(m_env);
@@ -556,12 +566,7 @@ void RenderDevice::renderShadow(Model& model, Transform& transform)
 		if (mat.shaderId[m_tech] < 0) // TODO: Get rid of this
 			continue;
 
-		uint programId = m_shaders[mat.shaderId[m_tech]].id;
-		if (m_program != programId) {
-			m_program = programId;
-			glUseProgram(m_program);
-			++stats.programs;
-		}
+		useProgram(m_shaders[mat.shaderId[m_tech]]);
 
 		if (mat.flags & Material::ALPHA_TEST) {
 			glActiveTexture(GL_TEXTURE0 + BINDING_DIFFUSE_MAP);
@@ -669,12 +674,7 @@ void RenderDevice::render(Model& model, Transform& transform, Animation* animati
 		if (mat.shaderId[m_tech] < 0 || (mat.flags & Material::DIRTY_MAPS))
 			uploadMaterial(mat); // TODO: Should not be here!
 
-		uint programId = m_shaders[mat.shaderId[m_tech]].id;
-		if (m_program != programId) {
-			m_program = programId;
-			glUseProgram(m_program);
-			++stats.programs;
-		}
+		useProgram(m_shaders[mat.shaderId[m_tech]]);
 
 		m_materialBlock.uniforms.ambient = mat.ambient;
 		m_materialBlock.uniforms.diffuse = mat.diffuse;

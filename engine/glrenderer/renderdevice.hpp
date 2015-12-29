@@ -36,6 +36,8 @@ public:
 	void resizeRenderTargets();
 	void toggleWireframe();
 
+	void useProgram(const ShaderProgram& program);
+
 	struct Caps {
 		float maxAnisotropy;
 		int maxSamples;
