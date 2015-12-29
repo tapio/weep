@@ -27,6 +27,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			ImGui::Checkbox("V-sync", &vsync);
 			if (vsync != oldVsync)
 				game.engine.vsync(vsync);
+
 			ImGui::SameLine();
 			bool fullscreen = game.engine.fullscreen();
 			bool oldFullscreen = fullscreen;
@@ -35,6 +36,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				game.engine.fullscreen(fullscreen);
 				renderer.device().resizeRenderTargets();
 			}
+
 			float volume = audio.soloud->getGlobalVolume();
 			float oldVolume = volume;
 			ImGui::SliderFloat("Volume", &volume, 0.f, 1.25f);
@@ -55,6 +57,8 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				Engine::settings = Json(settings);
 				renderer.device().resizeRenderTargets();
 			}
+
+			ImGui::Checkbox("Shadows", &renderer.settings.shadows);
 			break;
 		}
 	}

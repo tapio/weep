@@ -22,6 +22,10 @@ public:
 
 	RenderDevice& device() { return *m_device; }
 
+	struct Settings {
+		bool shadows = true;
+	} settings;
+
 private:
 	std::unique_ptr<RenderDevice> m_device;
 	std::vector<Model*> m_models;
