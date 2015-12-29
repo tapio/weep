@@ -78,6 +78,7 @@ private:
 	mat4 m_shadowView[MAX_SHADOWS];
 
 	uint m_program = 0;
+	Technique m_tech = TECH_COLOR;
 	bool m_wireframe = false;
 	UBO<UniformCommonBlock> m_commonBlock;
 	UBO<UniformObjectBlock> m_objectBlock;

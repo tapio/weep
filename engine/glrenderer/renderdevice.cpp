@@ -175,6 +175,7 @@ void RenderDevice::loadShaders()
 		it.destroy();
 	m_shaders.clear();
 	m_shaderNames.clear();
+	m_shaderTags.clear();
 	std::string err;
 	Json jsonShaders = Json::parse(m_resources.getText("shaders.json", Resources::NO_CACHE), err);
 	if (!err.empty())
@@ -244,7 +245,12 @@ void RenderDevice::loadShaders()
 
 int RenderDevice::generateShader(uint tags)
 {
-	string name = "generated_" + std::bitset<NUM_SHADER_FEATURES>(tags).to_string();
+	auto it = m_shaderTags.find(tags);
+	if (it != m_shaderTags.end())
+		return it->second;
+
+	string name = (tags & USE_DEPTH) ? "gen_depth_" : "gen_color_";
+	name += std::bitset<NUM_SHADER_FEATURES>(tags).to_string();
 	m_shaders.emplace_back(name);
 	ShaderProgram& program = m_shaders.back();
 
@@ -277,11 +283,20 @@ int RenderDevice::generateShader(uint tags)
 	defineText += m_resources.getText("shaders/uniforms.glsl", Resources::USE_CACHE);
 	defineText += "#line 1 1\n";
 
-	program.compile(VERTEX_SHADER, m_resources.getText("shaders/core.vert", Resources::USE_CACHE), defineText);
-	program.compile(FRAGMENT_SHADER, m_resources.getText("shaders/core.frag", Resources::USE_CACHE), defineText);
+	string file = (tags & USE_DEPTH) ? "depth" : "core";
+	program.compile(VERTEX_SHADER, m_resources.getText("shaders/" + file + ".vert", Resources::USE_CACHE), defineText);
+	program.compile(FRAGMENT_SHADER, m_resources.getText("shaders/" + file + ".frag", Resources::USE_CACHE), defineText);
+	if (tags & USE_DEPTH_CUBE)
+		program.compile(GEOMETRY_SHADER, m_resources.getText("shaders/depth.geom", Resources::USE_CACHE), defineText);
 
-	if (!program.link())
+	if (!program.link()) {
+		if ((tags & USE_DEPTH) == 0) {
+			auto it = m_shaderNames.find("missing");
+			if (it != m_shaderNames.end())
+				return it->second;
+		}
 		return -1;
+	}
 
 	int index = m_shaders.size() - 1;
 	//m_shaderNames[name] = index;
@@ -319,7 +334,7 @@ void RenderDevice::setEnvironment(Environment* env)
 	m_env = env;
 	// TODO: Use uploadMaterial()
 	m_skyboxMat.shaderName = "skybox";
-	m_skyboxMat.shaderId = m_shaders[m_shaderNames["skybox"]].id;
+	m_skyboxMat.shaderId[TECH_COLOR] = m_shaders[m_shaderNames["skybox"]].id;
 	if (!m_env->skybox[0])
 		return;
 	Texture& tex = m_textures[m_env->skybox[0]];
@@ -415,7 +430,8 @@ bool RenderDevice::uploadMaterial(Material& material)
 			if (it == m_shaderNames.end())
 				return false;
 		}
-		material.shaderId = it->second;
+		material.shaderId[TECH_COLOR] = it->second;
+		ASSERT(material.shaderId[TECH_COLOR]);
 	} else {
 		// Auto-generate shader
 		uint tag = USE_FOG | USE_DIFFUSE | USE_SPECULAR;
@@ -439,16 +455,20 @@ bool RenderDevice::uploadMaterial(Material& material)
 			tag |= USE_EMISSION_MAP;
 		if (material.map[Material::REFLECTION_MAP])
 			tag |= USE_REFLECTION_MAP;
-		auto it = m_shaderTags.find(tag);
-		if (it == m_shaderTags.end()) {
-			material.shaderId = generateShader(tag);
-			if (material.shaderId == -1) {
-				auto it = m_shaderNames.find("missing");
-				if (it == m_shaderNames.end())
-					return false;
-				material.shaderId = it->second;
-			}
-		} else material.shaderId = it->second;
+		material.shaderId[TECH_COLOR] = generateShader(tag);
+		ASSERT(material.shaderId[TECH_COLOR] >= 0 && "Color shader generating failed");
+	}
+	// Depth materials always auto generated
+	{
+		uint tag = USE_DEPTH;
+		if (material.flags & Material::ANIMATED)
+			tag |= USE_ANIMATION;
+		if (material.flags & Material::ALPHA_TEST)
+			tag |= USE_ALPHA_TEST | USE_DIFFUSE_MAP;
+		material.shaderId[TECH_DEPTH] = generateShader(tag);
+		material.shaderId[TECH_DEPTH_CUBE] = generateShader(tag | USE_DEPTH_CUBE);
+		ASSERT(material.shaderId[TECH_DEPTH] >= 0 && "Depth shader generating failed");
+		ASSERT(material.shaderId[TECH_DEPTH_CUBE] >= 0 && "Depth cube shader generating failed");
 	}
 
 	bool dirty = false;
@@ -480,10 +500,12 @@ void RenderDevice::setupShadowPass(const Light& light, uint index)
 	m_shadowFbo[index].bind();
 	glViewport(0, 0, m_shadowFbo[index].width, m_shadowFbo[index].height);
 	glClear(GL_DEPTH_BUFFER_BIT);
+	m_program = 0;
+	glUseProgram(0);
 	float& near = m_commonBlock.uniforms.near;
 	float& far = m_commonBlock.uniforms.far;
 	if (light.type == Light::POINT_LIGHT) {
-		m_program = m_shaders[m_shaderNames["depthcube"]].id;
+		m_tech = TECH_DEPTH_CUBE;
 		float aspect = (float)m_shadowFbo[index].width / (float)m_shadowFbo[index].height;
 		near = 0.2f; far = light.distance;
 		m_shadowProj[index] = glm::perspective(glm::radians(90.0f), aspect, near, far);
@@ -499,7 +521,7 @@ void RenderDevice::setupShadowPass(const Light& light, uint index)
 		m_cubeShadowBlock.upload();
 
 	} else if (light.type == Light::DIRECTIONAL_LIGHT) {
-		m_program = m_shaders[m_shaderNames["depth"]].id;
+		m_tech = TECH_DEPTH;
 		// TODO: Configure
 		float size = 20.f;
 		near = 1.f; far = 50.f;
@@ -507,7 +529,6 @@ void RenderDevice::setupShadowPass(const Light& light, uint index)
 		m_shadowView[index] = glm::lookAt(light.position, light.target, vec3(0, 1, 0));
 	} else ASSERT(!"Unsupported light type for shadow pass");
 
-	glUseProgram(m_program);
 	m_commonBlock.uniforms.projectionMatrix = m_shadowProj[index];
 	m_commonBlock.uniforms.viewMatrix = m_shadowView[index];
 	m_commonBlock.uniforms.cameraPosition = light.position;
@@ -531,22 +552,18 @@ void RenderDevice::renderShadow(Model& model, Transform& transform)
 		Material& mat = *model.materials[batch.materialIndex];
 		if (!(mat.flags & Material::CAST_SHADOW))
 			continue;
-		// TODO: Optimize, refactor
-		bool alphaTestActive = m_program == m_shaders[m_shaderNames["depth_alphatest"]].id
-			|| m_program == m_shaders[m_shaderNames["depthcube_alphatest"]].id;
-		bool needsAlphaTest = mat.flags & Material::ALPHA_TEST;
-		if (alphaTestActive && !needsAlphaTest) {
-			if (m_program == m_shaders[m_shaderNames["depth_alphatest"]].id)
-				m_program = m_shaders[m_shaderNames["depth"]].id;
-			else m_program = m_shaders[m_shaderNames["depthcube"]].id;
+
+		if (mat.shaderId[m_tech] < 0) // TODO: Get rid of this
+			continue;
+
+		uint programId = m_shaders[mat.shaderId[m_tech]].id;
+		if (m_program != programId) {
+			m_program = programId;
 			glUseProgram(m_program);
-		} else if (!alphaTestActive && needsAlphaTest) {
-			if (m_program == m_shaders[m_shaderNames["depth"]].id)
-				m_program = m_shaders[m_shaderNames["depth_alphatest"]].id;
-			else m_program = m_shaders[m_shaderNames["depthcube_alphatest"]].id;
-			glUseProgram(m_program);
+			++stats.programs;
 		}
-		if (needsAlphaTest) {
+
+		if (mat.flags & Material::ALPHA_TEST) {
 			glActiveTexture(GL_TEXTURE0 + BINDING_DIFFUSE_MAP);
 			glBindTexture(GL_TEXTURE_2D, mat.tex[Material::DIFFUSE_MAP]);
 		}
@@ -577,6 +594,7 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 	else m_fbo.bind();
 	glViewport(0, 0, Engine::width(), Engine::height());
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	m_tech = TECH_COLOR;
 	m_program = 0;
 	glUseProgram(0);
 	m_commonBlock.uniforms.projectionMatrix = camera.projection;
@@ -631,7 +649,7 @@ void RenderDevice::render(Model& model, Transform& transform, Animation* animati
 	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (m_shadowProj[0] * (m_shadowView[0] * transform.matrix));
 	m_objectBlock.upload();
 
-	if (m_skyboxMat.shaderId != -1) {
+	if (m_skyboxMat.shaderId[TECH_COLOR] != -1) {
 		uint tex = m_skyboxMat.tex[Material::ENV_MAP];
 		glActiveTexture(GL_TEXTURE0 + BINDING_ENV_MAP);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
@@ -648,10 +666,10 @@ void RenderDevice::render(Model& model, Transform& transform, Animation* animati
 
 		ASSERT(batch.materialIndex < model.materials.size());
 		Material& mat = *model.materials[batch.materialIndex];
-		if (mat.shaderId < 0 || (mat.flags & Material::DIRTY_MAPS))
+		if (mat.shaderId[m_tech] < 0 || (mat.flags & Material::DIRTY_MAPS))
 			uploadMaterial(mat); // TODO: Should not be here!
 
-		uint programId = m_shaders[mat.shaderId].id;
+		uint programId = m_shaders[mat.shaderId[m_tech]].id;
 		if (m_program != programId) {
 			m_program = programId;
 			glUseProgram(m_program);
@@ -705,7 +723,7 @@ void RenderDevice::renderFullscreenQuad()
 
 void RenderDevice::renderSkybox()
 {
-	if (!m_env->skybox[0] || m_skyboxMat.shaderId == -1)
+	if (!m_env->skybox[0] || m_skyboxMat.shaderId[TECH_COLOR] == -1)
 		return;
 	if (!m_skyboxCube.vao) {
 		GLfloat skyboxVertices[] = {
@@ -760,7 +778,7 @@ void RenderDevice::renderSkybox()
 		glVertexAttribPointer(ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	}
 	glDepthFunc(GL_LEQUAL);
-	glUseProgram(m_skyboxMat.shaderId);
+	glUseProgram(m_skyboxMat.shaderId[TECH_COLOR]);
 	// Remove translation
 	m_commonBlock.uniforms.viewMatrix = glm::mat4(glm::mat3(m_commonBlock.uniforms.viewMatrix));
 	m_commonBlock.upload();
