@@ -570,18 +570,7 @@ void RenderDevice::renderShadow(Model& model, Transform& transform)
 			glBindTexture(GL_TEXTURE_2D, mat.tex[Material::DIFFUSE_MAP]);
 		}
 
-		ASSERT(batch.renderId >= 0);
-		GPUGeometry& gpuData = m_geometries[batch.renderId];
-		glBindVertexArray(gpuData.vao);
-		uint mode = GL_TRIANGLES;
-		if (gpuData.ebo) {
-			glDrawElements(mode, batch.indices.size(), GL_UNSIGNED_INT, 0);
-			stats.triangles += batch.indices.size() / 3;
-		} else {
-			glDrawArrays(mode, 0, batch.numVertices);
-			stats.triangles += batch.numVertices / 3;
-		}
-		++stats.drawCalls;
+		drawBatch(batch);
 	}
 	glBindVertexArray(0);
 	glutil::checkGL("Post shadow draw");
@@ -687,21 +676,27 @@ void RenderDevice::render(Model& model, Transform& transform, Animation* animati
 			//glUniform1i(i, i);
 		}
 
-		ASSERT(batch.renderId >= 0);
-		GPUGeometry& gpuData = m_geometries[batch.renderId];
-		glBindVertexArray(gpuData.vao);
-		uint mode = (mat.flags & Material::TESSELLATE) ? GL_PATCHES : GL_TRIANGLES;
-		if (gpuData.ebo) {
-			glDrawElements(mode, batch.indices.size(), GL_UNSIGNED_INT, 0);
-			stats.triangles += batch.indices.size() / 3;
-		} else {
-			glDrawArrays(mode, 0, batch.numVertices);
-			stats.triangles += batch.numVertices / 3;
-		}
-		++stats.drawCalls;
+		drawBatch(batch, mat.flags & Material::TESSELLATE);
 	}
 	glBindVertexArray(0);
 	glutil::checkGL("Post draw");
+}
+
+
+void RenderDevice::drawBatch(const Batch& batch, bool tessellate)
+{
+	ASSERT(batch.renderId >= 0);
+	GPUGeometry& gpuData = m_geometries[batch.renderId];
+	glBindVertexArray(gpuData.vao);
+	uint mode = tessellate ? GL_PATCHES : GL_TRIANGLES;
+	if (gpuData.ebo) {
+		glDrawElements(mode, batch.indices.size(), GL_UNSIGNED_INT, 0);
+		stats.triangles += batch.indices.size() / 3;
+	} else {
+		glDrawArrays(mode, 0, batch.numVertices);
+		stats.triangles += batch.numVertices / 3;
+	}
+	++stats.drawCalls;
 }
 
 void RenderDevice::renderFullscreenQuad()

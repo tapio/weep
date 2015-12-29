@@ -13,6 +13,7 @@ struct Transform;
 struct Geometry;
 struct Camera;
 struct Environment;
+struct Batch;
 
 class RenderDevice
 {
@@ -62,14 +63,14 @@ private:
 	void destroyGeometry(GPUGeometry& geometry);
 
 	int generateShader(uint tags);
+	void drawBatch(const Batch& batch, bool tessellate = false);
+	void renderFullscreenQuad();
+	void renderSkybox();
 
 	FBO m_msaaFbo;
 	FBO m_fbo;
 	FBO m_pingPongFbo[2];
 	FBO m_shadowFbo[MAX_SHADOWS];
-
-	void renderFullscreenQuad();
-	void renderSkybox();
 
 	GPUGeometry m_fullscreenQuad;
 	GPUGeometry m_skyboxCube;
