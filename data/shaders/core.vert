@@ -12,30 +12,26 @@ VERTEX_DATA(out, outData);
 
 void main()
 {
+	vec4 pos = vec4(position, 1.0);
+	vec3 n = normal;
 #ifdef USE_SKINNING
 	mat3x4 m = boneMatrices[int(boneIndices.x)] * boneWeights.x;
 	m += boneMatrices[int(boneIndices.y)] * boneWeights.y;
 	m += boneMatrices[int(boneIndices.z)] * boneWeights.z;
 	m += boneMatrices[int(boneIndices.w)] * boneWeights.w;
-	vec4 mpos = vec4(position, 1.0);
-	mpos = vec4(mpos * m, 1.0);
-	gl_Position = modelViewProjMatrix * mpos;
-	outData.normal = mat3(normalMatrix) * (vec4(normal, 0.0) * m).xyz;
-	outData.position = (modelViewMatrix * mpos).xyz;
-#else
-// Not skinned
+	pos = vec4(pos * m, 1.0);
+	n = (vec4(n, 0.0) * m).xyz;
+#endif // USE_SKINNING
+
 #ifndef USE_TESSELLATION
-	gl_Position = modelViewProjMatrix * vec4(position, 1.0);
+	gl_Position = modelViewProjMatrix * pos;
 #endif
-	outData.normal = mat3(normalMatrix) * normal;
-	outData.position = (modelViewMatrix * vec4(position, 1.0)).xyz;
-#endif
-
+	outData.normal = mat3(normalMatrix) * n;
+	outData.position = (modelViewMatrix * pos).xyz;
 	outData.texcoord = texcoord * material.uvRepeat + material.uvOffset;
-
 #ifdef USE_SHADOW_MAP
-	outData.worldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
-	outData.shadowcoord = shadowMatrix * vec4(position, 1.0);
+	outData.worldPosition = (modelMatrix * pos).xyz;
+	outData.shadowcoord = shadowMatrix * pos;
 #endif
 }
 
