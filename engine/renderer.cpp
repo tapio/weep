@@ -96,12 +96,12 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	for (uint i = 0; i < numCubeShadows; ++i) {
 		Light& light = lights[i];
 		m_device->setupShadowPass(light, 1+i);
-		entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
+		entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 			if (model.materials.empty())
 				return;
 			float maxDist = model.bounds.radius + light.distance;
 			if (glm::distance2(light.position, transform.position) < maxDist * maxDist)
-				m_device->renderShadow(model, transform);
+				m_device->renderShadow(model, transform, e.has<Animation>() ? &e.get<Animation>() : nullptr);
 		});
 	}
 
