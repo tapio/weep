@@ -69,7 +69,7 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	});
 
 	// Fixed amount of time for uploading each frame?
-	entities.for_each<Model>([&](Entity, Model&) {
+	entities.for_each<Model>([&](Entity, Model& model) {
 		// Upload geometry
 		Geometry& geom = *model.geometry;
 		if (!geom.batches.empty() && geom.batches.front().renderId < 0)
