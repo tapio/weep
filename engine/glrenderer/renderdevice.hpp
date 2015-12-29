@@ -28,7 +28,7 @@ public:
 	void destroyGeometry(Geometry& geometry);
 
 	void setupShadowPass(const Light& light, uint index);
-	void renderShadow(Model& model, Transform& transform);
+	void renderShadow(Model& model, Transform& transform, Animation* animation = nullptr);
 
 	void preRender(const Camera& camera, const std::vector<Light>& lights);
 	void render(Model& model, Transform& transform, Animation* animation = nullptr);
@@ -63,6 +63,7 @@ private:
 	void destroyGeometry(GPUGeometry& geometry);
 
 	int generateShader(uint tags);
+	void drawSetup(const Transform& transform, const Animation* animation = nullptr);
 	void drawBatch(const Batch& batch, bool tessellate = false);
 	void renderFullscreenQuad();
 	void renderSkybox();

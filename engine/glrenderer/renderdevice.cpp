@@ -504,6 +504,23 @@ void RenderDevice::useProgram(const ShaderProgram& program)
 	}
 }
 
+void RenderDevice::drawSetup(const Transform& transform, const Animation* animation)
+{
+	m_objectBlock.uniforms.modelMatrix = transform.matrix;
+	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_objectBlock.uniforms.modelMatrix;
+	m_objectBlock.uniforms.modelViewMatrix = modelView;
+	m_objectBlock.uniforms.modelViewProjMatrix = m_commonBlock.uniforms.projectionMatrix * modelView;
+	m_objectBlock.uniforms.normalMatrix = glm::inverseTranspose(modelView);
+	m_objectBlock.upload();
+
+	if (animation && !animation->bones.empty()) {
+		ASSERT(animation->bones.size() <= MAX_BONES);
+		uint numBones = std::min((uint)animation->bones.size(), (uint)MAX_BONES);
+		memcpy(&m_skinningBlock.uniforms.boneMatrices[0], &animation->bones[0], numBones * sizeof(mat3x4));
+		m_skinningBlock.upload();
+	}
+}
+
 void RenderDevice::setupShadowPass(const Light& light, uint index)
 {
 	ASSERT(m_env);
@@ -545,17 +562,11 @@ void RenderDevice::setupShadowPass(const Light& light, uint index)
 	m_commonBlock.upload();
 }
 
-void RenderDevice::renderShadow(Model& model, Transform& transform)
+void RenderDevice::renderShadow(Model& model, Transform& transform, Animation* animation)
 {
+	drawSetup(transform, animation);
+
 	Geometry& geom = *model.geometry;
-
-	m_objectBlock.uniforms.modelMatrix = transform.matrix;
-	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_objectBlock.uniforms.modelMatrix;
-	m_objectBlock.uniforms.modelViewMatrix = modelView;
-	m_objectBlock.uniforms.modelViewProjMatrix = m_commonBlock.uniforms.projectionMatrix * modelView;
-	m_objectBlock.uniforms.normalMatrix = glm::inverseTranspose(modelView);
-	m_objectBlock.upload();
-
 	for (auto& batch : geom.batches) {
 
 		ASSERT(batch.materialIndex <= model.materials.size());
@@ -628,15 +639,8 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 
 void RenderDevice::render(Model& model, Transform& transform, Animation* animation)
 {
-	Geometry& geom = *model.geometry;
-
-	m_objectBlock.uniforms.modelMatrix = transform.matrix;
-	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_objectBlock.uniforms.modelMatrix;
-	m_objectBlock.uniforms.modelViewMatrix = modelView;
-	m_objectBlock.uniforms.modelViewProjMatrix = m_commonBlock.uniforms.projectionMatrix * modelView;
-	m_objectBlock.uniforms.normalMatrix = glm::inverseTranspose(modelView);
 	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (m_shadowProj[0] * (m_shadowView[0] * transform.matrix));
-	m_objectBlock.upload();
+	drawSetup(transform, animation);
 
 	if (m_skyboxMat.shaderId[TECH_COLOR] != -1) {
 		uint tex = m_skyboxMat.tex[Material::ENV_MAP];
@@ -644,13 +648,7 @@ void RenderDevice::render(Model& model, Transform& transform, Animation* animati
 		glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
 	}
 
-	if (animation && !animation->bones.empty()) {
-		ASSERT(animation->bones.size() <= MAX_BONES);
-		uint numBones = std::min((uint)animation->bones.size(), (uint)MAX_BONES);
-		memcpy(&m_skinningBlock.uniforms.boneMatrices[0], &animation->bones[0], numBones * sizeof(mat3x4));
-		m_skinningBlock.upload();
-	}
-
+	Geometry& geom = *model.geometry;
 	for (auto& batch : geom.batches) {
 
 		ASSERT(batch.materialIndex < model.materials.size());
