@@ -51,7 +51,8 @@ enum ShaderFeature {
 	USE_TESSELLATION = 1 << 13,
 	USE_ANIMATION = 1 << 14,
 	USE_DEPTH = 1 << 15,
-	USE_DEPTH_CUBE = 1 << 16
+	USE_DEPTH_CUBE = 1 << 16,
+	NUM_SHADER_FEATURES = 17
 };
 
 RenderDevice::RenderDevice(Resources& resources)
@@ -243,7 +244,7 @@ void RenderDevice::loadShaders()
 
 int RenderDevice::generateShader(uint tags)
 {
-	string name = "generated_" + std::to_string(tags);
+	string name = "generated_" + std::bitset<NUM_SHADER_FEATURES>(tags).to_string();
 	m_shaders.emplace_back(name);
 	ShaderProgram& program = m_shaders.back();
 
