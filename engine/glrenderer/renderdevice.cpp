@@ -334,7 +334,7 @@ void RenderDevice::setEnvironment(Environment* env)
 	m_env = env;
 	// TODO: Use uploadMaterial()
 	m_skyboxMat.shaderName = "skybox";
-	m_skyboxMat.shaderId[TECH_COLOR] = m_shaders[m_shaderNames["skybox"]].id;
+	m_skyboxMat.shaderId[TECH_COLOR] = m_shaderNames["skybox"];
 	if (!m_env->skybox[0])
 		return;
 	Texture& tex = m_textures[m_env->skybox[0]];
@@ -778,7 +778,7 @@ void RenderDevice::renderSkybox()
 		glVertexAttribPointer(ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	}
 	glDepthFunc(GL_LEQUAL);
-	glUseProgram(m_skyboxMat.shaderId[TECH_COLOR]);
+	glUseProgram(m_shaders[m_skyboxMat.shaderId[TECH_COLOR]].id);
 	// Remove translation
 	m_commonBlock.uniforms.viewMatrix = glm::mat4(glm::mat3(m_commonBlock.uniforms.viewMatrix));
 	m_commonBlock.upload();
