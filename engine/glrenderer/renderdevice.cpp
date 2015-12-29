@@ -34,6 +34,26 @@ static const mat4 s_shadowBiasMatrix(
 	0.5f, 0.5f, 0.5f, 1.0f
 );
 
+enum ShaderFeature {
+	USE_FOG = 1 << 0,
+	USE_DIFFUSE = 1 << 1,
+	USE_SPECULAR = 1 << 2,
+	USE_DIFFUSE_MAP = 1 << 3,
+	USE_SPECULAR_MAP = 1 << 4,
+	USE_NORMAL_MAP = 1 << 5,
+	USE_EMISSION_MAP = 1 << 6,
+	USE_PARALLAX_MAP = 1 << 7,
+	USE_ENV_MAP = 1 << 8,
+	USE_REFLECTION_MAP = 1 << 9,
+	USE_SHADOW_MAP = 1 << 10,
+	USE_ALPHA_TEST = 1 << 11,
+	USE_ALPHA_BLEND = 1 << 12,
+	USE_TESSELLATION = 1 << 13,
+	USE_ANIMATION = 1 << 14,
+	USE_DEPTH = 1 << 15,
+	USE_DEPTH_CUBE = 1 << 16
+};
+
 RenderDevice::RenderDevice(Resources& resources)
 	: m_resources(resources)
 {
@@ -221,6 +241,63 @@ void RenderDevice::loadShaders()
 	logDebug("Loaded %d shaders in %dms", m_shaders.size(), t1 - t0);
 }
 
+int RenderDevice::generateShader(uint tags)
+{
+	string name = "generated_" + std::to_string(tags);
+	m_shaders.emplace_back(name);
+	ShaderProgram& program = m_shaders.back();
+
+	string defineText =
+		"#version 330 core\n"
+		"#extension GL_ARB_shading_language_420pack : enable\n"
+		"#extension GL_ARB_explicit_uniform_location : enable\n"
+		"\n";
+
+#define HANDLE_FEATURE(x) if (tags & x) defineText += "#define " #x " 1\n";
+	HANDLE_FEATURE(USE_FOG)
+	HANDLE_FEATURE(USE_DIFFUSE)
+	HANDLE_FEATURE(USE_SPECULAR)
+	HANDLE_FEATURE(USE_DIFFUSE_MAP)
+	HANDLE_FEATURE(USE_SPECULAR_MAP)
+	HANDLE_FEATURE(USE_NORMAL_MAP)
+	HANDLE_FEATURE(USE_EMISSION_MAP)
+	HANDLE_FEATURE(USE_PARALLAX_MAP)
+	HANDLE_FEATURE(USE_ENV_MAP)
+	HANDLE_FEATURE(USE_REFLECTION_MAP)
+	HANDLE_FEATURE(USE_SHADOW_MAP)
+	HANDLE_FEATURE(USE_ALPHA_TEST)
+	HANDLE_FEATURE(USE_ALPHA_BLEND)
+	HANDLE_FEATURE(USE_TESSELLATION)
+	HANDLE_FEATURE(USE_ANIMATION)
+	HANDLE_FEATURE(USE_DEPTH)
+	HANDLE_FEATURE(USE_DEPTH_CUBE)
+#undef HANDLE_FEATURE
+
+	defineText += m_resources.getText("shaders/uniforms.glsl", Resources::USE_CACHE);
+	defineText += "#line 1 1\n";
+
+	program.compile(VERTEX_SHADER, m_resources.getText("shaders/core.vert", Resources::USE_CACHE), defineText);
+	program.compile(FRAGMENT_SHADER, m_resources.getText("shaders/core.frag", Resources::USE_CACHE), defineText);
+
+	if (!program.link())
+		return -1;
+
+	int index = m_shaders.size() - 1;
+	//m_shaderNames[name] = index;
+	m_shaderTags[tags] = index;
+	logDebug("Shader \"%s\" initialized as %d (shader mask: %c%c%c%c%c%c)",
+		name.c_str(),
+		program.id,
+		program.has(VERTEX_SHADER) ? 'v' : '-',
+		program.has(FRAGMENT_SHADER) ? 'f' : '-',
+		program.has(GEOMETRY_SHADER) ? 'g' : '-',
+		program.has(TESS_CONTROL_SHADER) ? 'c' : '-',
+		program.has(TESS_EVALUATION_SHADER) ? 'e' : '-',
+		program.has(COMPUTE_SHADER) ? 'C' : '-'
+	);
+	return index;
+}
+
 RenderDevice::~RenderDevice()
 {
 	glDeleteBuffers(1, &m_fullscreenQuad.vbo);
@@ -329,14 +406,49 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 
 bool RenderDevice::uploadMaterial(Material& material)
 {
-	auto it = m_shaderNames.find(material.shaderName);
-	if (it == m_shaderNames.end()) {
-		logError("Failed to find shader \"%s\"", material.shaderName.c_str());
-		it = m_shaderNames.find("missing");
-		if (it == m_shaderNames.end())
-			return false;
+	if (!material.shaderName.empty()) {
+		auto it = m_shaderNames.find(material.shaderName);
+		if (it == m_shaderNames.end()) {
+			logError("Failed to find shader \"%s\"", material.shaderName.c_str());
+			it = m_shaderNames.find("missing");
+			if (it == m_shaderNames.end())
+				return false;
+		}
+		material.shaderId = it->second;
+	} else {
+		// Auto-generate shader
+		uint tag = USE_FOG | USE_DIFFUSE | USE_SPECULAR;
+		if (material.flags & Material::TESSELLATE)
+			tag |= USE_TESSELLATION;
+		if (material.flags & Material::RECEIVE_SHADOW)
+			tag |= USE_SHADOW_MAP;
+		if (material.flags & Material::ANIMATED)
+			tag |= USE_ANIMATION;
+		if (material.flags & Material::ALPHA_TEST)
+			tag |= USE_ALPHA_TEST;
+		if (material.map[Material::DIFFUSE_MAP])
+			tag |= USE_DIFFUSE_MAP | USE_DIFFUSE;
+		if (material.map[Material::NORMAL_MAP])
+			tag |= USE_NORMAL_MAP;
+		if (material.map[Material::SPECULAR_MAP])
+			tag |= USE_SPECULAR_MAP | USE_SPECULAR;
+		if (material.map[Material::HEIGHT_MAP])
+			tag |= USE_PARALLAX_MAP;
+		if (material.map[Material::EMISSION_MAP])
+			tag |= USE_EMISSION_MAP;
+		if (material.map[Material::REFLECTION_MAP])
+			tag |= USE_REFLECTION_MAP;
+		auto it = m_shaderTags.find(tag);
+		if (it == m_shaderTags.end()) {
+			material.shaderId = generateShader(tag);
+			if (material.shaderId == -1) {
+				auto it = m_shaderNames.find("missing");
+				if (it == m_shaderNames.end())
+					return false;
+				material.shaderId = it->second;
+			}
+		} else material.shaderId = it->second;
 	}
-	material.shaderId = it->second;
 
 	bool dirty = false;
 	for (uint i = 0; i < countof(material.map); ++i) {

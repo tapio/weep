@@ -90,6 +90,9 @@ UBO_PREFIX(UniformSkinningBlock, 5)
 		SHADOW_VARYINGS \
 	} name;
 
+#ifdef USE_ANIMATION
+#define USE_SKINNING
+#endif
 
 #ifdef USE_DIFFUSE_MAP
 layout(binding = BINDING_DIFFUSE_MAP) uniform sampler2D diffuseMap;

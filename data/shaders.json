@@ -101,7 +101,7 @@
 			"USE_DIFFUSE",
 			"USE_DIFFUSE_MAP",
 			"USE_SPECULAR",
-			"USE_SHADOW_MAPXXX",
+			"USE_SHADOW_MAP",
 			"USE_SKINNING"
 		],
 		"shaders" : {

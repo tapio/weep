@@ -59,6 +59,8 @@ private:
 	};
 	void destroyGeometry(GPUGeometry& geometry);
 
+	int generateShader(uint tags);
+
 	FBO m_msaaFbo;
 	FBO m_fbo;
 	FBO m_pingPongFbo[2];
@@ -85,6 +87,7 @@ private:
 	UBO<UniformSkinningBlock> m_skinningBlock;
 	std::vector<ShaderProgram> m_shaders;
 	std::map<string, int> m_shaderNames;
+	std::map<uint, int> m_shaderTags;
 	std::map<void*, Texture> m_textures;
 	std::vector<GPUGeometry> m_geometries;
 	Environment* m_env;
