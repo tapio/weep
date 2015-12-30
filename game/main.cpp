@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 				break;
 			}
 
-			if (imgui.processEvent(&e))
+			if (!active && imgui.processEvent(&e))
 				continue;
 
 			if (e.type == SDL_KEYUP) {
