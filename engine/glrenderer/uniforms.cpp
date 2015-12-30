@@ -2,6 +2,12 @@
 #include "glutil.hpp"
 
 template<typename T>
+UBO<T>::~UBO()
+{
+	destroy();
+}
+
+template<typename T>
 void UBO<T>::create()
 {
 	glGenBuffers(1, &id);

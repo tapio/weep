@@ -315,12 +315,6 @@ RenderDevice::~RenderDevice()
 {
 	glDeleteBuffers(1, &m_fullscreenQuad.vbo);
 	glDeleteVertexArrays(1, &m_fullscreenQuad.vao);
-	m_commonBlock.destroy();
-	m_objectBlock.destroy();
-	m_materialBlock.destroy();
-	m_lightBlock.destroy();
-	m_cubeShadowBlock.destroy();
-	m_skinningBlock.destroy();
 	m_textures.clear();
 	for (auto& g : m_geometries)
 		destroyGeometry(g);

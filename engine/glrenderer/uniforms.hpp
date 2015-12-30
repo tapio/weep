@@ -12,6 +12,7 @@ public:
 	T uniforms = T();
 
 	UBO() {}
+	~UBO();
 
 	void create();
 	void upload();
