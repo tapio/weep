@@ -9,8 +9,6 @@ public:
 	NONCOPYABLE(UBO);
 
 	uint id = 0;
-	int binding = 0;
-	uint arraySize = 1;
 	T uniforms = T();
 
 	UBO() {}
