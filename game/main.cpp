@@ -234,6 +234,7 @@ int main(int argc, char* argv[])
 				ImGui::SliderFloat("Exposure", &env.exposure, 0.0f, 10.0f);
 				ImGui::SliderFloat("Bloom Threshold", &env.bloomThreshold, 0.0f, 2.0f);
 				ImGui::SliderFloat("Bloom Intensity", &env.bloomIntensity, 1.0f, 10.0f);
+				ImGui::SliderFloat("Shadow Darkness", &env.shadowDarkness, 0.0f, 1.0f);
 				ImGui::ColorEdit3("Ambient", (float*)&env.ambient);
 				ImGui::ColorEdit3("Sun Color", (float*)&env.sunColor);
 				ImGui::SliderFloat3("Sun Pos", (float*)&env.sunPosition, -15.f, 15.f);

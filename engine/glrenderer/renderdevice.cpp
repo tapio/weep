@@ -613,6 +613,7 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 	m_commonBlock.uniforms.near = camera.near;
 	m_commonBlock.uniforms.far = camera.far;
 	m_commonBlock.uniforms.vignette = m_env->vignette;
+	m_commonBlock.uniforms.shadowDarkness = m_env->shadowDarkness;
 
 	uint numLights = std::min((int)lights.size(), MAX_LIGHTS);
 	m_commonBlock.uniforms.numLights = numLights;

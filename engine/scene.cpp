@@ -172,6 +172,7 @@ namespace {
 				env.skybox[i]->sRGB = true;
 
 		setNumber(env.exposure, def["exposure"]);
+		setNumber(env.shadowDarkness, def["shadowDarkness"]);
 		setNumber(env.bloomThreshold, def["bloomThreshold"]);
 		setNumber(env.bloomIntensity, def["bloomIntensity"]);
 		setNumber(env.tonemap, def["tonemap"]);
