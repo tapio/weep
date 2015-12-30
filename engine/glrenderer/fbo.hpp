@@ -1,11 +1,12 @@
 #pragma once
 #include "common.hpp"
 
-struct FBO {
-	NONCOPYABLE(FBO);
-
-	FBO();
+struct FBO
+{
+	FBO() {}
 	~FBO();
+
+	NONCOPYABLE(FBO);
 
 	void create();
 	void bind();

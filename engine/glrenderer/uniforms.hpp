@@ -3,18 +3,17 @@
 #include "../../data/shaders/uniforms.glsl"
 
 template<typename T>
-class UBO
+struct UBO
 {
-public:
-	NONCOPYABLE(UBO);
-
-	uint id = 0;
-	T uniforms = T();
-
 	UBO() {}
 	~UBO();
+
+	NONCOPYABLE(UBO);
 
 	void create();
 	void upload();
 	void destroy();
+
+	uint id = 0;
+	T uniforms = T();
 };

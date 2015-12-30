@@ -7,12 +7,12 @@
 
 struct Image;
 
-class Texture
+struct Texture
 {
-public:
-	NONCOPYABLE(Texture);
 	Texture() {}
 	~Texture();
+
+	NONCOPYABLE(Texture);
 
 	uint id = 0;
 	uint type = 0;

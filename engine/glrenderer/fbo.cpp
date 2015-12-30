@@ -2,11 +2,6 @@
 #include "glutil.hpp"
 #include "engine.hpp"
 
-FBO::FBO()
-{
-
-}
-
 FBO::~FBO()
 {
 	if (fbo)
