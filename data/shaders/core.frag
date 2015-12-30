@@ -132,7 +132,7 @@ float shadow_mapping()
 	if (projCoords.x > 1.0 || projCoords.x < 0.0 || projCoords.y > 1.0 || projCoords.y < 0.0)
 		return 0.0;
 
-	const float bias = 0.005;
+	const float bias = 0.00005;
 	// Get depth of current fragment from light's perspective
 	float currentDepth = projCoords.z - bias;
 

@@ -527,6 +527,7 @@ void RenderDevice::setupShadowPass(const Light& light, uint index)
 	m_shadowFbo[index].bind();
 	glViewport(0, 0, m_shadowFbo[index].width, m_shadowFbo[index].height);
 	glClear(GL_DEPTH_BUFFER_BIT);
+	glCullFace(GL_FRONT);
 	m_program = 0;
 	glUseProgram(0);
 	float& near = m_commonBlock.uniforms.near;
@@ -594,6 +595,7 @@ void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lig
 	else m_fbo.bind();
 	glViewport(0, 0, Engine::width(), Engine::height());
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glCullFace(GL_BACK);
 	m_tech = TECH_COLOR;
 	m_program = 0;
 	glUseProgram(0);
