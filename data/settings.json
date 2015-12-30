@@ -6,6 +6,7 @@
 	},
 	"renderer": {
 		"gldebug": true,
+		"glslversion": "330 core",
 		"vsync": true,
 		"msaa": 8,
 		"shadowMapSize": 2048,

@@ -194,11 +194,8 @@ void RenderDevice::loadShaders()
 		string defineText;
 		if (it.second["version"].is_string())
 			defineText = "#version " + it.second["version"].string_value() + "\n";
-		else defineText =
-			"#version 330 core\n"
-			"#extension GL_ARB_shading_language_420pack : enable\n"
-			"#extension GL_ARB_explicit_uniform_location : enable\n"
-			"\n";
+		else defineText = "#version " + Engine::settings["renderer"]["glslversion"].string_value() + "\n";
+		defineText += m_resources.getText("shaders/extensions.glsl", Resources::USE_CACHE);
 
 		const Json& defines = it.second["defines"];
 		if (!defines.is_null()) {
@@ -257,11 +254,8 @@ int RenderDevice::generateShader(uint tags)
 	m_shaders.emplace_back(name);
 	ShaderProgram& program = m_shaders.back();
 
-	string defineText =
-		"#version 330 core\n"
-		"#extension GL_ARB_shading_language_420pack : enable\n"
-		"#extension GL_ARB_explicit_uniform_location : enable\n"
-		"\n";
+	string defineText =	"#version " + Engine::settings["renderer"]["glslversion"].string_value() + "\n";
+	defineText += m_resources.getText("shaders/extensions.glsl", Resources::USE_CACHE);
 
 #define HANDLE_FEATURE(x) if (tags & x) defineText += "#define " #x " 1\n";
 	HANDLE_FEATURE(USE_FOG)
