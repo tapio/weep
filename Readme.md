@@ -13,7 +13,9 @@ This is a small personal game engine. It's mainly a platform for me to experimen
 	- Diffuse / normal / specular / emission map support
 	- Automatic mesh smoothing with tessellation shaders
 	- #define based uber shader
-* Mesh loading from Wavefront OBJ and heightmap images
+	- Automatic shader permutation generation based on material properties
+* Mesh loading from Wavefront .obj, Inter-Quake Model .iqm and heightmap images
+* Skeletal animation (GPU skinning)
 * Entity-component based architecture
 * Physics through Bullet dynamics library
 * Hotloadable gameplay code modules
@@ -37,7 +39,7 @@ The core repository only includes some debug assets, so you probably also want t
 
 ## Acknowledgements
 
-Renderer code, especially shader code owes a lot to various tutorials, among others
+Renderer code, especially shader code owes a lot to various tutorials, among others:
 
 * http://learnopengl.com/
 * http://www.opengl-tutorial.org/
