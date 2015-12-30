@@ -183,6 +183,8 @@ void RenderDevice::loadShaders()
 
 	ASSERT(jsonShaders.is_object());
 	const Json::object& shaders = jsonShaders.object_items();
+	m_shaders.reserve(shaders.size());
+	m_shaderNames.reserve(shaders.size());
 	for (auto& it : shaders) {
 		const Json& shaderFiles = it.second["shaders"];
 		string file;
@@ -227,7 +229,8 @@ void RenderDevice::loadShaders()
 		if (!program.link())
 			continue;
 
-		m_shaderNames[it.first] = m_shaders.size() - 1;
+		ASSERT(m_shaderNames.find(id::hash(it.first)) == m_shaderNames.end() && "Shader hash collision");
+		m_shaderNames[id::hash(it.first)] = m_shaders.size() - 1;
 		logDebug("Shader \"%s\" initialized as %d (shader mask: %c%c%c%c%c%c)",
 			it.first.c_str(),
 			program.id,
@@ -291,7 +294,7 @@ int RenderDevice::generateShader(uint tags)
 
 	if (!program.link()) {
 		if ((tags & USE_DEPTH) == 0) {
-			auto it = m_shaderNames.find("missing");
+			auto it = m_shaderNames.find($id(missing));
 			if (it != m_shaderNames.end())
 				return it->second;
 		}
@@ -334,7 +337,7 @@ void RenderDevice::setEnvironment(Environment* env)
 	m_env = env;
 	// TODO: Use uploadMaterial()
 	m_skyboxMat.shaderName = "skybox";
-	m_skyboxMat.shaderId[TECH_COLOR] = m_shaderNames["skybox"];
+	m_skyboxMat.shaderId[TECH_COLOR] = m_shaderNames[$id(skybox)];
 	if (!m_env->skybox[0])
 		return;
 	Texture& tex = m_textures[m_env->skybox[0]];
@@ -423,10 +426,10 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 bool RenderDevice::uploadMaterial(Material& material)
 {
 	if (!material.shaderName.empty()) {
-		auto it = m_shaderNames.find(material.shaderName);
+		auto it = m_shaderNames.find(id::hash(material.shaderName));
 		if (it == m_shaderNames.end()) {
 			logError("Failed to find shader \"%s\"", material.shaderName.c_str());
-			it = m_shaderNames.find("missing");
+			it = m_shaderNames.find($id(missing));
 			if (it == m_shaderNames.end())
 				return false;
 		}
@@ -806,7 +809,7 @@ void RenderDevice::postRender()
 	{
 		// Blur bloom texture
 		uint amount = (uint)m_env->bloomIntensity;
-		glUseProgram(m_shaders[m_shaderNames["hblur"]].id);
+		glUseProgram(m_shaders[m_shaderNames[$id(hblur)]].id);
 		glActiveTexture(GL_TEXTURE20);
 		for (uint i = 0; i < amount; i++)
 		{
@@ -815,7 +818,7 @@ void RenderDevice::postRender()
 			renderFullscreenQuad();
 			pingpong = !pingpong;
 		}
-		glUseProgram(m_shaders[m_shaderNames["vblur"]].id);
+		glUseProgram(m_shaders[m_shaderNames[$id(vblur)]].id);
 		for (uint i = 0; i < amount; i++)
 		{
 			m_pingPongFbo[pingpong].bind();
@@ -827,7 +830,7 @@ void RenderDevice::postRender()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glUseProgram(m_shaders[m_shaderNames["postfx"]].id);
+	glUseProgram(m_shaders[m_shaderNames[$id(postfx)]].id);
 	++stats.programs;
 	glActiveTexture(GL_TEXTURE20);
 	glBindTexture(GL_TEXTURE_2D, m_fbo.tex[0]);

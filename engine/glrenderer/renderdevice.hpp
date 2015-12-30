@@ -6,6 +6,7 @@
 #include "texture.hpp"
 #include "material.hpp"
 #include "fbo.hpp"
+#include <unordered_map>
 
 class Resources;
 struct Model;
@@ -91,8 +92,8 @@ private:
 	UBO<UniformCubeShadowBlock> m_cubeShadowBlock;
 	UBO<UniformSkinningBlock> m_skinningBlock;
 	std::vector<ShaderProgram> m_shaders;
-	std::map<string, int> m_shaderNames;
-	std::map<uint, int> m_shaderTags;
+	std::unordered_map<uint, int> m_shaderNames;
+	std::unordered_map<uint, int> m_shaderTags;
 	std::map<void*, Texture> m_textures;
 	std::vector<GPUGeometry> m_geometries;
 	Environment* m_env;
