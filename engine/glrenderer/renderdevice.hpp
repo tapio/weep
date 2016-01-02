@@ -96,6 +96,6 @@ private:
 	std::unordered_map<uint, int> m_shaderTags;
 	std::map<void*, Texture> m_textures;
 	std::vector<GPUGeometry> m_geometries;
-	Environment* m_env;
+	Environment* m_env = nullptr;
 	Resources& m_resources;
 };

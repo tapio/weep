@@ -28,7 +28,7 @@ const char* glutil::getErrorString(uint error)
 bool glutil::checkGL(const char* format, ...)
 {
 	return true; // Disabled, debug callback is better
-	GLenum error = glGetError();
+	/*GLenum error = glGetError();
 	if (error == GL_NO_ERROR)
 		return true;
 
@@ -37,7 +37,7 @@ bool glutil::checkGL(const char* format, ...)
 	string message = vlformat(format, vl);
 	va_end(vl);
 	logError("%s: %s", message.c_str(), getErrorString(error));
-	return false;
+	return false;*/
 }
 
 GLenum glutil::toGL(ShaderType type)

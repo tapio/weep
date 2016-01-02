@@ -34,5 +34,5 @@ private:
 	int m_width = 0;
 	int m_height = 0;
 	uint64 m_prevTime = 0;
-	void* m_glcontext;
+	void* m_glcontext = nullptr;
 };

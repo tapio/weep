@@ -68,9 +68,9 @@ int main(int argc, char* argv[])
 
 	char scenePath[128] = "testscene.json";
 	if (argc == 2)
-		strcpy(scenePath, argv[1]);
+		strncpy(scenePath, argv[1], countof(scenePath));
 	else if (Engine::settings["scene"].is_string())
-		strcpy(scenePath, Engine::settings["scene"].string_value().c_str());
+		strncpy(scenePath, Engine::settings["scene"].string_value().c_str(), countof(scenePath));
 	init(game, scene, scenePath);
 
 	bool running = true;
@@ -133,8 +133,8 @@ int main(int argc, char* argv[])
 					continue;
 				}
 				else if (keysym.sym == SDLK_F4) {
-					static bool removeModDir = true;
 					if (Engine::settings["moddir"].is_string()) {
+						static bool removeModDir = true;
 						if (removeModDir) resources.removePath(Engine::settings["moddir"].string_value());
 						else resources.addPath(Engine::settings["moddir"].string_value());
 						removeModDir = !removeModDir;
