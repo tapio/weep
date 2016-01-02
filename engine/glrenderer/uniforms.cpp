@@ -32,9 +32,9 @@ void UBO<T>::destroy()
 	}
 }
 
-template class UBO<UniformCommonBlock>;
-template class UBO<UniformObjectBlock>;
-template class UBO<UniformMaterialBlock>;
-template class UBO<UniformLightBlock>;
-template class UBO<UniformCubeShadowBlock>;
-template class UBO<UniformSkinningBlock>;
+template struct UBO<UniformCommonBlock>;
+template struct UBO<UniformObjectBlock>;
+template struct UBO<UniformMaterialBlock>;
+template struct UBO<UniformLightBlock>;
+template struct UBO<UniformCubeShadowBlock>;
+template struct UBO<UniformSkinningBlock>;
