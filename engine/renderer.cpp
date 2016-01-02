@@ -5,6 +5,7 @@
 #include "camera.hpp"
 #include "scene.hpp"
 #include "image.hpp"
+#include <algorithm>
 
 
 class Frustum
@@ -57,15 +58,22 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 {
 	m_device->stats = RenderDevice::Stats();
 	camera.updateViewMatrix();
-	Frustum frustum(camera);
-	std::vector<Light> lights;
-	// TODO: Prioritize lights
-	entities.for_each<Light>([&](Entity, Light& light) {
-		lights.push_back(light);
-	});
 
 	entities.for_each<Model, Transform>([&](Entity, Model&, Transform& transform) {
 		transform.updateMatrix();
+	});
+
+	Frustum frustum(camera);
+
+	std::vector<Light> lights;
+	// TODO: Better prioritizing
+	vec3 lightTarget = camera.position + camera.rotation * vec3(0, 0, -2);
+	entities.for_each<Light>([&](Entity, Light& light) {
+		light.priority = glm::distance2(lightTarget, light.position);
+		lights.push_back(light);
+	});
+	std::sort(lights.begin(), lights.end(), [](const Light& a, const Light& b) {
+		return a.priority < b.priority;
 	});
 
 	// Fixed amount of time for uploading each frame?
@@ -93,7 +101,7 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 		});
 	}
 
-	// TODO: Prioritize shadow casters
+	// TODO: Account for non-point lights
 	uint numCubeShadows = std::min((uint)lights.size(), (uint)MAX_SHADOW_CUBES);
 	for (uint i = 0; i < numCubeShadows; ++i) {
 		Light& light = lights[i];

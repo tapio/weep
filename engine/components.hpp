@@ -67,6 +67,7 @@ struct Light
 	vec3 target = vec3();
 	float distance = 1.0f;
 	float decay = 1.0f;
+	float priority = 0.f;
 };
 
 
