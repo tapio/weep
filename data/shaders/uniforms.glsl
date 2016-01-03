@@ -68,10 +68,11 @@ UBO_PREFIX(UniformSkinningBlock, 5)
 #define BINDING_SPECULAR_MAP 10
 #define BINDING_HEIGHT_MAP 11
 #define BINDING_EMISSION_MAP 12
-#define BINDING_REFLECTION_MAP 13
-#define BINDING_ENV_MAP 14
-#define BINDING_SHADOW_MAP 15
-#define BINDING_SHADOW_CUBE 16
+#define BINDING_AO_MAP 13
+#define BINDING_REFLECTION_MAP 14
+#define BINDING_ENV_MAP 15
+#define BINDING_SHADOW_MAP 16
+#define BINDING_SHADOW_CUBE 17
 
 
 #ifndef __cplusplus
@@ -108,6 +109,9 @@ layout(binding = BINDING_HEIGHT_MAP) uniform sampler2D heightMap;
 #endif
 #ifdef USE_EMISSION_MAP
 layout(binding = BINDING_EMISSION_MAP) uniform sampler2D emissionMap;
+#endif
+#ifdef USE_AO_MAP
+layout(binding = BINDING_AO_MAP) uniform sampler2D aoMap;
 #endif
 #ifdef USE_REFLECTION_MAP
 layout(binding = BINDING_REFLECTION_MAP) uniform sampler2D reflectionMap;

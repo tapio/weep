@@ -222,6 +222,11 @@ void main()
 	vec4 diffuseTex = vec4(1.0);
 #endif
 
+#ifdef USE_AO_MAP
+	vec4 aoTex = texture(aoMap, texcoord);
+	ambientComp *= aoTex.rgb;
+#endif
+
 #ifdef USE_NORMAL_MAP
 	normal = perturb_normal(TBN, texcoord);
 #endif

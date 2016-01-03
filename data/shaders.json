@@ -95,6 +95,17 @@
 			"frag": "shaders/core.frag"
 		}
 	},
+	"aodebug": {
+		"defines": [
+			"USE_DIFFUSE",
+			"USE_DIFFUSE_MAP",
+			"USE_AO_MAP"
+		],
+		"shaders" : {
+			"vert": "shaders/core.vert",
+			"frag": "shaders/core.frag"
+		}
+	},
 	"anim": {
 		"defines": [
 			"USE_FOG",

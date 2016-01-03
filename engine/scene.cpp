@@ -112,6 +112,8 @@ namespace {
 			material->map[Material::NORMAL_MAP] = resources.getImageAsync(def["normalMap"].string_value());
 		if (!def["heightMap"].is_null())
 			material->map[Material::HEIGHT_MAP] = resources.getImageAsync(def["heightMap"].string_value());
+		if (!def["aoMap"].is_null())
+			material->map[Material::AO_MAP] = resources.getImageAsync(def["aoMap"].string_value());
 		if (!def["reflectionMap"].is_null())
 			material->map[Material::REFLECTION_MAP] = resources.getImageAsync(def["reflectionMap"].string_value());
 

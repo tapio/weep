@@ -43,16 +43,17 @@ enum ShaderFeature {
 	USE_NORMAL_MAP = 1 << 5,
 	USE_EMISSION_MAP = 1 << 6,
 	USE_PARALLAX_MAP = 1 << 7,
-	USE_ENV_MAP = 1 << 8,
-	USE_REFLECTION_MAP = 1 << 9,
-	USE_SHADOW_MAP = 1 << 10,
-	USE_ALPHA_TEST = 1 << 11,
-	USE_ALPHA_BLEND = 1 << 12,
-	USE_TESSELLATION = 1 << 13,
-	USE_ANIMATION = 1 << 14,
-	USE_DEPTH = 1 << 15,
-	USE_DEPTH_CUBE = 1 << 16,
-	NUM_SHADER_FEATURES = 17
+	USE_AO_MAP = 1 << 8,
+	USE_ENV_MAP = 1 << 9,
+	USE_REFLECTION_MAP = 1 << 10,
+	USE_SHADOW_MAP = 1 << 11,
+	USE_ALPHA_TEST = 1 << 12,
+	USE_ALPHA_BLEND = 1 << 13,
+	USE_TESSELLATION = 1 << 14,
+	USE_ANIMATION = 1 << 15,
+	USE_DEPTH = 1 << 16,
+	USE_DEPTH_CUBE = 1 << 17,
+	NUM_SHADER_FEATURES = 18
 };
 
 RenderDevice::RenderDevice(Resources& resources)
@@ -266,6 +267,7 @@ int RenderDevice::generateShader(uint tags)
 	HANDLE_FEATURE(USE_NORMAL_MAP)
 	HANDLE_FEATURE(USE_EMISSION_MAP)
 	HANDLE_FEATURE(USE_PARALLAX_MAP)
+	HANDLE_FEATURE(USE_AO_MAP)
 	HANDLE_FEATURE(USE_ENV_MAP)
 	HANDLE_FEATURE(USE_REFLECTION_MAP)
 	HANDLE_FEATURE(USE_SHADOW_MAP)
@@ -444,6 +446,8 @@ bool RenderDevice::uploadMaterial(Material& material)
 			tag |= USE_PARALLAX_MAP;
 		if (material.map[Material::EMISSION_MAP])
 			tag |= USE_EMISSION_MAP;
+		if (material.map[Material::AO_MAP])
+			tag |= USE_AO_MAP;
 		if (material.map[Material::REFLECTION_MAP])
 			tag |= USE_REFLECTION_MAP;
 		material.shaderId[TECH_COLOR] = generateShader(tag);

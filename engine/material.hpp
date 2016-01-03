@@ -26,13 +26,14 @@ struct Material
 		SPECULAR_MAP,
 		HEIGHT_MAP,
 		EMISSION_MAP,
+		AO_MAP,
 		REFLECTION_MAP,
 		ENV_MAP,
 		MAX_MAPS
 	};
 
-	Image* map[MAX_MAPS] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-	uint tex[MAX_MAPS] = { 0, 0, 0, 0, 0, 0, 0 };
+	Image* map[MAX_MAPS] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+	uint tex[MAX_MAPS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
 	enum Flags {
 		TESSELLATE = 1 << 0,
