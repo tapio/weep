@@ -120,8 +120,8 @@
 	},{
 		"prefab": "testcube",
 		"material": {
-			"shaderName": "nsrmap",
-			"reflectionMap": "debug/uvtestgrid_height.png"
+			"reflectionMap": "debug/white.png",
+			"reflectivity": 1
 		},
 		"position": [ -1, 0, -14 ],
 		"scale": 0.5

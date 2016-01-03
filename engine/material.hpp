@@ -17,6 +17,7 @@ struct Material
 	vec3 specular = vec3(1, 1, 1);
 	vec3 emissive = vec3(0, 0, 0);
 	float shininess = 32.0f;
+	float reflectivity = 0.f;
 	vec2 uvOffset = vec2(0, 0);
 	vec2 uvRepeat = vec2(1, 1);
 

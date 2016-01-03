@@ -90,6 +90,7 @@ namespace {
 		setColor(material->specular, def["specular"]);
 		setColor(material->emissive, def["emissive"]);
 		setNumber(material->shininess, def["shininess"]);
+		setNumber(material->reflectivity, def["reflectivity"]);
 
 		if (!def["uvOffset"].is_null())
 			material->uvOffset = toVec2(def["uvOffset"]);

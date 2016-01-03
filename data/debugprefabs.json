@@ -26,7 +26,6 @@
 		},
 		"testcube": {
 			"material": {
-				"shaderName": "nsmap",
 				"diffuseMap": "debug/uvtestgrid.png",
 				"specularMap": "debug/uvtestgrid_specular.png",
 				"normalMap": "debug/uvtestgrid_normal.png"

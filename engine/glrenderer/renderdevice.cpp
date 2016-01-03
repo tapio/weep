@@ -427,7 +427,9 @@ bool RenderDevice::uploadMaterial(Material& material)
 		ASSERT(material.shaderId[TECH_COLOR]);
 	} else {
 		// Auto-generate shader
-		uint tag = USE_FOG | USE_DIFFUSE | USE_SPECULAR;
+		uint tag = USE_FOG | USE_DIFFUSE;
+		if (material.shininess > 0.f)
+			tag |= USE_SPECULAR;
 		if (material.flags & Material::TESSELLATE)
 			tag |= USE_TESSELLATION;
 		if (material.flags & Material::RECEIVE_SHADOW)
@@ -450,6 +452,8 @@ bool RenderDevice::uploadMaterial(Material& material)
 			tag |= USE_AO_MAP;
 		if (material.map[Material::REFLECTION_MAP])
 			tag |= USE_REFLECTION_MAP;
+		if (material.reflectivity > 0.f)
+			tag |= USE_ENV_MAP;
 		material.shaderId[TECH_COLOR] = generateShader(tag);
 		ASSERT(material.shaderId[TECH_COLOR] >= 0 && "Color shader generating failed");
 	}
@@ -659,6 +663,7 @@ void RenderDevice::render(Model& model, Transform& transform, Animation* animati
 		m_materialBlock.uniforms.diffuse = mat.diffuse;
 		m_materialBlock.uniforms.specular = mat.specular;
 		m_materialBlock.uniforms.shininess = mat.shininess;
+		m_materialBlock.uniforms.reflectivity = mat.reflectivity;
 		m_materialBlock.uniforms.emissive = mat.emissive;
 		m_materialBlock.uniforms.uvOffset = mat.uvOffset;
 		m_materialBlock.uniforms.uvRepeat = mat.uvRepeat;
