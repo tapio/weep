@@ -125,5 +125,9 @@
 		},
 		"position": [ -1, 0, -14 ],
 		"scale": 0.5
+	},{
+		"prefab": "cube_refl",
+		"position": [ -3, 0, -8 ],
+		"scale": 0.5
 	}
 ]}

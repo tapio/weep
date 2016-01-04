@@ -7,6 +7,14 @@
 			},
 			"geometry": "debug/cube.obj"
 		},
+		"cube_refl": {
+			"material": {
+				"reflectionMap": "debug/white.png",
+				"reflectivity": 1.0,
+				"shininess": 0
+			},
+			"geometry": "debug/cube.obj"
+		},
 		"plane": {
 			"material": {
 				"shaderName": "diffusemap",
