@@ -117,14 +117,19 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 		}
 	}
 
+	Camera reflCam = camera;
+	reflCam.makePerspective(glm::radians(90.0f), 1.f, 0.25f, 50.f);
+	m_device->setupRenderPass(reflCam, lights, TECH_REFLECTION);
+	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
+		float maxDist = model.bounds.radius + reflCam.far;
+		if (!model.materials.empty() && glm::distance2(reflCam.position, transform.position) < maxDist * maxDist)
+			m_device->render(model, transform, e.has<Animation>() ? &e.get<Animation>() : nullptr);
+	});
+
 	m_device->setupRenderPass(camera, lights, TECH_COLOR);
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
-		if (!model.materials.empty() && frustum.visible(transform, model)) {
-			if (e.has<Animation>())
-				m_device->render(model, transform, &e.get<Animation>());
-			else
-				m_device->render(model, transform);
-		}
+		if (!model.materials.empty() && frustum.visible(transform, model))
+			m_device->render(model, transform, e.has<Animation>() ? &e.get<Animation>() : nullptr);
 	});
 	m_device->postRender();
 }

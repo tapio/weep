@@ -64,6 +64,7 @@ private:
 	void destroyGeometry(GPUGeometry& geometry);
 
 	int generateShader(uint tags);
+	void setupCubeMatrices(mat4 proj, vec3 pos);
 	void drawSetup(const Transform& transform, const Animation* animation = nullptr);
 	void drawBatch(const Batch& batch, bool tessellate = false);
 	void renderFullscreenQuad();

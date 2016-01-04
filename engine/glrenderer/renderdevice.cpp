@@ -10,6 +10,8 @@
 #include "environment.hpp"
 #include "image.hpp"
 
+#define DEBUG_REFLECTION 0 // Draws dynamic cubemap to skybox
+
 static GLenum s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
 
 static void debugCallback(GLenum /*source*/, GLenum type, GLuint id, GLenum severity, GLsizei /*length*/, const GLchar* msg, const void* /*data*/)
@@ -542,6 +544,18 @@ void RenderDevice::drawSetup(const Transform& transform, const Animation* animat
 	}
 }
 
+void RenderDevice::setupCubeMatrices(mat4 proj, vec3 pos)
+{
+	mat4* cubeMatrices = &m_cubeShadowBlock.uniforms.shadowMatrixCube[0];
+	cubeMatrices[0] = proj * glm::lookAt(pos, pos + vec3(1, 0, 0), vec3(0, -1, 0));
+	cubeMatrices[1] = proj * glm::lookAt(pos, pos + vec3(-1, 0, 0), vec3(0, -1, 0));
+	cubeMatrices[2] = proj * glm::lookAt(pos, pos + vec3(0, 1, 0), vec3(0, 0, 1));
+	cubeMatrices[3] = proj * glm::lookAt(pos, pos + vec3(0, -1, 0), vec3(0, 0, -1));
+	cubeMatrices[4] = proj * glm::lookAt(pos, pos + vec3(0, 0, 1), vec3(0, -1, 0));
+	cubeMatrices[5] = proj * glm::lookAt(pos, pos + vec3(0, 0, -1), vec3(0, -1, 0));
+	m_cubeShadowBlock.upload();
+}
+
 void RenderDevice::setupShadowPass(const Light& light, uint index)
 {
 	ASSERT(m_env);
@@ -558,17 +572,7 @@ void RenderDevice::setupShadowPass(const Light& light, uint index)
 		float aspect = (float)m_shadowFbo[index].width / (float)m_shadowFbo[index].height;
 		near = 0.2f; far = light.distance;
 		m_shadowProj[index] = glm::perspective(glm::radians(90.0f), aspect, near, far);
-
-		vec3 pos = light.position;
-		mat4* shadowMatrices = &m_cubeShadowBlock.uniforms.shadowMatrixCube[0];
-		shadowMatrices[0] = m_shadowProj[index] * glm::lookAt(pos, pos + vec3(1, 0, 0), vec3(0, -1, 0));
-		shadowMatrices[1] = m_shadowProj[index] * glm::lookAt(pos, pos + vec3(-1, 0, 0), vec3(0, -1, 0));
-		shadowMatrices[2] = m_shadowProj[index] * glm::lookAt(pos, pos + vec3(0, 1, 0), vec3(0, 0, 1));
-		shadowMatrices[3] = m_shadowProj[index] * glm::lookAt(pos, pos + vec3(0, -1, 0), vec3(0, 0, -1));
-		shadowMatrices[4] = m_shadowProj[index] * glm::lookAt(pos, pos + vec3(0, 0, 1), vec3(0, -1, 0));
-		shadowMatrices[5] = m_shadowProj[index] * glm::lookAt(pos, pos + vec3(0, 0, -1), vec3(0, -1, 0));
-		m_cubeShadowBlock.upload();
-
+		setupCubeMatrices(m_shadowProj[index], light.position);
 	} else if (light.type == Light::DIRECTIONAL_LIGHT) {
 		m_tech = TECH_DEPTH;
 		// TODO: Configure
@@ -662,6 +666,12 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 
 	if (m_wireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	if (tech == TECH_REFLECTION) {
+		setupCubeMatrices(m_commonBlock.uniforms.projectionMatrix, vec3(0, 0, 0));
+		renderSkybox();
+		setupCubeMatrices(m_commonBlock.uniforms.projectionMatrix, camera.position);
+	}
 }
 
 void RenderDevice::render(Model& model, Transform& transform, Animation* animation)
@@ -669,11 +679,9 @@ void RenderDevice::render(Model& model, Transform& transform, Animation* animati
 	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (m_shadowProj[0] * (m_shadowView[0] * transform.matrix));
 	drawSetup(transform, animation);
 
-	if (m_skyboxMat.shaderId[TECH_COLOR] != -1) {
-		uint tex = m_skyboxMat.tex[Material::ENV_MAP];
-		glActiveTexture(GL_TEXTURE0 + BINDING_ENV_MAP);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
-	}
+	uint envTex = m_tech == TECH_COLOR ? m_reflectionFbo.tex[0] : m_skyboxMat.tex[Material::ENV_MAP];
+	glActiveTexture(GL_TEXTURE0 + BINDING_ENV_MAP);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, envTex);
 
 	Geometry& geom = *model.geometry;
 	for (auto& batch : geom.batches) {
@@ -791,13 +799,15 @@ void RenderDevice::renderSkybox()
 		glVertexAttribPointer(ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
 	}
 	glDepthFunc(GL_LEQUAL);
-	glUseProgram(m_shaders[m_skyboxMat.shaderId[TECH_COLOR]].id);
+	glUseProgram(m_shaders[m_skyboxMat.shaderId[m_tech]].id);
 	// Remove translation
 	m_commonBlock.uniforms.viewMatrix = glm::mat4(glm::mat3(m_commonBlock.uniforms.viewMatrix));
 	m_commonBlock.upload();
 	glBindVertexArray(m_skyboxCube.vao);
 	glActiveTexture(GL_TEXTURE0 + BINDING_ENV_MAP);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyboxMat.tex[Material::ENV_MAP]);
+	if (DEBUG_REFLECTION && m_tech == TECH_COLOR)
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_reflectionFbo.tex[0]);
+	else glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyboxMat.tex[Material::ENV_MAP]);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glDepthFunc(GL_LESS);
