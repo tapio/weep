@@ -35,8 +35,8 @@ include_directories(SYSTEM ${SDL2_INCLUDE_DIRS})
 link_directories(${SDL2_LIBRARY_DIRS})
 list(APPEND LIBS ${SDL2_LIBRARIES})
 
-pkg_check_modules(GL REQUIRED gl)
-list(APPEND LIBS ${GL_LIBRARIES})
+find_package(OpenGL REQUIRED)
+list(APPEND LIBS ${OPENGL_gl_LIBRARY})
 
 include_directories(engine)
 include_directories(SYSTEM third-party)
