@@ -23,8 +23,10 @@ void main()
 	n = (vec4(n, 0.0) * m).xyz;
 #endif // USE_SKINNING
 
-#ifndef USE_TESSELLATION
+#if !defined(USE_TESSELLATION) && !defined(USE_CUBE_RENDER)
 	gl_Position = modelViewProjMatrix * pos;
+#elif !defined(USE_TESSELLATION) && defined(USE_CUBE_RENDER)
+	gl_Position = modelMatrix * pos;
 #endif
 	outData.normal = mat3(normalMatrix) * n;
 	outData.position = (modelViewMatrix * pos).xyz;

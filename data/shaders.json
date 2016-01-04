@@ -69,6 +69,16 @@
 			"frag": "shaders/skybox.frag"
 		}
 	},
+	"skybox_refl": {
+		"defines": [
+			"USE_ENV_MAP", "USE_CUBE_RENDER"
+		],
+		"shaders" : {
+			"vert": "shaders/skybox.vert",
+			"geom": "shaders/skybox.geom",
+			"frag": "shaders/skybox.frag"
+		}
+	},
 	"normal": {
 		"shaders" : {
 			"vert": "shaders/core.vert",

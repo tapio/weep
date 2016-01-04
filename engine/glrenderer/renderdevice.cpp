@@ -343,6 +343,7 @@ void RenderDevice::setEnvironment(Environment* env)
 	// TODO: Use uploadMaterial()
 	m_skyboxMat.shaderName = "skybox";
 	m_skyboxMat.shaderId[TECH_COLOR] = m_shaderNames[$id(skybox)];
+	m_skyboxMat.shaderId[TECH_REFLECTION] = m_shaderNames[$id(skybox_refl)];
 	if (!m_env->skybox[0])
 		return;
 	Texture& tex = m_textures[m_env->skybox[0]];
