@@ -479,7 +479,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 	// Other techs are always auto generated
 	{
 		// Simpler reflection shader
-		tag &= ~(USE_SHADOW_MAP | USE_AO_MAP | USE_REFLECTION_MAP | USE_ENV_MAP);
+		tag &= ~(USE_SHADOW_MAP | USE_AO_MAP | USE_REFLECTION_MAP | USE_ENV_MAP | USE_TESSELLATION);
 		material.shaderId[TECH_REFLECTION] = generateShader(tag | USE_CUBE_RENDER);
 		ASSERT(material.shaderId[TECH_REFLECTION] >= 0 && "Reflection shader generating failed");
 		// Depth
