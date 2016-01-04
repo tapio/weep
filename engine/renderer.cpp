@@ -58,12 +58,30 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 {
 	m_device->stats = RenderDevice::Stats();
 	camera.updateViewMatrix();
-
-	entities.for_each<Model, Transform>([&](Entity, Model&, Transform& transform) {
-		transform.updateMatrix();
-	});
-
 	Frustum frustum(camera);
+
+	struct ReflectionProbe { float priority; vec3 pos; };
+	std::vector<ReflectionProbe> reflectionProbes;
+	entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
+		// Update transform
+		transform.updateMatrix();
+
+		// Figure out candidates for reflection location
+		if (frustum.visible(transform, model)) {
+			float reflectivity = 0.f;
+			for (auto mat : model.materials)
+				if (mat->reflectivity > reflectivity)
+					reflectivity = mat->reflectivity;
+			if (reflectivity > 0.01f) {
+				float priority = glm::distance2(camera.position, transform.position);
+				priority *= 1.1f - reflectivity;
+				reflectionProbes.push_back({ priority, transform.position });
+			}
+		}
+	});
+	std::sort(reflectionProbes.begin(), reflectionProbes.end(), [](const ReflectionProbe& a, const ReflectionProbe& b) {
+		return a.priority < b.priority;
+	});
 
 	std::vector<Light> lights;
 	// TODO: Better prioritizing
@@ -117,8 +135,13 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 		}
 	}
 
+	// Reflection pass
 	Camera reflCam = camera;
 	reflCam.makePerspective(glm::radians(90.0f), 1.f, 0.25f, 50.f);
+	if (!reflectionProbes.empty()) {
+		reflCam.position = reflectionProbes.front().pos;
+		reflCam.updateViewMatrix();
+	}
 	m_device->setupRenderPass(reflCam, lights, TECH_REFLECTION);
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 		float maxDist = model.bounds.radius + reflCam.far;
@@ -127,6 +150,7 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	});
 	m_device->renderSkybox();
 
+	// Scene color pass
 	m_device->setupRenderPass(camera, lights, TECH_COLOR);
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 		if (!model.materials.empty() && frustum.visible(transform, model))
