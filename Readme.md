@@ -10,7 +10,7 @@ This is a small personal game engine. It's mainly a platform for me to experimen
 	- Multiple point lights with omnidirectional shadow maps
 	- HDR with multiple tonemap functions
 	- Bloom / glow
-	- Diffuse / normal / specular / emission map support
+	- Diffuse / normal / specular / emission / AO map support
 	- Skybox reflections with reflectivity map support
 	- Automatic mesh smoothing with tessellation shaders
 	- #define based uber shader
