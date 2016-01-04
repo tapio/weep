@@ -131,6 +131,8 @@ void RenderDevice::resizeRenderTargets()
 	for (uint i = 0; i < countof(m_shadowFbo); ++i)
 		if (m_shadowFbo[i].valid())
 			m_shadowFbo[i].destroy();
+	if (m_reflectionFbo.valid())
+		m_reflectionFbo.destroy();
 	// Set up floating point framebuffer to render HDR scene to
 	int samples = Engine::settings["renderer"]["msaa"].number_value();
 	if (samples > 1) {
@@ -166,6 +168,12 @@ void RenderDevice::resizeRenderTargets()
 		m_shadowFbo[i].cube = true;
 		m_shadowFbo[i].create();
 	}
+	m_reflectionFbo.width = Engine::settings["renderer"]["reflectionCubeSize"].number_value();
+	m_reflectionFbo.height = m_reflectionFbo.width;
+	//m_reflectionFbo.numTextures = 2;
+	//m_reflectionFbo.depthAttachment = 1;
+	m_reflectionFbo.cube = true;
+	m_reflectionFbo.create();
 	glutil::checkGL("Post framebuffer create");
 }
 

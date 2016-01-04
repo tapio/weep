@@ -10,7 +10,8 @@
 		"vsync": true,
 		"msaa": 8,
 		"shadowMapSize": 2048,
-		"shadowCubeSize": 512
+		"shadowCubeSize": 512,
+		"reflectionCubeSize": 512
 	},
 	"devtools": true,
 	"scene": "debugscene.json",

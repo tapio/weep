@@ -73,6 +73,7 @@ private:
 	FBO m_fbo;
 	FBO m_pingPongFbo[2];
 	FBO m_shadowFbo[MAX_SHADOWS];
+	FBO m_reflectionFbo;
 
 	GPUGeometry m_fullscreenQuad;
 	GPUGeometry m_skyboxCube;
