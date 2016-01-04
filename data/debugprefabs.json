@@ -17,8 +17,8 @@
 		},
 		"plane": {
 			"material": {
-				"shaderName": "diffusemap",
-				"diffuseMap": "debug/uvtestgrid.png"
+				"diffuseMap": "debug/uvtestgrid.png",
+				"specularMap": "debug/uvtestgrid_specular.png"
 			},
 			"geometry": "debug/plane.obj"
 		},
