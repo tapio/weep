@@ -117,7 +117,6 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 		}
 	}
 
-	m_device->preRender(camera, lights);
 	m_device->setupRenderPass(camera, lights, TECH_COLOR);
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 		if (!model.materials.empty() && frustum.visible(transform, model)) {
