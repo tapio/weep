@@ -14,7 +14,7 @@ struct Transform
 	vec3& setScale(vec3 s)      { dirty = true; return scale = s; }
 
 	void updateMatrix() {
-		matrix = glm::translate(position);
+		matrix = glm::translate(mat4(1.f), position);
 		matrix = glm::scale(matrix, scale);
 		matrix *= glm::mat4_cast(rotation);
 	}

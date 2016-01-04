@@ -3,6 +3,8 @@
 #include "physics.hpp"
 #include "iqm/iqm.h"
 #include "glrenderer/glutil.hpp"
+#include <glm/gtc/matrix_inverse.hpp>
+#include <glm/gtx/normal.hpp>
 #include <sstream>
 #include <fstream>
 #include <cstring>

@@ -13,6 +13,8 @@
 #include "module.hpp"
 #include "renderer.hpp"
 #include "glrenderer/renderdevice.hpp"
+#include <id/id.hpp>
+#include <glm/gtx/component_wise.hpp>
 
 #define USE_DEBUG_NAMES
 

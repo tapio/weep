@@ -8,7 +8,8 @@
 #include "gui.hpp"
 #include "../controller.hpp"
 #include "../game.hpp"
-#include "SDL2/SDL_events.h"
+#include <glm/gtc/random.hpp>
+#include <SDL_events.h>
 
 static vec3 startPos = vec3(0, 1, 0);
 static vec3 goalPos = vec3(INFINITY, INFINITY, INFINITY);

@@ -3,6 +3,7 @@
 #include "engine.hpp"
 #include "resources.hpp"
 #include "module.hpp"
+#include <id/id.hpp>
 
 struct Game {
 	Engine engine = {};

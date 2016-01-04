@@ -2,6 +2,8 @@
 #include "camera.hpp"
 #include "soloud.h"
 #include "components.hpp"
+#include <id/id.hpp>
+#include <glm/gtc/random.hpp>
 
 using namespace SoLoud;
 

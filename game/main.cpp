@@ -13,6 +13,7 @@
 #include "gui.hpp"
 #include "glrenderer/renderdevice.hpp"
 #include "game.hpp"
+#include <id/id.hpp>
 #include <SDL.h>
 
 void init(Game& game, SceneLoader& scene, const string& scenePath)
