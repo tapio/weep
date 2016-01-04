@@ -53,7 +53,8 @@ enum ShaderFeature {
 	USE_ANIMATION = 1 << 15,
 	USE_DEPTH = 1 << 16,
 	USE_DEPTH_CUBE = 1 << 17,
-	NUM_SHADER_FEATURES = 18
+	USE_CUBE_RENDER = 1 << 18,
+	NUM_SHADER_FEATURES = 19
 };
 
 RenderDevice::RenderDevice(Resources& resources)
@@ -258,7 +259,10 @@ int RenderDevice::generateShader(uint tags)
 	if (it != m_shaderTags.end())
 		return it->second;
 
-	string name = (tags & USE_DEPTH) ? "gen_depth_" : "gen_color_";
+	string name;
+	if (tags & USE_DEPTH) name = "gen_depth_";
+	else if (tags & USE_CUBE_RENDER) name= "gen_refl_";
+	else name = "gen_color_";
 	name += std::bitset<NUM_SHADER_FEATURES>(tags).to_string();
 	m_shaders.emplace_back(name);
 	ShaderProgram& program = m_shaders.back();
@@ -285,6 +289,7 @@ int RenderDevice::generateShader(uint tags)
 	HANDLE_FEATURE(USE_ANIMATION)
 	HANDLE_FEATURE(USE_DEPTH)
 	HANDLE_FEATURE(USE_DEPTH_CUBE)
+	HANDLE_FEATURE(USE_CUBE_RENDER)
 #undef HANDLE_FEATURE
 
 	defineText += m_resources.getText("shaders/uniforms.glsl", Resources::USE_CACHE);
@@ -295,6 +300,8 @@ int RenderDevice::generateShader(uint tags)
 	program.compile(FRAGMENT_SHADER, m_resources.getText("shaders/" + file + ".frag", Resources::USE_CACHE), defineText);
 	if (tags & USE_DEPTH_CUBE)
 		program.compile(GEOMETRY_SHADER, m_resources.getText("shaders/depth.geom", Resources::USE_CACHE), defineText);
+	if (tags & USE_CUBE_RENDER)
+		program.compile(GEOMETRY_SHADER, m_resources.getText("shaders/core.geom", Resources::USE_CACHE), defineText);
 
 	if (!program.link()) {
 		if ((tags & USE_DEPTH) == 0) {
@@ -423,6 +430,34 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 
 bool RenderDevice::uploadMaterial(Material& material)
 {
+	uint tag = USE_FOG | USE_DIFFUSE;
+	if (material.shininess > 0.f)
+		tag |= USE_SPECULAR;
+	if (material.flags & Material::TESSELLATE)
+		tag |= USE_TESSELLATION;
+	if (material.flags & Material::RECEIVE_SHADOW)
+		tag |= USE_SHADOW_MAP;
+	if (material.flags & Material::ANIMATED)
+		tag |= USE_ANIMATION;
+	if (material.flags & Material::ALPHA_TEST)
+		tag |= USE_ALPHA_TEST;
+	if (material.map[Material::DIFFUSE_MAP])
+		tag |= USE_DIFFUSE_MAP | USE_DIFFUSE;
+	if (material.map[Material::NORMAL_MAP])
+		tag |= USE_NORMAL_MAP;
+	if (material.map[Material::SPECULAR_MAP])
+		tag |= USE_SPECULAR_MAP | USE_SPECULAR;
+	if (material.map[Material::HEIGHT_MAP])
+		tag |= USE_PARALLAX_MAP;
+	if (material.map[Material::EMISSION_MAP])
+		tag |= USE_EMISSION_MAP;
+	if (material.map[Material::AO_MAP])
+		tag |= USE_AO_MAP;
+	if (material.map[Material::REFLECTION_MAP])
+		tag |= USE_REFLECTION_MAP;
+	if (material.reflectivity > 0.f)
+		tag |= USE_ENV_MAP;
+
 	if (!material.shaderName.empty()) {
 		auto it = m_shaderNames.find(id::hash(material.shaderName));
 		if (it == m_shaderNames.end()) {
@@ -435,39 +470,17 @@ bool RenderDevice::uploadMaterial(Material& material)
 		ASSERT(material.shaderId[TECH_COLOR]);
 	} else {
 		// Auto-generate shader
-		uint tag = USE_FOG | USE_DIFFUSE;
-		if (material.shininess > 0.f)
-			tag |= USE_SPECULAR;
-		if (material.flags & Material::TESSELLATE)
-			tag |= USE_TESSELLATION;
-		if (material.flags & Material::RECEIVE_SHADOW)
-			tag |= USE_SHADOW_MAP;
-		if (material.flags & Material::ANIMATED)
-			tag |= USE_ANIMATION;
-		if (material.flags & Material::ALPHA_TEST)
-			tag |= USE_ALPHA_TEST;
-		if (material.map[Material::DIFFUSE_MAP])
-			tag |= USE_DIFFUSE_MAP | USE_DIFFUSE;
-		if (material.map[Material::NORMAL_MAP])
-			tag |= USE_NORMAL_MAP;
-		if (material.map[Material::SPECULAR_MAP])
-			tag |= USE_SPECULAR_MAP | USE_SPECULAR;
-		if (material.map[Material::HEIGHT_MAP])
-			tag |= USE_PARALLAX_MAP;
-		if (material.map[Material::EMISSION_MAP])
-			tag |= USE_EMISSION_MAP;
-		if (material.map[Material::AO_MAP])
-			tag |= USE_AO_MAP;
-		if (material.map[Material::REFLECTION_MAP])
-			tag |= USE_REFLECTION_MAP;
-		if (material.reflectivity > 0.f)
-			tag |= USE_ENV_MAP;
 		material.shaderId[TECH_COLOR] = generateShader(tag);
 		ASSERT(material.shaderId[TECH_COLOR] >= 0 && "Color shader generating failed");
 	}
-	// Depth materials always auto generated
+	// Other techs are always auto generated
 	{
-		uint tag = USE_DEPTH;
+		// Simpler reflection shader
+		tag &= ~(USE_SHADOW_MAP | USE_AO_MAP | USE_REFLECTION_MAP | USE_ENV_MAP);
+		material.shaderId[TECH_REFLECTION] = generateShader(tag | USE_CUBE_RENDER);
+		ASSERT(material.shaderId[TECH_REFLECTION] >= 0 && "Reflection shader generating failed");
+		// Depth
+		tag = USE_DEPTH;
 		if (material.flags & Material::ANIMATED)
 			tag |= USE_ANIMATION;
 		if (material.flags & Material::ALPHA_TEST)
@@ -595,15 +608,18 @@ void RenderDevice::renderShadow(Model& model, Transform& transform, Animation* a
 	glutil::checkGL("Post shadow draw");
 }
 
-void RenderDevice::preRender(const Camera& camera, const std::vector<Light>& lights)
+void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light>& lights, Technique tech)
 {
 	ASSERT(m_env);
-	if (m_msaaFbo.valid()) m_msaaFbo.bind();
-	else m_fbo.bind();
-	glViewport(0, 0, Engine::width(), Engine::height());
+	FBO* fbo;
+	if (tech == TECH_REFLECTION) fbo = &m_reflectionFbo;
+	else if (m_msaaFbo.valid()) fbo = &m_msaaFbo;
+	else fbo = &m_fbo;
+	fbo->bind();
+	glViewport(0, 0, fbo->width, fbo->height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_BACK);
-	m_tech = TECH_COLOR;
+	m_tech = tech;
 	m_program = 0;
 	glUseProgram(0);
 	m_commonBlock.uniforms.projectionMatrix = camera.projection;
@@ -685,7 +701,7 @@ void RenderDevice::render(Model& model, Transform& transform, Animation* animati
 			//glUniform1i(i, i);
 		}
 
-		drawBatch(batch, mat.flags & Material::TESSELLATE);
+		drawBatch(batch, m_tech == TECH_COLOR && (mat.flags & Material::TESSELLATE));
 	}
 	glBindVertexArray(0);
 	glutil::checkGL("Post draw");

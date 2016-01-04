@@ -31,7 +31,7 @@ public:
 	void setupShadowPass(const Light& light, uint index);
 	void renderShadow(Model& model, Transform& transform, Animation* animation = nullptr);
 
-	void preRender(const Camera& camera, const std::vector<Light>& lights);
+	void setupRenderPass(const Camera& camera, const std::vector<Light>& lights, Technique tech = TECH_COLOR);
 	void render(Model& model, Transform& transform, Animation* animation = nullptr);
 	void postRender();
 

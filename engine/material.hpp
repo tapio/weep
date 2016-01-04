@@ -5,6 +5,7 @@ struct Image;
 
 enum Technique {
 	TECH_COLOR,
+	TECH_REFLECTION,
 	TECH_DEPTH,
 	TECH_DEPTH_CUBE,
 	NUM_TECHNIQUES
@@ -46,6 +47,6 @@ struct Material
 	};
 	uint flags = DIRTY_MAPS | CAST_SHADOW | RECEIVE_SHADOW;
 
-	int shaderId[NUM_TECHNIQUES] = { -1, -1, -1 }; // Automatic
+	int shaderId[NUM_TECHNIQUES] = { -1, -1, -1, -1 }; // Automatic
 	string shaderName = "";
 };
