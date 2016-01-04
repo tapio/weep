@@ -173,8 +173,8 @@ void RenderDevice::resizeRenderTargets()
 	}
 	m_reflectionFbo.width = Engine::settings["renderer"]["reflectionCubeSize"].number_value();
 	m_reflectionFbo.height = m_reflectionFbo.width;
-	//m_reflectionFbo.numTextures = 2;
-	//m_reflectionFbo.depthAttachment = 1;
+	m_reflectionFbo.numTextures = 2;
+	m_reflectionFbo.depthAttachment = 1;
 	m_reflectionFbo.cube = true;
 	m_reflectionFbo.create();
 	glutil::checkGL("Post framebuffer create");
@@ -658,6 +658,9 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 	m_lightBlock.upload();
 	m_commonBlock.upload();
 
+	if (tech == TECH_REFLECTION)
+		setupCubeMatrices(m_commonBlock.uniforms.projectionMatrix, camera.position);
+
 	// Shadow map textures
 	for (uint i = 0; i < countof(m_shadowFbo); ++i) {
 		glActiveTexture(GL_TEXTURE0 + BINDING_SHADOW_MAP + i);
@@ -666,12 +669,6 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 
 	if (m_wireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-	if (tech == TECH_REFLECTION) {
-		setupCubeMatrices(m_commonBlock.uniforms.projectionMatrix, vec3(0, 0, 0));
-		renderSkybox();
-		setupCubeMatrices(m_commonBlock.uniforms.projectionMatrix, camera.position);
-	}
 }
 
 void RenderDevice::render(Model& model, Transform& transform, Animation* animation)
@@ -800,9 +797,13 @@ void RenderDevice::renderSkybox()
 	}
 	glDepthFunc(GL_LEQUAL);
 	glUseProgram(m_shaders[m_skyboxMat.shaderId[m_tech]].id);
-	// Remove translation
-	m_commonBlock.uniforms.viewMatrix = glm::mat4(glm::mat3(m_commonBlock.uniforms.viewMatrix));
-	m_commonBlock.upload();
+	if (m_tech == TECH_REFLECTION) {
+		setupCubeMatrices(m_commonBlock.uniforms.projectionMatrix, vec3(0, 0, 0));
+	} else {
+		// Remove translation
+		m_commonBlock.uniforms.viewMatrix = glm::mat4(glm::mat3(m_commonBlock.uniforms.viewMatrix));
+		m_commonBlock.upload();
+	}
 	glBindVertexArray(m_skyboxCube.vao);
 	glActiveTexture(GL_TEXTURE0 + BINDING_ENV_MAP);
 	if (DEBUG_REFLECTION && m_tech == TECH_COLOR)
@@ -817,7 +818,6 @@ void RenderDevice::renderSkybox()
 
 void RenderDevice::postRender()
 {
-	renderSkybox();
 	glBindVertexArray(0);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

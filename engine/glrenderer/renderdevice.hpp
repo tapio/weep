@@ -33,6 +33,7 @@ public:
 
 	void setupRenderPass(const Camera& camera, const std::vector<Light>& lights, Technique tech = TECH_COLOR);
 	void render(Model& model, Transform& transform, Animation* animation = nullptr);
+	void renderSkybox();
 	void postRender();
 
 	void resizeRenderTargets();
@@ -68,7 +69,6 @@ private:
 	void drawSetup(const Transform& transform, const Animation* animation = nullptr);
 	void drawBatch(const Batch& batch, bool tessellate = false);
 	void renderFullscreenQuad();
-	void renderSkybox();
 
 	FBO m_msaaFbo;
 	FBO m_fbo;

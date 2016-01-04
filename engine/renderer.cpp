@@ -125,11 +125,13 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 		if (!model.materials.empty() && glm::distance2(reflCam.position, transform.position) < maxDist * maxDist)
 			m_device->render(model, transform, e.has<Animation>() ? &e.get<Animation>() : nullptr);
 	});
+	m_device->renderSkybox();
 
 	m_device->setupRenderPass(camera, lights, TECH_COLOR);
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 		if (!model.materials.empty() && frustum.visible(transform, model))
 			m_device->render(model, transform, e.has<Animation>() ? &e.get<Animation>() : nullptr);
 	});
+	m_device->renderSkybox();
 	m_device->postRender();
 }
