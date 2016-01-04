@@ -17,9 +17,9 @@
 #include <glm/gtx/component_wise.hpp>
 #include <id/id.hpp>
 #define SDL_ASSERT_LEVEL 2
-#include <SDL2/SDL_assert.h>
+#include <SDL_assert.h>
 #define ASSERT SDL_assert
-#include <SDL2/SDL_timer.h>
+#include <SDL_timer.h>
 #define ECS_ASSERT ASSERT
 #include <ecs/ecs.hpp>
 

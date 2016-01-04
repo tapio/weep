@@ -1,6 +1,6 @@
 #include "controller.hpp"
 #include "physics.hpp"
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 
 Controller::Controller(vec3 pos, quat rot)

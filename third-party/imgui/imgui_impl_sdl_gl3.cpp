@@ -8,8 +8,8 @@
 #include "imgui_impl_sdl_gl3.h"
 
 // SDL,GL
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_syswm.h>
+#include <SDL.h>
+#include <SDL_syswm.h>
 #ifdef _WIN32
 #include "glad/glad.h"
 #else

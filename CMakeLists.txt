@@ -31,7 +31,8 @@ endif()
 find_package(PkgConfig)
 
 pkg_check_modules(SDL2 REQUIRED sdl2)
-include_directories(${SDL2_INCLUDE_DIRS})
+include_directories(SYSTEM ${SDL2_INCLUDE_DIRS})
+link_directories(${SDL2_LIBRARY_DIRS})
 list(APPEND LIBS ${SDL2_LIBRARIES})
 
 pkg_check_modules(GL REQUIRED gl)

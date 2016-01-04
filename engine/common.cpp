@@ -4,7 +4,7 @@
 #include <sstream>
 #include <thread>
 #include <chrono>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <sys/stat.h>
 
 #if defined(_WIN32) || defined(WIN32)

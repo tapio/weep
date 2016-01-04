@@ -1,6 +1,6 @@
 #include "engine.hpp"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #ifdef _WIN32
 #include "glad/glad.h"
 #endif
