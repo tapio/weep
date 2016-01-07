@@ -19,6 +19,8 @@ void AnimationSystem::reset()
 void AnimationSystem::update(Entities& entities, float dt)
 {
 	entities.for_each<Animation, Model>([&](Entity, Animation& anim, Model& model) {
+		if (anim.state != Animation::PLAYING)
+			return;
 		Geometry& geom = *model.geometry;
 		Geometry::Animation a = geom.animations[anim.animation];
 		anim.time += dt * anim.speed * a.frameRate;
@@ -38,18 +40,30 @@ void AnimationSystem::update(Entities& entities, float dt)
 	});
 }
 
-void AnimationSystem::play(Entity& e)
+void AnimationSystem::play(Entity e)
 {
 	if (!e.has<Animation>() || !e.has<Model>())
 		return;
 	Animation& anim = e.get<Animation>();
+	if (anim.state == Animation::PAUSED) {
+		anim.state = Animation::PLAYING;
+		return;
+	}
 	Geometry& geom = *e.get<Model>().geometry;
 	Geometry::Animation a = geom.animations[anim.animation];
 	anim.state = Animation::PLAYING;
 	anim.bones.assign(&geom.animFrames[a.start * geom.bones.size()], &geom.animFrames[a.start * geom.bones.size() + geom.bones.size()]);
 }
 
-void AnimationSystem::stop(Entity& e)
+void AnimationSystem::pause(Entity e)
+{
+	if (!e.has<Animation>())
+		return;
+	Animation& anim = e.get<Animation>();
+	anim.state = Animation::PAUSED;
+}
+
+void AnimationSystem::stop(Entity e)
 {
 	if (!e.has<Animation>() || !e.has<Model>())
 		return;

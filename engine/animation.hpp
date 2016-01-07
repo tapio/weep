@@ -9,6 +9,7 @@ public:
 	void reset();
 	void update(Entities& entities, float dt);
 
-	void play(Entity& entity);
-	void stop(Entity& entity);
+	void play(Entity entity);
+	void pause(Entity entity);
+	void stop(Entity entity);
 };
