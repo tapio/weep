@@ -1,8 +1,6 @@
 
 in VertexData {
-	vec3 position;
 	vec2 texcoord;
-	vec3 normal;
 } inData;
 
 layout(binding = 20) uniform sampler2D sceneMap;
