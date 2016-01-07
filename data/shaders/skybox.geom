@@ -15,7 +15,7 @@ void main()
 		gl_Layer = face;
 		for (int i = 0; i < 3; ++i) {
 			outData.texcoord = inData[i].texcoord;
-			vec4 pos = shadowMatrixCube[face] * gl_in[i].gl_Position;
+			vec4 pos = cubeMatrices[face] * gl_in[i].gl_Position;
 			gl_Position = pos.xyww;
 			EmitVertex();
 		}

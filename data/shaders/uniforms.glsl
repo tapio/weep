@@ -51,8 +51,8 @@ UBO_PREFIX(UniformLightBlock, 3)
 	UniformLightData lights[MAX_LIGHTS];
 };
 
-UBO_PREFIX(UniformCubeShadowBlock, 4)
-	mat4 shadowMatrixCube[6];
+UBO_PREFIX(UniformCubeMatrixBlock, 4)
+	mat4 cubeMatrices[6];
 };
 
 UBO_PREFIX(UniformSkinningBlock, 5)

@@ -36,6 +36,6 @@ template struct UBO<UniformCommonBlock>;
 template struct UBO<UniformObjectBlock>;
 template struct UBO<UniformMaterialBlock>;
 template struct UBO<UniformLightBlock>;
-template struct UBO<UniformCubeShadowBlock>;
+template struct UBO<UniformCubeMatrixBlock>;
 template struct UBO<UniformSkinningBlock>;
 template struct UBO<UniformPostProcessBlock>;

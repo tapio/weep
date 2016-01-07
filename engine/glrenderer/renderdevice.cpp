@@ -120,7 +120,7 @@ RenderDevice::RenderDevice(Resources& resources)
 	m_objectBlock.create();
 	m_materialBlock.create();
 	m_lightBlock.create();
-	m_cubeShadowBlock.create();
+	m_cubeMatrixBlock.create();
 	m_skinningBlock.create();
 	m_postProcessBlock.create();
 }
@@ -549,14 +549,14 @@ void RenderDevice::drawSetup(const Transform& transform, const Animation* animat
 
 void RenderDevice::setupCubeMatrices(mat4 proj, vec3 pos)
 {
-	mat4* cubeMatrices = &m_cubeShadowBlock.uniforms.shadowMatrixCube[0];
+	mat4* cubeMatrices = &m_cubeMatrixBlock.uniforms.cubeMatrices[0];
 	cubeMatrices[0] = proj * glm::lookAt(pos, pos + vec3(1, 0, 0), vec3(0, -1, 0));
 	cubeMatrices[1] = proj * glm::lookAt(pos, pos + vec3(-1, 0, 0), vec3(0, -1, 0));
 	cubeMatrices[2] = proj * glm::lookAt(pos, pos + vec3(0, 1, 0), vec3(0, 0, 1));
 	cubeMatrices[3] = proj * glm::lookAt(pos, pos + vec3(0, -1, 0), vec3(0, 0, -1));
 	cubeMatrices[4] = proj * glm::lookAt(pos, pos + vec3(0, 0, 1), vec3(0, -1, 0));
 	cubeMatrices[5] = proj * glm::lookAt(pos, pos + vec3(0, 0, -1), vec3(0, -1, 0));
-	m_cubeShadowBlock.upload();
+	m_cubeMatrixBlock.upload();
 }
 
 void RenderDevice::setupShadowPass(const Light& light, uint index)

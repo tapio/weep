@@ -91,7 +91,7 @@ private:
 	UBO<UniformObjectBlock> m_objectBlock;
 	UBO<UniformMaterialBlock> m_materialBlock;
 	UBO<UniformLightBlock> m_lightBlock;
-	UBO<UniformCubeShadowBlock> m_cubeShadowBlock;
+	UBO<UniformCubeMatrixBlock> m_cubeMatrixBlock;
 	UBO<UniformSkinningBlock> m_skinningBlock;
 	UBO<UniformPostProcessBlock> m_postProcessBlock;
 	std::vector<ShaderProgram> m_shaders;

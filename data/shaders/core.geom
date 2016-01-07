@@ -14,7 +14,7 @@ void main()
 			outData.texcoord = inData[i].texcoord;
 			outData.normal = inData[i].normal;
 
-			gl_Position = shadowMatrixCube[face] * gl_in[i].gl_Position;
+			gl_Position = cubeMatrices[face] * gl_in[i].gl_Position;
 			EmitVertex();
 		}
 		EndPrimitive();

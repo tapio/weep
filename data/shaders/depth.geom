@@ -34,7 +34,7 @@ void main()
 #ifdef USE_ALPHA_TEST
 			outData.texcoord = inData[i].texcoord;
 #endif
-			gl_Position = shadowMatrixCube[face] * gl_in[i].gl_Position;
+			gl_Position = cubeMatrices[face] * gl_in[i].gl_Position;
 			EmitVertex();
 		}
 		EndPrimitive();
