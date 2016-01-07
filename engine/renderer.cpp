@@ -57,11 +57,15 @@ void RenderSystem::toggleWireframe()
 void RenderSystem::render(Entities& entities, Camera& camera)
 {
 	m_device->stats = RenderDevice::Stats();
-	camera.updateViewMatrix();
-	Frustum frustum(camera);
 
 	struct ReflectionProbe { float priority; vec3 pos; };
 	std::vector<ReflectionProbe> reflectionProbes;
+	std::vector<Light> lights;
+	Frustum frustum(camera);
+
+	START_MEASURE(prerenderMs)
+	camera.updateViewMatrix();
+
 	entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
 		// Update transform
 		transform.updateMatrix();
@@ -83,7 +87,6 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 		return a.priority < b.priority;
 	});
 
-	std::vector<Light> lights;
 	// TODO: Better prioritizing
 	vec3 lightTarget = camera.position + camera.rotation * vec3(0, 0, -2);
 	entities.for_each<Light>([&](Entity, Light& light) {
@@ -94,7 +97,10 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 		return a.priority < b.priority;
 	});
 
+	END_MEASURE(prerenderMs)
+
 	// Fixed amount of time for uploading each frame?
+	START_MEASURE(uploadMs)
 	entities.for_each<Model>([&](Entity, Model& model) {
 		// Upload geometry
 		Geometry& geom = *model.geometry;
@@ -105,7 +111,9 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 			if (mat->shaderId[0] < 0 || (mat->flags & Material::DIRTY_MAPS))
 				m_device->uploadMaterial(*mat);
 	});
+	END_MEASURE(uploadMs)
 
+	START_MEASURE(shadowMs)
 	Light sun;
 	sun.type = Light::DIRECTIONAL_LIGHT;
 	sun.position = camera.position + normalize(m_env.sunPosition) * 10.f;
@@ -134,8 +142,10 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 			});
 		}
 	}
+	END_MEASURE(shadowMs)
 
 	// Reflection pass
+	START_MEASURE(reflectionMs)
 	Camera reflCam = camera;
 	reflCam.makePerspective(glm::radians(90.0f), 1.f, 0.25f, 50.f);
 	if (!reflectionProbes.empty()) {
@@ -149,13 +159,27 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 			m_device->render(model, transform, e.has<Animation>() ? &e.get<Animation>() : nullptr);
 	});
 	m_device->renderSkybox();
+	END_MEASURE(reflectionMs)
 
 	// Scene color pass
+	START_MEASURE(sceneMs)
 	m_device->setupRenderPass(camera, lights, TECH_COLOR);
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 		if (!model.materials.empty() && frustum.visible(transform, model))
 			m_device->render(model, transform, e.has<Animation>() ? &e.get<Animation>() : nullptr);
 	});
 	m_device->renderSkybox();
+	END_MEASURE(sceneMs)
+
+	START_MEASURE(postprocessMs)
 	m_device->postRender();
+	END_MEASURE(postprocessMs)
+
+	RenderDevice::Stats& stats = m_device->stats;
+	stats.times.prerender = prerenderMs;
+	stats.times.upload = uploadMs;
+	stats.times.shadow = shadowMs;
+	stats.times.reflection = reflectionMs;
+	stats.times.scene = sceneMs;
+	stats.times.postprocess = postprocessMs;
 }

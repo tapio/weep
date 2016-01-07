@@ -53,6 +53,14 @@ public:
 		uint programs = 0;
 		uint triangles = 0;
 		uint lights = 0;
+		struct {
+			float prerender = 0.f;
+			float upload = 0.f;
+			float shadow = 0.f;
+			float reflection = 0.f;
+			float scene = 0.f;
+			float postprocess = 0.f;
+		} times;
 	} stats;
 
 private:

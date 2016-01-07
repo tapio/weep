@@ -202,12 +202,21 @@ int main(int argc, char* argv[])
 			ImGui::Text("Right mouse button to toggle mouse grab.");
 			ImGui::Text("FPS: %d (%.3fms)", int(1.0 / game.engine.dt), game.engine.dt * 1000.f);
 			if (ImGui::CollapsingHeader("Stats")) {
+				const RenderDevice::Stats& stats = renderer.device().stats;
 				ImGui::Text("Physics:      %.3fms", physTimeMs);
 				ImGui::Text("Animation:    %.3fms", animTimeMs);
 				ImGui::Text("Audio:        %.3fms", audioTimeMs);
-				ImGui::Text("CPU Render:   %.3fms", renderTimeMs);
 				ImGui::Text("Module upd:   %.3fms", moduleTimeMs);
-				const RenderDevice::Stats& stats = renderer.device().stats;
+				ImGui::Text("CPU Render:   %.3fms", renderTimeMs);
+				if (ImGui::TreeNode("Render times")) {
+					ImGui::Text("Prerender:    %.3fm", stats.times.prerender);
+					ImGui::Text("Upload:       %.3fm", stats.times.upload);
+					ImGui::Text("Shadow:       %.3fm", stats.times.shadow);
+					ImGui::Text("Reflection:   %.3fm", stats.times.reflection);
+					ImGui::Text("Scene:        %.3fm", stats.times.scene);
+					ImGui::Text("Postprocess:  %.3fm", stats.times.postprocess);
+					ImGui::TreePop();
+				}
 				ImGui::Text("Lights:       %d", stats.lights);
 				ImGui::Text("Triangles:    %d", stats.triangles);
 				ImGui::Text("Programs:     %d", stats.programs);
