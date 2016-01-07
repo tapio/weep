@@ -97,6 +97,13 @@ string replace(string str, const string& search, const string& replace)
 	return str;
 }
 
+bool endsWith(const string& str, const string& ending)
+{
+	const int strLen = str.length(), endingLen = ending.length();
+	return strLen >= endingLen &&
+		str.compare(strLen - endingLen, endingLen, ending) == 0;
+}
+
 uint timestamp(const string& path)
 {
 #if defined(_MSC_VER) || defined(__MINGW32__)

@@ -45,6 +45,7 @@ void panic(const char* format, ...);
 
 string readFile(const string& path);
 string replace(string str, const string& search, const string& replace);
+bool endsWith(const string& str, const string& ending);
 uint timestamp(const string& path);
 
 void sleep(uint ms);

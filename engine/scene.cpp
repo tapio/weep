@@ -298,11 +298,21 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 	ASSERT(def.is_object());
 
 	if (def["prefab"].is_string()) {
-		auto prefabIter = prefabs.find(def["prefab"].string_value());
+		const string& prefabName = def["prefab"].string_value();
+		auto prefabIter = prefabs.find(prefabName);
 		if (prefabIter != prefabs.end()) {
 			def = assign(prefabIter->second, def);
+		} else if (endsWith(prefabName, ".json")) {
+				string err;
+				Json extPrefab = Json::parse(resources.getText(prefabName, Resources::NO_CACHE), err);
+				if (!err.empty()) {
+					logError("Failed to parse prefab \"%s\": %s", prefabName.c_str(), err.c_str());
+				} else {
+					def = assign(extPrefab, def);
+					prefabs[prefabName] = extPrefab;
+				}
 		} else {
-			logWarning("Could not find prefab \"%s\"", def["prefab"].string_value().c_str());
+			logError("Could not find prefab \"%s\"", prefabName.c_str());
 		}
 	}
 

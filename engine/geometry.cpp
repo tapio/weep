@@ -19,12 +19,6 @@ namespace {
 		return elems;
 	}
 
-	bool endsWith (const string& str, const string& ending) {
-		const int strLen = str.length(), endingLen = ending.length();
-		return strLen >= endingLen &&
-			str.compare(strLen - endingLen, endingLen, ending) == 0;
-	}
-
 	mat3x4 invert(mat3x4 mat) {
 		mat3 invrot(vec3(mat[0].x, mat[1].x, mat[2].x), vec3(mat[0].y, mat[1].y, mat[2].y), vec3(mat[0].z, mat[1].z, mat[2].z));
 		invrot[0] /= glm::length2(invrot[0]);
