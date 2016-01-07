@@ -122,6 +122,7 @@ RenderDevice::RenderDevice(Resources& resources)
 	m_lightBlock.create();
 	m_cubeShadowBlock.create();
 	m_skinningBlock.create();
+	m_postProcessBlock.create();
 }
 
 void RenderDevice::resizeRenderTargets()
@@ -633,8 +634,7 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 	m_commonBlock.uniforms.viewMatrix = camera.view;
 	m_commonBlock.uniforms.cameraPosition = camera.position;
 	m_commonBlock.uniforms.globalAmbient = m_env->ambient;
-	m_commonBlock.uniforms.exposure = m_env->exposure;
-	m_commonBlock.uniforms.tonemap = m_env->tonemap;
+	m_commonBlock.uniforms.shadowDarkness = m_env->shadowDarkness;
 	m_commonBlock.uniforms.bloomThreshold = m_env->bloomThreshold;
 	m_commonBlock.uniforms.sunPosition = glm::normalize(m_env->sunPosition);
 	m_commonBlock.uniforms.sunColor = m_env->sunColor;
@@ -642,8 +642,6 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 	m_commonBlock.uniforms.fogDensity = m_env->fogDensity;
 	m_commonBlock.uniforms.near = camera.near;
 	m_commonBlock.uniforms.far = camera.far;
-	m_commonBlock.uniforms.vignette = m_env->vignette;
-	m_commonBlock.uniforms.shadowDarkness = m_env->shadowDarkness;
 
 	uint numLights = std::min((int)lights.size(), MAX_LIGHTS);
 	m_commonBlock.uniforms.numLights = numLights;
@@ -825,6 +823,11 @@ void RenderDevice::postRender()
 
 	if (m_wireframe)
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	m_postProcessBlock.uniforms.tonemap = m_env->tonemap;
+	m_postProcessBlock.uniforms.exposure = m_env->exposure;
+	m_postProcessBlock.uniforms.vignette = m_env->vignette;
+	m_postProcessBlock.upload();
 
 	// Resolve MSAA to regular FBO
 	if (m_msaaFbo.valid()) {

@@ -17,12 +17,11 @@ UBO_PREFIX(UniformCommonBlock, 0)
 	mat4 projectionMatrix;
 	mat4 viewMatrix;
 	vec3 cameraPosition; int numLights;
-	vec3 globalAmbient; float exposure;
-	vec3 sunPosition; int tonemap;
+	vec3 globalAmbient; float shadowDarkness;
+	vec3 sunPosition; float pad1;
 	vec3 sunColor; float bloomThreshold;
 	vec3 fogColor; float fogDensity;
-	float near; float far; float pad1; float pad2;
-	vec3 vignette; float shadowDarkness;
+	float near; float far; float pad2;
 };
 
 UBO_PREFIX(UniformObjectBlock, 1)
@@ -59,6 +58,12 @@ UBO_PREFIX(UniformCubeShadowBlock, 4)
 UBO_PREFIX(UniformSkinningBlock, 5)
 	mat3x4 boneMatrices[MAX_BONES];
 };
+
+UBO_PREFIX(UniformPostProcessBlock, 6)
+	int tonemap; float exposure; float padding1; float padding2;
+	vec3 vignette; float padding3;
+};
+
 
 #undef UBO_PREFIX
 

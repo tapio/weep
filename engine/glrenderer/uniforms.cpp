@@ -38,3 +38,4 @@ template struct UBO<UniformMaterialBlock>;
 template struct UBO<UniformLightBlock>;
 template struct UBO<UniformCubeShadowBlock>;
 template struct UBO<UniformSkinningBlock>;
+template struct UBO<UniformPostProcessBlock>;

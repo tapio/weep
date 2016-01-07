@@ -93,6 +93,7 @@ private:
 	UBO<UniformLightBlock> m_lightBlock;
 	UBO<UniformCubeShadowBlock> m_cubeShadowBlock;
 	UBO<UniformSkinningBlock> m_skinningBlock;
+	UBO<UniformPostProcessBlock> m_postProcessBlock;
 	std::vector<ShaderProgram> m_shaders;
 	std::unordered_map<uint, int> m_shaderNames;
 	std::unordered_map<uint, int> m_shaderTags;
