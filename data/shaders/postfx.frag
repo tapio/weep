@@ -11,18 +11,30 @@ layout(binding = 22) uniform sampler2D depthMap;
 
 layout(location = 0) out vec4 fragment;
 
+#define saturate(x) clamp(x, 0.0, 1.0)
+#define gamma(x) pow((x), vec3(1.0 / 2.2));
 
-const float A = 0.15;
-const float B = 0.50;
-const float C = 0.10;
-const float D = 0.20;
-const float E = 0.02;
-const float F = 0.30;
-const float W = 11.2;
-
+// http://filmicgames.com/archives/75
 vec3 Uncharted2Tonemap(vec3 x)
 {
+	const float A = 0.15;
+	const float B = 0.50;
+	const float C = 0.10;
+	const float D = 0.20;
+	const float E = 0.02;
+	const float F = 0.30;
 	return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
+}
+
+// https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
+vec3 ACESFilmicTonemap(vec3 x)
+{
+	const float A = 2.51;
+	const float B = 0.03;
+	const float C = 2.43;
+	const float D = 0.59;
+	const float E = 0.14;
+	return saturate((x*(A*x+B))/(x*(C*x+D)+E));
 }
 
 /*vec4 textureMultisample(sampler2DMS sampler, vec2 uv)
@@ -69,10 +81,10 @@ void main()
 	vec3 result;
 	if (tonemap == 0) { // Reinhard
 		result = hdrColor / (hdrColor + vec3(1.0));
-		result = pow(result, vec3(1.0 / 2.2)); // Gamma
+		result = gamma(result);
 	} else if (tonemap == 1) { // Exposure
 		result = vec3(1.0) - exp(-hdrColor * exposure);
-		result = pow(result, vec3(1.0 / 2.2)); // Gamma
+		result = gamma(result);
 	} else if (tonemap == 2) { // Filmic
 		vec3 x = max(vec3(0.0), hdrColor - vec3(0.004));
 		result = (x * (6.2 * x + 0.5)) / (x * (6.2 * x + 1.7) + 0.06);
@@ -80,9 +92,12 @@ void main()
 	} else if (tonemap == 3) { // Uncharted 2
 		const float exposureBias = 2.0;
 		result = Uncharted2Tonemap(exposureBias * hdrColor);
-		vec3 whiteScale = 1.0 / Uncharted2Tonemap(vec3(W));
+		vec3 whiteScale = 1.0 / Uncharted2Tonemap(vec3(11.2));
 		result *= whiteScale;
-		result = pow(result, vec3(1.0 / 2.2)); // Gamma
+		result = gamma(result);
+	} else if (tonemap == 4) { // ACES
+		result = ACESFilmicTonemap(hdrColor);
+		result = gamma(result);
 	} else {
 		result = vec3(1.0, 0.0, 1.0);
 	}
