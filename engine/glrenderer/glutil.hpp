@@ -14,6 +14,4 @@ uint getTypeSize(GLenum type);
 
 const char* getErrorString(uint error);
 
-GLenum toGL(ShaderType type);
-
 }

@@ -17,20 +17,6 @@ const char* glutil::getErrorString(uint error)
 	return "unknown error";
 }
 
-GLenum glutil::toGL(ShaderType type)
-{
-	switch (type) {
-		case VERTEX_SHADER: return GL_VERTEX_SHADER;
-		case FRAGMENT_SHADER: return GL_FRAGMENT_SHADER;
-		case GEOMETRY_SHADER: return GL_GEOMETRY_SHADER;
-		case TESS_CONTROL_SHADER: return GL_TESS_CONTROL_SHADER;
-		case TESS_EVALUATION_SHADER: return GL_TESS_EVALUATION_SHADER;
-		case COMPUTE_SHADER: return GL_COMPUTE_SHADER;
-	}
-	logError("Invalid ShaderType %d", type);
-	return 0;
-}
-
 uint glutil::getTypeSize(GLenum type)
 {
 	switch (type) {

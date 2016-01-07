@@ -1,9 +1,15 @@
 #include "shader.hpp"
 #include "glutil.hpp"
 
+static const GLenum s_shaderTypes[] = {
+	GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER,
+	GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_COMPUTE_SHADER
+};
+
 static const char* s_shaderTypeNames[] = {
 	"vertex", "fragment", "geometry", "tess control", "tess eval", "compute"
 };
+
 
 ShaderProgram::ShaderProgram(const std::string& debugName)
 	: name(debugName)
@@ -21,7 +27,7 @@ bool ShaderProgram::compile(ShaderType type, const string& text, const std::stri
 	GLsizei lengths[] = { (GLsizei)defines.length(), (GLsizei)text.length() };
 	const GLchar* strings[] = { (const GLchar*)defines.c_str(), (const GLchar*)text.c_str() };
 	uint& shaderId = m_shaderIds[type];
-	shaderId = glCreateShader(glutil::toGL(type));
+	shaderId = glCreateShader(s_shaderTypes[type]);
 	ASSERT(shaderId);
 	glShaderSource(shaderId, 2, strings, lengths);
 	glCompileShader(shaderId);
