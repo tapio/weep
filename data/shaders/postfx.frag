@@ -77,6 +77,23 @@ void main()
 	hdrColor = texture(bloomMap, inData.texcoord).rgb;
 #endif
 
+	// Saturation
+	float luminance = dot(hdrColor, vec3(0.3086, 0.6094, 0.0820));
+	if (saturation > 0.0) {
+		hdrColor.rgb += (luminance - hdrColor.rgb) * (1.0 - 1.0 / (1.001 - saturation));
+	} else {
+		hdrColor.rgb += (luminance - hdrColor.rgb) * (-saturation);
+	}
+
+	// Sepia
+	if (sepia > 0) {
+		vec3 sepiaColor = vec3(
+			dot(hdrColor, vec3(0.393, 0.769, 0.189)),
+			dot(hdrColor, vec3(0.349, 0.686, 0.168)),
+			dot(hdrColor, vec3(0.272, 0.534, 0.131)));
+		hdrColor = mix(hdrColor, sepiaColor, sepia);
+	}
+
 	// Tone mapping & gamma
 	vec3 result;
 	if (tonemap == 0) { // Reinhard

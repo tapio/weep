@@ -60,8 +60,8 @@ UBO_PREFIX(UniformSkinningBlock, 5)
 };
 
 UBO_PREFIX(UniformPostProcessBlock, 6)
-	int tonemap; float exposure; float padding1; float padding2;
-	vec3 vignette; float padding3;
+	int tonemap; float exposure; float saturation; float padding1;
+	vec3 vignette; float sepia;
 };
 
 

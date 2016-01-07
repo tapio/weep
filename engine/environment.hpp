@@ -25,7 +25,10 @@ struct Environment
 	vec3 fogColor = vec3(0.5, 0.5, 0.5);
 	float fogDensity = 0.f;
 
-	vec3 vignette = vec3(0, 1, 1); // TODO: Probably put to some other "PostEffects" class?
+	// TODO: Probably put to some other "PostEffects" class?
+	vec3 vignette = vec3(0, 1, 1);
+	float saturation = 0.f;
+	float sepia = 0.f;
 
 	struct Image* skybox[6] = {};
 };
