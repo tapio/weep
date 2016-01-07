@@ -180,7 +180,6 @@ void RenderDevice::resizeRenderTargets()
 	m_reflectionFbo.depthAttachment = 1;
 	m_reflectionFbo.cube = true;
 	m_reflectionFbo.create();
-	glutil::checkGL("Post framebuffer create");
 }
 
 void RenderDevice::loadShaders()
@@ -398,7 +397,7 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 		logError("Cannot upload empty geometry");
 		return false;
 	}
-	glutil::checkGL("Pre geometry upload");
+
 	for (auto& batch : geometry.batches) {
 		ASSERT(batch.renderId == -1);
 		batch.renderId = m_geometries.size();
@@ -428,7 +427,7 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, batch.indices.size() * sizeof(uint), &batch.indices.front(), GL_STATIC_DRAW);
 		}
 	}
-	glutil::checkGL("Post geometry upload");
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	return true;
@@ -613,7 +612,6 @@ void RenderDevice::renderShadow(Model& model, Transform& transform, Animation* a
 		drawBatch(batch);
 	}
 	glBindVertexArray(0);
-	glutil::checkGL("Post shadow draw");
 }
 
 void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light>& lights, Technique tech)
@@ -710,7 +708,6 @@ void RenderDevice::render(Model& model, Transform& transform, Animation* animati
 		drawBatch(batch, m_tech == TECH_COLOR && (mat.flags & Material::TESSELLATE));
 	}
 	glBindVertexArray(0);
-	glutil::checkGL("Post draw");
 }
 
 
@@ -880,5 +877,4 @@ void RenderDevice::postRender()
 	renderFullscreenQuad();
 
 	glUseProgram(0);
-	glutil::checkGL("Post render");
 }

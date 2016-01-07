@@ -1,13 +1,5 @@
 #include "glutil.hpp"
-#include <GL/glcorearb.h>
 
-
-int glutil::getInt(GLenum pname)
-{
-	GLint value;
-	glGetIntegerv(pname, &value);
-	return value;
-}
 
 const char* glutil::getErrorString(uint error)
 {
@@ -23,21 +15,6 @@ const char* glutil::getErrorString(uint error)
 	}
 	logError("Unknown OpenGL error %u", error);
 	return "unknown error";
-}
-
-bool glutil::checkGL(const char* format, ...)
-{
-	return true; // Disabled, debug callback is better
-	/*GLenum error = glGetError();
-	if (error == GL_NO_ERROR)
-		return true;
-
-	va_list vl;
-	va_start(vl, format);
-	string message = vlformat(format, vl);
-	va_end(vl);
-	logError("%s: %s", message.c_str(), getErrorString(error));
-	return false;*/
 }
 
 GLenum glutil::toGL(ShaderType type)
