@@ -36,12 +36,6 @@ void init(Game& game, SceneLoader& scene, const string& scenePath)
 	if (cameraEnt.has<btRigidBody>())
 		cameraEnt.get<Controller>().body = &cameraEnt.get<btRigidBody>();
 	game.entities.get_system<ModuleSystem>().call($id(INIT), &game);
-	// Temp test
-	if (game.entities.has_tagged_entity("animtest")) {
-		Entity e = game.entities.get_entity_by_tag("animtest");
-		e.add<Animation>();
-		game.entities.get_system<AnimationSystem>().play(e);
-	}
 }
 
 void reloadShaders(Game& game)

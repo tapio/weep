@@ -70,5 +70,6 @@ void AnimationSystem::stop(Entity e)
 	Animation& anim = e.get<Animation>();
 	anim.state = Animation::STOPPED;
 	anim.time = 0.f;
-	anim.bones = e.get<Model>().geometry->bones;
+	anim.bones.clear();
+	anim.bones.assign(e.get<Model>().geometry->bones.size(), mat3x4(1));
 }

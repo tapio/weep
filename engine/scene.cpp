@@ -6,6 +6,7 @@
 #include "engine.hpp"
 #include "physics.hpp"
 #include "audio.hpp"
+#include "animation.hpp"
 #include "camera.hpp"
 #include "components.hpp"
 #include "environment.hpp"
@@ -438,6 +439,17 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 			body.setFlags(body.getFlags() | BT_DISABLE_WORLD_GRAVITY);
 		if (world->has_system<PhysicsSystem>())
 			world->get_system<PhysicsSystem>().add(entity);
+	}
+
+	if (!def["animation"].is_null()) {
+		ASSERT(entity.has<Model>());
+		const Json& animDef = def["animation"];
+		Animation anim;
+		setNumber(anim.speed, animDef["speed"]);
+		entity.add(anim);
+		if (animDef["play"].is_bool() && animDef["play"].bool_value())
+			world->get_system<AnimationSystem>().play(entity);
+		else world->get_system<AnimationSystem>().stop(entity);
 	}
 
 	if (def["trackGround"].bool_value()) {
