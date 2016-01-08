@@ -17,7 +17,7 @@ public:
 		m_center = camera.position + dir * m_radius;
 	}
 
-	bool visible(const Transform& transform, const Model& model) {
+	bool visible(const Transform& transform, const Model& model) const {
 		float maxDist = model.bounds.radius + m_radius;
 		return glm::distance2(m_center, transform.position) < maxDist * maxDist;
 	}
