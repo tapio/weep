@@ -54,7 +54,10 @@ public:
 
 	template<class F>
 	void enqueue(F task) {
-		{
+		if (m_threads.empty()) {
+			task();
+			return;
+		} else {
 			std::unique_lock<std::mutex> lock(m_mutex);
 			m_tasks.emplace(task);
 			++m_count;
