@@ -67,8 +67,7 @@ constexpr std::size_t countof(T const (&)[N]) noexcept { return N; }
 
 // TODO: Dummy versions for non-debug build
 #define START_MEASURE(var_name) \
-	float var_name = 0.f; { uint64 _t0_##var_name = SDL_GetPerformanceCounter();
+	float var_name = 0.f; uint64 _t0_##var_name = SDL_GetPerformanceCounter();
 #define END_MEASURE(var_name) \
-	uint64 _t1_##var_name = SDL_GetPerformanceCounter(); \
-	var_name = (_t1_##var_name - _t0_##var_name) / (double)SDL_GetPerformanceFrequency() * 1000.0; }
+	var_name = (SDL_GetPerformanceCounter() - _t0_##var_name) / (double)SDL_GetPerformanceFrequency() * 1000.0;
 
