@@ -99,6 +99,8 @@ void Engine::deinit()
 void Engine::swap()
 {
 	SDL_GL_SwapWindow(window);
+	if (m_threadpool.size() != threads)
+		m_threadpool.resize(threads);
 	Uint64 curTime = SDL_GetPerformanceCounter();
 	dt = (curTime - m_prevTime) / (float)SDL_GetPerformanceFrequency();
 	m_prevTime = curTime;

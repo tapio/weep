@@ -1,5 +1,6 @@
 #pragma once
 #include "common.hpp"
+#include "threadpool.hpp"
 
 class Engine
 {
@@ -27,6 +28,12 @@ public:
 	float dt = 0.f;
 	struct SDL_Window* window = nullptr;
 
+	uint threads = 0;
+	static thread_pool& threadpool() {
+		ASSERT(s_singleton);
+		return s_singleton->m_threadpool;
+	}
+
 	static Json settings;
 
 private:
@@ -35,4 +42,5 @@ private:
 	int m_height = 0;
 	uint64 m_prevTime = 0;
 	void* m_glcontext = nullptr;
+	thread_pool m_threadpool = {threads};
 };

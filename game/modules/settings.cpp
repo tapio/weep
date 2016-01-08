@@ -43,6 +43,8 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			if (volume != oldVolume)
 				audio.soloud->setGlobalVolume(volume);
 
+			ImGui::SliderInt("Threads", (int*)&game.engine.threads, 0, 8);
+
 			int oldMsaa = Engine::settings["renderer"]["msaa"].number_value();
 			float msaa = log2(oldMsaa);
 			ImGui::SliderFloat("MSAA", &msaa, 0.f, 3.f, "%.0f");
