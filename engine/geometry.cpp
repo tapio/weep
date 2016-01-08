@@ -210,7 +210,7 @@ bool Geometry::loadObj(const string& path)
 }
 
 template<class vector_t, class T = typename vector_t::value_type>
-static bool iqmAssign(vector_t& dst, uint8* data, uint wantedFormat, uint wantedSize, uint numVerts, iqmvertexarray& va)
+static bool iqmAssign(vector_t& dst, uint8* data, uint wantedFormat, uint wantedSize, iqmvertexarray& va, iqmmesh& mesh)
 {
 	if (va.format != wantedFormat || va.size != wantedSize) {
 		logWarning("Unsupported iqm vertex array type");
@@ -218,9 +218,10 @@ static bool iqmAssign(vector_t& dst, uint8* data, uint wantedFormat, uint wanted
 	}
 	ASSERT(wantedFormat == IQM_UBYTE || wantedFormat == IQM_FLOAT);
 	uint compSize = wantedFormat == IQM_UBYTE ? sizeof(uint8) : sizeof(float);
-	uint start = va.offset;
-	uint end = start + va.size * compSize * numVerts;
+	uint start = va.offset + va.size * compSize * mesh.first_vertex;
+	uint end = start + va.size * compSize * mesh.num_vertexes;
 	dst.assign((T*)&data[start], (T*)&data[end]);
+	ASSERT(dst.size() == mesh.num_vertexes);
 	return true;
 }
 
@@ -276,24 +277,23 @@ bool Geometry::loadIqm(const string& path)
 		// Fix triangle winding
 		for (uint i = 0; i < mesh.num_triangles; ++i)
 			std::swap(batch.indices[i*3], batch.indices[i*3+2]);
-		// TODO: Vertices are duplicated to all batches!
 		for (uint i = 0; i < header.num_vertexarrays; ++i) {
 			iqmvertexarray &va = vas[i];
 			switch (va.type) {
 				case IQM_POSITION:
-					iqmAssign(batch.positions, &data[0], IQM_FLOAT, 3, header.num_vertexes, va);
+					iqmAssign(batch.positions, &data[0], IQM_FLOAT, 3, va, mesh);
 					break;
 				case IQM_TEXCOORD:
-					iqmAssign(batch.texcoords, &data[0], IQM_FLOAT, 2, header.num_vertexes, va);
+					iqmAssign(batch.texcoords, &data[0], IQM_FLOAT, 2, va, mesh);
 					break;
 				case IQM_NORMAL:
-					iqmAssign(batch.normals, &data[0], IQM_FLOAT, 3, header.num_vertexes, va);
+					iqmAssign(batch.normals, &data[0], IQM_FLOAT, 3, va, mesh);
 					break;
 				case IQM_BLENDINDEXES:
-					iqmAssign(batch.boneindices, &data[0], IQM_UBYTE, 4, header.num_vertexes, va);
+					iqmAssign(batch.boneindices, &data[0], IQM_UBYTE, 4, va, mesh);
 					break;
 				case IQM_BLENDWEIGHTS:
-					iqmAssign(batch.boneweights, &data[0], IQM_UBYTE, 4, header.num_vertexes, va);
+					iqmAssign(batch.boneweights, &data[0], IQM_UBYTE, 4, va, mesh);
 					break;
 			}
 		}
