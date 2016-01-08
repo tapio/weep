@@ -198,6 +198,7 @@ int main(int argc, char* argv[])
 		renderer.render(game.entities, camera);
 		END_MEASURE(renderTimeMs)
 
+		static bool imguiMetrics = false;
 		if (devtools && ImGui::Begin("Debug")) {
 			ImGui::Text("Right mouse button to toggle mouse grab.");
 			ImGui::Text("FPS: %d (%.3fms)", int(1.0 / game.engine.dt), game.engine.dt * 1000.f);
@@ -221,6 +222,7 @@ int main(int argc, char* argv[])
 				ImGui::Text("Triangles:    %d", stats.triangles);
 				ImGui::Text("Programs:     %d", stats.programs);
 				ImGui::Text("Draw calls:   %d", stats.drawCalls);
+				ImGui::Checkbox("ImGui Metrics", &imguiMetrics);
 			}
 			if (ImGui::CollapsingHeader("Camera")) {
 				ImGui::Text("Position: %.1f %.1f %.1f", camera.position.x, camera.position.y, camera.position.z);
@@ -329,9 +331,10 @@ int main(int argc, char* argv[])
 		}
 		if (devtools)
 			ImGui::End();
+		if (imguiMetrics)
+			ImGui::ShowMetricsWindow();
 		//ImGui::ShowTestWindow();
 		//ImGui::ShowStyleEditor();
-		//ImGui::ShowMetricsWindow();
 
 		ImGui::Render();
 
