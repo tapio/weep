@@ -36,7 +36,7 @@ UBO_PREFIX(UniformMaterialBlock, 2)
 	vec3 ambient; float pad1;
 	vec3 diffuse; float reflectivity;
 	vec3 specular; float shininess;
-	vec3 emissive; float pad3;
+	vec3 emissive; float parallax;
 	vec2 uvOffset; vec2 uvRepeat;
 UBO_SUFFIX(material)
 

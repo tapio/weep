@@ -113,6 +113,7 @@
 		"material": {
 			"shaderName": "parallax",
 			"heightMap": "debug/uvtestgrid_height.png",
+			"parallax": 0.1,
 			"ambient": 0.02
 		},
 		"position": [ -3, 0, -14 ],

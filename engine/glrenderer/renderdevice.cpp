@@ -452,7 +452,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 		tag |= USE_NORMAL_MAP;
 	if (material.map[Material::SPECULAR_MAP])
 		tag |= USE_SPECULAR_MAP | USE_SPECULAR;
-	if (material.map[Material::HEIGHT_MAP])
+	if (material.map[Material::HEIGHT_MAP] && material.parallax > 0.f)
 		tag |= USE_PARALLAX_MAP;
 	if (material.map[Material::EMISSION_MAP])
 		tag |= USE_EMISSION_MAP;
@@ -481,7 +481,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 	// Other techs are always auto generated
 	{
 		// Simpler reflection shader
-		tag &= ~(USE_SHADOW_MAP | USE_AO_MAP | USE_REFLECTION_MAP | USE_ENV_MAP | USE_TESSELLATION);
+		tag &= ~(USE_SHADOW_MAP | USE_AO_MAP | USE_REFLECTION_MAP | USE_PARALLAX_MAP | USE_ENV_MAP | USE_TESSELLATION);
 		material.shaderId[TECH_REFLECTION] = generateShader(tag | USE_CUBE_RENDER);
 		ASSERT(material.shaderId[TECH_REFLECTION] >= 0 && "Reflection shader generating failed");
 		// Depth
@@ -693,6 +693,7 @@ void RenderDevice::render(Model& model, Transform& transform, Animation* animati
 		m_materialBlock.uniforms.specular = mat.specular;
 		m_materialBlock.uniforms.shininess = mat.shininess;
 		m_materialBlock.uniforms.reflectivity = mat.reflectivity;
+		m_materialBlock.uniforms.parallax = mat.parallax;
 		m_materialBlock.uniforms.emissive = mat.emissive;
 		m_materialBlock.uniforms.uvOffset = mat.uvOffset;
 		m_materialBlock.uniforms.uvRepeat = mat.uvRepeat;

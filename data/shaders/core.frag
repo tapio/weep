@@ -43,7 +43,7 @@ vec3 perturb_normal(mat3 TBN, vec2 texcoord)
 #ifdef USE_PARALLAX_MAP
 vec2 parallax_mapping(vec2 texcoord, vec3 viewDir)
 {
-	const float heightScale = 0.2; // TODO: Uniform
+	const float heightScale = material.parallax;
 	// number of depth layers
 	const float minLayers = 8;
 	const float maxLayers = 32;

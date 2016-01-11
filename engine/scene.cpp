@@ -94,6 +94,7 @@ namespace {
 		setColor(material->emissive, def["emissive"]);
 		setNumber(material->shininess, def["shininess"]);
 		setNumber(material->reflectivity, def["reflectivity"]);
+		setNumber(material->parallax, def["parallax"]);
 
 		if (!def["uvOffset"].is_null())
 			material->uvOffset = toVec2(def["uvOffset"]);
