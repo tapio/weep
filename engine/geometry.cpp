@@ -293,6 +293,9 @@ bool Geometry::loadIqm(const string& path)
 				case IQM_NORMAL:
 					iqmAssign(batch.normals, &data[0], IQM_FLOAT, 3, va, mesh);
 					break;
+				case IQM_TANGENT:
+					iqmAssign(batch.tangents, &data[0], IQM_FLOAT, 3, va, mesh);
+					break;
 				case IQM_BLENDINDEXES:
 					iqmAssign(batch.boneindices, &data[0], IQM_UBYTE, 4, va, mesh);
 					break;
@@ -422,6 +425,53 @@ void Geometry::calculateNormals()
 	}
 }
 
+void Geometry::calculateTangents()
+{
+	for (auto& batch : batches) {
+		auto& indices = batch.indices;
+		auto& positions = batch.positions;
+		auto& texcoords = batch.texcoords;
+		auto& normals = batch.normals;
+		auto& tangents = batch.tangents;
+		// Indexed elements
+		if (!indices.empty()) {
+			// Reset existing tangents
+			//tangents.clear();
+			//tangents.resize(positions.size());
+			ASSERT(!"Indexed tangents not implemented");
+		// Non-indexed elements
+		} else {
+			std::vector<vec3> bitangents;
+			bitangents.resize(positions.size());
+			tangents.resize(positions.size());
+			for (uint i = 0, len = positions.size(); i < len; i += 3) {
+				// Edges of the triangle : postion delta
+				vec3 deltaPos1 = positions[i+1] - positions[i];
+				vec3 deltaPos2 = positions[i+2] - positions[i];
+
+				// UV delta
+				vec2 deltaUV1 = texcoords[i+1] - texcoords[i];
+				vec2 deltaUV2 = texcoords[i+2] - texcoords[i];
+
+				float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+				vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+				vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+
+				for (int j = 0; j < 3; ++j) {
+					vec3 n = normals[i+j];
+					// Gram-Schmidt orthogonalize
+					vec3 t = glm::normalize(tangent - n * glm::dot(n, tangent));
+					// Calculate handedness
+					if (glm::dot(glm::cross(n, t), bitangent) < 0.0f)
+						t = t * -1.0f;
+					tangents[i+j] = t;
+				}
+			}
+		}
+	}
+
+}
+
 void Geometry::normalizeNormals()
 {
 	for (auto& batch : batches)
@@ -529,6 +579,14 @@ void Batch::setupAttributes()
 		attr.offset = offset;
 		offset += sizeof(normals[0]);
 		dataArrays[ATTR_NORMAL] = (char*)&normals[0];
+	}
+	if (!tangents.empty()) {
+		Attribute& attr = attributes[ATTR_TANGENT];
+		attr.components = 3;
+		attr.type = GL_FLOAT;
+		attr.offset = offset;
+		offset += sizeof(tangents[0]);
+		dataArrays[ATTR_TANGENT] = (char*)&tangents[0];
 	}
 	if (!boneindices.empty()) {
 		Attribute& attr = attributes[ATTR_BONE_INDEX];

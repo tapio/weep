@@ -2,7 +2,12 @@
 layout(location = ATTR_POSITION) in vec3 position;
 layout(location = ATTR_TEXCOORD) in vec2 texcoord;
 layout(location = ATTR_NORMAL) in vec3 normal;
+#ifdef USE_TANGENTS
+layout(location = ATTR_TANGENT) in vec3 tangent;
+#endif
+#ifdef USE_VERTEX_COLOR
 layout(location = ATTR_COLOR) in vec4 color;
+#endif
 #ifdef USE_SKINNING
 layout(location = ATTR_BONE_INDEX) in vec4 boneIndices;
 layout(location = ATTR_BONE_WEIGHT) in vec4 boneWeights;

@@ -96,11 +96,18 @@ UBO_PREFIX(UniformPostProcessBlock, 6)
 #define SHADOW_VARYINGS
 #endif
 
+#ifdef USE_TANGENTS
+#define TANGENT_VARYINGS vec3 tangent;
+#else
+#define TANGENT_VARYINGS
+#endif
+
 #define VERTEX_DATA(inout, name) \
 	inout VertexData { \
 		vec3 position; \
 		vec2 texcoord; \
 		vec3 normal; \
+		TANGENT_VARYINGS \
 		SHADOW_VARYINGS \
 	} name;
 

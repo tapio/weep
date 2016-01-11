@@ -36,6 +36,7 @@ struct Batch
 	std::vector<vec2> positions2d;
 	std::vector<vec2> texcoords;
 	std::vector<vec3> normals;
+	std::vector<vec3> tangents;
 	std::vector<u8vec4> boneindices;
 	std::vector<u8vec4> boneweights;
 	std::vector<uint> indices;
@@ -56,6 +57,7 @@ struct Geometry
 	void calculateBoundingSphere();
 	void calculateBoundingBox();
 	void calculateNormals();
+	void calculateTangents();
 	void normalizeNormals();
 	void applyMatrix(mat4 transform);
 	void generateCollisionTriMesh(bool deduplicateVertices = true);
