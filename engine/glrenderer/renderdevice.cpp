@@ -634,6 +634,7 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 	m_commonBlock.uniforms.globalAmbient = m_env->ambient;
 	m_commonBlock.uniforms.shadowDarkness = m_env->shadowDarkness;
 	m_commonBlock.uniforms.bloomThreshold = m_env->bloomThreshold;
+	m_commonBlock.uniforms.skyType = m_env->skyType;
 	m_commonBlock.uniforms.sunPosition = glm::normalize(m_env->sunPosition);
 	m_commonBlock.uniforms.sunColor = m_env->sunColor;
 	m_commonBlock.uniforms.fogColor = m_env->fogColor;

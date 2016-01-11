@@ -246,6 +246,7 @@ int main(int argc, char* argv[])
 				ImGui::SliderFloat3("Sun Pos", (float*)&env.sunPosition, -15.f, 15.f);
 				ImGui::ColorEdit3("Fog Color", (float*)&env.fogColor);
 				ImGui::SliderFloat("Fog Density", &env.fogDensity, 0.0f, 1.0f);
+				ImGui::SliderInt("Sky Type", (int*)&env.skyType, 0, Environment::SKY_COUNT-1);
 				ImGui::SliderFloat3("Vignette", (float*)&env.vignette, 0.0f, 1.0f);
 				ImGui::SliderFloat("Sepia", &env.sepia, 0.0f, 1.0f);
 				ImGui::SliderFloat("Saturation", &env.saturation, -1.0f, 1.0f);

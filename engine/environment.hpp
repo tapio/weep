@@ -19,6 +19,12 @@ struct Environment
 		TONEMAP_COUNT
 	} tonemap = TONEMAP_REINHARD;
 
+	enum SkyType {
+		SKY_SKYBOX,
+		SKY_PROCEDURAL,
+		SKY_COUNT
+	} skyType = SKY_PROCEDURAL;
+
 	vec3 sunPosition = vec3(0, 1, 0);
 	vec3 sunColor = vec3(0, 0, 0);
 

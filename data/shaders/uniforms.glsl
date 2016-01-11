@@ -18,7 +18,7 @@ UBO_PREFIX(UniformCommonBlock, 0)
 	mat4 viewMatrix;
 	vec3 cameraPosition; int numLights;
 	vec3 globalAmbient; float shadowDarkness;
-	vec3 sunPosition; float pad1;
+	vec3 sunPosition; int skyType;
 	vec3 sunColor; float bloomThreshold;
 	vec3 fogColor; float fogDensity;
 	float near; float far; float pad2;

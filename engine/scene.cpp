@@ -157,6 +157,7 @@ namespace {
 		Environment env;
 		ASSERT(def.is_object());
 		if (def["skybox"].is_string()) {
+			env.skyType = Environment::SKY_SKYBOX;
 			const string& skyboxPath = def["skybox"].string_value();
 			if (skyboxPath.back() == '/' || skyboxPath.back() == '\\') {
 				env.skybox[0] = resources.getImage(skyboxPath + "px.jpg");
@@ -170,6 +171,7 @@ namespace {
 					env.skybox[i] = resources.getImage(skyboxPath);
 			}
 		} else if (def["skybox"].is_array()) {
+			env.skyType = Environment::SKY_SKYBOX;
 			for (int i = 0; i < 6; i++)
 				env.skybox[i] = resources.getImage(def["skybox"][i].string_value());
 		}
