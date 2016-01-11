@@ -4,10 +4,12 @@
 
 struct Image;
 
+// Remember to modify uniforms.glsl layout to match
 enum GeometryAttributeIndex {
 	ATTR_POSITION = 0,
 	ATTR_TEXCOORD,
 	ATTR_NORMAL,
+	ATTR_TANGENT,
 	ATTR_COLOR,
 	ATTR_BONE_INDEX,
 	ATTR_BONE_WEIGHT,

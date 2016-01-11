@@ -1,11 +1,11 @@
 
-layout(location = 0) in vec3 position;
-layout(location = 1) in vec2 texcoord;
-layout(location = 2) in vec3 normal;
-layout(location = 3) in vec4 color;
+layout(location = ATTR_POSITION) in vec3 position;
+layout(location = ATTR_TEXCOORD) in vec2 texcoord;
+layout(location = ATTR_NORMAL) in vec3 normal;
+layout(location = ATTR_COLOR) in vec4 color;
 #ifdef USE_SKINNING
-layout(location = 4) in vec4 boneIndices;
-layout(location = 5) in vec4 boneWeights;
+layout(location = ATTR_BONE_INDEX) in vec4 boneIndices;
+layout(location = ATTR_BONE_WEIGHT) in vec4 boneWeights;
 #endif
 
 VERTEX_DATA(out, outData);

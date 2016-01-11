@@ -1,5 +1,5 @@
 
-layout (location = 0) in vec3 position;
+layout (location = ATTR_POSITION) in vec3 position;
 
 out VertexData {
 	vec3 texcoord;

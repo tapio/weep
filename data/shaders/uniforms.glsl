@@ -82,6 +82,14 @@ UBO_PREFIX(UniformPostProcessBlock, 6)
 
 #ifndef __cplusplus
 
+#define ATTR_POSITION 0
+#define ATTR_TEXCOORD 1
+#define ATTR_NORMAL 2
+#define ATTR_TANGENT 3
+#define ATTR_COLOR 4
+#define ATTR_BONE_INDEX 5
+#define ATTR_BONE_WEIGHT 6
+
 #ifdef USE_SHADOW_MAP
 #define SHADOW_VARYINGS vec4 shadowcoord; vec3 worldPosition;
 #else
