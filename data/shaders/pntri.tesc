@@ -19,6 +19,9 @@ void main()
 	outp[ID].shadowcoord = inp[ID].shadowcoord;
 	outp[ID].worldPosition = inp[ID].worldPosition;
 #endif
+#ifdef USE_VERTEX_COLOR
+	outp[ID].color = inp[ID].color;
+#endif
 
 	// Calculate curvature factors for each edge
 	// Uses the angles between the corner normals of the patch

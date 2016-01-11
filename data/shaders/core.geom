@@ -13,6 +13,9 @@ void main()
 			outData.position = inData[i].position;
 			outData.texcoord = inData[i].texcoord;
 			outData.normal = inData[i].normal;
+#ifdef USE_VERTEX_COLOR
+			outData.color = inData[i].color;
+#endif
 
 			gl_Position = cubeMatrices[face] * gl_in[i].gl_Position;
 			EmitVertex();

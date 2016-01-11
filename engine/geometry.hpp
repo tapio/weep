@@ -39,6 +39,7 @@ struct Batch
 	std::vector<vec3> tangents;
 	std::vector<u8vec4> boneindices;
 	std::vector<u8vec4> boneweights;
+	std::vector<u8vec4> colors;
 	std::vector<uint> indices;
 	std::vector<char> vertexData;
 	uint materialIndex = 0;

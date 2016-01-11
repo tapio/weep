@@ -2,7 +2,7 @@
 layout(location = ATTR_POSITION) in vec3 position;
 layout(location = ATTR_TEXCOORD) in vec2 texcoord;
 layout(location = ATTR_NORMAL) in vec3 normal;
-#ifdef USE_TANGENTS
+#ifdef USE_TANGENT
 layout(location = ATTR_TANGENT) in vec3 tangent;
 #endif
 #ifdef USE_VERTEX_COLOR
@@ -36,6 +36,12 @@ void main()
 	outData.normal = mat3(normalMatrix) * n;
 	outData.position = (modelViewMatrix * pos).xyz;
 	outData.texcoord = texcoord * material.uvRepeat + material.uvOffset;
+#ifdef USE_TANGENT
+	outData.tangent = tangent; // TODO
+#endif
+#ifdef USE_VERTEX_COLOR
+	outData.color = color;
+#endif
 #ifdef USE_SHADOW_MAP
 	outData.worldPosition = (modelMatrix * pos).xyz;
 	outData.shadowcoord = shadowMatrix * pos;

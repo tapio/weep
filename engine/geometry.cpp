@@ -302,6 +302,9 @@ bool Geometry::loadIqm(const string& path)
 				case IQM_BLENDWEIGHTS:
 					iqmAssign(batch.boneweights, &data[0], IQM_UBYTE, 4, va, mesh);
 					break;
+				case IQM_COLOR:
+					iqmAssign(batch.colors, &data[0], IQM_UBYTE, 4, va, mesh);
+					break;
 			}
 		}
 	}

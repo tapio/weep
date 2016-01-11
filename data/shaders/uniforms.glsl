@@ -96,10 +96,16 @@ UBO_PREFIX(UniformPostProcessBlock, 6)
 #define SHADOW_VARYINGS
 #endif
 
-#ifdef USE_TANGENTS
+#ifdef USE_TANGENT
 #define TANGENT_VARYINGS vec3 tangent;
 #else
 #define TANGENT_VARYINGS
+#endif
+
+#ifdef USE_VERTEX_COLOR
+#define VERTEX_COLOR_VARYINGS vec4 color;
+#else
+#define VERTEX_COLOR_VARYINGS
 #endif
 
 #define VERTEX_DATA(inout, name) \
@@ -108,6 +114,7 @@ UBO_PREFIX(UniformPostProcessBlock, 6)
 		vec2 texcoord; \
 		vec3 normal; \
 		TANGENT_VARYINGS \
+		VERTEX_COLOR_VARYINGS \
 		SHADOW_VARYINGS \
 	} name;
 

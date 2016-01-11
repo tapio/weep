@@ -58,7 +58,9 @@ enum ShaderFeature {
 	USE_DEPTH = 1 << 16,
 	USE_DEPTH_CUBE = 1 << 17,
 	USE_CUBE_RENDER = 1 << 18,
-	NUM_SHADER_FEATURES = 19
+	USE_TANGENT = 1 << 19,
+	USE_VERTEX_COLOR = 1 << 20,
+	NUM_SHADER_FEATURES = 21
 };
 
 RenderDevice::RenderDevice(Resources& resources)
@@ -294,6 +296,8 @@ int RenderDevice::generateShader(uint tags)
 	HANDLE_FEATURE(USE_DEPTH)
 	HANDLE_FEATURE(USE_DEPTH_CUBE)
 	HANDLE_FEATURE(USE_CUBE_RENDER)
+	HANDLE_FEATURE(USE_TANGENT)
+	HANDLE_FEATURE(USE_VERTEX_COLOR)
 #undef HANDLE_FEATURE
 
 	defineText += m_resources.getText("shaders/uniforms.glsl", Resources::USE_CACHE);

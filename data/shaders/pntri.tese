@@ -45,6 +45,13 @@ void main()
 	outp.worldPosition = wp0 + wp1 + wp2;
 #endif
 
+#ifdef USE_VERTEX_COLOR
+	vec3 c0 = tc.x * inp[0].color;
+	vec3 c1 = tc.y * inp[1].color;
+	vec3 c2 = tc.z * inp[2].color;
+	outp.color = normalize(c0 + c1 + c2);
+#endif
+
 	// Calculate distance to each edge
 	float d0 = tc.y * tc.z;
 	float d1 = tc.x * tc.z;

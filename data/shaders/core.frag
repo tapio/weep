@@ -343,6 +343,11 @@ void main()
 	fragment = vec4(ambientComp + diffuseComp + specularComp + emissionComp, alpha);
 #endif
 
+#ifdef USE_VERTEX_COLOR
+	// May be useful with e.g. baking AO to vertex color, but needs different modes
+	fragment *= input.color;
+#endif
+
 #ifdef USE_FOG
 	// http://iquilezles.org/www/articles/fog/fog.htm
 	float depth = gl_FragCoord.z / gl_FragCoord.w;
