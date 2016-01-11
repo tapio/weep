@@ -41,6 +41,8 @@ vec3 perturb_normal(mat3 TBN, vec2 texcoord)
 #endif
 
 #ifdef USE_PARALLAX_MAP
+// http://learnopengl.com/#!Advanced-Lighting/Parallax-Mapping
+// http://sunandblackcat.com/tipFullView.php?topicid=28
 vec2 parallax_mapping(vec2 texcoord, vec3 viewDir)
 {
 	const float heightScale = material.parallax;
@@ -122,6 +124,8 @@ float random(vec3 seed, int i) {
 	return fract(sin(dot_product) * 43758.5453);
 }
 
+// http://learnopengl.com/#!Advanced-Lighting/Shadows/Shadow-Mapping
+// http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
 float shadow_mapping()
 {
 	vec4 pos = input.shadowcoord;
@@ -155,6 +159,8 @@ float shadow_mapping()
 #endif
 }
 
+// http://learnopengl.com/#!Advanced-Lighting/Shadows/Point-Shadows
+// http://www.sunandblackcat.com/tipFullView.php?topicid=36
 float shadow_mapping_cube(in int lightIndex, in int shadowIndex)
 {
 	vec3 fragToLight = input.worldPosition - lights[lightIndex].position;
