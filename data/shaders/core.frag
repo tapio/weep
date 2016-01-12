@@ -47,7 +47,7 @@ vec2 parallax_mapping(vec2 texcoord, vec3 viewDir)
 {
 	const float heightScale = material.parallax;
 	// number of depth layers
-	const float minLayers = 8;
+	const float minLayers = 12;
 	const float maxLayers = 32;
 	float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));
 	// calculate the size of each layer
@@ -208,7 +208,7 @@ void main()
 #endif
 
 #ifdef USE_PARALLAX_MAP
-	vec3 tangentViewDir = normalize(TBN * viewDir);
+	vec3 tangentViewDir = normalize(transpose(TBN) * viewDir);
 	texcoord = parallax_mapping(texcoord, tangentViewDir);
 	//if (texcoord.x > 1.0 || texcoord.y > 1.0 || texcoord.x < 0.0 || texcoord.y < 0.0)
 	//	discard;
