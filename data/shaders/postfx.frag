@@ -93,12 +93,13 @@ void main()
 	}
 
 	// Tone mapping & gamma
+	hdrColor *= exposure;
 	vec3 result;
 	if (tonemap == 0) { // Reinhard
 		result = hdrColor / (hdrColor + vec3(1.0));
 		result = gamma(result);
 	} else if (tonemap == 1) { // Exposure
-		result = vec3(1.0) - exp(-hdrColor * exposure);
+		result = vec3(1.0) - exp(-hdrColor);
 		result = gamma(result);
 	} else if (tonemap == 2) { // Filmic
 		vec3 x = max(vec3(0.0), hdrColor - vec3(0.004));
