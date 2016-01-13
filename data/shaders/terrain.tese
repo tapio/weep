@@ -1,8 +1,8 @@
 
 layout(triangles, equal_spacing, ccw) in;
 
-VERTEX_DATA(in, inp[]);
-VERTEX_DATA(out, outp);
+VERTEX_DATA(in, inData[]);
+VERTEX_DATA(out, outData);
 
 vec2 interp2(vec2 a, vec2 b, vec2 c) {
 	return gl_TessCoord.x * a + gl_TessCoord.y * b + gl_TessCoord.z * c;
@@ -20,22 +20,22 @@ vec4 interp4(vec4 a, vec4 b, vec4 c) {
 
 void main()
 {
-	vec3 position = interp3(inp[0].position, inp[1].position, inp[2].position);
-	outp.texcoord = interp2(inp[0].texcoord, inp[1].texcoord, inp[2].texcoord);
-	outp.normal = normalize(interp3(inp[0].normal, inp[1].normal, inp[2].normal));
+	vec3 position = interp3(inData[0].position, inData[1].position, inData[2].position);
+	outData.texcoord = interp2(inData[0].texcoord, inData[1].texcoord, inData[2].texcoord);
+	outData.normal = normalize(interp3(inData[0].normal, inData[1].normal, inData[2].normal));
 #ifdef USE_SHADOW_MAP
-	outp.shadowcoord = interp4(inp[0].shadowcoord, inp[1].shadowcoord, inp[2].shadowcoord);
-	outp.worldPosition = interp3(inp[0].worldPosition, inp[1].worldPosition, inp[2].worldPosition);
+	outData.shadowcoord = interp4(inData[0].shadowcoord, inData[1].shadowcoord, inData[2].shadowcoord);
+	outData.worldPosition = interp3(inData[0].worldPosition, inData[1].worldPosition, inData[2].worldPosition);
 #endif
 #ifdef USE_VERTEX_COLOR
-	outp.color = interp4(inp[0].color, inp[1].color, inp[2].color);
+	outData.color = interp4(inData[0].color, inData[1].color, inData[2].color);
 #endif
 
 	// Displace
-	float height = texture(heightMap, outp.texcoord).r;
+	float height = texture(heightMap, outData.texcoord).r;
 	position.y += height;
 
-	outp.position = position;
+	outData.position = position;
 
 	// Project
 	gl_Position = projectionMatrix * vec4(position, 1.0);

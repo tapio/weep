@@ -1,27 +1,27 @@
 
 layout(vertices = 3) out;
 
-VERTEX_DATA(in, inp[]);
-VERTEX_DATA(out, outp[]);
+VERTEX_DATA(in, inData[]);
+VERTEX_DATA(out, outData[]);
 
 
 #define ID gl_InvocationID
 
 void main()
 {
-	outp[ID].position = inp[ID].position;
-	outp[ID].texcoord = inp[ID].texcoord;
-	outp[ID].normal = inp[ID].normal;
+	outData[ID].position = inData[ID].position;
+	outData[ID].texcoord = inData[ID].texcoord;
+	outData[ID].normal = inData[ID].normal;
 #ifdef USE_SHADOW_MAP
-	outp[ID].shadowcoord = inp[ID].shadowcoord;
-	outp[ID].worldPosition = inp[ID].worldPosition;
+	outData[ID].shadowcoord = inData[ID].shadowcoord;
+	outData[ID].worldPosition = inData[ID].worldPosition;
 #endif
 #ifdef USE_VERTEX_COLOR
-	outp[ID].color = inp[ID].color;
+	outData[ID].color = inData[ID].color;
 #endif
 
 	if (ID == 0) {
-		float dist2 = dot(inp[0].position, inp[0].position);
+		float dist2 = dot(inData[0].position, inData[0].position);
 
 		float tessLevel = 1;
 		if (dist2 < 1 * 1) tessLevel = 8;

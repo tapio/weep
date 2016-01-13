@@ -1,8 +1,8 @@
 
 layout(vertices = 3) out;
 
-VERTEX_DATA(in, inp[]);
-VERTEX_DATA(out, outp[]);
+VERTEX_DATA(in, inData[]);
+VERTEX_DATA(out, outData[]);
 
 out float curvature[];
 
@@ -21,27 +21,27 @@ float calculateTessLevel(float dist)
 
 void main()
 {
-	outp[ID].position = inp[ID].position;
-	outp[ID].texcoord = inp[ID].texcoord;
-	outp[ID].normal = inp[ID].normal;
+	outData[ID].position = inData[ID].position;
+	outData[ID].texcoord = inData[ID].texcoord;
+	outData[ID].normal = inData[ID].normal;
 #ifdef USE_SHADOW_MAP
-	outp[ID].shadowcoord = inp[ID].shadowcoord;
-	outp[ID].worldPosition = inp[ID].worldPosition;
+	outData[ID].shadowcoord = inData[ID].shadowcoord;
+	outData[ID].worldPosition = inData[ID].worldPosition;
 #endif
 #ifdef USE_VERTEX_COLOR
-	outp[ID].color = inp[ID].color;
+	outData[ID].color = inData[ID].color;
 #endif
 
 	// Calculate curvature factors for each edge
 	// Uses the angles between the corner normals of the patch
-	curvature[ID] = 1.0 - dot(normalize(inp[ID].normal), normalize(inp[(ID+1)%3].normal));
+	curvature[ID] = 1.0 - dot(normalize(inData[ID].normal), normalize(inData[(ID+1)%3].normal));
 
 	// Set tessellation levels
 	if (ID == 0) {
 		const vec3 camPos = cameraPosition;
-		float dist0 = distance(camPos, inp[0].worldPosition);
-		float dist1 = distance(camPos, inp[1].worldPosition);
-		float dist2 = distance(camPos, inp[2].worldPosition);
+		float dist0 = distance(camPos, inData[0].worldPosition);
+		float dist1 = distance(camPos, inData[1].worldPosition);
+		float dist2 = distance(camPos, inData[2].worldPosition);
 		gl_TessLevelOuter[0] = calculateTessLevel((dist1 + dist2) * 0.5);
 		gl_TessLevelOuter[1] = calculateTessLevel((dist2 + dist0) * 0.5);
 		gl_TessLevelOuter[2] = calculateTessLevel((dist0 + dist1) * 0.5);
