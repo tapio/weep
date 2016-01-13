@@ -82,6 +82,10 @@ UBO_PREFIX(UniformPostProcessBlock, 6)
 
 #ifndef __cplusplus
 
+#define PI 3.14159265
+#define saturate(x) clamp(x, 0.0, 1.0)
+
+
 #define ATTR_POSITION 0
 #define ATTR_TEXCOORD 1
 #define ATTR_NORMAL 2

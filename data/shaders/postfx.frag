@@ -9,7 +9,6 @@ layout(binding = 22) uniform sampler2D depthMap;
 
 layout(location = 0) out vec4 fragment;
 
-#define saturate(x) clamp(x, 0.0, 1.0)
 #define gamma(x) pow((x), vec3(1.0 / 2.2));
 
 // http://filmicgames.com/archives/75

@@ -9,7 +9,6 @@ layout(location = 1) out vec4 brightFragment;
 #endif
 
 // https://github.com/wwwtyro/glsl-atmosphere (public domain)
-#define PI 3.14159265
 #define iSteps 16
 #define jSteps 8
 
