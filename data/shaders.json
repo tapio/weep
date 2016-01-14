@@ -278,7 +278,7 @@
 		],
 		"shaders" : {
 			"vert": "shaders/core.vert",
-			"tesc": "shaders/terrain.tesc",
+			"tesc": "shaders/core.tesc",
 			"tese": "shaders/terrain.tese",
 			"frag": "shaders/core.frag"
 		}
