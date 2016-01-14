@@ -4,19 +4,19 @@ layout(triangles, equal_spacing, ccw) in;
 VERTEX_DATA(in, inData[]);
 VERTEX_DATA(out, outData);
 
+#define tc gl_TessCoord
+
 vec2 interp2(vec2 a, vec2 b, vec2 c) {
-	return gl_TessCoord.x * a + gl_TessCoord.y * b + gl_TessCoord.z * c;
+	return tc.x * a + tc.y * b + tc.z * c;
 }
 
 vec3 interp3(vec3 a, vec3 b, vec3 c) {
-	return gl_TessCoord.x * a + gl_TessCoord.y * b + gl_TessCoord.z * c;
+	return tc.x * a + tc.y * b + tc.z * c;
 }
 
 vec4 interp4(vec4 a, vec4 b, vec4 c) {
-	return gl_TessCoord.x * a + gl_TessCoord.y * b + gl_TessCoord.z * c;
+	return tc.x * a + tc.y * b + tc.z * c;
 }
-
-#define tc gl_TessCoord
 
 // http://ogldev.atspace.co.uk/www/tutorial31/tutorial31.html
 vec3 projectToPlane(vec3 point, vec3 planePoint, vec3 planeNormal)
