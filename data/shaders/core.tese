@@ -2,7 +2,6 @@
 layout(triangles, equal_spacing, ccw) in;
 
 VERTEX_DATA(in, inData[]);
-in float curvature[];
 VERTEX_DATA(out, outData);
 
 vec2 interp2(vec2 a, vec2 b, vec2 c) {
@@ -19,10 +18,14 @@ vec4 interp4(vec4 a, vec4 b, vec4 c) {
 
 #define tc gl_TessCoord
 
-// <1.0 - Less roundness when approaching zero
-// ~1.0 ~ Sphere
-// >1.0 - Original polygons pop out
-const float exaggeration = 0.3;
+// http://ogldev.atspace.co.uk/www/tutorial31/tutorial31.html
+vec3 projectToPlane(vec3 point, vec3 planePoint, vec3 planeNormal)
+{
+	vec3 v = point - planePoint;
+	float len = dot(v, planeNormal);
+	vec3 d = len * planeNormal;
+	return (point - d);
+}
 
 void main()
 {
@@ -37,21 +40,14 @@ void main()
 	outData.color = interp4(inData[0].color, inData[1].color, inData[2].color);
 #endif
 
-	// Calculate distance to each edge
-	float d0 = tc.y * tc.z;
-	float d1 = tc.x * tc.z;
-	float d2 = tc.x * tc.y;
+	vec3 p0 = projectToPlane(position, inData[0].position, normalize(inData[0].normal));
+	vec3 p1 = projectToPlane(position, inData[1].position, normalize(inData[1].normal));
+	vec3 p2 = projectToPlane(position, inData[2].position, normalize(inData[2].normal));
+	vec3 phongPos = interp3(p0, p1, p2);
 
-	// Calculate total displacement
-	//float f = inData[0].curvature * d2 + inData[1].curvature * d0 + inData[2].curvature * d1;
-	float f = curvature[0] * d2 + curvature[1] * d0 + curvature[2] * d1;
-
-	// Displace
-	position += exaggeration * f * outData.normal;
-
-	outData.position = position;
+	outData.position = mix(position, phongPos, 0.5);
 
 	// Project
-	gl_Position = projectionMatrix * vec4(position, 1.0);
+	gl_Position = projectionMatrix * vec4(outData.position, 1.0);
 }
 

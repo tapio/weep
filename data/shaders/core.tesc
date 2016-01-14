@@ -4,8 +4,6 @@ layout(vertices = 3) out;
 VERTEX_DATA(in, inData[]);
 VERTEX_DATA(out, outData[]);
 
-out float curvature[];
-
 #define ID gl_InvocationID
 
 float calculateTessLevel(float dist)
@@ -31,10 +29,6 @@ void main()
 #ifdef USE_VERTEX_COLOR
 	outData[ID].color = inData[ID].color;
 #endif
-
-	// Calculate curvature factors for each edge
-	// Uses the angles between the corner normals of the patch
-	curvature[ID] = 1.0 - dot(normalize(inData[ID].normal), normalize(inData[(ID+1)%3].normal));
 
 	// Set tessellation levels
 	if (ID == 0) {
