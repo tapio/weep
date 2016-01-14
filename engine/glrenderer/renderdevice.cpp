@@ -310,6 +310,10 @@ int RenderDevice::generateShader(uint tags)
 		program.compile(GEOMETRY_SHADER, m_resources.getText("shaders/depth.geom", Resources::USE_CACHE), defineText);
 	if (tags & USE_CUBE_RENDER)
 		program.compile(GEOMETRY_SHADER, m_resources.getText("shaders/core.geom", Resources::USE_CACHE), defineText);
+	if (tags & USE_TESSELLATION) {
+		program.compile(TESS_CONTROL_SHADER, m_resources.getText("shaders/core.tesc", Resources::USE_CACHE), defineText);
+		program.compile(TESS_EVALUATION_SHADER, m_resources.getText("shaders/core.tese", Resources::USE_CACHE), defineText);
+	}
 
 	if (!program.link()) {
 		if ((tags & USE_DEPTH) == 0) {
