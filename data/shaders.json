@@ -260,8 +260,8 @@
 		],
 		"shaders" : {
 			"vert": "shaders/core.vert",
-			"tesc": "shaders/pntri.tesc",
-			"tese": "shaders/pntri.tese",
+			"tesc": "shaders/core.tesc",
+			"tese": "shaders/core.tese",
 			"frag": "shaders/core.frag"
 		}
 	},
