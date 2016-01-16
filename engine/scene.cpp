@@ -447,7 +447,7 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 	if (!def["animation"].is_null()) {
 		ASSERT(entity.has<Model>());
 		const Json& animDef = def["animation"];
-		Animation anim;
+		BoneAnimation anim;
 		setNumber(anim.speed, animDef["speed"]);
 		entity.add(anim);
 		if (animDef["play"].is_bool() && animDef["play"].bool_value())

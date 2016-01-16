@@ -18,8 +18,8 @@ void AnimationSystem::reset()
 
 void AnimationSystem::update(Entities& entities, float dt)
 {
-	entities.for_each<Animation, Model>([&](Entity, Animation& anim, Model& model) {
-		if (anim.state != Animation::PLAYING)
+	entities.for_each<BoneAnimation, Model>([&](Entity, BoneAnimation& anim, Model& model) {
+		if (anim.state != BoneAnimation::PLAYING)
 			return;
 		Geometry& geom = *model.geometry;
 		Geometry::Animation a = geom.animations[anim.animation];
@@ -42,33 +42,33 @@ void AnimationSystem::update(Entities& entities, float dt)
 
 void AnimationSystem::play(Entity e)
 {
-	if (!e.has<Animation>() || !e.has<Model>())
+	if (!e.has<BoneAnimation>() || !e.has<Model>())
 		return;
-	Animation& anim = e.get<Animation>();
-	if (anim.state == Animation::PAUSED) {
-		anim.state = Animation::PLAYING;
+	BoneAnimation& anim = e.get<BoneAnimation>();
+	if (anim.state == BoneAnimation::PAUSED) {
+		anim.state = BoneAnimation::PLAYING;
 		return;
 	}
 	Geometry& geom = *e.get<Model>().geometry;
 	Geometry::Animation a = geom.animations[anim.animation];
-	anim.state = Animation::PLAYING;
+	anim.state = BoneAnimation::PLAYING;
 	anim.bones.assign(&geom.animFrames[a.start * geom.bones.size()], &geom.animFrames[a.start * geom.bones.size() + geom.bones.size()]);
 }
 
 void AnimationSystem::pause(Entity e)
 {
-	if (!e.has<Animation>())
+	if (!e.has<BoneAnimation>())
 		return;
-	Animation& anim = e.get<Animation>();
-	anim.state = Animation::PAUSED;
+	BoneAnimation& anim = e.get<BoneAnimation>();
+	anim.state = BoneAnimation::PAUSED;
 }
 
 void AnimationSystem::stop(Entity e)
 {
-	if (!e.has<Animation>() || !e.has<Model>())
+	if (!e.has<BoneAnimation>() || !e.has<Model>())
 		return;
-	Animation& anim = e.get<Animation>();
-	anim.state = Animation::STOPPED;
+	BoneAnimation& anim = e.get<BoneAnimation>();
+	anim.state = BoneAnimation::STOPPED;
 	anim.time = 0.f;
 	anim.bones.clear();
 	anim.bones.assign(e.get<Model>().geometry->bones.size(), mat3x4(1));

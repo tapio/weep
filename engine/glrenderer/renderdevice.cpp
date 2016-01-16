@@ -537,7 +537,7 @@ void RenderDevice::useProgram(const ShaderProgram& program)
 	}
 }
 
-void RenderDevice::drawSetup(const Transform& transform, const Animation* animation)
+void RenderDevice::drawSetup(const Transform& transform, const BoneAnimation* animation)
 {
 	m_objectBlock.uniforms.modelMatrix = transform.matrix;
 	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_objectBlock.uniforms.modelMatrix;
@@ -598,7 +598,7 @@ void RenderDevice::setupShadowPass(const Light& light, uint index)
 	m_commonBlock.upload();
 }
 
-void RenderDevice::renderShadow(Model& model, Transform& transform, Animation* animation)
+void RenderDevice::renderShadow(Model& model, Transform& transform, BoneAnimation* animation)
 {
 	drawSetup(transform, animation);
 
@@ -678,7 +678,7 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
-void RenderDevice::render(Model& model, Transform& transform, Animation* animation)
+void RenderDevice::render(Model& model, Transform& transform, BoneAnimation* animation)
 {
 	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (m_shadowProj[0] * (m_shadowView[0] * transform.matrix));
 	drawSetup(transform, animation);

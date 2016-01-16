@@ -27,7 +27,7 @@ struct Bounds
 	float radius = INFINITY;
 };
 
-struct Animation
+struct BoneAnimation
 {
 	std::vector<mat3x4> bones;
 	enum State {

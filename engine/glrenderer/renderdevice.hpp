@@ -29,10 +29,10 @@ public:
 	void destroyGeometry(Geometry& geometry);
 
 	void setupShadowPass(const Light& light, uint index);
-	void renderShadow(Model& model, Transform& transform, Animation* animation = nullptr);
+	void renderShadow(Model& model, Transform& transform, BoneAnimation* animation = nullptr);
 
 	void setupRenderPass(const Camera& camera, const std::vector<Light>& lights, Technique tech = TECH_COLOR);
-	void render(Model& model, Transform& transform, Animation* animation = nullptr);
+	void render(Model& model, Transform& transform, BoneAnimation* animation = nullptr);
 	void renderSkybox();
 	void postRender();
 
@@ -74,7 +74,7 @@ private:
 
 	int generateShader(uint tags);
 	void setupCubeMatrices(mat4 proj, vec3 pos);
-	void drawSetup(const Transform& transform, const Animation* animation = nullptr);
+	void drawSetup(const Transform& transform, const BoneAnimation* animation = nullptr);
 	void drawBatch(const Batch& batch, bool tessellate = false);
 	void renderFullscreenQuad();
 

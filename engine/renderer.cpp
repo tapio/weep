@@ -138,7 +138,7 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 					return;
 				float maxDist = model.bounds.radius + light.distance;
 				if (glm::distance2(light.position, transform.position) < maxDist * maxDist)
-					m_device->renderShadow(model, transform, e.has<Animation>() ? &e.get<Animation>() : nullptr);
+					m_device->renderShadow(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
 			});
 		}
 	}
@@ -156,7 +156,7 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 		float maxDist = model.bounds.radius + reflCam.far;
 		if (!model.materials.empty() && glm::distance2(reflCam.position, transform.position) < maxDist * maxDist)
-			m_device->render(model, transform, e.has<Animation>() ? &e.get<Animation>() : nullptr);
+			m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
 	});
 	m_device->renderSkybox();
 	END_MEASURE(reflectionMs)
@@ -166,7 +166,7 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	m_device->setupRenderPass(camera, lights, TECH_COLOR);
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 		if (!model.materials.empty() && frustum.visible(transform, model))
-			m_device->render(model, transform, e.has<Animation>() ? &e.get<Animation>() : nullptr);
+			m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
 	});
 	m_device->renderSkybox();
 	END_MEASURE(sceneMs)
