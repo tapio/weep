@@ -49,7 +49,23 @@ namespace {
 
 	inline vec3 colorToVec3(const Json& color) {
 		if (color.is_number()) return vec3(color.number_value());
-		//if (color.is_string()) return TODO;
+		else if (color.is_string()) {
+			const std::string& str = color.string_value();
+			if (str.length() == 7 && str[0] == '#') {
+				float r = std::stoi(str.substr(1, 2), 0, 16) / 255.f;
+				float g = std::stoi(str.substr(3, 2), 0, 16) / 255.f;
+				float b = std::stoi(str.substr(5, 2), 0, 16) / 255.f;
+				return vec3(r, g, b);
+			} else if (str.length() == 4 && str[0] == '#') {
+				float r = std::stoi(str.substr(1, 1) + str.substr(1, 1), 0, 16) / 255.f;
+				float g = std::stoi(str.substr(2, 1) + str.substr(2, 1), 0, 16) / 255.f;
+				float b = std::stoi(str.substr(3, 1) + str.substr(3, 1), 0, 16) / 255.f;
+				return vec3(r, g, b);
+			} else {
+				ASSERT(!"Malformed color string");
+				return vec3(1, 0, 1);
+			}
+		}
 		return toVec3(color);
 	}
 
