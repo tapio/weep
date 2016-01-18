@@ -102,8 +102,8 @@ void Engine::moduleInit()
 void Engine::deinit()
 {
 #ifdef USE_PROFILER
-	rmt_DestroyGlobalInstance(m_remotery);
 	rmt_UnbindOpenGL();
+	rmt_DestroyGlobalInstance(m_remotery);
 #endif
 	SDL_GL_DeleteContext(m_glcontext);
 	SDL_DestroyWindow(window);

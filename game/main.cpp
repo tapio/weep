@@ -75,6 +75,7 @@ int main(int argc, char* argv[])
 	bool devtools = Engine::settings["devtools"].bool_value();
 	SDL_Event e;
 	while (running) {
+		BEGIN_CPU_SAMPLE(MainLoop)
 		RenderSystem& renderer = game.entities.get_system<RenderSystem>();
 		PhysicsSystem& physics = game.entities.get_system<PhysicsSystem>();
 		AudioSystem& audio = game.entities.get_system<AudioSystem>();
@@ -335,7 +336,9 @@ int main(int argc, char* argv[])
 
 		ImGui::Render();
 
+		BEGIN_CPU_SAMPLE(swap)
 		game.engine.swap();
+		END_CPU_SAMPLE()
 
 		game.entities.update();
 
@@ -351,6 +354,7 @@ int main(int argc, char* argv[])
 			init(game, scene, scenePath);
 			reload = false;
 		}
+		END_CPU_SAMPLE(MainLoop)
 	}
 
 	game.entities.get_system<RenderSystem>().reset(game.entities); // TODO: Should not be needed...
