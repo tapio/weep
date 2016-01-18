@@ -77,6 +77,13 @@ void Engine::init(const string& configPath)
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
 	logInfo("OpenGL Context:  %d.%d", major, minor);
+
+#ifdef USE_PROFILER
+	rmtError rmtErr = rmt_CreateGlobalInstance(&m_remotery);
+	if (rmtErr != RMT_ERROR_NONE)
+		logError("Failed to initialize Remotery profiler (code %d)", rmtErr);
+	else rmt_BindOpenGL();
+#endif
 }
 
 void Engine::moduleInit()
@@ -87,10 +94,17 @@ void Engine::moduleInit()
 		panic("Failed to load OpenGL functions");
 	}
 #endif
+#ifdef USE_PROFILER
+	rmt_SetGlobalInstance(m_remotery);
+#endif
 }
 
 void Engine::deinit()
 {
+#ifdef USE_PROFILER
+	rmt_DestroyGlobalInstance(m_remotery);
+	rmt_UnbindOpenGL();
+#endif
 	SDL_GL_DeleteContext(m_glcontext);
 	SDL_DestroyWindow(window);
 	SDL_Quit();

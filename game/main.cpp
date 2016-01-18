@@ -189,7 +189,9 @@ int main(int argc, char* argv[])
 
 		// Graphics
 		START_MEASURE(renderTimeMs)
+		BEGIN_GPU_SAMPLE(GPURender)
 		renderer.render(game.entities, camera);
+		END_GPU_SAMPLE()
 		END_MEASURE(renderTimeMs)
 
 		static bool imguiMetrics = false;

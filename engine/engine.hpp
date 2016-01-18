@@ -43,4 +43,7 @@ private:
 	uint64 m_prevTime = 0;
 	void* m_glcontext = nullptr;
 	thread_pool m_threadpool = {threads};
+#ifdef USE_PROFILER
+	Remotery* m_remotery = nullptr;
+#endif
 };

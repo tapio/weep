@@ -65,9 +65,30 @@ constexpr std::size_t countof(T const (&)[N]) noexcept { return N; }
 #define EXPORT extern "C"
 #endif
 
-// TODO: Dummy versions for non-debug build
-#define START_MEASURE(var_name) \
-	float var_name = 0.f; uint64 _t0_##var_name = SDL_GetPerformanceCounter();
-#define END_MEASURE(var_name) \
-	var_name = (SDL_GetPerformanceCounter() - _t0_##var_name) / (double)SDL_GetPerformanceFrequency() * 1000.0;
+#define USE_PROFILER 1
+#ifdef USE_PROFILER
+	#define RMT_USE_OPENGL 1
+	#include "remotery/Remotery.h"
+	#define BEGIN_CPU_SAMPLE(name) rmt_BeginCPUSample(name);
+	#define END_CPU_SAMPLE(name) rmt_EndCPUSample();
+	#define SCOPED_CPU_SAMPLE(name) rmt_ScopedCPUSample(name);
+	#define BEGIN_GPU_SAMPLE(name) rmt_BeginOpenGLSample(name);
+	#define END_GPU_SAMPLE() rmt_EndOpenGLSample();
+	#define SCOPED_GPU_SAMPLE(name) rmt_ScopedOpenGLSample(name);
+#else
+	struct Remotery;
+	#define BEGIN_CPU_SAMPLE(name)
+	#define END_CPU_SAMPLE(name)
+	#define SCOPED_CPU_SAMPLE(name)
+	#define BEGIN_GPU_SAMPLE(name)
+	#define END_GPU_SAMPLE()
+	#define SCOPED_GPU_SAMPLE(name)
+#endif
 
+// TODO: Dummy versions for non-debug build?
+#define START_MEASURE(var_name) \
+	float var_name = 0.f; uint64 _t0_##var_name = SDL_GetPerformanceCounter(); \
+	BEGIN_CPU_SAMPLE(var_name)
+#define END_MEASURE(var_name) \
+	var_name = (SDL_GetPerformanceCounter() - _t0_##var_name) / (double)SDL_GetPerformanceFrequency() * 1000.0; \
+	END_CPU_SAMPLE(var_name)

@@ -41,6 +41,11 @@ list(APPEND LIBS ${SDL2_LIBRARIES})
 find_package(OpenGL REQUIRED)
 list(APPEND LIBS ${OPENGL_gl_LIBRARY})
 
+if(NOT WIN32)
+	# For Remotery
+	list(APPEND LIBS "dl")
+endif()
+
 include_directories(engine)
 include_directories(SYSTEM third-party)
 include_directories(SYSTEM third-party/bullet)
@@ -49,6 +54,8 @@ include_directories(SYSTEM third-party/soloud/include)
 add_definitions(-DGL_GLEXT_PROTOTYPES)
 # SoLoud
 add_definitions(-DWITH_NULL -DWITH_SDL2_STATIC)
+# Remotery
+add_definitions(-DRMT_USE_OPENGL=1 -DRMT_USE_POSIX_THREADNAMES=1)
 
 # TODO: Make separate libs of third-party deps
 
