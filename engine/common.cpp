@@ -33,9 +33,10 @@ void logDebug(const char* format, ...)
 {
 	va_list vl;
 	va_start(vl, format);
-	string message = vlformat(format, vl);
+	string message = "Debug: " + vlformat(format, vl);
 	va_end(vl);
-	std::cout << "Debug: " << message << std::endl;
+	std::cout << message << std::endl;
+	PROFILER_LOG(message.c_str());
 }
 
 void logInfo(const char* format, ...)
@@ -45,33 +46,37 @@ void logInfo(const char* format, ...)
 	string message = vlformat(format, vl);
 	va_end(vl);
 	std::cout << message << std::endl;
+	PROFILER_LOG(message.c_str());
 }
 
 void logWarning(const char* format, ...)
 {
 	va_list vl;
 	va_start(vl, format);
-	string message = vlformat(format, vl);
+	string message = "Warning: " + vlformat(format, vl);
 	va_end(vl);
-	std::cerr << "Warning: " << message << std::endl;
+	std::cerr << message << std::endl;
+	PROFILER_LOG(message.c_str());
 }
 
 void logError(const char* format, ...)
 {
 	va_list vl;
 	va_start(vl, format);
-	string message = vlformat(format, vl);
+	string message = "ERROR: " + vlformat(format, vl);
 	va_end(vl);
-	std::cerr << "ERROR: " << message << std::endl;
+	std::cerr << message << std::endl;
+	PROFILER_LOG(message.c_str());
 }
 
 void panic(const char* format, ...)
 {
 	va_list vl;
 	va_start(vl, format);
-	string message = vlformat(format, vl);
+	string message = "PANIC: " + vlformat(format, vl);
 	va_end(vl);
-	std::cerr << "PANIC: " << message << std::endl;
+	std::cerr << message << std::endl;
+	PROFILER_LOG(message.c_str());
 
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
 		"Fatal Error", message.c_str(), NULL);

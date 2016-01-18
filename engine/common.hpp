@@ -75,6 +75,7 @@ constexpr std::size_t countof(T const (&)[N]) noexcept { return N; }
 	#define BEGIN_GPU_SAMPLE(name) rmt_BeginOpenGLSample(name);
 	#define END_GPU_SAMPLE() rmt_EndOpenGLSample();
 	#define SCOPED_GPU_SAMPLE(name) rmt_ScopedOpenGLSample(name);
+	#define PROFILER_LOG(text) rmt_LogText(text);
 #else
 	#define BEGIN_CPU_SAMPLE(name)
 	#define END_CPU_SAMPLE(name)
@@ -82,6 +83,7 @@ constexpr std::size_t countof(T const (&)[N]) noexcept { return N; }
 	#define BEGIN_GPU_SAMPLE(name)
 	#define END_GPU_SAMPLE()
 	#define SCOPED_GPU_SAMPLE(name)
+	#define PROFILER_LOG(text)
 #endif
 
 // TODO: Dummy versions for non-debug build?
