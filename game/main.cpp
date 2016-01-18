@@ -204,12 +204,12 @@ int main(int argc, char* argv[])
 				ImGui::Text("Module upd:   %.3fms", moduleTimeMs);
 				ImGui::Text("CPU Render:   %.3fms", renderTimeMs);
 				if (ImGui::TreeNode("Render times")) {
-					ImGui::Text("Prerender:    %.3fm", stats.times.prerender);
-					ImGui::Text("Upload:       %.3fm", stats.times.upload);
-					ImGui::Text("Shadow:       %.3fm", stats.times.shadow);
-					ImGui::Text("Reflection:   %.3fm", stats.times.reflection);
-					ImGui::Text("Scene:        %.3fm", stats.times.scene);
-					ImGui::Text("Postprocess:  %.3fm", stats.times.postprocess);
+					ImGui::Text("Prerender:    %.3fms", stats.times.prerender);
+					ImGui::Text("Upload:       %.3fms", stats.times.upload);
+					ImGui::Text("Shadow:       %.3fms", stats.times.shadow);
+					ImGui::Text("Reflection:   %.3fms", stats.times.reflection);
+					ImGui::Text("Scene:        %.3fms", stats.times.scene);
+					ImGui::Text("Postprocess:  %.3fms", stats.times.postprocess);
 					ImGui::TreePop();
 				}
 				ImGui::Text("Lights:       %d", stats.lights);
