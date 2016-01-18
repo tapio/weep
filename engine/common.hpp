@@ -76,7 +76,6 @@ constexpr std::size_t countof(T const (&)[N]) noexcept { return N; }
 	#define END_GPU_SAMPLE() rmt_EndOpenGLSample();
 	#define SCOPED_GPU_SAMPLE(name) rmt_ScopedOpenGLSample(name);
 #else
-	struct Remotery;
 	#define BEGIN_CPU_SAMPLE(name)
 	#define END_CPU_SAMPLE(name)
 	#define SCOPED_CPU_SAMPLE(name)
