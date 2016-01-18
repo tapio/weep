@@ -101,6 +101,7 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 
 	// Fixed amount of time for uploading each frame?
 	START_MEASURE(uploadMs)
+	BEGIN_GPU_SAMPLE(Upload)
 	entities.for_each<Model>([&](Entity, Model& model) {
 		// Upload geometry
 		Geometry& geom = *model.geometry;
@@ -111,9 +112,11 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 			if (mat->shaderId[0] < 0 || (mat->flags & Material::DIRTY_MAPS))
 				m_device->uploadMaterial(*mat);
 	});
+	END_GPU_SAMPLE()
 	END_MEASURE(uploadMs)
 
 	START_MEASURE(shadowMs)
+	BEGIN_GPU_SAMPLE(ShadowPass)
 	Light sun;
 	sun.type = Light::DIRECTIONAL_LIGHT;
 	sun.position = camera.position + normalize(m_env.sunPosition) * 10.f;
@@ -142,10 +145,12 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 			});
 		}
 	}
+	END_GPU_SAMPLE()
 	END_MEASURE(shadowMs)
 
 	// Reflection pass
 	START_MEASURE(reflectionMs)
+	BEGIN_GPU_SAMPLE(ReflectionPass)
 	Camera reflCam = camera;
 	reflCam.makePerspective(glm::radians(90.0f), 1.f, 0.25f, 50.f);
 	if (!reflectionProbes.empty()) {
@@ -159,20 +164,25 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 			m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
 	});
 	m_device->renderSkybox();
+	END_GPU_SAMPLE()
 	END_MEASURE(reflectionMs)
 
 	// Scene color pass
 	START_MEASURE(sceneMs)
+	BEGIN_GPU_SAMPLE(ScenePass)
 	m_device->setupRenderPass(camera, lights, TECH_COLOR);
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 		if (!model.materials.empty() && frustum.visible(transform, model))
 			m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
 	});
 	m_device->renderSkybox();
+	END_GPU_SAMPLE()
 	END_MEASURE(sceneMs)
 
 	START_MEASURE(postprocessMs)
+	BEGIN_GPU_SAMPLE(Postprocess)
 	m_device->postRender();
+	END_GPU_SAMPLE()
 	END_MEASURE(postprocessMs)
 
 	RenderDevice::Stats& stats = m_device->stats;
