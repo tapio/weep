@@ -6,19 +6,27 @@
 #include "../game.hpp"
 #include "../controller.hpp"
 #include "SDL_events.h"
+#include <glm/gtc/random.hpp>
 
 static Game* s_game = nullptr;
+static float s_pointsWindowWidth = 150.f;
+static int s_points[2] = {};
+static const char* s_names[] = { "Player 1", "Player 2" };
+static const int pointsToWin = 3;
+static int s_winner = -1;
+static float s_resetTime = 0;
 
-void begin() {
+void begin(int dir) {
 	Entity cameraEnt = s_game->entities.get_entity_by_tag("camera");
 	Controller& controller = cameraEnt.get<Controller>();
 	controller.enabled = false;
+
 	Entity ball = s_game->entities.get_entity_by_tag("ball");
 	if (ball.is_alive()) {
 		Transform& trans = ball.get<Transform>();
 		trans.setPosition(vec3(0));
 		btRigidBody& body = ball.get<btRigidBody>();
-		body.setLinearVelocity(btVector3(-8, 0, -3));
+		body.setLinearVelocity(btVector3(10 * dir, 0, glm::linearRand(-6, 6)));
 	}
 	Entity paddle1 = s_game->entities.get_entity_by_tag("paddle1");
 	if (paddle1.is_alive()) {
@@ -34,6 +42,14 @@ void begin() {
 		btRigidBody& body = paddle2.get<btRigidBody>();
 		body.setLinearVelocity(btVector3(0, 0, 0));
 	}
+}
+
+void reset() {
+	s_points[0] = 0;
+	s_points[1] = 0;
+	s_winner = -1;
+	s_resetTime = 5.f;
+	begin(glm::linearRand(0, 1) ? 1 : -1);
 }
 
 void steer(const string& paddleName, int dir) {
@@ -55,7 +71,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			ImGuiSystem& imgui = s_game->entities.get_system<ImGuiSystem>();
 			imgui.applyInternalState();
 
-			begin();
+			reset();
 			break;
 		}
 		case $id(INPUT):
@@ -77,7 +93,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			{
 				SDL_Keysym keysym = e.key.keysym;
 				if (keysym.sym == SDLK_r) {
-					begin();
+					reset();
 				}
 				if (keysym.sym == SDLK_w)
 					steer("paddle1", 0);
@@ -93,6 +109,43 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		case $id(UPDATE):
 		{
 			s_game = static_cast<Game*>(param);
+
+			Entity ball = s_game->entities.get_entity_by_tag("ball");
+			if (ball.is_alive() && s_winner < 0) {
+				Transform& trans = ball.get<Transform>();
+				if (trans.position.x < -11) {
+					s_points[1]++;
+					if (s_points[1] >= pointsToWin) {
+						s_winner = 1;
+					} else begin(1);
+				} else if (trans.position.x > 11) {
+					s_points[0]++;
+					if (s_points[0] >= pointsToWin) {
+						s_winner = 0;
+					} else begin(-1);
+				} else if (glm::dot(trans.position, trans.position) > 100 * 100) {
+					begin(glm::linearRand(0, 1) ? 1 : -1);
+				}
+			}
+
+			ScopedFont sf(s_game->entities, $id(pong_big));
+			float x = (Engine::width() - s_pointsWindowWidth) * 0.5f;
+			ImGui::SetNextWindowPos(ImVec2(x, 20));
+			ImGui::Begin("##Points", NULL, ImGuiSystem::MinimalWindow);
+			s_pointsWindowWidth = ImGui::GetWindowWidth();
+			ImGui::Text("%d  -  %d", s_points[0], s_points[1]);
+			ImGui::End();
+
+			if (s_winner >= 0) {
+				ImGui::SetNextWindowPosCenter();
+				ImGui::Begin("##Winner", NULL, ImGuiSystem::MinimalWindow);
+				ImGui::Text("%s Won!", s_names[s_winner]);
+				ImGui::End();
+
+				s_resetTime -= s_game->engine.dt;
+				if (s_resetTime <= 0.f)
+					reset();
+			}
 			break;
 		}
 	}
