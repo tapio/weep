@@ -41,8 +41,10 @@ list(APPEND LIBS ${SDL2_LIBRARIES})
 find_package(OpenGL REQUIRED)
 list(APPEND LIBS ${OPENGL_gl_LIBRARY})
 
-if(NOT WIN32)
-	# For Remotery
+# For Remotery
+if(WIN32)
+	list(APPEND LIBS "ws2_32")
+else()
 	list(APPEND LIBS "dl")
 endif()
 
