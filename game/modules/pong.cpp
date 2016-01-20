@@ -4,11 +4,15 @@
 #include "physics.hpp"
 #include "glrenderer/texture.hpp"
 #include "../game.hpp"
+#include "../controller.hpp"
 #include "SDL_events.h"
 
 static Game* s_game = nullptr;
 
 void begin() {
+	Entity cameraEnt = s_game->entities.get_entity_by_tag("camera");
+	Controller& controller = cameraEnt.get<Controller>();
+	controller.enabled = false;
 	Entity ball = s_game->entities.get_entity_by_tag("ball");
 	if (ball.is_alive()) {
 		Transform& trans = ball.get<Transform>();

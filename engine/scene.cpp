@@ -235,7 +235,15 @@ void SceneLoader::load(const string& path, Resources& resources)
 		Camera& camera = cameraEnt.get<Camera>();
 		float ar = Engine::width() / (float)Engine::height();
 		camera.makePerspective(45, ar, 0.1, 1000);
-		camera.view = glm::lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
+		if (cameraEnt.has<Transform>()) {
+			Transform& trans = cameraEnt.get<Transform>();
+			// TODO: Should probably not have pos/rot duplicated
+			camera.position = trans.position;
+			camera.rotation = trans.rotation;
+			camera.updateViewMatrix();
+		} else {
+			camera.view = glm::lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
+		}
 	}
 
 	resources.startAsyncLoading();

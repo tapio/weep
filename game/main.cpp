@@ -155,7 +155,8 @@ int main(int argc, char* argv[])
 			modules.call($id(INPUT), &e);
 		}
 
-		controller.enabled = !imgui.usingKeyboard();
+		if (imgui.usingKeyboard())
+			controller.enabled = false;
 		controller.update(game.engine.dt);
 
 		// Modules
@@ -178,10 +179,11 @@ int main(int argc, char* argv[])
 			camera.position = convert(body.getCenterOfMassPosition());
 			if (cameraEnt.has<GroundTracker>())
 				controller.onGround = cameraEnt.get<GroundTracker>().onGround;
-		} else {
+		} else if (controller.enabled) {
 			camera.position = controller.position;
 		}
-		camera.rotation = controller.rotation;
+		if (controller.enabled)
+			camera.rotation = controller.rotation;
 
 		// Audio
 		START_MEASURE(audioTimeMs)
@@ -230,6 +232,8 @@ int main(int argc, char* argv[])
 						body.setGravity(controller.fly ? btVector3(0, 0, 0) : physics.dynamicsWorld->getGravity());
 					}
 				}
+				ImGui::SameLine();
+				ImGui::Checkbox("Enable controller", &controller.enabled);
 				ImGui::SliderFloat("Move force", &controller.moveForce, 0.0f, 10000.0f);
 				ImGui::SliderFloat("Brake force", &controller.brakeForce, 0.0f, 10000.0f);
 				ImGui::SliderFloat("Jump force", &controller.jumpForce, 0.0f, 10000.0f);
