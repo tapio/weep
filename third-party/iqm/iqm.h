@@ -52,7 +52,7 @@ enum
     IQM_UINT   = 5,
     IQM_HALF   = 6,
     IQM_FLOAT  = 7,
-    IQM_DOUBLE = 8,
+    IQM_DOUBLE = 8
 };
 
 struct iqmtriangle
@@ -65,11 +65,26 @@ struct iqmadjacency
     unsigned int triangle[3];
 };
 
+struct iqmjointv1
+{
+    unsigned int name;
+    int parent;
+    float translate[3], rotate[3], scale[3];
+};
+
 struct iqmjoint
 {
     unsigned int name;
     int parent;
     float translate[3], rotate[4], scale[3];
+};
+
+struct iqmposev1
+{
+    int parent;
+    unsigned int mask;
+    float channeloffset[9];
+    float channelscale[9];
 };
 
 struct iqmpose
@@ -106,6 +121,13 @@ struct iqmbounds
 {
     float bbmin[3], bbmax[3];
     float xyradius, radius;
+};
+
+struct iqmextension
+{
+    unsigned int name;
+    unsigned int num_data, ofs_data;
+    unsigned int ofs_extensions; // pointer to next extension
 };
 
 #endif
