@@ -29,4 +29,21 @@ done
 $WGET $GHBASEURL/ocornut/imgui/master/examples/sdl_opengl3_example/imgui_impl_sdl_gl3.h -O imgui/imgui_impl_sdl_gl3.h &
 $WGET $GHBASEURL/ocornut/imgui/master/examples/sdl_opengl3_example/imgui_impl_sdl_gl3.cpp -O imgui/imgui_impl_sdl_gl3.cpp &
 
+# Bullet
+BULLETPATH=/tmp/bullet3
+rm -rf "$BULLETPATH"
+git clone --depth=1 https://github.com/bulletphysics/bullet3 "$BULLETPATH"
+
+rm -r "bullet"
+mkdir -p "bullet"
+cp -r "$BULLETPATH/src/BulletCollision" "bullet/"
+cp -r "$BULLETPATH/src/BulletDynamics" "bullet/"
+#cp -r "$BULLETPATH/src/BulletSoftBody" "bullet/"
+cp -r "$BULLETPATH/src/LinearMath" "bullet/"
+cp "$BULLETPATH/src/btBulletCollisionCommon.h" "bullet/"
+cp "$BULLETPATH/src/btBulletDynamicsCommon.h" "bullet/"
+cp "$BULLETPATH/LICENSE.txt" "bullet/"
+rm -r "bullet/BulletDynamics/Featherstone"
+rm -r "bullet/BulletDynamics/MLCPSolvers"
+find bullet -type f \( -name 'CMakeLists.txt' -o -name 'premake4.lua' \) -delete
 
