@@ -15,7 +15,7 @@ Many might be unpolished...
 	- Diffuse / normal / specular / emission / height / AO map support
 	- Dynamic reflections with reflectivity map support
 	- Automatic mesh smoothing with tessellation shaders
-	- Postprocessing effects: vignette, sepia, saturation control
+	- Postprocessing effects: vignette, sepia, saturation control, chromatic aberration
 	- #define based uber shader
 	- Automatic shader permutation generation based on material properties
 * Mesh loading from Wavefront .obj, Inter-Quake Model .iqm and heightmap images
@@ -47,7 +47,6 @@ Here's some things that need work. The list is by no means exhaustive.
 * There is little multi-threading going on
 * Sun shadow map really needs cascades
 * I'm sceptical whether all tonemap functions work as they should
-* Tessellation smoothing implementation is suboptimal and doesn't support all material features
 * Animation and sound systems are very basic
 * Gameplay module hotloading fails in some situations
 * Entity/component destroying works poorly as it's currently implemented
