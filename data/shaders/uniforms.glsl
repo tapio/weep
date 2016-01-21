@@ -21,7 +21,7 @@ UBO_PREFIX(UniformCommonBlock, 0)
 	vec3 sunPosition; int skyType;
 	vec3 sunColor; float bloomThreshold;
 	vec3 fogColor; float fogDensity;
-	float near; float far; float pad2;
+	float near; float far; float pad1;
 };
 
 UBO_PREFIX(UniformObjectBlock, 1)
@@ -62,6 +62,7 @@ UBO_PREFIX(UniformSkinningBlock, 5)
 UBO_PREFIX(UniformPostProcessBlock, 6)
 	int tonemap; float exposure; float saturation; float chromaticAberration;
 	vec3 vignette; float sepia;
+	float scanlines; float padding1; float padding2; float padding3;
 };
 
 

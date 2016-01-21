@@ -58,6 +58,7 @@ void main()
 {
 	vec2 uv = inData.texcoord;
 	vec3 hdrColor;
+	// Chromatic Aberration
 	if (chromaticAberration > 0) {
 		float d = distance(uv, vec2(0.5, 0.5));
 		const vec3 chromaticOffsets = vec3(-0.1, 0.0, 0.1) * chromaticAberration * d;
@@ -69,6 +70,7 @@ void main()
 	}
 	else hdrColor = texture(sceneMap, uv).rgb;
 
+	// Bloom
 	if (bloomThreshold > 0)
 		hdrColor += texture(bloomMap, uv).rgb; // Bloom
 
@@ -78,13 +80,6 @@ void main()
 		float vig = smoothstep(vignette.x, vignette.x - vignette.y, d);
 		hdrColor = mix(hdrColor, hdrColor * vig, vignette.z);
 	}
-
-#if 0 // Visualize depth
-	hdrColor = vec3(linearizeDepth(texture(depthMap, uv).r));
-#endif
-#if 0 // Visualize bloom
-	hdrColor = texture(bloomMap, uv).rgb;
-#endif
 
 	// Saturation
 	float luminance = dot(hdrColor, vec3(0.3086, 0.6094, 0.0820));
@@ -102,6 +97,19 @@ void main()
 			dot(hdrColor, vec3(0.272, 0.534, 0.131)));
 		hdrColor = mix(hdrColor, sepiaColor, sepia);
 	}
+
+	// Scanlines
+	if (scanlines > 0)
+		if (mod(floor(uv.y * textureSize(sceneMap, 0).y), scanlines + 1.0) < 1.0)
+			hdrColor *= luminance;
+
+	// Debug
+#if 0 // Visualize depth
+	hdrColor = vec3(linearizeDepth(texture(depthMap, uv).r));
+#endif
+#if 0 // Visualize bloom
+	hdrColor = texture(bloomMap, uv).rgb;
+#endif
 
 	// Tone mapping & gamma
 	hdrColor *= exposure;

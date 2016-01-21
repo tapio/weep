@@ -36,6 +36,7 @@ struct Environment
 	float saturation = 0.f;
 	float sepia = 0.f;
 	float chromaticAberration = 0.f;
+	float scanlines = 0.f;
 
 	struct Image* skybox[6] = {};
 };

@@ -837,6 +837,7 @@ void RenderDevice::postRender()
 	m_postProcessBlock.uniforms.chromaticAberration = m_env->chromaticAberration;
 	m_postProcessBlock.uniforms.sepia = m_env->sepia;
 	m_postProcessBlock.uniforms.vignette = m_env->vignette;
+	m_postProcessBlock.uniforms.scanlines = m_env->scanlines;
 	m_postProcessBlock.upload();
 
 	// Resolve MSAA to regular FBO
