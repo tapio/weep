@@ -335,6 +335,18 @@ int main(int argc, char* argv[])
 					}
 				}
 			}
+			if (ImGui::CollapsingHeader("Entities")) {
+				game.entities.for_each<Transform>([](Entity e, Transform& trans) {
+					string label = "Entity #" + std::to_string(e.get_index());
+					if (ImGui::SliderFloat3(label.c_str(), &trans.position[0], -100, 100))
+						trans.dirty = true;
+					if (ImGui::SliderFloat3(("Scale##" + label).c_str(), &trans.scale[0], 0, 10))
+						trans.dirty = true;
+					if (ImGui::SliderFloat4(("Rot##" + label).c_str(), &trans.rotation[0], -1, 1))
+						trans.dirty = true;
+					ImGui::Separator();
+				});
+			}
 		}
 		if (devtools)
 			ImGui::End();
