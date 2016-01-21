@@ -56,22 +56,34 @@ float linearizeDepth(float depth)
 
 void main()
 {
-	vec3 hdrColor = texture(sceneMap, inData.texcoord).rgb;
+	vec2 uv = inData.texcoord;
+	vec3 hdrColor;
+	if (chromaticAberration > 0) {
+		float d = distance(uv, vec2(0.5, 0.5));
+		const vec3 chromaticOffsets = vec3(-0.1, 0.0, 0.1) * chromaticAberration * d;
+		hdrColor = vec3(
+			texture(sceneMap, vec2(uv.x + chromaticOffsets.r, uv.y)).r,
+			texture(sceneMap, vec2(uv.x + chromaticOffsets.g, uv.y)).g,
+			texture(sceneMap, vec2(uv.x + chromaticOffsets.b, uv.y)).b
+		);
+	}
+	else hdrColor = texture(sceneMap, uv).rgb;
+
 	if (bloomThreshold > 0)
-		hdrColor += texture(bloomMap, inData.texcoord).rgb; // Bloom
+		hdrColor += texture(bloomMap, uv).rgb; // Bloom
 
 	// Vignette
 	if (vignette.x > 0) {
-		float d = distance(inData.texcoord, vec2(0.5, 0.5));
+		float d = distance(uv, vec2(0.5, 0.5));
 		float vig = smoothstep(vignette.x, vignette.x - vignette.y, d);
 		hdrColor = mix(hdrColor, hdrColor * vig, vignette.z);
 	}
 
 #if 0 // Visualize depth
-	hdrColor = vec3(linearizeDepth(texture(depthMap, inData.texcoord).r));
+	hdrColor = vec3(linearizeDepth(texture(depthMap, uv).r));
 #endif
 #if 0 // Visualize bloom
-	hdrColor = texture(bloomMap, inData.texcoord).rgb;
+	hdrColor = texture(bloomMap, uv).rgb;
 #endif
 
 	// Saturation

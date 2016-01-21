@@ -35,6 +35,7 @@ struct Environment
 	vec3 vignette = vec3(0, 1, 1);
 	float saturation = 0.f;
 	float sepia = 0.f;
+	float chromaticAberration = 0.f;
 
 	struct Image* skybox[6] = {};
 };

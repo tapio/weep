@@ -257,6 +257,7 @@ int main(int argc, char* argv[])
 				ImGui::SliderFloat3("Vignette", (float*)&env.vignette, 0.0f, 1.0f);
 				ImGui::SliderFloat("Sepia", &env.sepia, 0.0f, 1.0f);
 				ImGui::SliderFloat("Saturation", &env.saturation, -1.0f, 1.0f);
+				ImGui::SliderFloat("Chromatic Aberration", &env.chromaticAberration, 0.0f, 1.0f);
 			}
 			if (ImGui::CollapsingHeader("Modules")) {
 				if (ImGui::Button("Reload all##Modules")) {
