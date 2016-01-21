@@ -2,6 +2,7 @@
 #include "gui.hpp"
 #include "components.hpp"
 #include "physics.hpp"
+#include "audio.hpp"
 #include "glrenderer/texture.hpp"
 #include "../game.hpp"
 #include "../controller.hpp"
@@ -109,6 +110,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		case $id(UPDATE):
 		{
 			s_game = static_cast<Game*>(param);
+			AudioSystem& audio = s_game->entities.get_system<AudioSystem>();
 
 			Entity ball = s_game->entities.get_entity_by_tag("ball");
 			if (ball.is_alive() && s_winner < 0) {
@@ -116,13 +118,21 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				if (trans.position.x < -11) {
 					s_points[1]++;
 					if (s_points[1] >= pointsToWin) {
+						audio.play($id(win));
 						s_winner = 1;
-					} else begin(1);
+					} else {
+						audio.play($id(point));
+						begin(1);
+					}
 				} else if (trans.position.x > 11) {
 					s_points[0]++;
 					if (s_points[0] >= pointsToWin) {
+						audio.play($id(win));
 						s_winner = 0;
-					} else begin(-1);
+					} else {
+						audio.play($id(point));
+						begin(-1);
+					}
 				} else if (glm::dot(trans.position, trans.position) > 100 * 100) {
 					begin(glm::linearRand(0, 1) ? 1 : -1);
 				}
