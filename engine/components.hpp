@@ -15,8 +15,8 @@ struct Transform
 
 	void updateMatrix() {
 		matrix = glm::translate(mat4(1.f), position);
-		matrix = glm::scale(matrix, scale);
 		matrix *= glm::mat4_cast(rotation);
+		matrix = glm::scale(matrix, scale);
 	}
 };
 
