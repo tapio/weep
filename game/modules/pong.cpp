@@ -13,7 +13,7 @@
 static Game* s_game = nullptr;
 static float s_pointsWindowWidth = 150.f;
 static int s_points[2] = {};
-static const char* s_names[] = { "Player 1", "Player 2" };
+static const char* s_names[] = { "Blue Player", "Red Player" };
 static const int pointsToWin = 3;
 static int s_winner = -1;
 static float s_resetTime = 0;
