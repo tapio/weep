@@ -21,6 +21,7 @@ $WGET $GHBASEURL/Celtoys/Remotery/master/LICENSE -O remotery/LICENSE &
 
 # stb_image
 $WGET $GHBASEURL/nothings/stb/master/stb_image.h -O stb_image/stb_image.h &
+$WGET $GHBASEURL/nothings/stb/master/stb_image_write.h -O stb_image/stb_image_write.h &
 
 # ImGui
 for f in imconfig.h imgui.cpp imgui.h imgui_demo.cpp imgui_draw.cpp imgui_internal.h LICENSE stb_rect_pack.h stb_textedit.h stb_truetype.h; do
