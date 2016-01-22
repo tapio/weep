@@ -278,6 +278,10 @@ int main(int argc, char* argv[])
 						modules.reload(it.first);
 						break; // Must break as iterator will be invalidated
 					}
+					ImGui::SameLine();
+					if (ImGui::Button(("Init##" + it.second.name).c_str())) {
+						modules.call(it.first, $id(INIT), &game);
+					}
 				}
 			}
 			if (ImGui::CollapsingHeader("Scene")) {
