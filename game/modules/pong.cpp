@@ -3,7 +3,8 @@
 #include "components.hpp"
 #include "physics.hpp"
 #include "audio.hpp"
-#include "glrenderer/texture.hpp"
+#include "renderer.hpp"
+#include "tween.hpp"
 #include "../game.hpp"
 #include "../controller.hpp"
 #include "SDL_events.h"
@@ -16,6 +17,7 @@ static const char* s_names[] = { "Player 1", "Player 2" };
 static const int pointsToWin = 3;
 static int s_winner = -1;
 static float s_resetTime = 0;
+static Tween s_dieAnim = Tween(0.25f, false);
 
 void begin(int dir) {
 	Entity cameraEnt = s_game->entities.get_entity_by_tag("camera");
@@ -122,6 +124,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 						s_winner = 1;
 					} else {
 						audio.play($id(point));
+						s_dieAnim.reset();
 						begin(1);
 					}
 				} else if (trans.position.x > 11) {
@@ -131,11 +134,19 @@ EXPORT void ModuleFunc(uint msg, void* param)
 						s_winner = 0;
 					} else {
 						audio.play($id(point));
+						s_dieAnim.reset();
 						begin(-1);
 					}
 				} else if (glm::dot(trans.position, trans.position) > 100 * 100) {
 					begin(glm::linearRand(0, 1) ? 1 : -1);
 				}
+			}
+
+			if (s_dieAnim.active()) {
+				s_dieAnim.update(s_game->engine.dt);
+				Environment& env = s_game->entities.get_system<RenderSystem>().env();
+				env.chromaticAberration =
+					s_dieAnim.active() ? 0.1f * (1.0f - easing::backInOut(s_dieAnim.t)) : 0.f;
 			}
 
 			ScopedFont sf(s_game->entities, $id(pong_big));
