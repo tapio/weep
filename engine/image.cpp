@@ -6,6 +6,9 @@
 #define STBI_ONLY_TGA
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image/stb_image.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_STATIC
+#include <stb_image/stb_image_write.h>
 
 bool Image::load(const std::string& path_, int forceChannels)
 {
@@ -25,4 +28,9 @@ bool Image::load(const std::string& path_, int forceChannels)
 	END_MEASURE(loadTimeMs)
 	logDebug("Loaded image %s %dx%d in %.1fms", path.c_str(), width, height, loadTimeMs);
 	return true;
+}
+
+bool Image::save(const string& path) const
+{
+	return stbi_write_png(path.c_str(), width, height, channels, (void*)&data[0], 0);
 }
