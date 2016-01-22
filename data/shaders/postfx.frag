@@ -75,7 +75,7 @@ void main()
 		hdrColor += texture(bloomMap, uv).rgb; // Bloom
 
 	// Vignette
-	if (vignette.x > 0) {
+	if (vignette.z > 0) {
 		float d = distance(uv, vec2(0.5, 0.5));
 		float vig = smoothstep(vignette.x, vignette.x - vignette.y, d);
 		hdrColor = mix(hdrColor, hdrColor * vig, vignette.z);

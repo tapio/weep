@@ -18,6 +18,7 @@ static const int pointsToWin = 3;
 static int s_winner = -1;
 static float s_resetTime = 0;
 static Tween s_dieAnim = Tween(0.25f, false);
+static Tween s_startAnim = Tween(0.35f, false);
 
 void begin(int dir) {
 	Entity cameraEnt = s_game->entities.get_entity_by_tag("camera");
@@ -52,6 +53,8 @@ void reset() {
 	s_points[1] = 0;
 	s_winner = -1;
 	s_resetTime = 5.f;
+	s_startAnim.reset();
+	s_game->entities.get_system<RenderSystem>().env().saturation = 0.f;
 	begin(glm::linearRand(0, 1) ? 1 : -1);
 }
 
@@ -145,8 +148,15 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			if (s_dieAnim.active()) {
 				s_dieAnim.update(s_game->engine.dt);
 				Environment& env = s_game->entities.get_system<RenderSystem>().env();
-				env.chromaticAberration =
-					s_dieAnim.active() ? 0.1f * (1.0f - easing::backInOut(s_dieAnim.t)) : 0.f;
+				env.chromaticAberration = s_dieAnim.active()
+					? 0.1f * (1.0f - easing::backInOut(s_dieAnim.t)) : 0.f;
+			}
+
+			if (s_startAnim.active()) {
+				s_startAnim.update(s_game->engine.dt);
+				Environment& env = s_game->entities.get_system<RenderSystem>().env();
+				env.vignette = s_startAnim.active()
+					? vec3(s_startAnim.t, 0.5f, 1.f) : vec3(0);
 			}
 
 			ScopedFont sf(s_game->entities, $id(pong_big));
@@ -158,6 +168,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			ImGui::End();
 
 			if (s_winner >= 0) {
+				s_game->entities.get_system<RenderSystem>().env().saturation = -1.f;
 				ImGui::SetNextWindowPosCenter();
 				ImGui::Begin("##Winner", NULL, ImGuiSystem::MinimalWindow);
 				ImGui::Text("%s Won!", s_names[s_winner]);

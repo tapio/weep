@@ -32,7 +32,7 @@ struct Environment
 	float fogDensity = 0.f;
 
 	// TODO: Probably put to some other "PostEffects" class?
-	vec3 vignette = vec3(0, 1, 1);
+	vec3 vignette = vec3(0.5, 0.5, 0.0); // Radius, smoothness, strength
 	float saturation = 0.f;
 	float sepia = 0.f;
 	float chromaticAberration = 0.f;
