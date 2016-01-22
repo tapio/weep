@@ -11,6 +11,7 @@
 #include "audio.hpp"
 #include "module.hpp"
 #include "gui.hpp"
+#include "image.hpp"
 #include "glrenderer/renderdevice.hpp"
 #include "game.hpp"
 #include <id/id.hpp>
@@ -71,6 +72,7 @@ int main(int argc, char* argv[])
 	bool running = true;
 	bool active = false;
 	bool reload = false;
+	bool screenshot = false;
 	bool autoReloadModules = true;
 	bool devtools = Engine::settings["devtools"].bool_value();
 	SDL_Event e;
@@ -137,8 +139,12 @@ int main(int argc, char* argv[])
 					}
 					continue;
 				}
-				else if (keysym.sym == SDLK_F12) {
+				else if (keysym.sym == SDLK_F11) {
 					devtools = !devtools;
+					continue;
+				}
+				else if (keysym.sym == SDLK_F12) {
+					screenshot = true;
 					continue;
 				}
 			}
@@ -360,6 +366,33 @@ int main(int argc, char* argv[])
 		//ImGui::ShowStyleEditor();
 
 		ImGui::Render();
+
+		if (screenshot) {
+			START_MEASURE(screenshotMs)
+			// Read
+			Image shot(Engine::width(), Engine::height(), 3);
+			glPixelStorei(GL_PACK_ALIGNMENT, 1);
+			glReadPixels(0, 0, shot.width, shot.height, GL_RGB, GL_UNSIGNED_BYTE, &shot.data[0]);
+			// Fix orientation
+			const int lineSize = shot.width * 3;
+			unsigned char* line_tmp = new unsigned char[lineSize];
+			unsigned char* line_a = &shot.data[0];
+			unsigned char* line_b = &shot.data[0] + (lineSize * (shot.height - 1));
+			while (line_a < line_b) {
+				memcpy(line_tmp, line_a, lineSize);
+				memcpy(line_a, line_b, lineSize);
+				memcpy(line_b, line_tmp, lineSize);
+				line_a += lineSize;
+				line_b -= lineSize;
+			}
+			// Save
+			string path = "screenshot_" + std::to_string(Engine::timems()) + ".png";
+			bool ret = shot.save(path.c_str());
+			END_MEASURE(screenshotMs)
+			if (ret) logInfo("Screenshot saved to %s (%.1fms)", path.c_str(), screenshotMs);
+			else logError("Screenshot failed!");
+			screenshot = false;
+		}
 
 		BEGIN_CPU_SAMPLE(swap)
 		game.engine.swap();
