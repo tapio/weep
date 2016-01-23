@@ -109,7 +109,7 @@ namespace ecs
 		Id = index + version (kinda).
 		*/
 		Entity(Id index = 0, Version version = 0) { id = (version << INDEX_BITS) | index; }
-
+		Entity(Id id_, Entities* entities_) { id = id_; entities = entities_; }
 		Entity(const Entity&) = default;
 		Entity& operator=(const Entity&) = default;
 
@@ -129,6 +129,11 @@ namespace ecs
 		Returns the version part of the id.
 		*/
 		Version get_version() const { return (id >> INDEX_BITS) & VERSION_MASK; }
+
+		/*
+		Returns the id.
+		*/
+		Id get_id() const { return id; }
 
 		/*
 		Kills the entity (destroyed when the world updates).
