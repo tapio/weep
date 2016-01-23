@@ -60,6 +60,9 @@ void PhysicsSystem::step(Entities& entities, float dt)
 			body.setCenterOfMassTransform(trans);
 		}
 	});
+	entities.for_each<ContactTracker>([&](Entity, ContactTracker& tracker) {
+		tracker.hadContact = false;
+	});
 
 	// Simulate
 	ASSERT(dynamicsWorld);
@@ -71,6 +74,33 @@ void PhysicsSystem::step(Entities& entities, float dt)
 		transform.position = convert(trans.getOrigin());
 		transform.rotation = convert(trans.getRotation());
 	});
+
+	// ContactTracker
+	int numManifolds = dispatcher->getNumManifolds();
+	for (int i = 0;i < numManifolds; i++)
+	{
+		btPersistentManifold* contactManifold =  dispatcher->getManifoldByIndexInternal(i);
+		const btCollisionObject* objA = contactManifold->getBody0();
+		const btCollisionObject* objB = contactManifold->getBody1();
+		int numContacts = contactManifold->getNumContacts();
+		if (numContacts) {
+			Entity entityA(objA->getUserIndex(), &entities);
+			Entity entityB(objB->getUserIndex(), &entities);
+			// TODO: Figure out a way to filter what contacts to tracks
+			if (entityA.has<ContactTracker>() && entityB.has<ContactTracker>()) {
+				entityA.get<ContactTracker>().hadContact = true;
+				entityB.get<ContactTracker>().hadContact = true;
+			}
+		}
+		/*for (int j = 0;j < numContacts; j++) {
+			btManifoldPoint& pt = contactManifold->getContactPoint(j);
+			if (pt.getDistance() < 0.f) {
+				const btVector3& ptA = pt.getPositionWorldOnA();
+				const btVector3& ptB = pt.getPositionWorldOnB();
+				const btVector3& normalOnB = pt.m_normalWorldOnB;
+			}
+		}*/
+	}
 
 	// GroundTracker
 	entities.for_each<GroundTracker, btRigidBody>([&](Entity, GroundTracker& tracker, btRigidBody& body) {

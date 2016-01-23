@@ -38,9 +38,17 @@ void AudioSystem::update(Entities& entities, Camera& camera)
 			sound.delta += length(sound.prevPos - trans.position);
 			sound.prevPos = trans.position;
 			if (sound.delta > sound.stepLength) {
-				play(sound.event);
+				play(sound.event, trans.position);
 				sound.delta = 0;
 			}
+		}
+	});
+
+	// Contact sounds
+	entities.for_each<ContactSound, Transform>([&](Entity e, ContactSound& sound, Transform& trans) {
+		ASSERT(e.has<ContactTracker>());
+		if (e.get<ContactTracker>().hadContact) {
+			play(sound.event, trans.position);
 		}
 	});
 

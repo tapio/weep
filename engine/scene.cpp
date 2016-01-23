@@ -464,6 +464,7 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 			body.setLinearFactor(convert(toVec3(bodyDef["linearFactor"])));
 		if (bodyDef["noGravity"].bool_value())
 			body.setFlags(body.getFlags() | BT_DISABLE_WORLD_GRAVITY);
+		body.setUserIndex(entity.get_id());
 		if (world->has_system<PhysicsSystem>())
 			world->get_system<PhysicsSystem>().add(entity);
 	}
@@ -484,6 +485,11 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 		entity.add<GroundTracker>();
 	}
 
+	if (def["trackContacts"].bool_value()) {
+		ASSERT(entity.has<btRigidBody>());
+		entity.add<ContactTracker>();
+	}
+
 	if (!def["moveSound"].is_null()) {
 		const Json& soundDef = def["moveSound"];
 		MoveSound sound;
@@ -493,6 +499,17 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 		ASSERT(sound.event);
 		ASSERT(entity.has<Transform>());
 		sound.prevPos = entity.get<Transform>().position;
+		entity.add(sound);
+	}
+
+	if (!def["contactSound"].is_null()) {
+		const Json& soundDef = def["contactSound"];
+		ContactSound sound;
+		if (soundDef["event"].is_string())
+			sound.event = id::hash(soundDef["event"].string_value());
+		ASSERT(sound.event);
+		ASSERT(entity.has<Transform>());
+		ASSERT(entity.has<ContactTracker>());
 		entity.add(sound);
 	}
 

@@ -50,6 +50,11 @@ struct GroundTracker
 	bool onGround = false;
 };
 
+struct ContactTracker
+{
+	bool hadContact = false;
+};
+
 struct Light
 {
 	enum Type {
@@ -78,4 +83,9 @@ struct MoveSound
 	float stepLength = 0.5f;
 	uint event = 0;
 	bool needsGroundContact = true;
+};
+
+struct ContactSound
+{
+	uint event = 0;
 };
