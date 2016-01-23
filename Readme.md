@@ -3,6 +3,13 @@ WeepEngine
 
 This is a small personal game engine. It's mainly a platform for me to experiment with OpenGL and perhaps build small game prototypes. While you can use it too under the MIT license, you probably shouldn't as it's incomplete, inefficient and buggy.
 
+![Reflections](docs/pics/shot_1.jpg)
+![Materials](docs/pics/shot_2.jpg)  
+![Pong](docs/pics/shot_3.jpg)
+![Level](docs/pics/shot_4.jpg)  
+![Debug](docs/pics/shot_5.jpg)
+![Skyrunner](docs/pics/shot_6.jpg)
+
 ## Features
 
 Many might be unpolished...
@@ -19,7 +26,7 @@ Many might be unpolished...
 	- #define based uber shader
 	- Automatic shader permutation generation based on material properties
 * Mesh loading from Wavefront .obj, Inter-Quake Model .iqm and heightmap images
-* Skeletal animation (GPU skinning)
+* Basic skeletal animation (GPU skinning)
 * Entity-component based architecture
 * Physics through Bullet dynamics library
 * Hotloadable gameplay code modules

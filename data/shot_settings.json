@@ -1,0 +1,20 @@
+{
+	"screen": {
+		"width": 400,
+		"height": 240,
+		"fullscreen": false
+	},
+	"renderer": {
+		"gldebug": false,
+		"glslversion": "400 core",
+		"vsync": true,
+		"msaa": 8,
+		"shadowMapSize": 2048,
+		"shadowCubeSize": 512,
+		"reflectionCubeSize": 512
+	},
+	"devtools": false,
+	"scene": "testscene.json",
+	"moddir": "../weep-media/",
+	"modules": [ "devtools", "settings", "testbed" ]
+}
