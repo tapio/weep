@@ -14,7 +14,8 @@ static Game* s_game = nullptr;
 static float s_pointsWindowWidth = 150.f;
 static int s_points[2] = {};
 static const char* s_names[] = { "Blue Player", "Red Player" };
-static const int pointsToWin = 3;
+static const int s_pointsToWin = 3;
+static const float s_ballMinVel = 14.f;
 static int s_winner = -1;
 static float s_resetTime = 0;
 static Tween s_dieAnim = Tween(0.25f, false);
@@ -119,10 +120,20 @@ EXPORT void ModuleFunc(uint msg, void* param)
 
 			Entity ball = s_game->entities.get_entity_by_tag("ball");
 			if (ball.is_alive() && s_winner < 0) {
+				// Ensure the ball keeps moving
+				btRigidBody& body = ball.get<btRigidBody>();
+				float vel2 = body.getLinearVelocity().length2();
+				if (vel2 > 0.f && vel2 < s_ballMinVel * s_ballMinVel) {
+					btVector3 vel = body.getLinearVelocity();
+					vel.normalize();
+					vel *= s_ballMinVel;
+					body.setLinearVelocity(vel);
+				}
+				// Check scoring
 				Transform& trans = ball.get<Transform>();
 				if (trans.position.x < -11) {
 					s_points[1]++;
-					if (s_points[1] >= pointsToWin) {
+					if (s_points[1] >= s_pointsToWin) {
 						audio.play($id(win));
 						s_winner = 1;
 					} else {
@@ -132,7 +143,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					}
 				} else if (trans.position.x > 11) {
 					s_points[0]++;
-					if (s_points[0] >= pointsToWin) {
+					if (s_points[0] >= s_pointsToWin) {
 						audio.play($id(win));
 						s_winner = 0;
 					} else {
