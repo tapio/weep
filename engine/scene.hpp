@@ -6,7 +6,7 @@ class Resources;
 class SceneLoader
 {
 public:
-
+	SceneLoader() {}
 	SceneLoader(Entities& entities): world(&entities) {}
 
 	void load(const string& path, Resources& resources);
@@ -14,7 +14,7 @@ public:
 
 	Entity instantiate(Json def, Resources& resources);
 
-	Entities* world;
+	Entities* world = nullptr;
 	std::map<string, Json> prefabs;
 
 private:

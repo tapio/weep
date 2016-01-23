@@ -16,5 +16,5 @@
 	"devtools": true,
 	"scene": "debugscene.json",
 	"moddir": "../weep-media/",
-	"modules": [ "logo", "testbed", "settings" ]
+	"modules": [ "logo", "devtools", "settings", "testbed" ]
 }
