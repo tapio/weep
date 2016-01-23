@@ -132,15 +132,6 @@ int main(int argc, char* argv[])
 					game.engine.vsync(!game.engine.vsync());
 					continue;
 				}
-				else if (keysym.sym == SDLK_F4) {
-					if (Engine::settings["moddir"].is_string()) {
-						static bool removeModDir = true;
-						if (removeModDir) resources.removePath(Engine::settings["moddir"].string_value());
-						else resources.addPath(Engine::settings["moddir"].string_value());
-						removeModDir = !removeModDir;
-					}
-					continue;
-				}
 				else if (keysym.sym == SDLK_F11) {
 					devtools = !devtools;
 					continue;
