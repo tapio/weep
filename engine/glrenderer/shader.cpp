@@ -88,7 +88,15 @@ bool ShaderProgram::link()
 	if (!infoLog.empty()) {
 		logWarning("Warning(s) linking program \"%s\":\n%s", name.c_str(), infoLog.c_str());
 	}
-
+	logDebug("Linked shader %d: \"%s\" (shader mask: %c%c%c%c%c%c)",
+		id, name.c_str(),
+		has(VERTEX_SHADER) ? 'v' : '-',
+		has(FRAGMENT_SHADER) ? 'f' : '-',
+		has(GEOMETRY_SHADER) ? 'g' : '-',
+		has(TESS_CONTROL_SHADER) ? 'c' : '-',
+		has(TESS_EVALUATION_SHADER) ? 'e' : '-',
+		has(COMPUTE_SHADER) ? 'C' : '-'
+	);
 	return true;
 }
 

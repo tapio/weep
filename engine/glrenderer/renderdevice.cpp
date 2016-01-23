@@ -244,16 +244,6 @@ void RenderDevice::loadShaders()
 
 		ASSERT(m_shaderNames.find(id::hash(it.first)) == m_shaderNames.end() && "Shader hash collision");
 		m_shaderNames[id::hash(it.first)] = m_shaders.size() - 1;
-		logDebug("Shader \"%s\" initialized as %d (shader mask: %c%c%c%c%c%c)",
-			it.first.c_str(),
-			program.id,
-			program.has(VERTEX_SHADER) ? 'v' : '-',
-			program.has(FRAGMENT_SHADER) ? 'f' : '-',
-			program.has(GEOMETRY_SHADER) ? 'g' : '-',
-			program.has(TESS_CONTROL_SHADER) ? 'c' : '-',
-			program.has(TESS_EVALUATION_SHADER) ? 'e' : '-',
-			program.has(COMPUTE_SHADER) ? 'C' : '-'
-		);
 	}
 	uint t1 = Engine::timems();
 	logDebug("Loaded %d shaders in %dms", m_shaders.size(), t1 - t0);
@@ -327,16 +317,6 @@ int RenderDevice::generateShader(uint tags)
 	int index = m_shaders.size() - 1;
 	//m_shaderNames[name] = index;
 	m_shaderTags[tags] = index;
-	logDebug("Shader \"%s\" initialized as %d (shader mask: %c%c%c%c%c%c)",
-		name.c_str(),
-		program.id,
-		program.has(VERTEX_SHADER) ? 'v' : '-',
-		program.has(FRAGMENT_SHADER) ? 'f' : '-',
-		program.has(GEOMETRY_SHADER) ? 'g' : '-',
-		program.has(TESS_CONTROL_SHADER) ? 'c' : '-',
-		program.has(TESS_EVALUATION_SHADER) ? 'e' : '-',
-		program.has(COMPUTE_SHADER) ? 'C' : '-'
-	);
 	return index;
 }
 
