@@ -3,7 +3,6 @@
 	"objects": [
 	{
 		"DISABLEDmaterial": {
-			"shaderName": "nsmap",
 			"diffuseMap": "debug/uvtestgrid.png",
 			"specularMap": "debug/uvtestgrid_specular.png",
 			"normalMap": "debug/uvtestgrid_normal.png",
@@ -19,7 +18,6 @@
 		"scale": [ 0.1, 0.5, 0.1 ]
 	},{
 		"material": {
-			"shaderName": "nsmap",
 			"diffuseMap": "debug/uvtestgrid.png",
 			"specularMap": "debug/uvtestgrid_specular.png",
 			"normalMap": "debug/uvtestgrid_normal.png",
@@ -102,7 +100,6 @@
 	},{
 		"prefab": "testcube",
 		"material": {
-			"shaderName": "nsemap",
 			"emissive": 1.0,
 			"emissionMap": "debug/uvtestgrid_emission.png"
 		},
@@ -111,7 +108,6 @@
 	},{
 		"prefab": "testcube",
 		"material": {
-			"shaderName": "parallax",
 			"heightMap": "debug/uvtestgrid_height.png",
 			"parallax": 0.1,
 			"ambient": 0.02

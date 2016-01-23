@@ -116,20 +116,6 @@
 			"frag": "shaders/core.frag"
 		}
 	},
-	"anim": {
-		"defines": [
-			"USE_FOG",
-			"USE_DIFFUSE",
-			"USE_DIFFUSE_MAP",
-			"USE_SPECULAR",
-			"USE_SHADOW_MAP",
-			"USE_SKINNING"
-		],
-		"shaders" : {
-			"vert": "shaders/core.vert",
-			"frag": "shaders/core.frag"
-		}
-	},
 	"basic": {
 		"defines": [
 			"USE_DIFFUSE_MAP"
@@ -163,105 +149,6 @@
 		],
 		"shaders" : {
 			"vert": "shaders/core.vert",
-			"frag": "shaders/core.frag"
-		}
-	},
-	"nsmap": {
-		"defines": [
-			"USE_FOG",
-			"USE_DIFFUSE",
-			"USE_SPECULAR",
-			"USE_DIFFUSE_MAP",
-			"USE_SPECULAR_MAP",
-			"USE_NORMAL_MAP",
-			"USE_SHADOW_MAP"
-		],
-		"shaders" : {
-			"vert": "shaders/core.vert",
-			"frag": "shaders/core.frag"
-		}
-	},
-	"nsamap": {
-		"defines": [
-			"USE_FOG",
-			"USE_DIFFUSE",
-			"USE_SPECULAR",
-			"USE_DIFFUSE_MAP",
-			"USE_SPECULAR_MAP",
-			"USE_NORMAL_MAP",
-			"USE_ALPHA_TEST",
-			"USE_SHADOW_MAP"
-		],
-		"shaders" : {
-			"vert": "shaders/core.vert",
-			"frag": "shaders/core.frag"
-		}
-	},
-	"nsemap": {
-		"defines": [
-			"USE_FOG",
-			"USE_DIFFUSE",
-			"USE_SPECULAR",
-			"USE_DIFFUSE_MAP",
-			"USE_SPECULAR_MAP",
-			"USE_NORMAL_MAP",
-			"USE_EMISSION_MAP",
-			"USE_SHADOW_MAP"
-		],
-		"shaders" : {
-			"vert": "shaders/core.vert",
-			"frag": "shaders/core.frag"
-		}
-	},
-	"nsrmap": {
-		"defines": [
-			"USE_FOG",
-			"USE_DIFFUSE",
-			"USE_SPECULAR",
-			"USE_DIFFUSE_MAP",
-			"USE_SPECULAR_MAP",
-			"XXXUSE_NORMAL_MAP",
-			"USE_ENV_MAP",
-			"XXXUSE_REFLECTION_MAP",
-			"USE_SHADOW_MAP"
-		],
-		"shaders" : {
-			"vert": "shaders/core.vert",
-			"frag": "shaders/core.frag"
-		}
-	},
-	"parallax": {
-		"defines": [
-			"USE_FOG",
-			"USE_DIFFUSE",
-			"USE_SPECULAR",
-			"USE_DIFFUSE_MAP",
-			"USE_SPECULAR_MAPXXX",
-			"USE_NORMAL_MAPXXX",
-			"USE_PARALLAX_MAP",
-			"USE_SHADOW_MAP"
-		],
-		"shaders" : {
-			"vert": "shaders/core.vert",
-			"frag": "shaders/core.frag"
-		}
-	},
-	"nstess": {
-		"version": "430",
-		"defines": [
-			"USE_FOG",
-			"USE_TESSELLATION",
-			"USE_DIFFUSE",
-			"USE_SPECULAR",
-			"USE_DIFFUSE_MAP",
-			"USE_SPECULAR_MAP",
-			"USE_NORMAL_MAP",
-			"USE_SHADOW_MAP"
-		],
-		"shaders" : {
-			"vert": "shaders/core.vert",
-			"tesc": "shaders/core.tesc",
-			"tese": "shaders/core.tese",
 			"frag": "shaders/core.frag"
 		}
 	},
