@@ -122,11 +122,17 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			if (ball.is_alive() && s_winner < 0) {
 				// Ensure the ball keeps moving
 				btRigidBody& body = ball.get<btRigidBody>();
-				float vel2 = body.getLinearVelocity().length2();
+				btVector3 vel = body.getLinearVelocity();
+				float vel2 = vel.length2();
 				if (vel2 > 0.f && vel2 < s_ballMinVel * s_ballMinVel) {
-					btVector3 vel = body.getLinearVelocity();
 					vel.normalize();
 					vel *= s_ballMinVel;
+					body.setLinearVelocity(vel);
+				}
+				vel = body.getLinearVelocity();
+				float xvel = vel.x();
+				if (glm::abs(xvel < 2.f)) {
+					vel.setX(xvel + 2.f * s_game->engine.dt * glm::sign(xvel));
 					body.setLinearVelocity(vel);
 				}
 				// Check scoring
