@@ -14,6 +14,7 @@
 #include "image.hpp"
 #include "glrenderer/renderdevice.hpp"
 #include "game.hpp"
+#include "args.hpp"
 #include <id/id.hpp>
 #include <SDL.h>
 
@@ -53,18 +54,19 @@ void reloadShaders(Game& game)
 
 int main(int argc, char* argv[])
 {
+	Args args(argc, argv);
 	Game game;
 	Resources& resources = game.resources;
-	resources.addPath("../data/");
-	game.engine.init(resources.findPath("settings.json"));
+	resources.addPath(args.arg<string>(' ', "data", "../data/"));
+	game.engine.init(resources.findPath(args.arg<string>('c', "config", "settings.json")));
 	if (Engine::settings["moddir"].is_string())
 		resources.addPath(Engine::settings["moddir"].string_value());
 
 	SceneLoader scene(game.entities);
 
 	char scenePath[128] = "testscene.json";
-	if (argc == 2)
-		strncpy(scenePath, argv[1], countof(scenePath));
+	if (argc > 1 && argv[argc-1][0] != '-')
+		strncpy(scenePath, argv[argc-1], countof(scenePath));
 	else if (Engine::settings["scene"].is_string())
 		strncpy(scenePath, Engine::settings["scene"].string_value().c_str(), countof(scenePath));
 	init(game, scene, scenePath);
@@ -74,7 +76,7 @@ int main(int argc, char* argv[])
 	bool reload = false;
 	bool screenshot = false;
 	bool autoReloadModules = true;
-	bool devtools = Engine::settings["devtools"].bool_value();
+	bool devtools = args.opt('d', "dev") || Engine::settings["devtools"].bool_value();
 	SDL_Event e;
 	while (running) {
 		BEGIN_CPU_SAMPLE(MainLoop)
