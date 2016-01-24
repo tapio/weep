@@ -9,7 +9,7 @@ VERTEX_DATA(out, outData[]);
 float calculateTessLevel(float dist)
 {
 	const float minLevel = 1.f;
-	const float maxLevel = 8.f;
+	const float maxLevel = 4.f;
 	const float minDist = 1.f;
 	const float maxDist = 12.f;
 	float d = clamp(dist, minDist, maxDist);
