@@ -130,7 +130,10 @@ namespace glm
 	// -- Unary bit operators --
 
 	template <typename T, precision P>
-	GLM_FUNC_DECL tquat<T, P> operator-(tquat<T, P> const & q);
+	GLM_FUNC_DECL tdualquat<T, P> operator+(tdualquat<T, P> const & q);
+
+	template <typename T, precision P>
+	GLM_FUNC_DECL tdualquat<T, P> operator-(tdualquat<T, P> const & q);
 
 	// -- Binary operators --
 
@@ -292,6 +295,16 @@ namespace glm
 #endif
 
 	/// @}
+
+	// -- Is type --
+
+	template <typename T, precision P>
+	struct type<T, P, tdualquat>
+	{
+		static bool const is_vec = false;
+		static bool const is_mat = false;
+		static bool const is_quat = true;
+	};
 } //namespace glm
 
 #include "dual_quaternion.inl"

@@ -57,6 +57,11 @@ namespace glm
 			static GLM_RELAXED_CONSTEXPR precision prec = P;
 #		endif//GLM_META_PROG_HELPERS
 
+#		ifdef GLM_STATIC_CONST_MEMBERS
+			static const type ZERO;
+			static const type IDENTITY;
+#		endif
+
 	private:
 		col_type value[3];
 
@@ -156,7 +161,10 @@ namespace glm
 	// -- Unary operators --
 
 	template <typename T, precision P>
-	GLM_FUNC_DECL tmat3x2<T, P> const operator-(tmat3x2<T, P> const & m);
+	GLM_FUNC_DECL tmat3x2<T, P> operator+(tmat3x2<T, P> const & m);
+
+	template <typename T, precision P>
+	GLM_FUNC_DECL tmat3x2<T, P> operator-(tmat3x2<T, P> const & m);
 
 	// -- Binary operators --
 
@@ -206,6 +214,16 @@ namespace glm
 
 	template <typename T, precision P>
 	GLM_FUNC_DECL bool operator!=(tmat3x2<T, P> const & m1, tmat3x2<T, P> const & m2);
+
+	// -- Is type --
+
+	template <typename T, precision P>
+	struct type<T, P, tmat3x2>
+	{
+		static bool const is_vec = false;
+		static bool const is_mat = true;
+		static bool const is_quat = false;
+	};
 }//namespace glm
 
 #ifndef GLM_EXTERNAL_TEMPLATE

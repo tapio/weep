@@ -58,6 +58,17 @@ namespace glm
 			static GLM_RELAXED_CONSTEXPR precision prec = P;
 #		endif//GLM_META_PROG_HELPERS
 
+#		ifdef GLM_STATIC_CONST_MEMBERS
+		static const type ZERO;
+		static const type X;
+		static const type Y;
+		static const type Z;
+		static const type XY;
+		static const type XZ;
+		static const type YZ;
+		static const type XYZ;
+#		endif
+
 		// -- Data --
 
 #		if GLM_HAS_ANONYMOUS_UNION
@@ -253,6 +264,9 @@ namespace glm
 	// -- Unary operators --
 
 	template <typename T, precision P>
+	GLM_FUNC_DECL tvec3<T, P> operator+(tvec3<T, P> const & v);
+
+	template <typename T, precision P>
 	GLM_FUNC_DECL tvec3<T, P> operator-(tvec3<T, P> const & v);
 
 	// -- Binary operators --
@@ -417,6 +431,22 @@ namespace glm
 
 	template <typename T, precision P>
 	GLM_FUNC_DECL bool operator!=(tvec3<T, P> const & v1, tvec3<T, P> const & v2);
+
+	template <precision P>
+	GLM_FUNC_DECL tvec3<bool, P> operator&&(tvec3<bool, P> const & v1, tvec3<bool, P> const & v2);
+
+	template <precision P>
+	GLM_FUNC_DECL tvec3<bool, P> operator||(tvec3<bool, P> const & v1, tvec3<bool, P> const & v2);
+
+	// -- Is type --
+
+	template <typename T, precision P>
+	struct type<T, P, tvec3>
+	{
+		static bool const is_vec = true;
+		static bool const is_mat = false;
+		static bool const is_quat = false;
+	};
 }//namespace glm
 
 #ifndef GLM_EXTERNAL_TEMPLATE
