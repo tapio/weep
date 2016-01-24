@@ -814,6 +814,7 @@ void RenderDevice::postRender()
 	m_postProcessBlock.uniforms.tonemap = m_env->tonemap;
 	m_postProcessBlock.uniforms.exposure = m_env->exposure;
 	m_postProcessBlock.uniforms.saturation = m_env->saturation;
+	m_postProcessBlock.uniforms.postAA = m_env->postAA;
 	m_postProcessBlock.uniforms.chromaticAberration = m_env->chromaticAberration;
 	m_postProcessBlock.uniforms.sepia = m_env->sepia;
 	m_postProcessBlock.uniforms.vignette = m_env->vignette;

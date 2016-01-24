@@ -37,6 +37,11 @@ struct Environment
 	float sepia = 0.f;
 	float chromaticAberration = 0.f;
 	float scanlines = 0.f;
+	enum PostProcessAA {
+		POST_AA_NONE,
+		POST_AA_FXAA,
+		POST_AA_COUNT
+	} postAA;
 
 	struct Image* skybox[6] = {};
 };

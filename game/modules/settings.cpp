@@ -60,6 +60,8 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				renderer.device().resizeRenderTargets();
 			}
 
+			ImGui::Checkbox("FXAA", (bool*)&renderer.env().postAA);
+			ImGui::SameLine();
 			ImGui::Checkbox("Shadows", &renderer.settings.shadows);
 			break;
 		}
