@@ -6,15 +6,21 @@ VERTEX_DATA(out, outData[]);
 
 #define ID gl_InvocationID
 
+vec2 project(vec3 p)
+{
+	vec4 res = projectionMatrix * vec4(p, 1.0);
+	return res.xy / res.w * 0.5 + 0.5;
+}
+
 float calculateTessLevel(float dist)
 {
-	const float minLevel = 1.f;
-	const float maxLevel = 4.f;
-	const float minDist = 1.f;
-	const float maxDist = 12.f;
+	const float minLevel = 1.0;
+	const float maxLevel = 4.0;
+	const float minDist = 0.04;
+	const float maxDist = 0.1;
 	float d = clamp(dist, minDist, maxDist);
 	float alpha = 1.0 - (d - minDist) / (maxDist - minDist);
-	return mix(minLevel, maxLevel, alpha * alpha * alpha);
+	return mix(maxLevel, minLevel, alpha * alpha);
 }
 
 void main()
@@ -31,13 +37,12 @@ void main()
 #endif
 
 	// Set tessellation levels
-	const int idA = (ID + 1) % 3;
-	const int idB = (ID + 2) % 3;
-	const vec3 camPos = cameraPosition;
-	float distA = distance(camPos, inData[idA].worldPosition);
-	float distB = distance(camPos, inData[idB].worldPosition);
-	gl_TessLevelOuter[ID] = calculateTessLevel((distA + distB) * 0.5);
+	const int idA = (ID + 0) % 3;
+	const int idB = (ID + 1) % 3;
+	float dist = distance(project(inData[idA].position), project(inData[idB].position));
+	gl_TessLevelOuter[ID] = calculateTessLevel(dist);
+	barrier();
 	if (ID == 0)
-		gl_TessLevelInner[0] = gl_TessLevelOuter[0];
+		gl_TessLevelInner[0] = (gl_TessLevelOuter[0] + gl_TessLevelOuter[1] + gl_TessLevelOuter[2]) / 3.0;
 }
 
