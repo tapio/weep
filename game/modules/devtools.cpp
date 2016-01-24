@@ -3,6 +3,7 @@
 #include "camera.hpp"
 #include "glrenderer/renderdevice.hpp"
 #include "physics.hpp"
+#include "audio.hpp"
 #include "gui.hpp"
 #include "module.hpp"
 #include "../game.hpp"
@@ -43,6 +44,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			if (ImGui::Begin("Debug")) {
 				RenderSystem& renderer = game.entities.get_system<RenderSystem>();
 				PhysicsSystem& physics = game.entities.get_system<PhysicsSystem>();
+				AudioSystem& audio = game.entities.get_system<AudioSystem>();
 				ModuleSystem& modules = game.entities.get_system<ModuleSystem>();
 				Entity cameraEnt = game.entities.get_entity_by_tag("camera");
 				Controller& controller = cameraEnt.get<Controller>();
@@ -70,6 +72,12 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					ImGui::Text("Triangles:    %d", stats.triangles);
 					ImGui::Text("Programs:     %d", stats.programs);
 					ImGui::Text("Draw calls:   %d", stats.drawCalls);
+					ImGui::Separator();
+					ImGui::Text("Voices:       %d/%d (%d)",
+						audio.soloud->getActiveVoiceCount(),
+						audio.soloud->getMaxActiveVoiceCount(),
+						audio.soloud->getVoiceCount());
+					ImGui::Separator();
 					ImGui::Checkbox("ImGui Metrics", &imguiMetrics);
 				}
 				if (ImGui::CollapsingHeader("Camera")) {
