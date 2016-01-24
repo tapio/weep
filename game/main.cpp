@@ -137,9 +137,8 @@ int main(int argc, char* argv[])
 			modules.call($id(INPUT), &e);
 		}
 
-		if (imgui.usingKeyboard())
-			controller.enabled = false;
-		controller.update(game.engine.dt);
+		if (!imgui.usingKeyboard())
+			controller.update(game.engine.dt);
 
 		// Modules
 		START_MEASURE(moduleTimeMs)
