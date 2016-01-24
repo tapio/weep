@@ -207,8 +207,6 @@ EXPORT void ModuleFunc(uint msg, void* param)
 
 			if (imguiMetrics)
 				ImGui::ShowMetricsWindow();
-			//ImGui::ShowTestWindow();
-			//ImGui::ShowStyleEditor();
 
 			break;
 		}

@@ -181,6 +181,8 @@ int main(int argc, char* argv[])
 
 		if (devtools)
 			modules.call($id(devtools), $id(DRAW_DEVTOOLS), &game);
+		//ImGui::ShowTestWindow();
+		//ImGui::ShowStyleEditor();
 
 		ImGui::Render();
 
