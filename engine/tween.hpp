@@ -43,6 +43,13 @@ struct Tween
   Jesse Crossen (http://stackoverflow.com/questions/5161465/how-to-create-custom-easing-function-with-core-animation)
 */
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846 /* pi */
+#endif
+#ifndef M_PI_2
+#define M_PI_2 1.57079632679489661923 /* pi/2 */
+#endif
+
 namespace easing {
 
 	template <typename T> T ease(T a, T b, T t) {
