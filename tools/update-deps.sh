@@ -37,14 +37,29 @@ git clone --depth=1 https://github.com/bulletphysics/bullet3 "$BULLETPATH"
 
 rm -r "bullet"
 mkdir -p "bullet"
-cp -r "$BULLETPATH/src/BulletCollision" "bullet/"
-cp -r "$BULLETPATH/src/BulletDynamics" "bullet/"
-#cp -r "$BULLETPATH/src/BulletSoftBody" "bullet/"
-cp -r "$BULLETPATH/src/LinearMath" "bullet/"
-cp "$BULLETPATH/src/btBulletCollisionCommon.h" "bullet/"
-cp "$BULLETPATH/src/btBulletDynamicsCommon.h" "bullet/"
-cp "$BULLETPATH/LICENSE.txt" "bullet/"
-rm -r "bullet/BulletDynamics/Featherstone"
-rm -r "bullet/BulletDynamics/MLCPSolvers"
+cp -vr "$BULLETPATH/src/BulletCollision" "bullet/"
+cp -vr "$BULLETPATH/src/BulletDynamics" "bullet/"
+#cp -vr "$BULLETPATH/src/BulletSoftBody" "bullet/"
+cp -vr "$BULLETPATH/src/LinearMath" "bullet/"
+cp -v "$BULLETPATH/src/btBulletCollisionCommon.h" "bullet/"
+cp -v "$BULLETPATH/src/btBulletDynamicsCommon.h" "bullet/"
+cp -v "$BULLETPATH/LICENSE.txt" "bullet/"
+rm -vr "bullet/BulletDynamics/Featherstone"
+rm -vr "bullet/BulletDynamics/MLCPSolvers"
 find bullet -type f \( -name 'CMakeLists.txt' -o -name 'premake4.lua' \) -delete
+
+# SoLoud
+SOLOUDPATH=/tmp/soloud
+rm -rf "$SOLOUDPATH"
+git clone --depth=1 https://github.com/jarikomppa/soloud "$SOLOUDPATH"
+
+rm -r soloud
+mkdir -p soloud/src/audiosource soloud/src/backend
+cp -v "$SOLOUDPATH/LICENSE" "soloud/"
+cp -vr "$SOLOUDPATH/include/" "soloud/"
+cp -vr "$SOLOUDPATH/src/audiosource/wav/" "soloud/src/audiosource/"
+cp -vr "$SOLOUDPATH/src/backend/null/" "soloud/src/backend/"
+cp -vr "$SOLOUDPATH/src/backend/sdl2_static/" "soloud/src/backend/"
+cp -vr "$SOLOUDPATH/src/core/" "soloud/src/"
+cp -vr "$SOLOUDPATH/src/filter/" "soloud/src/"
 
