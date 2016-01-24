@@ -31,16 +31,13 @@ void main()
 #endif
 
 	// Set tessellation levels
-	if (ID == 0) {
-		const vec3 camPos = cameraPosition;
-		float dist0 = distance(camPos, inData[0].worldPosition);
-		float dist1 = distance(camPos, inData[1].worldPosition);
-		float dist2 = distance(camPos, inData[2].worldPosition);
-		gl_TessLevelOuter[0] = calculateTessLevel((dist1 + dist2) * 0.5);
-		gl_TessLevelOuter[1] = calculateTessLevel((dist2 + dist0) * 0.5);
-		gl_TessLevelOuter[2] = calculateTessLevel((dist0 + dist1) * 0.5);
-		gl_TessLevelInner[0] = gl_TessLevelOuter[2];
-
-	}
+	const int idA = (ID + 1) % 3;
+	const int idB = (ID + 2) % 3;
+	const vec3 camPos = cameraPosition;
+	float distA = distance(camPos, inData[idA].worldPosition);
+	float distB = distance(camPos, inData[idB].worldPosition);
+	gl_TessLevelOuter[ID] = calculateTessLevel((distA + distB) * 0.5);
+	if (ID == 0)
+		gl_TessLevelInner[0] = gl_TessLevelOuter[0];
 }
 
