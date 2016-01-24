@@ -1,5 +1,0 @@
-* Only includes "wav" audiosource
-* Only includes "null" and "sdl2_static" backends
-* No c_api, no tools
-* All includes are present though
-

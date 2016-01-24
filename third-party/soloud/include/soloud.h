@@ -32,7 +32,7 @@ freely, subject to the following restrictions:
 #define M_PI 3.14159265359
 #endif
 
-#if defined(_MSC_VER) || defined(_WIN32)
+#ifdef _MSC_VER
 #define WINDOWS_VERSION
 #endif
 
@@ -42,7 +42,7 @@ freely, subject to the following restrictions:
 #endif
 #endif
 
-#define SOLOUD_VERSION 110
+#define SOLOUD_VERSION 111
 
 /////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
@@ -134,6 +134,7 @@ namespace SoLoud
 			ALSA,
 			OSS,
 			OPENAL,
+			COREAUDIO,
 			OPENSLES,
 			NULLDRIVER,
 			BACKEND_MAX,
@@ -344,13 +345,14 @@ namespace SoLoud
 
 		// Rest of the stuff is used internally.
 
-		// Mix N samples * M channels. Called by other mix_ functions. 
-		void mix_internal(unsigned int aSamples);
 		// Returns mixed float samples in buffer. Called by the back-end, or user with null driver.
 		void mix(float *aBuffer, unsigned int aSamples);
 		// Returns mixed 16-bit signed integer samples in buffer. Called by the back-end, or user with null driver.
-		void mix_s16(short *aBuffer, unsigned int aSamples);
+		void mixSigned16(short *aBuffer, unsigned int aSamples);
 	public:
+		// Mix N samples * M channels. Called by other mix_ functions. 
+		void mix_internal(unsigned int aSamples);
+
 		// Handle rest of initialization (called from backend)
 		void postinit(unsigned int aSamplerate, unsigned int aBufferSize, unsigned int aFlags, unsigned int aChannels);
 

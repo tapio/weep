@@ -110,13 +110,13 @@ namespace SoLoud
 				{
 					if (j == 0)
 					{
-						aBuffer[i] = ((signed char)aFile->read8()) / (float)0x80;
+						aBuffer[i] = ((signed)aFile->read8() - 128) / (float)0x80;
 					}
 					else
 					{
 						if (aChannels > 1 && j == 1)
 						{
-							aBuffer[i + aPitch] = ((signed char)aFile->read8()) / (float)0x80;
+							aBuffer[i + aPitch] = ((signed)aFile->read8() - 128) / (float)0x80;
 						}
 						else
 						{
@@ -242,11 +242,12 @@ namespace SoLoud
 					mLoopCount++;
 				}
 				else
-				{
+				{					
 					unsigned int i;
 					for (i = 0; i < channels; i++)
 						memset(aBuffer + copysize + i * aSamples, 0, sizeof(float) * (aSamples - copysize));
-					mOffset += aSamples - copysize;
+						
+					mOffset += aSamples;
 				}
 			}
 			else
@@ -288,7 +289,6 @@ namespace SoLoud
 		mOgg = 0;
 		mDataOffset = 0;
 		mBits = 0;
-		mChannels = 0;
 		mMemFile = 0;
 		mStreamFile = 0;
 	}
@@ -347,6 +347,8 @@ namespace SoLoud
 
 		int readchannels = 1;
 
+		mChannels = channels;
+
 		if (channels > 1)
 		{
 			readchannels = 2;
@@ -359,7 +361,6 @@ namespace SoLoud
 		
 		mDataOffset = fp->pos();
 		mBits = bitspersample;
-		mChannels = channels;	
 		mBaseSamplerate = (float)samplerate;
 		mSampleCount = samples;
 		mOgg = 0;
@@ -376,6 +377,7 @@ namespace SoLoud
 		if (v == NULL)
 			return FILE_LOAD_FAILED;
 		stb_vorbis_info info = stb_vorbis_get_info(v);
+		mChannels = 1;
 		if (info.channels > 1)
 		{
 			mChannels = 2;

@@ -37,7 +37,7 @@
 #pragma clang diagnostic ignored "-Wfloat-equal"            // warning : comparing floating point with == or != is unsafe   // storing and comparing against same constants ok.
 #pragma clang diagnostic ignored "-Wglobal-constructors"    // warning : declaration requires a global destructor           // similar to above, not sure what the exact difference it.
 #pragma clang diagnostic ignored "-Wsign-conversion"        // warning : implicit conversion changes signedness             //
-#pragma clang diagnostic ignored "-Wreserved-id-macro"      // warning : macro name is a reserved identifier                //
+//#pragma clang diagnostic ignored "-Wreserved-id-macro"    // warning : macro name is a reserved identifier                //
 #endif
 #ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wunused-function"          // warning: 'xxxx' defined but not used
@@ -344,6 +344,7 @@ void ImDrawList::PrimReserve(int idx_count, int vtx_count)
     _IdxWritePtr = IdxBuffer.Data + idx_buffer_size;
 }
 
+// Fully unrolled with inline call to keep our debug builds decently fast.
 void ImDrawList::PrimRect(const ImVec2& a, const ImVec2& c, ImU32 col)
 {
     ImVec2 b(c.x, a.y), d(a.x, c.y), uv(GImGui->FontTexUvWhitePixel);
