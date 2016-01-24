@@ -42,7 +42,7 @@ namespace unistd {
 #define ANSI_BACKGROUND_CYAN      "\033[46m"
 #define ANSI_BACKGROUND_WHITE     "\033[47m"
 
-static void printColorized(std::ostream* out, const std::string msg, const char* color) {
+static void printColorized(std::ostream* out, const std::string& msg, const char* color) {
 #if defined(_WIN32) || defined(WIN32)
 	*out << msg << std::endl; // Usually no ANSI escape support on Windows
 #else

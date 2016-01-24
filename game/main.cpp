@@ -206,6 +206,7 @@ int main(int argc, char* argv[])
 			// Save
 			string path = "screenshot_" + std::to_string(Engine::timems()) + ".png";
 			bool ret = shot.save(path.c_str());
+			delete[] line_tmp;
 			END_MEASURE(screenshotMs)
 			if (ret) logInfo("Screenshot saved to %s (%.1fms)", path.c_str(), screenshotMs);
 			else logError("Screenshot failed!");
