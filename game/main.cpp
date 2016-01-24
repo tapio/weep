@@ -141,19 +141,19 @@ int main(int argc, char* argv[])
 			controller.update(game.engine.dt);
 
 		// Modules
-		START_MEASURE(moduleTimeMs)
+		BEGIN_CPU_SAMPLE(moduleTime)
 		modules.call($id(UPDATE), &game);
-		END_MEASURE(moduleTimeMs)
+		END_CPU_SAMPLE()
 
 		// Animation
-		START_MEASURE(animTimeMs)
+		BEGIN_CPU_SAMPLE(animTime)
 		animation.update(game.entities, game.engine.dt);
-		END_MEASURE(animTimeMs)
+		END_CPU_SAMPLE()
 
 		// Physics
-		START_MEASURE(physTimeMs)
+		BEGIN_CPU_SAMPLE(physTime)
 		physics.step(game.entities, game.engine.dt);
-		END_MEASURE(physTimeMs)
+		END_CPU_SAMPLE()
 
 		if (cameraEnt.has<btRigidBody>()) {
 			btRigidBody& body = cameraEnt.get<btRigidBody>();
@@ -167,16 +167,16 @@ int main(int argc, char* argv[])
 			camera.rotation = controller.rotation;
 
 		// Audio
-		START_MEASURE(audioTimeMs)
+		BEGIN_CPU_SAMPLE(audioTime)
 		audio.update(game.entities, camera);
-		END_MEASURE(audioTimeMs)
+		END_CPU_SAMPLE()
 
 		// Graphics
-		START_MEASURE(renderTimeMs)
+		BEGIN_CPU_SAMPLE(renderTimeMs)
 		BEGIN_GPU_SAMPLE(GPURender)
 		renderer.render(game.entities, camera);
 		END_GPU_SAMPLE()
-		END_MEASURE(renderTimeMs)
+		END_CPU_SAMPLE()
 
 		if (devtools)
 			modules.call($id(devtools), $id(DRAW_DEVTOOLS), &game);
