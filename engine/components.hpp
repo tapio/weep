@@ -1,5 +1,6 @@
 #pragma once
 #include "common.hpp"
+#include "material.hpp"
 
 struct Transform
 {
@@ -42,7 +43,7 @@ struct Model
 {
 	Bounds bounds;
 	struct Geometry* geometry = nullptr;
-	std::vector<struct Material*> materials;
+	std::vector<Material> materials;
 };
 
 struct GroundTracker

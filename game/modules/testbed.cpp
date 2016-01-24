@@ -27,7 +27,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				if (e.has<Transform>())
 					e.get<Transform>().position = light.position;
 				if (e.has<Model>())
-					e.get<Model>().materials[0]->emissive = light.color * 1.f;
+					e.get<Model>().materials[0].emissive = light.color * 1.f;
 				lightIndex++;
 			});
 #endif

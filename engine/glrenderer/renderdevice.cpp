@@ -586,7 +586,7 @@ void RenderDevice::renderShadow(Model& model, Transform& transform, BoneAnimatio
 	for (auto& batch : geom.batches) {
 
 		ASSERT(batch.materialIndex <= model.materials.size());
-		Material& mat = *model.materials[batch.materialIndex];
+		Material& mat = model.materials[batch.materialIndex];
 		if (!(mat.flags & Material::CAST_SHADOW))
 			continue;
 
@@ -671,7 +671,7 @@ void RenderDevice::render(Model& model, Transform& transform, BoneAnimation* ani
 	for (auto& batch : geom.batches) {
 
 		ASSERT(batch.materialIndex < model.materials.size());
-		Material& mat = *model.materials[batch.materialIndex];
+		Material& mat = model.materials[batch.materialIndex];
 		ASSERT(mat.shaderId[m_tech] >= 0);
 
 		useProgram(m_shaders[mat.shaderId[m_tech]]);

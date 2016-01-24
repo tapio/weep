@@ -96,47 +96,47 @@ namespace {
 			dst = src.string_value();
 	}
 
-	Material* parseMaterial(Material* material, const Json& def, Resources& resources) {
+	Material& parseMaterial(Material& material, const Json& def, Resources& resources) {
 		ASSERT(def.is_object());
-		setString(material->shaderName, def["shaderName"]);
-		setFlag(material->flags, Material::TESSELLATE, def["tessellate"]);
-		setFlag(material->flags, Material::CAST_SHADOW, def["castShadow"]);
-		setFlag(material->flags, Material::RECEIVE_SHADOW, def["receiveShadow"]);
-		setFlag(material->flags, Material::ANIMATED, def["animated"]);
-		setFlag(material->flags, Material::ALPHA_TEST, def["alphaTest"]);
-		setColor(material->ambient, def["ambient"]);
-		setColor(material->diffuse, def["diffuse"]);
-		setColor(material->specular, def["specular"]);
-		setColor(material->emissive, def["emissive"]);
-		setNumber(material->shininess, def["shininess"]);
-		setNumber(material->reflectivity, def["reflectivity"]);
-		setNumber(material->parallax, def["parallax"]);
+		setString(material.shaderName, def["shaderName"]);
+		setFlag(material.flags, Material::TESSELLATE, def["tessellate"]);
+		setFlag(material.flags, Material::CAST_SHADOW, def["castShadow"]);
+		setFlag(material.flags, Material::RECEIVE_SHADOW, def["receiveShadow"]);
+		setFlag(material.flags, Material::ANIMATED, def["animated"]);
+		setFlag(material.flags, Material::ALPHA_TEST, def["alphaTest"]);
+		setColor(material.ambient, def["ambient"]);
+		setColor(material.diffuse, def["diffuse"]);
+		setColor(material.specular, def["specular"]);
+		setColor(material.emissive, def["emissive"]);
+		setNumber(material.shininess, def["shininess"]);
+		setNumber(material.reflectivity, def["reflectivity"]);
+		setNumber(material.parallax, def["parallax"]);
 
 		if (!def["uvOffset"].is_null())
-			material->uvOffset = toVec2(def["uvOffset"]);
+			material.uvOffset = toVec2(def["uvOffset"]);
 		if (!def["uvRepeat"].is_null())
-			material->uvRepeat = toVec2(def["uvRepeat"]);
+			material.uvRepeat = toVec2(def["uvRepeat"]);
 
 		if (!def["diffuseMap"].is_null()) {
-			material->map[Material::DIFFUSE_MAP] = resources.getImageAsync(def["diffuseMap"].string_value());
-			material->map[Material::DIFFUSE_MAP]->sRGB = true;
+			material.map[Material::DIFFUSE_MAP] = resources.getImageAsync(def["diffuseMap"].string_value());
+			material.map[Material::DIFFUSE_MAP]->sRGB = true;
 		}
 		if (!def["specularMap"].is_null()) {
-			material->map[Material::SPECULAR_MAP] = resources.getImageAsync(def["specularMap"].string_value());
-			material->map[Material::SPECULAR_MAP]->sRGB = true;
+			material.map[Material::SPECULAR_MAP] = resources.getImageAsync(def["specularMap"].string_value());
+			material.map[Material::SPECULAR_MAP]->sRGB = true;
 		}
 		if (!def["emissionMap"].is_null()) {
-			material->map[Material::EMISSION_MAP] = resources.getImageAsync(def["emissionMap"].string_value());
-			material->map[Material::EMISSION_MAP]->sRGB = true;
+			material.map[Material::EMISSION_MAP] = resources.getImageAsync(def["emissionMap"].string_value());
+			material.map[Material::EMISSION_MAP]->sRGB = true;
 		}
 		if (!def["normalMap"].is_null())
-			material->map[Material::NORMAL_MAP] = resources.getImageAsync(def["normalMap"].string_value());
+			material.map[Material::NORMAL_MAP] = resources.getImageAsync(def["normalMap"].string_value());
 		if (!def["heightMap"].is_null())
-			material->map[Material::HEIGHT_MAP] = resources.getImageAsync(def["heightMap"].string_value());
+			material.map[Material::HEIGHT_MAP] = resources.getImageAsync(def["heightMap"].string_value());
 		if (!def["aoMap"].is_null())
-			material->map[Material::AO_MAP] = resources.getImageAsync(def["aoMap"].string_value());
+			material.map[Material::AO_MAP] = resources.getImageAsync(def["aoMap"].string_value());
 		if (!def["reflectionMap"].is_null())
-			material->map[Material::REFLECTION_MAP] = resources.getImageAsync(def["reflectionMap"].string_value());
+			material.map[Material::REFLECTION_MAP] = resources.getImageAsync(def["reflectionMap"].string_value());
 
 		return material;
 	}
@@ -155,12 +155,14 @@ namespace {
 		if (materialDef.is_object()) {
 			ASSERT(model.materials.size() <= 1);
 			if (model.materials.empty())
-				model.materials.push_back(new Material());
+				model.materials.emplace_back();
 			parseMaterial(model.materials.back(), materialDef, resources);
 		} else if (materialDef.is_array()) {
 			if (model.materials.empty()) {
-				for (auto& matDef : materialDef.array_items())
-					model.materials.push_back(parseMaterial(new Material(), matDef, resources));
+				for (auto& matDef : materialDef.array_items()) {
+					model.materials.emplace_back();
+					parseMaterial(model.materials.back(), matDef, resources);
+				}
 			} else {
 				ASSERT(model.materials.size() == materialDef.array_items().size());
 				for (uint i = 0; i < materialDef.array_items().size(); ++i)

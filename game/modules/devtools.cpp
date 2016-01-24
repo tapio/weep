@@ -19,7 +19,7 @@ static void reloadShaders(Game& game)
 	renderer.device().setEnvironment(&renderer.env());
 	game.entities.for_each<Model>([&](Entity, Model& model) {
 		for (auto& material : model.materials)
-			material->shaderId[TECH_COLOR] = -1;
+			material.shaderId[TECH_COLOR] = -1;
 	});
 }
 

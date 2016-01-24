@@ -73,9 +73,9 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 		// Figure out candidates for reflection location
 		if (frustum.visible(transform, model)) {
 			float reflectivity = 0.f;
-			for (auto mat : model.materials)
-				if (mat->reflectivity > reflectivity)
-					reflectivity = mat->reflectivity;
+			for (auto& mat : model.materials)
+				if (mat.reflectivity > reflectivity)
+					reflectivity = mat.reflectivity;
 			if (reflectivity > 0.01f) {
 				float priority = glm::distance2(camera.position, transform.position);
 				priority *= 1.1f - reflectivity;
@@ -108,9 +108,9 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 		if (!geom.batches.empty() && geom.batches.front().renderId < 0)
 			m_device->uploadGeometry(geom);
 		// Upload materials
-		for (auto mat : model.materials)
-			if (mat->shaderId[0] < 0 || (mat->flags & Material::DIRTY_MAPS))
-				m_device->uploadMaterial(*mat);
+		for (auto& mat : model.materials)
+			if (mat.shaderId[0] < 0 || (mat.flags & Material::DIRTY_MAPS))
+				m_device->uploadMaterial(mat);
 	});
 	END_GPU_SAMPLE()
 	END_MEASURE(uploadMs)
