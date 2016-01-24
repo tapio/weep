@@ -30,6 +30,20 @@ done
 $WGET $GHBASEURL/ocornut/imgui/master/examples/sdl_opengl3_example/imgui_impl_sdl_gl3.h -O imgui/imgui_impl_sdl_gl3.h &
 $WGET $GHBASEURL/ocornut/imgui/master/examples/sdl_opengl3_example/imgui_impl_sdl_gl3.cpp -O imgui/imgui_impl_sdl_gl3.cpp &
 
+# GLM
+GLMPATH=/tmp/glm
+rm -rf "$GLMPATH"
+git clone --depth=1 https://github.com/g-truc/glm "$GLMPATH"
+
+rm -r glm
+mkdir -p glm
+cp -vr "$GLMPATH/glm/" .
+cp -v "$GLMPATH/copying.txt" "glm/"
+rm -v "glm/CMakeLists.txt"
+rm -v "glm/detail/glm.cpp"
+rm -v "glm/detail/dummy.cpp"
+
+
 # Bullet
 BULLETPATH=/tmp/bullet3
 rm -rf "$BULLETPATH"
@@ -47,6 +61,7 @@ cp -v "$BULLETPATH/LICENSE.txt" "bullet/"
 rm -vr "bullet/BulletDynamics/Featherstone"
 rm -vr "bullet/BulletDynamics/MLCPSolvers"
 find bullet -type f \( -name 'CMakeLists.txt' -o -name 'premake4.lua' \) -delete
+
 
 # SoLoud
 SOLOUDPATH=/tmp/soloud
