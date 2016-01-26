@@ -2,6 +2,11 @@ project(WeepEngine)
 cmake_minimum_required(VERSION 2.8)
 cmake_policy(VERSION 2.8)
 
+set(EXE_NAME "weep" CACHE STRING "Executable name")
+set(INSTALL_DIR "weep" CACHE STRING "Installation directory name")
+option(SHIPPING_BUILD "Remove debug stuff" OFF)
+option(USE_REMOTERY "Use Remotery profiler" ON)
+
 # Avoid source tree pollution
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
 	message(FATAL_ERROR "In-source builds are not permitted. Make a separate folder for building:\nmkdir build; cd build; cmake ..\nBefore that, remove the files already created:\nrm -rf CMakeCache.txt CMakeFiles")
@@ -14,19 +19,13 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Enable C++11 support and other compiler flags...
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-	message(STATUS "GCC detected, adding compile flags")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -ffast-math -march=native -Wall -Wextra")
+set(COMMON_FLAGS "-std=c++11 -ffast-math -march=native -Wall -Wextra")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	message(STATUS "${CMAKE_CXX_COMPILER_ID} detected, adding compile flags")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS}")
 	if(WIN32)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--export-all-symbols")
 	else()
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-	endif()
-endif()
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	message(STATUS "Clang detected, adding compile flags")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -ffast-math -march=native -Wall -Wextra")
-	if(NOT WIN32)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
 	endif()
 endif()
@@ -41,11 +40,13 @@ list(APPEND LIBS ${SDL2_LIBRARIES})
 find_package(OpenGL REQUIRED)
 list(APPEND LIBS ${OPENGL_gl_LIBRARY})
 
-# For Remotery
-if(WIN32)
-	list(APPEND LIBS "ws2_32")
-else()
-	list(APPEND LIBS "dl")
+if(USE_REMOTERY)
+	add_definitions(-DUSE_PROFILER=1 -DRMT_USE_OPENGL=1 -DRMT_USE_POSIX_THREADNAMES=1)
+	if(WIN32)
+		list(APPEND LIBS "ws2_32")
+	else()
+		list(APPEND LIBS "dl")
+	endif()
 endif()
 
 include_directories(engine)
@@ -53,11 +54,12 @@ include_directories(SYSTEM third-party)
 include_directories(SYSTEM third-party/bullet)
 include_directories(SYSTEM third-party/soloud/include)
 
+if(SHIPPING_BUILD)
+	add_definitions(-DSHIPPING_BUILD)
+endif()
 add_definitions(-DGL_GLEXT_PROTOTYPES)
 # SoLoud
 add_definitions(-DWITH_NULL -DWITH_SDL2_STATIC)
-# Remotery
-add_definitions(-DRMT_USE_OPENGL=1 -DRMT_USE_POSIX_THREADNAMES=1)
 
 # TODO: Make separate libs of third-party deps
 
@@ -75,14 +77,12 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR})
 link_directories(${PROJECT_BINARY_DIR})
 
-set(EXE_NAME weep)
-set(INSTALL_DIR weep)
-
 add_library(deps STATIC ${DEPS_SOURCES})
 add_library(engine STATIC ${ENGINE_SOURCES})
 
 add_executable(${EXE_NAME} ${GAME_SOURCES} ${SHADER_SOURCES} ${CONFIG_SOURCES})
 set_target_properties(${EXE_NAME} PROPERTIES ENABLE_EXPORTS ON)
+#set_target_properties(${EXE_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON) # CMake 3.4
 target_link_libraries(${EXE_NAME} PRIVATE engine deps ${LIBS})
 install(TARGETS ${EXE_NAME} DESTINATION ${INSTALL_DIR}/bin)
 

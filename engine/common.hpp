@@ -65,7 +65,7 @@ constexpr std::size_t countof(T const (&)[N]) noexcept { return N; }
 #define EXPORT extern "C"
 #endif
 
-#define USE_PROFILER 1
+//#define USE_PROFILER 1 // From CMake
 #ifdef USE_PROFILER
 	#define RMT_USE_OPENGL 1
 	#include "remotery/Remotery.h"
