@@ -10,6 +10,8 @@
 #include "../controller.hpp"
 
 static bool s_autoReloadModules = true;
+static std::vector<string> s_shaderFiles;
+static std::vector<uint> s_shaderTimestamps;
 
 static void reloadShaders(Game& game)
 {
@@ -21,6 +23,8 @@ static void reloadShaders(Game& game)
 		for (auto& material : model.materials)
 			material.shaderId[TECH_COLOR] = -1;
 	});
+	for (uint i = 0; i < s_shaderFiles.size(); ++i)
+		s_shaderTimestamps[i] = timestamp(s_shaderFiles[i]);
 }
 
 EXPORT void ModuleFunc(uint msg, void* param)
@@ -32,6 +36,12 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			game.engine.moduleInit();
 			ImGuiSystem& imgui = game.entities.get_system<ImGuiSystem>();
 			imgui.applyInternalState();
+			s_shaderFiles = game.resources.listFiles("shaders/");
+			s_shaderTimestamps.resize(s_shaderFiles.size());
+			for (uint i = 0; i < s_shaderFiles.size(); ++i) {
+				s_shaderFiles[i] = game.resources.findPath("shaders/" + s_shaderFiles[i]);
+				s_shaderTimestamps[i] = timestamp(s_shaderFiles[i]);
+			}
 			break;
 		}
 		case $id(RELOAD_SHADERS):
@@ -226,6 +236,15 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		{
 			if (s_autoReloadModules)
 				game.entities.get_system<ModuleSystem>().autoReload();
+			// Shader hotload
+			for (uint i = 0; i < s_shaderFiles.size(); ++i) {
+				if (timestamp(s_shaderFiles[i]) > s_shaderTimestamps[i]) {
+					logDebug("Shader change detected, reloading...");
+					sleep(100);
+					reloadShaders(game);
+					break;
+				}
+			}
 		}
 	}
 }
