@@ -22,9 +22,10 @@ Many might be unpolished...
 	- Diffuse / normal / specular / emission / height / AO map support
 	- Dynamic reflections with reflectivity map support
 	- Automatic mesh smoothing with tessellation shaders
-	- Postprocessing effects: vignette, sepia, saturation control, chromatic aberration
+	- Postprocessing effects: vignette, sepia, saturation control, chromatic aberration...
 	- #define based uber shader
 	- Automatic shader permutation generation based on material properties
+	- Automatic shader reload on file change
 * Mesh loading from Wavefront .obj, Inter-Quake Model .iqm and heightmap images
 * Basic skeletal animation (GPU skinning)
 * Entity-component based architecture
@@ -32,7 +33,7 @@ Many might be unpolished...
 * Hotloadable gameplay code modules
 * JSON based configuration and scene declaration
 * ImGui user interface integration
-* Sound system
+* Sound system: positional audio, sample randomization, contact sounds
 * Runs on Linux and Windows (mostly)
 
 ## Design Principles
@@ -55,7 +56,7 @@ Here's some things that need work. The list is by no means exhaustive.
 * Sun shadow map really needs cascades
 * I'm sceptical whether all tonemap functions work as they should
 * Animation and sound systems are very basic
-* Gameplay module hotloading fails in some situations
+* Gameplay modules barely work on Windows and hotloading fails in some situations
 * Entity/component destroying works poorly as it's currently implemented
 * Windows support is fragile
 
@@ -71,6 +72,10 @@ The core repository only includes some debug assets, so you probably also want t
 	cd build
 	cmake ..
 	make
+
+## Running
+
+Run "weep" from the build directory. You can give the scene to load as a command line argument or select it from the dev tools.
 
 ## Acknowledgements
 
