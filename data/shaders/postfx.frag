@@ -102,7 +102,8 @@ vec3 fxaa(vec2 uv, vec2 step)
 void main()
 {
 	vec2 uv = inData.texcoord;
-	vec2 pixelSize = 1.0 / textureSize(sceneMap, 0);
+	vec2 screenSize = textureSize(sceneMap, 0);
+	vec2 pixelSize = 1.0 / screenSize;
 	vec3 hdrColor;
 	// Chromatic Aberration
 	if (chromaticAberration > 0) {
@@ -147,7 +148,7 @@ void main()
 
 	// Scanlines
 	if (scanlines > 0)
-		if (mod(floor(uv.y * pixelSize.y), scanlines + 1.0) < 1.0)
+		if (mod(floor(uv.y * screenSize.y), scanlines + 1.0) < 1.0)
 			hdrColor *= luminance;
 
 	// Debug
