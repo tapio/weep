@@ -90,3 +90,8 @@ struct ContactSound
 {
 	uint event = 0;
 };
+
+struct DebugInfo
+{
+	string name = "";
+};

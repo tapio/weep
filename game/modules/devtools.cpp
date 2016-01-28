@@ -200,8 +200,12 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				}
 				if (ImGui::CollapsingHeader("Entities")) {
 					game.entities.for_each<Transform>([](Entity e, Transform& trans) {
-						string label = "Entity #" + std::to_string(e.get_index());
-						if (ImGui::DragFloat3(label.c_str(), &trans.position[0], 0.01f, -1000, 1000))
+						string label;
+						if (e.has<DebugInfo>())
+							label = e.get<DebugInfo>().name;
+						else label = "entity #" + std::to_string(e.get_index());
+						ImGui::Text("%s", label.c_str());
+						if (ImGui::DragFloat3(("Position##" + label).c_str(), &trans.position[0], 0.01f, -1000, 1000))
 							trans.dirty = true;
 						if (ImGui::DragFloat3(("Scale##" + label).c_str(), &trans.scale[0], 0.01f, 0, 10))
 							trans.dirty = true;

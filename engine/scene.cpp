@@ -17,7 +17,9 @@
 #include <id/id.hpp>
 #include <glm/gtx/component_wise.hpp>
 
+#ifndef SHIPPING_BUILD
 #define USE_DEBUG_NAMES
+#endif
 
 namespace {
 
@@ -350,15 +352,21 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 
 	if (def["name"].is_string()) {
 		entity.tag(def["name"].string_value());
-	} else {
 #ifdef USE_DEBUG_NAMES
+		DebugInfo info;
+		info.name = def["name"].string_value();
+		entity.add<DebugInfo>(info);
+	} else {
 		static uint debugId = 0;
-		string name;
+		DebugInfo info;
 		if (def["prefab"].is_string())
-			name = def["prefab"].string_value() + "#";
-		else name = "object#";
-		name += std::to_string(debugId++);
-		entity.tag(name);
+			info.name = def["prefab"].string_value() + "#";
+		else if (def["geometry"].is_string())
+			info.name = def["geometry"].string_value() + "#";
+		else info.name = "object#";
+		info.name += std::to_string(debugId++);
+		entity.tag(info.name);
+		entity.add<DebugInfo>(info);
 #endif
 	}
 
