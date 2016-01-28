@@ -90,9 +90,9 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					}
 					ImGui::SameLine();
 					ImGui::Checkbox("Enable controller", &controller.enabled);
-					ImGui::SliderFloat("Move force", &controller.moveForce, 0.0f, 10000.0f);
-					ImGui::SliderFloat("Brake force", &controller.brakeForce, 0.0f, 10000.0f);
-					ImGui::SliderFloat("Jump force", &controller.jumpForce, 0.0f, 10000.0f);
+					ImGui::SliderFloat("Move force", &controller.moveForce, 0.0f, 10000.0f, "%.1f");
+					ImGui::SliderFloat("Brake force", &controller.brakeForce, 0.0f, 10000.0f, "%.1f");
+					ImGui::SliderFloat("Jump force", &controller.jumpForce, 0.0f, 10000.0f, "%.1f");
 				}
 				if (ImGui::CollapsingHeader("Settings")) {
 					modules.call($id(settings), $id(DRAW_SETTINGS_MENU), &game);
@@ -106,7 +106,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					ImGui::SliderFloat("Shadow Darkness", &env.shadowDarkness, 0.0f, 1.0f);
 					ImGui::ColorEdit3("Ambient", (float*)&env.ambient);
 					ImGui::ColorEdit3("Sun Color", (float*)&env.sunColor);
-					ImGui::SliderFloat3("Sun Pos", (float*)&env.sunPosition, -15.f, 15.f);
+					ImGui::DragFloat3("Sun Pos", (float*)&env.sunPosition, 0.1f, -15.f, 15.f, "%.2f");
 					ImGui::ColorEdit3("Fog Color", (float*)&env.fogColor);
 					ImGui::SliderFloat("Fog Density", &env.fogDensity, 0.0f, 1.0f);
 					ImGui::SliderInt("Sky Type", (int*)&env.skyType, 0, Environment::SKY_COUNT-1);
@@ -201,11 +201,11 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				if (ImGui::CollapsingHeader("Entities")) {
 					game.entities.for_each<Transform>([](Entity e, Transform& trans) {
 						string label = "Entity #" + std::to_string(e.get_index());
-						if (ImGui::SliderFloat3(label.c_str(), &trans.position[0], -100, 100))
+						if (ImGui::DragFloat3(label.c_str(), &trans.position[0], 0.01f, -1000, 1000))
 							trans.dirty = true;
-						if (ImGui::SliderFloat3(("Scale##" + label).c_str(), &trans.scale[0], 0, 10))
+						if (ImGui::DragFloat3(("Scale##" + label).c_str(), &trans.scale[0], 0.01f, 0, 10))
 							trans.dirty = true;
-						if (ImGui::SliderFloat4(("Rot##" + label).c_str(), &trans.rotation[0], -1, 1))
+						if (ImGui::DragFloat4(("Rot##" + label).c_str(), &trans.rotation[0], 0.01f, -1, 1))
 							trans.dirty = true;
 						ImGui::Separator();
 					});
