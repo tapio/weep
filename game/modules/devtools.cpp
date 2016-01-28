@@ -10,6 +10,7 @@
 #include "../controller.hpp"
 
 static bool s_autoReloadModules = true;
+static bool s_autoReloadShaders = true;
 static std::vector<string> s_shaderFiles;
 static std::vector<uint> s_shaderTimestamps;
 
@@ -153,6 +154,8 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				if (ImGui::CollapsingHeader("Scene")) {
 					if (ImGui::Button("Reload Shaders"))
 						reloadShaders(game);
+					ImGui::SameLine();
+					ImGui::Checkbox("Auto Reload##Shaders", &s_autoReloadShaders);
 					static char tempScenePath[128] = {0};
 					strncpy(tempScenePath, game.scenePath.c_str(), sizeof(tempScenePath)-1);
 					ImGui::InputText("##Scene Path", tempScenePath, sizeof(tempScenePath));
@@ -237,7 +240,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			if (s_autoReloadModules)
 				game.entities.get_system<ModuleSystem>().autoReload();
 			// Shader hotload
-			for (uint i = 0; i < s_shaderFiles.size(); ++i) {
+			for (uint i = 0; s_autoReloadShaders && i < s_shaderFiles.size(); ++i) {
 				if (timestamp(s_shaderFiles[i]) > s_shaderTimestamps[i]) {
 					logDebug("Shader change detected, reloading...");
 					sleep(100);
