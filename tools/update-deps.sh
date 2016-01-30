@@ -23,6 +23,10 @@ $WGET $GHBASEURL/Celtoys/Remotery/master/LICENSE -O remotery/LICENSE &
 $WGET $GHBASEURL/nothings/stb/master/stb_image.h -O stb_image/stb_image.h &
 $WGET $GHBASEURL/nothings/stb/master/stb_image_write.h -O stb_image/stb_image_write.h &
 
+# gif-h
+$WGET $GHBASEURL/ginsweater/gif-h/master/gif.h -O gif-h/gif.h &
+$WGET $GHBASEURL/ginsweater/gif-h/master/LICENSE -O gif-h/LICENSE &
+
 # ImGui
 for f in imconfig.h imgui.cpp imgui.h imgui_demo.cpp imgui_draw.cpp imgui_internal.h LICENSE stb_rect_pack.h stb_textedit.h stb_truetype.h; do
 	$WGET $GHBASEURL/ocornut/imgui/master/$f -O imgui/$f &

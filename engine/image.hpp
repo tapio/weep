@@ -19,3 +19,18 @@ struct Image {
 	string path;
 	std::vector<unsigned char> data;
 };
+
+struct GifMovie {
+	GifMovie() {}
+	GifMovie(const string& path, int w, int h, int fps = 10, bool dither = false);
+	void startRecording();
+	void recordFrame(float dt);
+	void finish();
+
+	Image frame;
+	std::shared_ptr<struct GifWriter> writer = nullptr;
+	bool dither = false;
+	float frameDelay = 0;
+	float currentTime = 0;
+	bool recording = false;
+};

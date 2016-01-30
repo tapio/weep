@@ -2,6 +2,7 @@ Library      URL                                          License
 ================================================================================
 bullet     - https://github.com/bulletphysics/bullet3   - zlib
 ecs        - https://github.com/tapio/ecs               - MIT
+gif-h      - https://github.com/ginsweater/gif-h        - Public Domain
 GL         - http://www.opengl.org/registry/            - MIT
 glad       - https://github.com/Dav1dde/glad            - MIT
 glm        - http://glm.g-truc.net/                     - MIT

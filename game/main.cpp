@@ -56,6 +56,8 @@ int main(int argc, char* argv[])
 		game.scenePath = Engine::settings["scene"].string_value();
 	init(game);
 
+	GifMovie gif("movie.gif", game.engine.width(), game.engine.height(), 10, false);
+
 	bool running = true;
 	bool active = false;
 	bool screenshot = false;
@@ -113,6 +115,14 @@ int main(int argc, char* argv[])
 				}
 				else if (keysym.sym == SDLK_F3) {
 					game.engine.vsync(!game.engine.vsync());
+					continue;
+				}
+				else if (keysym.sym == SDLK_F9) {
+					if (gif.recording) gif.finish();
+					else {
+						gif.frame.path = "movie_" + std::to_string(Engine::timems()) + ".gif";
+						gif.startRecording();
+					}
 					continue;
 				}
 				else if (keysym.sym == SDLK_F11) {
@@ -196,6 +206,9 @@ int main(int argc, char* argv[])
 			else logError("Screenshot failed!");
 			screenshot = false;
 		}
+
+		if (gif.recording)
+			gif.recordFrame(game.engine.dt);
 
 		BEGIN_CPU_SAMPLE(swap)
 		game.engine.swap();

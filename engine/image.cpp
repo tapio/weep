@@ -10,6 +10,7 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_STATIC
 #include <stb_image/stb_image_write.h>
+#include <gif-h/gif.h>
 
 bool Image::load(const std::string& path_, int forceChannels)
 {
@@ -56,3 +57,37 @@ void Image::screenshot()
 	delete[] line_tmp;
 }
 
+
+
+GifMovie::GifMovie(const string& path, int w, int h, int fps, bool dither_)
+: frame(w, h, 4), dither(dither_), frameDelay(1.f / fps)
+{
+	writer.reset(new GifWriter);
+	frame.path = path;
+}
+
+void GifMovie::startRecording()
+{
+	GifBegin(writer.get(), frame.path.c_str(), frame.width, frame.height, frameDelay * 100, 8, dither);
+	recording = true;
+	currentTime = 0;
+}
+
+void GifMovie::recordFrame(float dt)
+{
+	ASSERT(recording);
+	currentTime += dt;
+	if (currentTime < frameDelay)
+		return;
+	while (currentTime >= frameDelay)
+		currentTime -= frameDelay;
+	frame.screenshot();
+	GifWriteFrame(writer.get(), &frame.data[0], frame.width, frame.height, frameDelay * 100, 8, dither);
+}
+
+void GifMovie::finish()
+{
+	ASSERT(recording);
+	GifEnd(writer.get());
+	recording = false;
+}
