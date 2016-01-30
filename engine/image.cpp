@@ -1,4 +1,5 @@
 #include "image.hpp"
+#include "glrenderer/glutil.hpp"
 #define STBI_NO_HDR
 #define STBI_NO_LINEAR
 #define STBI_ONLY_JPEG
@@ -34,3 +35,24 @@ bool Image::save(const string& path) const
 {
 	return stbi_write_png(path.c_str(), width, height, channels, (void*)&data[0], 0);
 }
+
+void Image::screenshot()
+{
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	GLenum format = channels == 4 ? GL_RGBA : GL_RGB;
+	glReadPixels(0, 0, width, height, format, GL_UNSIGNED_BYTE, &data[0]);
+	// Fix orientation
+	const int lineSize = width * channels;
+	unsigned char* line_tmp = new unsigned char[lineSize];
+	unsigned char* line_a = &data[0];
+	unsigned char* line_b = &data[0] + (lineSize * (height - 1));
+	while (line_a < line_b) {
+		memcpy(line_tmp, line_a, lineSize);
+		memcpy(line_a, line_b, lineSize);
+		memcpy(line_b, line_tmp, lineSize);
+		line_a += lineSize;
+		line_b -= lineSize;
+	}
+	delete[] line_tmp;
+}
+

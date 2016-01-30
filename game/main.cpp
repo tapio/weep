@@ -187,26 +187,10 @@ int main(int argc, char* argv[])
 
 		if (screenshot) {
 			START_MEASURE(screenshotMs)
-			// Read
 			Image shot(Engine::width(), Engine::height(), 3);
-			glPixelStorei(GL_PACK_ALIGNMENT, 1);
-			glReadPixels(0, 0, shot.width, shot.height, GL_RGB, GL_UNSIGNED_BYTE, &shot.data[0]);
-			// Fix orientation
-			const int lineSize = shot.width * 3;
-			unsigned char* line_tmp = new unsigned char[lineSize];
-			unsigned char* line_a = &shot.data[0];
-			unsigned char* line_b = &shot.data[0] + (lineSize * (shot.height - 1));
-			while (line_a < line_b) {
-				memcpy(line_tmp, line_a, lineSize);
-				memcpy(line_a, line_b, lineSize);
-				memcpy(line_b, line_tmp, lineSize);
-				line_a += lineSize;
-				line_b -= lineSize;
-			}
-			// Save
+			shot.screenshot();
 			string path = "screenshot_" + std::to_string(Engine::timems()) + ".png";
 			bool ret = shot.save(path.c_str());
-			delete[] line_tmp;
 			END_MEASURE(screenshotMs)
 			if (ret) logInfo("Screenshot saved to %s (%.1fms)", path.c_str(), screenshotMs);
 			else logError("Screenshot failed!");
