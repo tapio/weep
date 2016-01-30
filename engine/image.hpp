@@ -32,5 +32,6 @@ struct GifMovie {
 	bool dither = false;
 	float frameDelay = 0;
 	float currentTime = 0;
+	uint frames = 0;
 	bool recording = false;
 };

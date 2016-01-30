@@ -71,6 +71,8 @@ void GifMovie::startRecording()
 	GifBegin(writer.get(), frame.path.c_str(), frame.width, frame.height, frameDelay * 100, 8, dither);
 	recording = true;
 	currentTime = 0;
+	frames = 0;
+	logInfo("Started capturing gif movie");
 }
 
 void GifMovie::recordFrame(float dt)
@@ -83,6 +85,7 @@ void GifMovie::recordFrame(float dt)
 		currentTime -= frameDelay;
 	frame.screenshot();
 	GifWriteFrame(writer.get(), &frame.data[0], frame.width, frame.height, frameDelay * 100, 8, dither);
+	frames++;
 }
 
 void GifMovie::finish()
@@ -90,4 +93,5 @@ void GifMovie::finish()
 	ASSERT(recording);
 	GifEnd(writer.get());
 	recording = false;
+	logInfo("Movie capture with %u frames saved to %s", frames, frame.path.c_str());
 }
