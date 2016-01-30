@@ -34,6 +34,7 @@ Many might be unpolished...
 * JSON based configuration and scene declaration
 * ImGui user interface integration
 * Sound system: positional audio, sample randomization, contact sounds
+* Built-in screenshot and gif movie capture
 * Runs on Linux and Windows (mostly)
 
 ## Design Principles
