@@ -1,3 +1,6 @@
+// Implements a settings menu for end-user. This is in a separate module
+// so that it can be shared between multiple small example games.
+
 #include "common.hpp"
 #include "renderer.hpp"
 #include "glrenderer/renderdevice.hpp"

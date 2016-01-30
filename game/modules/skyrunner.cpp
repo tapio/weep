@@ -1,3 +1,5 @@
+// A game where you try to reach the end of a "parkour" track floating in the sky.
+
 #include "common.hpp"
 #include "physics.hpp"
 #include "renderer.hpp"

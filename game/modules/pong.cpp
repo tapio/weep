@@ -1,3 +1,8 @@
+// Small two-player Pong game. This is mainly for testing how the engine
+// can be used for implementing an actual game, even if small one.
+// E.g. using a full-blown dynamics engine like I've done here is rather
+// overkill and results in need of some hacks to make the game playable.
+
 #include "common.hpp"
 #include "gui.hpp"
 #include "components.hpp"

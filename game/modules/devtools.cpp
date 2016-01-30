@@ -1,3 +1,6 @@
+// This module implements a handy debug UI that can be used to manipulate
+// many aspects of the engine.
+
 #include "common.hpp"
 #include "renderer.hpp"
 #include "camera.hpp"

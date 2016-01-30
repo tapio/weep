@@ -1,3 +1,5 @@
+// Miscellaneous test stuff and a place to write temp code.
+
 #include "common.hpp"
 #include "components.hpp"
 #include "material.hpp"

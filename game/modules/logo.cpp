@@ -1,3 +1,5 @@
+// Renders Weep Engine logo to a screen corner.
+
 #include "common.hpp"
 #include "gui.hpp"
 #include "glrenderer/texture.hpp"
