@@ -20,6 +20,7 @@
 
 struct Physics {
 	float angle = 0.f;
+	float angVel = 0.f;
 	vec2 vel = {0.f, 0.f};
 };
 
@@ -49,6 +50,7 @@ void spawnAsteroid() {
 	trans.position.z = glm::linearRand(-areaExtents.y, areaExtents.y);
 	Physics& phys = asteroid.add<Physics>();
 	phys.angle = glm::linearRand(-M_PI, M_PI);
+	phys.angVel = glm::linearRand(-2.f, 2.f);
 	phys.vel.x = glm::linearRand(-1.f, 1.f);
 	phys.vel.y = glm::linearRand(-1.f, 1.f);
 	phys.vel = glm::normalize(phys.vel) * glm::linearRand(0.5f, 2.f);
@@ -115,6 +117,7 @@ void steer(float dir, float dt) {
 
 void simulate(float dt) {
 	s_game->entities.for_each<Physics, Transform>([&](Entity, Physics& phys, Transform& trans){
+		phys.angle += phys.angVel * dt;
 		trans.position.x += phys.vel.x * dt;
 		trans.position.z += phys.vel.y * dt;
 		trans.rotation = glm::angleAxis(phys.angle - 1.57079632679f, vec3(0, 1, 0));
