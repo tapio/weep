@@ -32,6 +32,21 @@ public:
 
 	void startAsyncLoading();
 
+	struct Stats {
+		uint texts = 0;
+		uint binaries = 0;
+		uint images = 0;
+		uint geometries = 0;
+	} stats;
+
+	const Stats& updateStats() {
+		stats.texts = m_texts.size();
+		stats.binaries = m_binaries.size();
+		stats.images = m_images.size();
+		stats.geometries = m_geoms.size();
+		return stats;
+	}
+
 private:
 	std::vector<string> m_paths;
 	std::map<string, string> m_texts;

@@ -92,6 +92,15 @@ EXPORT void ModuleFunc(uint msg, void* param)
 						audio.soloud->getMaxActiveVoiceCount(),
 						audio.soloud->getVoiceCount());
 					ImGui::Separator();
+					if (ImGui::TreeNode("Resource stats")) {
+						const Resources::Stats& res = game.resources.updateStats();
+						ImGui::Text("Images:        %5u  (textures, heightmaps...)", res.images);
+						ImGui::Text("Geometries:    %5u  (includes different lods)", res.geometries);
+						ImGui::Text("Text files:    %5u  (e.g. shader files)", res.texts);
+						ImGui::Text("Misc binaries: %5u  (e.g. audio samples)", res.binaries);
+						ImGui::TreePop();
+					}
+					ImGui::Separator();
 					ImGui::Checkbox("ImGui Metrics", &imguiMetrics);
 				}
 				if (ImGui::CollapsingHeader("Camera")) {
