@@ -148,8 +148,8 @@ namespace ecs
 		/*
 		Component management.
 		*/
-		template <typename T> void add(T component);
-		template <typename T, typename ... Args> void add(Args && ... args);
+		template <typename T> T& add(T component);
+		template <typename T, typename ... Args> T& add(Args && ... args);
 		template <typename T> void remove();
 		template <typename T> bool has() const;
 		template <typename T> T& get() const;
@@ -274,8 +274,8 @@ namespace ecs
 		/*
 		Component management.
 		*/
-		template <typename T> void add_component(Entity e, T component);
-		template <typename T, typename ... Args> void add_component(Entity e, Args && ... args);
+		template <typename T> T& add_component(Entity e, T component);
+		template <typename T, typename ... Args> T& add_component(Entity e, Args && ... args);
 		template <typename T> void remove_component(Entity e);
 		template <typename T> bool has_component(Entity e) const;
 		template <typename T> T& get_component(Entity e) const;
@@ -454,7 +454,7 @@ namespace ecs
 	}
 
 	template <typename T>
-	void Entities::add_component(Entity e, T component)
+	T& Entities::add_component(Entity e, T component)
 	{
 		const auto component_id = Component<T>::get_id();
 		const auto entity_id = e.get_index();
@@ -466,13 +466,14 @@ namespace ecs
 
 		component_pool->set(entity_id, component);
 		component_masks[entity_id].set(component_id);
+		return component_pool->get(entity_id);
 	}
 
 	template <typename T, typename ... Args>
-	void Entities::add_component(Entity e, Args && ... args)
+	T& Entities::add_component(Entity e, Args && ... args)
 	{
 		T component(std::forward<Args>(args) ...);
-		add_component<T>(e, component);
+		return add_component<T>(e, component);
 	}
 
 	template <typename T>
@@ -526,15 +527,15 @@ namespace ecs
 	}
 
 	template <typename T>
-	void Entity::add(T component)
+	T& Entity::add(T component)
 	{
-		entities->add_component<T>(*this, component);
+		return entities->add_component<T>(*this, component);
 	}
 
 	template <typename T, typename ... Args>
-	void Entity::add(Args && ... args)
+	T& Entity::add(Args && ... args)
 	{
-		entities->add_component<T>(*this, std::forward<Args>(args)...);
+		return entities->add_component<T>(*this, std::forward<Args>(args)...);
 	}
 
 	template <typename T>
