@@ -1,5 +1,6 @@
 // Simple top-down asteroids clone to test creating a sprite based game with the engine.
-// Also demonstrates using game-specific ad-hoc components (custom physics in this case).
+// Also demonstrates using game-specific ad-hoc components (custom physics in this case),
+// as well as creating entities without the help of SceneLoader and a json definition.
 
 #include "common.hpp"
 #include "gui.hpp"
@@ -7,11 +8,15 @@
 #include "physics.hpp"
 #include "audio.hpp"
 #include "renderer.hpp"
+#include "geometry.hpp"
+#include "image.hpp"
 #include "tween.hpp"
 #include "../game.hpp"
 #include "../controller.hpp"
 #include "SDL_events.h"
 #include <glm/gtc/random.hpp>
+#include <glm/gtx/component_wise.hpp>
+
 
 struct Physics {
 	float angle = 0.f;
@@ -21,6 +26,13 @@ struct Physics {
 static const float turnSpeed = 4.f;
 static const float maxSpeed = 6.f;
 static const float accel = 5.f;
+static const vec2 areaExtents = vec2(10, 7);
+static const char* s_asteroids[] = {
+	"sprites/space-shooter/Meteors/meteorBrown_big1.png",
+	"sprites/space-shooter/Meteors/meteorBrown_big2.png",
+	"sprites/space-shooter/Meteors/meteorBrown_big3.png",
+	"sprites/space-shooter/Meteors/meteorBrown_big4.png"
+};
 
 static Game* s_game = nullptr;
 static float s_scoreWindowWidth = 150.f;
@@ -29,6 +41,30 @@ static bool s_gameOver = true;
 static float s_resetTime = 0;
 static Tween s_dieAnim = Tween(0.25f, false);
 static Tween s_startAnim = Tween(0.35f, false);
+
+void spawnAsteroid() {
+	Entity asteroid = s_game->entities.create();
+	Transform& trans = asteroid.add<Transform>();
+	trans.position.x = glm::linearRand(-areaExtents.x, areaExtents.x);
+	trans.position.z = glm::linearRand(-areaExtents.y, areaExtents.y);
+	Physics& phys = asteroid.add<Physics>();
+	phys.angle = glm::linearRand(-M_PI, M_PI);
+	phys.vel.x = glm::linearRand(-1.f, 1.f);
+	phys.vel.y = glm::linearRand(-1.f, 1.f);
+	phys.vel = glm::normalize(phys.vel) * glm::linearRand(0.5f, 2.f);
+	Model& model = asteroid.add<Model>();
+	model.lods[0].geometry = model.geometry = s_game->resources.getGeometry("debug/plane.obj");
+	model.bounds.min = model.lods[0].geometry->bounds.min * trans.scale;
+	model.bounds.max = model.lods[0].geometry->bounds.max * trans.scale;
+	model.bounds.radius = model.lods[0].geometry->bounds.radius * glm::compMax(trans.scale);
+	Material material;
+	material.flags |= Material::ALPHA_TEST;
+	material.ambient = vec3(1);
+	const char* asteroidImg = s_asteroids[glm::linearRand<int>(0, countof(s_asteroids)-1)];
+	material.map[Material::DIFFUSE_MAP] = s_game->resources.getImage(asteroidImg);
+	material.map[Material::DIFFUSE_MAP]->sRGB = true;
+	model.materials.emplace_back(material);
+}
 
 void begin() {
 	Entity cameraEnt = s_game->entities.get_entity_by_tag("camera");
@@ -43,9 +79,13 @@ void begin() {
 		phys.angle = 0;
 		phys.vel = vec2(0, 0);
 	}
+
+	for (int i = 0; i < 10; ++i)
+		spawnAsteroid();
 }
 
 void reset() {
+	std::srand(std::time(0));
 	s_score = 0;
 	s_gameOver = false;
 	s_resetTime = 5.f;
