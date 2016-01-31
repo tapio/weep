@@ -19,9 +19,10 @@
 
 
 struct Physics {
+	vec2 pos = {0.f, 0.f};
+	vec2 vel = {0.f, 0.f};
 	float angle = 0.f;
 	float angVel = 0.f;
-	vec2 vel = {0.f, 0.f};
 };
 
 static const float turnSpeed = 4.f;
@@ -49,9 +50,9 @@ static Tween s_startAnim = Tween(0.35f, false);
 void spawnAsteroid() {
 	Entity asteroid = s_game->entities.create();
 	Transform& trans = asteroid.add<Transform>();
-	trans.position.x = glm::linearRand(-areaExtents.x, areaExtents.x);
-	trans.position.z = glm::linearRand(-areaExtents.y, areaExtents.y);
 	Physics& phys = asteroid.add<Physics>();
+	phys.pos.x = glm::linearRand(-areaExtents.x, areaExtents.x);
+	phys.pos.y = glm::linearRand(-areaExtents.y, areaExtents.y);
 	phys.angle = glm::linearRand(-M_PI, M_PI);
 	phys.angVel = glm::linearRand(-2.f, 2.f);
 	phys.vel.x = glm::linearRand(-1.f, 1.f);
@@ -74,10 +75,9 @@ void spawnAsteroid() {
 void spawnLaser(vec2 pos, float angle, float speed) {
 	Entity laser = s_game->entities.create();
 	Transform& trans = laser.add<Transform>();
-	trans.position.x = pos.x;
-	trans.position.z = pos.y;
 	trans.scale = vec3(0.25f);
 	Physics& phys = laser.add<Physics>();
+	phys.pos = pos;
 	phys.angle = angle;
 	phys.vel.x = glm::cos(angle) * speed;
 	phys.vel.y = -glm::sin(angle) * speed;
@@ -150,20 +150,20 @@ void fire(float dt) {
 	if (s_fireTime <= 0) {
 		s_fireTime = fireDelay;
 		Entity pl = s_game->entities.get_entity_by_tag("player");
-		Transform& trans = pl.get<Transform>();
 		Physics& phys = pl.get<Physics>();
-		spawnLaser(vec2(trans.position.x, trans.position.z),
-			phys.angle + glm::linearRand(-0.01f, 0.01f), glm::length(phys.vel) + laserSpeed);
+		spawnLaser(phys.pos, phys.angle + glm::linearRand(-0.01f, 0.01f),
+			glm::length(phys.vel) + laserSpeed);
 		AudioSystem& audio = s_game->entities.get_system<AudioSystem>();
 		audio.play($id(laser));
 	}
 }
 
 void simulate(float dt) {
-	s_game->entities.for_each<Physics, Transform>([&](Entity, Physics& phys, Transform& trans){
+	s_game->entities.for_each<Physics, Transform>([&](Entity, Physics& phys, Transform& trans) {
+		phys.pos += phys.vel * dt;
 		phys.angle += phys.angVel * dt;
-		trans.position.x += phys.vel.x * dt;
-		trans.position.z += phys.vel.y * dt;
+		trans.position.x = phys.pos.x;
+		trans.position.z = phys.pos.y;
 		trans.rotation = glm::angleAxis(phys.angle - 1.57079632679f, vec3(0, 1, 0));
 		trans.dirty = true;
 	});
