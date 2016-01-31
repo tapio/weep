@@ -213,6 +213,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 							body.setLinearVelocity(convert(vel));
 						}
 					}
+					ImGui::SliderInt("Force LOD", &renderer.settings.forceLod, -1, Model::MAX_LODS - 1);
 				}
 				if (ImGui::CollapsingHeader("Entities")) {
 					game.entities.for_each<Transform>([](Entity e, Transform& trans) {

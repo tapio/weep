@@ -70,7 +70,12 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 		// Update transform
 		transform.updateMatrix();
 		// Update LOD
+		#ifdef SHIPPING_BUILD
 		model.geometry = model.getLod2(glm::distance2(camera.position, transform.position));
+		#else
+		model.geometry = settings.forceLod >= 0 ? model.lods[settings.forceLod].geometry
+			: model.getLod2(glm::distance2(camera.position, transform.position));
+		#endif
 		// Figure out candidates for reflection location
 		if (frustum.visible(transform, model)) {
 			float reflectivity = 0.f;
@@ -128,7 +133,7 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	if (settings.shadows) {
 		entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
 			// TODO: Shadow frustum culling
-			if (!model.materials.empty() /* && frustum.visible(transform, model) */)
+			if (!model.materials.empty() && model.geometry /* && frustum.visible(transform, model) */)
 				m_device->renderShadow(model, transform);
 		});
 	}
@@ -140,7 +145,7 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 		m_device->setupShadowPass(light, 1+i);
 		if (settings.shadows) {
 			entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
-				if (model.materials.empty())
+				if (model.materials.empty() || !model.geometry)
 					return;
 				float maxDist = model.bounds.radius + light.distance;
 				if (glm::distance2(light.position, transform.position) < maxDist * maxDist)
@@ -163,7 +168,7 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	m_device->setupRenderPass(reflCam, lights, TECH_REFLECTION);
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 		float maxDist = model.bounds.radius + reflCam.far;
-		if (!model.materials.empty() && glm::distance2(reflCam.position, transform.position) < maxDist * maxDist)
+		if (!model.materials.empty() && model.geometry && glm::distance2(reflCam.position, transform.position) < maxDist * maxDist)
 			m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
 	});
 	m_device->renderSkybox();
@@ -175,7 +180,7 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	BEGIN_GPU_SAMPLE(ScenePass)
 	m_device->setupRenderPass(camera, lights, TECH_COLOR);
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
-		if (!model.materials.empty() && frustum.visible(transform, model))
+		if (!model.materials.empty() && model.geometry && frustum.visible(transform, model))
 			m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
 	});
 	m_device->renderSkybox();

@@ -24,6 +24,7 @@ public:
 
 	struct Settings {
 		bool shadows = true;
+		int forceLod = -1;
 	} settings;
 
 private:
