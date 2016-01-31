@@ -22,6 +22,7 @@ Many might be unpolished...
 	- Diffuse / normal / specular / emission / height / AO map support
 	- Dynamic reflections with reflectivity map support
 	- Automatic mesh smoothing with tessellation shaders
+	- LODs
 	- Postprocessing effects: vignette, sepia, saturation control, chromatic aberration...
 	- #define based uber shader
 	- Automatic shader permutation generation based on material properties
@@ -55,7 +56,8 @@ Here's some things that need work. The list is by no means exhaustive.
 
 * There is little multi-threading going on
 * Sun shadow map really needs cascades
-* I'm sceptical whether all tonemap functions work as they should
+* Light system is poor, should implement Forward+
+* Tonemapping needs adaptive exposure
 * Animation and sound systems are very basic
 * Gameplay modules barely work on Windows and hotloading fails in some situations
 * Entity/component destroying works poorly as it's currently implemented
@@ -63,7 +65,9 @@ Here's some things that need work. The list is by no means exhaustive.
 
 ## Dependencies
 
-You need C++11 capable compiler and CMake. A number of third-party libraries are included in the repository and built as a part of the build process (see "third-party" subfolder). In addition, you need SDL 2.0.2+ and OpenGL drivers installed.
+You need CMake and C++11 capable compiler. Currently Clang works best as GCC breaks live reload of non-trivial code plugins. Visual Studio is untested.
+
+A number of third-party libraries are included in the repository and built as a part of the build process (see "third-party" subfolder). In addition, you need SDL 2.0.2+ and OpenGL drivers installed.
 
 The core repository only includes some debug assets, so you probably also want to have "weep-media" repository (cloned as a sub folder next to this readme).
 
