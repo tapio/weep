@@ -25,6 +25,14 @@ struct Physics {
 	float angVel = 0.f;
 };
 
+struct Asteroid {
+	float hp = 5.f;
+};
+struct Laser {
+	float range = 10.f;
+};
+
+
 static const float turnSpeed = 4.f;
 static const float maxSpeed = 6.f;
 static const float accel = 5.f;
@@ -41,6 +49,7 @@ static const char* s_asteroids[] = {
 static Game* s_game = nullptr;
 static float s_scoreWindowWidth = 150.f;
 static int s_score = 0;
+static float s_hp = 100.f;
 static bool s_gameOver = true;
 static float s_resetTime = 0;
 static float s_fireTime = 0;
@@ -49,6 +58,7 @@ static Tween s_startAnim = Tween(0.35f, false);
 
 void spawnAsteroid() {
 	Entity asteroid = s_game->entities.create();
+	asteroid.add<Asteroid>();
 	Transform& trans = asteroid.add<Transform>();
 	Physics& phys = asteroid.add<Physics>();
 	phys.pos.x = glm::linearRand(-areaExtents.x, areaExtents.x);
@@ -74,6 +84,7 @@ void spawnAsteroid() {
 
 void spawnLaser(vec2 pos, float angle, float speed) {
 	Entity laser = s_game->entities.create();
+	laser.add<Laser>();
 	Transform& trans = laser.add<Transform>();
 	trans.scale = vec3(0.25f);
 	Physics& phys = laser.add<Physics>();
@@ -118,6 +129,7 @@ void begin() {
 void reset() {
 	std::srand(std::time(0));
 	s_score = 0;
+	s_hp = 100.f;
 	s_gameOver = false;
 	s_resetTime = 5.f;
 	s_fireTime = 0.f;
@@ -158,6 +170,12 @@ void fire(float dt) {
 	}
 }
 
+bool hitTest(vec2 posA, vec2 posB, float rA, float rB) {
+	float d2 = glm::distance2(posA, posB);
+	float r2 = (rA + rB) * 0.75f; r2 *= r2;
+	return d2 <= r2;
+}
+
 void simulate(float dt) {
 	s_game->entities.for_each<Physics, Transform>([&](Entity, Physics& phys, Transform& trans) {
 		phys.pos += phys.vel * dt;
@@ -167,6 +185,19 @@ void simulate(float dt) {
 		trans.rotation = glm::angleAxis(phys.angle - 1.57079632679f, vec3(0, 1, 0));
 		trans.dirty = true;
 	});
+
+	AudioSystem& audio = s_game->entities.get_system<AudioSystem>();
+	Entity pl = s_game->entities.get_entity_by_tag("player");
+	Physics& plphys = pl.get<Physics>();
+	Model& plmodel = pl.get<Model>();
+	s_game->entities.for_each<Asteroid, Physics, Model>([&](Entity e, Asteroid& asteroid, Physics& phys, Model& model) {
+		if (hitTest(plphys.pos, phys.pos, plmodel.bounds.radius, model.bounds.radius)) {
+			s_hp -= 15.f;
+			e.kill();
+			audio.play($id(hit));
+		}
+	});
+
 }
 
 EXPORT void ModuleFunc(uint msg, void* param)
