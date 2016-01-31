@@ -27,6 +27,8 @@ struct Physics {
 static const float turnSpeed = 4.f;
 static const float maxSpeed = 6.f;
 static const float accel = 5.f;
+static const float fireDelay = 0.075f;
+static const float laserSpeed = 10.f;
 static const vec2 areaExtents = vec2(10, 7);
 static const char* s_asteroids[] = {
 	"sprites/space-shooter/Meteors/meteorBrown_big1.png",
@@ -40,6 +42,7 @@ static float s_scoreWindowWidth = 150.f;
 static int s_score = 0;
 static bool s_gameOver = true;
 static float s_resetTime = 0;
+static float s_fireTime = 0;
 static Tween s_dieAnim = Tween(0.25f, false);
 static Tween s_startAnim = Tween(0.35f, false);
 
@@ -68,6 +71,32 @@ void spawnAsteroid() {
 	model.materials.emplace_back(material);
 }
 
+void spawnLaser(vec2 pos, float angle, float speed) {
+	Entity laser = s_game->entities.create();
+	Transform& trans = laser.add<Transform>();
+	trans.position.x = pos.x;
+	trans.position.z = pos.y;
+	trans.scale = vec3(0.25f);
+	Physics& phys = laser.add<Physics>();
+	phys.angle = angle;
+	phys.vel.x = glm::cos(angle) * speed;
+	phys.vel.y = -glm::sin(angle) * speed;
+	Model& model = laser.add<Model>();
+	model.lods[0].geometry = model.geometry = s_game->resources.getGeometry("debug/plane.obj");
+	model.bounds.min = model.lods[0].geometry->bounds.min * trans.scale;
+	model.bounds.max = model.lods[0].geometry->bounds.max * trans.scale;
+	model.bounds.radius = model.lods[0].geometry->bounds.radius * glm::compMax(trans.scale);
+	Material material;
+	material.flags |= Material::ALPHA_TEST;
+	material.ambient = vec3(0.01f);
+	material.emissive = vec3(0.75f);
+	material.map[Material::DIFFUSE_MAP] = s_game->resources.getImage("sprites/space-shooter/Lasers/laserBlue01.png");
+	material.map[Material::DIFFUSE_MAP]->sRGB = true;
+	material.map[Material::EMISSION_MAP] = s_game->resources.getImage("sprites/space-shooter/Lasers/laserBlue01.png");
+	material.map[Material::EMISSION_MAP]->sRGB = true;
+	model.materials.emplace_back(material);
+}
+
 void begin() {
 	Entity cameraEnt = s_game->entities.get_entity_by_tag("camera");
 	Controller& controller = cameraEnt.get<Controller>();
@@ -91,6 +120,7 @@ void reset() {
 	s_score = 0;
 	s_gameOver = false;
 	s_resetTime = 5.f;
+	s_fireTime = 0.f;
 	s_startAnim.reset();
 	s_game->entities.get_system<RenderSystem>().env().saturation = 0.f;
 	Entity pl = s_game->entities.get_entity_by_tag("player");
@@ -113,6 +143,20 @@ void steer(float dir, float dt) {
 	Entity pl = s_game->entities.get_entity_by_tag("player");
 	Physics& phys = pl.get<Physics>();
 	phys.angle += turnSpeed * dir * dt;
+}
+
+void fire(float dt) {
+	s_fireTime -= dt;
+	if (s_fireTime <= 0) {
+		s_fireTime = fireDelay;
+		Entity pl = s_game->entities.get_entity_by_tag("player");
+		Transform& trans = pl.get<Transform>();
+		Physics& phys = pl.get<Physics>();
+		spawnLaser(vec2(trans.position.x, trans.position.z),
+			phys.angle + glm::linearRand(-0.01f, 0.01f), glm::length(phys.vel) + laserSpeed);
+		AudioSystem& audio = s_game->entities.get_system<AudioSystem>();
+		audio.play($id(laser));
+	}
 }
 
 void simulate(float dt) {
@@ -153,7 +197,6 @@ EXPORT void ModuleFunc(uint msg, void* param)
 		case $id(UPDATE):
 		{
 			s_game = static_cast<Game*>(param);
-			//AudioSystem& audio = s_game->entities.get_system<AudioSystem>();
 
 			// Input
 			const uint8* keys = SDL_GetKeyboardState(NULL);
@@ -165,6 +208,8 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				steer(1, s_game->engine.dt);
 			if (keys[SDL_SCANCODE_RIGHT])
 				steer(-1, s_game->engine.dt);
+			if (keys[SDL_SCANCODE_SPACE])
+				fire(s_game->engine.dt);
 
 			simulate(s_game->engine.dt);
 
