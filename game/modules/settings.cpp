@@ -63,7 +63,9 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				renderer.device().resizeRenderTargets();
 			}
 
-			ImGui::Checkbox("FXAA", (bool*)&renderer.env().postAA);
+			bool fxaa = renderer.env().postAA == Environment::POST_AA_FXAA;
+			ImGui::Checkbox("FXAA", &fxaa);
+			renderer.env().postAA = fxaa ? Environment::POST_AA_FXAA : Environment::POST_AA_NONE;
 			ImGui::SameLine();
 			ImGui::Checkbox("Shadows", &renderer.settings.shadows);
 			break;
