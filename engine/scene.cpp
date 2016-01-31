@@ -211,6 +211,7 @@ namespace {
 			for (int i = 0; i < 6; i++)
 				env.skybox[i] = resources.getImage(def["skybox"][i].string_value());
 		}
+		else env.skyType = Environment::SKY_PROCEDURAL;
 		for (int i = 0; i < 6; i++)
 			if (env.skybox[i])
 				env.skybox[i]->sRGB = true;

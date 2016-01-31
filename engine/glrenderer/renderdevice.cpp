@@ -728,7 +728,7 @@ void RenderDevice::renderFullscreenQuad()
 
 void RenderDevice::renderSkybox()
 {
-	if (!m_env->skybox[0] || m_skyboxMat.shaderId[TECH_COLOR] == -1)
+	if (m_skyboxMat.shaderId[TECH_COLOR] == -1)
 		return;
 	if (!m_skyboxCube.vao) {
 		GLfloat skyboxVertices[] = {
