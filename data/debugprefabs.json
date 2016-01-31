@@ -29,7 +29,10 @@
 				"castShadow": false,
 				"receiveShadow": false
 			},
-			"geometry": "debug/sphere.obj",
+			"geometry": [
+				{ "debug/sphere.obj": 6.0 },
+				{ "debug/sphere_lo.obj": 1e999 }
+			],
 			"scale": 0.1
 		},
 		"testcube": {

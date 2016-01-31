@@ -147,9 +147,24 @@ namespace {
 		// Parse geometry
 		if (!def["geometry"].is_null()) {
 			const Json& defGeom = def["geometry"];
-			if (defGeom.is_string())
-				model.geometry = resources.getGeometry(defGeom.string_value());
-			else model.geometry = resources.getHeightmap(defGeom["heightmap"].string_value());
+			if (defGeom.is_string()) {
+				const string geomPath = defGeom.string_value();
+				if (endsWith(geomPath, ".png") || endsWith(geomPath, ".jpg") || endsWith(geomPath, ".jpeg") || endsWith(geomPath, ".tga"))
+					model.lods[0].geometry = resources.getHeightmap(geomPath);
+				else model.lods[0].geometry = resources.getGeometry(geomPath);
+			} else if (defGeom.is_array()) {
+				const Json::array& lods = defGeom.array_items();
+				ASSERT(lods.size() <= Model::MAX_LODS);
+				int i = 0;
+				for (auto& lodDef : lods) {
+					ASSERT(lodDef.is_object());
+					model.lods[i].geometry = resources.getGeometry(lodDef.object_items().begin()->first);
+					model.lods[i].distSq = lodDef.object_items().begin()->second.number_value();
+					model.lods[i].distSq *= model.lods[i].distSq;
+					++i;
+				}
+			} else ASSERT(!"Unknown geometry definition");
+			model.geometry = model.lods[0].geometry;
 		}
 
 		// Parse material
@@ -415,9 +430,9 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 	if (entity.has<Model>() && entity.has<Transform>()) {
 		Model& model = entity.get<Model>();
 		const Transform& trans = entity.get<Transform>();
-		model.bounds.min = model.geometry->bounds.min * trans.scale;
-		model.bounds.max = model.geometry->bounds.max * trans.scale;
-		model.bounds.radius = model.geometry->bounds.radius * glm::compMax(trans.scale);
+		model.bounds.min = model.lods[0].geometry->bounds.min * trans.scale;
+		model.bounds.max = model.lods[0].geometry->bounds.max * trans.scale;
+		model.bounds.radius = model.lods[0].geometry->bounds.radius * glm::compMax(trans.scale);
 	}
 
 	// Parse body (needs to be after geometry, transform, bounds...)
@@ -442,9 +457,9 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 			float r = glm::max(extents.x, extents.z) * 0.5f;
 			shape = new btCapsuleShape(r, extents.y);
 		} else if (shapeStr == "trimesh") {
-			if (!model.geometry->collisionMesh)
-				model.geometry->generateCollisionTriMesh();
-			shape = new btBvhTriangleMeshShape(model.geometry->collisionMesh, true);
+			if (!model.lods[0].geometry->collisionMesh)
+				model.lods[0].geometry->generateCollisionTriMesh();
+			shape = new btBvhTriangleMeshShape(model.lods[0].geometry->collisionMesh, true);
 		} else {
 			logError("Unknown shape %s", shapeStr.c_str());
 		}

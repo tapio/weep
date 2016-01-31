@@ -11,9 +11,7 @@
 			"ambient": [ 0.005, 0.005, 0.005 ],
 			"shininess": 8
 		},
-		"DISABLEDgeometry": {
-			"heightmap": "debug/uvtestgrid.png"
-		},
+		"DISABLEDgeometry": "debug/uvtestgrid.png",
 		"position": [ 0, -0.5, -10 ],
 		"scale": [ 0.1, 0.5, 0.1 ]
 	},{
@@ -24,7 +22,11 @@
 			"ambient": [ 0.005, 0.005, 0.005 ],
 			"shininess": 8
 		},
-		"geometry": "debug/sphere.obj",
+		"geometry": [
+			{ "debug/sphere_hi.obj": 5.0 },
+			{ "debug/sphere.obj": 15.0 },
+			{ "debug/sphere_lo.obj": 1e999 }
+		],
 		"position": [ 0, 0, -8 ],
 		"scale": 0.5
 	},{

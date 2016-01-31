@@ -44,8 +44,8 @@ void RenderSystem::reset(Entities& entities)
 {
 	logDebug("Reseting renderer");
 	entities.for_each<Model>([this](Entity, Model& model) {
-		if (model.geometry)
-			m_device->destroyGeometry(*model.geometry);
+		for (int i = 0; i < Model::MAX_LODS && model.lods[i].geometry; ++i)
+			m_device->destroyGeometry(*model.lods[i].geometry);
 	});
 }
 
@@ -69,7 +69,8 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
 		// Update transform
 		transform.updateMatrix();
-
+		// Update LOD
+		model.geometry = model.getLod2(glm::distance2(camera.position, transform.position));
 		// Figure out candidates for reflection location
 		if (frustum.visible(transform, model)) {
 			float reflectivity = 0.f;
@@ -103,10 +104,12 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	START_MEASURE(uploadMs)
 	BEGIN_GPU_SAMPLE(Upload)
 	entities.for_each<Model>([&](Entity, Model& model) {
-		// Upload geometry
-		Geometry& geom = *model.geometry;
-		if (!geom.batches.empty() && geom.batches.front().renderId < 0)
-			m_device->uploadGeometry(geom);
+		// Upload geometries
+		for (int i = 0; i < Model::MAX_LODS && model.lods[i].geometry; ++i) {
+			Geometry& geom = *model.lods[i].geometry;
+			if (!geom.batches.empty() && geom.batches.front().renderId < 0)
+				m_device->uploadGeometry(geom);
+		}
 		// Upload materials
 		for (auto& mat : model.materials)
 			if (mat.shaderId[0] < 0 || (mat.flags & Material::DIRTY_MAPS))

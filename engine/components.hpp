@@ -39,10 +39,30 @@ struct BoneAnimation
 	float speed = 1.f;
 };
 
+struct Geometry;
+
 struct Model
 {
+	struct Lod {
+		float distSq = FLT_MAX;
+		Geometry* geometry = nullptr;
+	};
+	static const int MAX_LODS = 3;
+	Lod lods[MAX_LODS] = {};
+
+	Geometry* getLod(float distance) {
+		return getLod2(distance * distance);
+	}
+
+	Geometry* getLod2(float distanceSq) {
+		for (int i = 0; i < MAX_LODS; ++i)
+			if (distanceSq < lods[i].distSq)
+				return lods[i].geometry;
+		return nullptr;
+	}
+
 	Bounds bounds;
-	struct Geometry* geometry = nullptr;
+	Geometry* geometry = nullptr; // Current LOD
 	std::vector<Material> materials;
 };
 

@@ -21,7 +21,7 @@ void AnimationSystem::update(Entities& entities, float dt)
 	entities.for_each<BoneAnimation, Model>([&](Entity, BoneAnimation& anim, Model& model) {
 		if (anim.state != BoneAnimation::PLAYING)
 			return;
-		Geometry& geom = *model.geometry;
+		Geometry& geom = *model.lods[0].geometry;
 		Geometry::Animation a = geom.animations[anim.animation];
 		anim.time += dt * anim.speed * a.frameRate;
 		float alpha = glm::fract(anim.time);
@@ -49,7 +49,7 @@ void AnimationSystem::play(Entity e)
 		anim.state = BoneAnimation::PLAYING;
 		return;
 	}
-	Geometry& geom = *e.get<Model>().geometry;
+	Geometry& geom = *e.get<Model>().lods[0].geometry;
 	Geometry::Animation a = geom.animations[anim.animation];
 	anim.state = BoneAnimation::PLAYING;
 	anim.bones.assign(&geom.animFrames[a.start * geom.bones.size()], &geom.animFrames[a.start * geom.bones.size() + geom.bones.size()]);
@@ -71,5 +71,5 @@ void AnimationSystem::stop(Entity e)
 	anim.state = BoneAnimation::STOPPED;
 	anim.time = 0.f;
 	anim.bones.clear();
-	anim.bones.assign(e.get<Model>().geometry->bones.size(), mat3x4(1));
+	anim.bones.assign(e.get<Model>().lods[0].geometry->bones.size(), mat3x4(1));
 }
