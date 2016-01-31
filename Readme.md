@@ -3,12 +3,19 @@ WeepEngine ![Logo](data/logo/weep-logo-32.png)
 
 This is a small personal game engine. It's mainly a platform for me to experiment with OpenGL and perhaps build small game prototypes. While you can use it too under the MIT license, you probably shouldn't as it's incomplete, inefficient and buggy.
 
+![Skyrunner](docs/pics/skyrunner.gif)
+![Pong](docs/pics/pong.gif)  
+![Testscene](docs/pics/testscene.gif)
+![Debug](docs/pics/debug.gif)  
+
+<!--
 ![Reflections](docs/pics/shot_1.jpg)
 ![Materials](docs/pics/shot_2.jpg)  
 ![Pong](docs/pics/shot_3.jpg)
 ![Level](docs/pics/shot_4.jpg)  
 ![Debug](docs/pics/shot_5.jpg)
 ![Skyrunner](docs/pics/shot_6.jpg)
+-->
 
 ## Features
 
