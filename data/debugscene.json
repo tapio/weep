@@ -1,39 +1,32 @@
 {
-	"include": [ "debugprefabs.json", "environment.json" ],
+	"include": [ "debugprefabs.json" ],
+	"environment": {
+		"sunColor": [ 0.3, 0.3, 0.3 ],
+		"sunPosition": [ 4, 2, 4 ],
+		"skybox_disabled": [
+			"debug/skybox/px.png", "debug/skybox/nx.png",
+			"debug/skybox/py.png", "debug/skybox/ny.png",
+			"debug/skybox/pz.png", "debug/skybox/nz.png"
+		]
+	},
 	"objects": [
 	{
-		"DISABLEDmaterial": {
-			"diffuseMap": "debug/uvtestgrid.png",
-			"specularMap": "debug/uvtestgrid_specular.png",
-			"normalMap": "debug/uvtestgrid_normal.png",
-			"heightMap": "debug/uvtestgrid.png",
-			"tessellate": false,
-			"ambient": [ 0.005, 0.005, 0.005 ],
-			"shininess": 8
+		"name": "camera",
+		"geometry": "debug/cube.obj",
+		"body": {
+			"shape": "capsule",
+			"mass": 100,
+			"angularFactor": 0,
+			"noSleep": true
 		},
-		"DISABLEDgeometry": "debug/uvtestgrid.png",
-		"position": [ 0, -0.5, -10 ],
-		"scale": [ 0.1, 0.5, 0.1 ]
-	},{
-		"material": {
-			"diffuseMap": "debug/uvtestgrid.png",
-			"specularMap": "debug/uvtestgrid_specular.png",
-			"normalMap": "debug/uvtestgrid_normal.png",
-			"ambient": [ 0.005, 0.005, 0.005 ],
-			"shininess": 8
-		},
-		"geometry": [
-			{ "debug/sphere_hi.obj": 5.0 },
-			{ "debug/sphere.obj": 15.0 },
-			{ "debug/sphere_lo.obj": 1e999 }
-		],
-		"position": [ 0, 0, -8 ],
-		"scale": 0.5
+		"scale": [ 0.4, 1, 0.4 ],
+		"position": [ 0, 0.5, 0 ]
 	},{
 		"prefab": "plane",
 		"material": { "uvRepeat": 20 },
 		"position": [ 0, -0.5, 0 ],
-		"scale": [ 50, 1, 50 ]
+		"scale": [ 50, 0.01, 50 ],
+		"body": { "mass": 0, "shape": "box" }
 	},{
 		"prefab": "pointlight",
 		"name": "light_01",
@@ -43,7 +36,7 @@
 			"distance": 6,
 			"decay": 2
 		},
-		"position": [ 0, 2, -15 ]
+		"position": [ 0, 2, -10 ]
 	},{
 		"prefab": "pointlight",
 		"name": "light_02",
@@ -59,22 +52,56 @@
 		"name": "light_03",
 		"light": {
 			"type": "point",
-			"color": [ 1.0, 0.0, 0.0 ],
+			"color": [ 2.0, 0.0, 0.0 ],
 			"distance": 6,
 			"decay": 2
 		},
-		"position": [ 0, 3, -13 ]
+		"position": [ 1.5, 3, -7 ]
+	},
+
+
+	{
+		"prefab": "testsphere",
+		"position": [ 0, 0, -7 ]
 	},{
 		"prefab": "testcube",
-		"position": [ 0, 0, -10 ],
+		"position": [ -0.01, 2, -7 ],
 		"rotation": [ 0, -1, 0 ]
 	},{
 		"prefab": "testcube",
 		"material": {
-			"shaderName": "diffusemap",
-			"diffuse": [ 1, 0, 1 ]
+			"emissionMap": "debug/uvtestgrid_emission.png",
+			"emissive": 1.0
 		},
-		"position": [ 5, 0, -12 ],
+		"position": [ 2, 0, -5 ],
+		"scale": 0.5
+	},{
+		"prefab": "testcube",
+		"material": {
+			"heightMap": "debug/uvtestgrid_height.png",
+			"parallax": 0.04
+		},
+		"position": [ 4, 0, -5 ],
+		"scale": 0.5
+	},{
+		"prefab": "testcube",
+		"material": {
+			"reflectionMap": "debug/white.png",
+			"reflectivity": 1
+		},
+		"position": [ 6, 0, -5 ],
+		"scale": 0.5
+	},{
+		"prefab": "cube_refl",
+		"position": [ 8, 0, -5 ],
+		"scale": 0.5
+	},{
+		"prefab": "testcube",
+		"material": {
+			"shaderName": "diffusemap",
+			"diffuse": [ 2, 0, 2 ]
+		},
+		"position": [ 6, 0, -7 ],
 		"scale": 0.5
 	},{
 		"prefab": "testcube",
@@ -82,14 +109,14 @@
 			"shaderName": "specularmap",
 			"shininess": 48
 		},
-		"position": [ -5, 0, -12 ],
+		"position": [ 8, 0, -7 ],
 		"scale": 0.5
 	},{
 		"prefab": "cube",
 		"material": {
 			"shaderName": "normal"
 		},
-		"position": [ 3, 0, -5 ],
+		"position": [ 10, 0, -7 ],
 		"scale": 0.5
 	},{
 		"prefab": "cube",
@@ -98,36 +125,58 @@
 			"ambient": 1.0,
 			"diffuseMap": "debug/uvtestgrid.png"
 		},
-		"position": [ -3, 0, -5 ],
+		"position": [ 12, 0, -7 ],
 		"scale": 0.5
-	},{
-		"prefab": "testcube",
+	},
+
+
+
+
+	{
+		"prefab": "testsphere",
 		"material": {
-			"emissive": 1.0,
-			"emissionMap": "debug/uvtestgrid_emission.png"
-		},
-		"position": [ -5, 0, -10 ],
-		"scale": 0.5
-	},{
-		"prefab": "testcube",
-		"material": {
-			"heightMap": "debug/uvtestgrid_height.png",
-			"parallax": 0.1,
-			"ambient": 0.02
-		},
-		"position": [ -3, 0, -14 ],
-		"scale": 0.5
-	},{
-		"prefab": "testcube",
-		"material": {
+			"normalMap": null,
 			"reflectionMap": "debug/white.png",
-			"reflectivity": 1
+			"reflectivity": 1.0
 		},
-		"position": [ -1, 0, -14 ],
-		"scale": 0.5
+		"position": [ -2, 0, -4 ]
 	},{
-		"prefab": "cube_refl",
-		"position": [ -3, 0, -8 ],
-		"scale": 0.5
+		"prefab": "testsphere",
+		"material": {
+			"normalMap": null,
+			"reflectionMap": "debug/white.png",
+			"reflectivity": 0.75
+		},
+		"position": [ -4, 0, -4 ]
+	},{
+		"prefab": "testsphere",
+		"material": {
+			"normalMap": null,
+			"reflectionMap": "debug/white.png",
+			"reflectivity": 0.5
+		},
+		"position": [ -6, 0, -4 ]
+	},{
+		"prefab": "testsphere",
+		"material": {
+			"normalMap": null,
+			"reflectionMap": "debug/white.png",
+			"reflectivity": 0.25
+		},
+		"position": [ -8, 0, -4 ]
+	},{
+		"prefab": "testsphere",
+		"material": {
+			"normalMap": null,
+			"reflectionMap": "debug/white.png",
+			"reflectivity": 0.125
+		},
+		"position": [ -10, 0, -4 ]
+	},{
+		"prefab": "testsphere",
+		"material": {
+			"normalMap": null
+		},
+		"position": [ -12, 0, -4 ]
 	}
 ]}

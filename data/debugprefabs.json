@@ -41,7 +41,30 @@
 				"specularMap": "debug/uvtestgrid_specular.png",
 				"normalMap": "debug/uvtestgrid_normal.png"
 			},
-			"geometry": "debug/cube.obj"
+			"geometry": "debug/cube.obj",
+			"body": {
+				"mass": 500,
+				"shape": "box"
+			}
+		},
+		"testsphere": {
+			"material": {
+				"diffuseMap": "debug/uvtestgrid.png",
+				"specularMap": "debug/uvtestgrid_specular.png",
+				"normalMap": "debug/uvtestgrid_normal.png",
+				"ambient": [ 0.01, 0.01, 0.01 ],
+				"shininess": 8
+			},
+			"geometry": [
+				{ "debug/sphere_hi.obj": 5.0 },
+				{ "debug/sphere.obj": 15.0 },
+				{ "debug/sphere_lo.obj": 1e999 }
+			],
+			"body": {
+				"mass": 500,
+				"shape": "sphere"
+			},
+			"scale": 0.5
 		}
 	}
 }
