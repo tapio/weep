@@ -177,9 +177,15 @@ bool hitTest(vec2 posA, vec2 posB, float rA, float rB) {
 }
 
 void simulate(float dt) {
-	s_game->entities.for_each<Physics, Transform>([&](Entity, Physics& phys, Transform& trans) {
+	s_game->entities.for_each<Physics, Transform>([&](Entity e, Physics& phys, Transform& trans) {
 		phys.pos += phys.vel * dt;
 		phys.angle += phys.angVel * dt;
+		if (e.has<Laser>()) {
+			Laser& laser = e.get<Laser>();
+			laser.range -= glm::length(phys.vel * dt);
+			if (laser.range <= 0)
+				e.kill();
+		}
 		// Wrapping
 		if (phys.pos.x < -areaExtents.x)
 			phys.pos.x += 2 * areaExtents.x;
