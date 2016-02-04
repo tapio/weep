@@ -47,13 +47,12 @@ static const char* s_asteroids[] = {
 };
 
 static Game* s_game = nullptr;
-static float s_scoreWindowWidth = 150.f;
 static int s_score = 0;
 static float s_hp = 100.f;
 static bool s_gameOver = true;
 static float s_resetTime = 0;
 static float s_fireTime = 0;
-static Tween s_dieAnim = Tween(0.25f, false);
+static Tween s_damageAnim = Tween(0.25f, false);
 static Tween s_startAnim = Tween(0.35f, false);
 
 void spawnAsteroid() {
@@ -202,15 +201,21 @@ void simulate(float dt) {
 		trans.dirty = true;
 	});
 
+	if (s_gameOver)
+		return;
+
 	AudioSystem& audio = s_game->entities.get_system<AudioSystem>();
 	Entity pl = s_game->entities.get_entity_by_tag("player");
 	Physics& pl_phys = pl.get<Physics>();
 	Model& pl_model = pl.get<Model>();
 	s_game->entities.for_each<Asteroid, Physics, Model>([&](Entity asteroidEntity, Asteroid& asteroid, Physics& asteroid_phys, Model& asteroid_model) {
 		if (hitTest(pl_phys.pos, asteroid_phys.pos, pl_model.bounds.radius, asteroid_model.bounds.radius)) {
-			s_hp -= 15.f;
+			s_hp -= glm::linearRand(15.f, 25.f);
 			asteroidEntity.kill();
+			s_damageAnim.reset();
 			audio.play($id(hit));
+			if (s_hp <= 0)
+				s_gameOver = true;
 		}
 		s_game->entities.for_each<Laser, Physics, Model>([&](Entity laserEntity, Laser&, Physics& laser_phys, Model& laser_model) {
 			if (hitTest(asteroid_phys.pos, laser_phys.pos, asteroid_model.bounds.radius, laser_model.bounds.radius)) {
@@ -260,25 +265,27 @@ EXPORT void ModuleFunc(uint msg, void* param)
 			s_game = static_cast<Game*>(param);
 
 			// Input
-			const uint8* keys = SDL_GetKeyboardState(NULL);
-			if (keys[SDL_SCANCODE_UP])
-				thrust(1, s_game->engine.dt);
-			if (keys[SDL_SCANCODE_DOWN])
-				thrust(-1, s_game->engine.dt);
-			if (keys[SDL_SCANCODE_LEFT])
-				steer(1, s_game->engine.dt);
-			if (keys[SDL_SCANCODE_RIGHT])
-				steer(-1, s_game->engine.dt);
-			if (keys[SDL_SCANCODE_SPACE])
-				fire(s_game->engine.dt);
+			if (!s_gameOver) {
+				const uint8* keys = SDL_GetKeyboardState(NULL);
+				if (keys[SDL_SCANCODE_UP])
+					thrust(1, s_game->engine.dt);
+				if (keys[SDL_SCANCODE_DOWN])
+					thrust(-1, s_game->engine.dt);
+				if (keys[SDL_SCANCODE_LEFT])
+					steer(1, s_game->engine.dt);
+				if (keys[SDL_SCANCODE_RIGHT])
+					steer(-1, s_game->engine.dt);
+				if (keys[SDL_SCANCODE_SPACE])
+					fire(s_game->engine.dt);
+			}
 
 			simulate(s_game->engine.dt);
 
-			if (s_dieAnim.active()) {
-				s_dieAnim.update(s_game->engine.dt);
+			if (s_damageAnim.active()) {
+				s_damageAnim.update(s_game->engine.dt);
 				Environment& env = s_game->entities.get_system<RenderSystem>().env();
-				env.chromaticAberration = s_dieAnim.active()
-					? 0.1f * (1.0f - easing::backInOut(s_dieAnim.t)) : 0.f;
+				env.scanlines = s_damageAnim.active()
+					? (1.0f - easing::backInOut(s_damageAnim.t)) : 0.f;
 			}
 
 			if (s_startAnim.active()) {
@@ -288,16 +295,16 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					? vec3(s_startAnim.t, 0.5f, 1.f) : vec3(0);
 			}
 
-			ScopedFont sf(s_game->entities, $id(asteroids_big));
-			float x = (Engine::width() - s_scoreWindowWidth) * 0.5f;
-			ImGui::SetNextWindowPos(ImVec2(x, 20));
+			ScopedFont sf(s_game->entities, $id(asteroids_hud));
+			ImGui::SetNextWindowPos(ImVec2(20, 20));
 			ImGui::Begin("##Points", NULL, ImGuiSystem::MinimalWindow);
-			s_scoreWindowWidth = ImGui::GetWindowWidth();
+			ImGui::Text("Shields: %d", glm::max(0, (int)s_hp));
 			ImGui::Text("Score: %d", s_score);
 			ImGui::End();
 
 			if (s_gameOver) {
 				s_game->entities.get_system<RenderSystem>().env().saturation = -1.f;
+				ScopedFont sf(s_game->entities, $id(asteroids_big));
 				ImGui::SetNextWindowPosCenter();
 				ImGui::Begin("##GameOver", NULL, ImGuiSystem::MinimalWindow);
 				ImGui::Text("Game Over!");
