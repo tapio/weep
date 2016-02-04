@@ -58,7 +58,7 @@ struct id
 	constexpr static uint fnv1a(const char* str, uint h = 2166136261u) {
 		return !str[0] ? h : fnv1a(str + 1, (h ^ str[0]) * 16777619u);
 	}
-	static unsigned int hash(const char* str) {
+	static uint hash(const char* str) {
 		ASSERT(str);
 		uint ret = 2166136261u;
 		while (*str) {
