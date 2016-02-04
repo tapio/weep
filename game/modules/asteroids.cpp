@@ -180,6 +180,16 @@ void simulate(float dt) {
 	s_game->entities.for_each<Physics, Transform>([&](Entity, Physics& phys, Transform& trans) {
 		phys.pos += phys.vel * dt;
 		phys.angle += phys.angVel * dt;
+		// Wrapping
+		if (phys.pos.x < -areaExtents.x)
+			phys.pos.x += 2 * areaExtents.x;
+		else if (phys.pos.x > areaExtents.x)
+			phys.pos.x -= 2 * areaExtents.x;
+		if (phys.pos.y < -areaExtents.y)
+			phys.pos.y += 2 * areaExtents.y;
+		else if (phys.pos.y > areaExtents.y)
+			phys.pos.y -= 2 * areaExtents.y;
+		// Apply to visual
 		trans.position.x = phys.pos.x;
 		trans.position.z = phys.pos.y;
 		trans.rotation = glm::angleAxis(phys.angle - 1.57079632679f, vec3(0, 1, 0));
