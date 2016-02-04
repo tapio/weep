@@ -204,6 +204,8 @@ void simulate(float dt) {
 				if (asteroid.hp <= 0.f) {
 					asteroidEntity.kill();
 					s_score += 10;
+					spawnAsteroid();
+					spawnAsteroid();
 				}
 				audio.play($id(hit));
 			}
