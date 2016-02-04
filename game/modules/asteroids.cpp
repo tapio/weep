@@ -188,14 +188,26 @@ void simulate(float dt) {
 
 	AudioSystem& audio = s_game->entities.get_system<AudioSystem>();
 	Entity pl = s_game->entities.get_entity_by_tag("player");
-	Physics& plphys = pl.get<Physics>();
-	Model& plmodel = pl.get<Model>();
-	s_game->entities.for_each<Asteroid, Physics, Model>([&](Entity e, Asteroid& asteroid, Physics& phys, Model& model) {
-		if (hitTest(plphys.pos, phys.pos, plmodel.bounds.radius, model.bounds.radius)) {
+	Physics& pl_phys = pl.get<Physics>();
+	Model& pl_model = pl.get<Model>();
+	s_game->entities.for_each<Asteroid, Physics, Model>([&](Entity asteroidEntity, Asteroid& asteroid, Physics& asteroid_phys, Model& asteroid_model) {
+		if (hitTest(pl_phys.pos, asteroid_phys.pos, pl_model.bounds.radius, asteroid_model.bounds.radius)) {
 			s_hp -= 15.f;
-			e.kill();
+			asteroidEntity.kill();
 			audio.play($id(hit));
 		}
+		s_game->entities.for_each<Laser, Physics, Model>([&](Entity laserEntity, Laser&, Physics& laser_phys, Model& laser_model) {
+			if (hitTest(asteroid_phys.pos, laser_phys.pos, asteroid_model.bounds.radius, laser_model.bounds.radius)) {
+				asteroid.hp -= 1.f;
+				s_score++;
+				laserEntity.kill();
+				if (asteroid.hp <= 0.f) {
+					asteroidEntity.kill();
+					s_score += 10;
+				}
+				audio.play($id(hit));
+			}
+		});
 	});
 
 }
