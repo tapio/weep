@@ -53,6 +53,26 @@ void sleep(uint ms);
 template <typename T, std::size_t N>
 constexpr std::size_t countof(T const (&)[N]) noexcept { return N; }
 
+struct id
+{
+	constexpr static uint fnv1a(const char* str, uint h = 2166136261u) {
+		return !str[0] ? h : fnv1a(str + 1, (h ^ str[0]) * 16777619u);
+	}
+	static unsigned int hash(const char* str) {
+		ASSERT(str);
+		uint ret = 2166136261u;
+		while (*str) {
+			ret = (ret ^ str[0]) * 16777619u;
+			str++;
+		}
+		return ret;
+	}
+	static uint hash(const std::string& str) {
+		return hash(str.c_str());
+	}
+};
+#define $id(...) id::fnv1a(#__VA_ARGS__)
+
 
 #define NONCOPYABLE(T) \
 	T(T&&) = default; \

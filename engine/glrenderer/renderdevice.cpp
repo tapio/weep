@@ -9,7 +9,6 @@
 #include "resources.hpp"
 #include "environment.hpp"
 #include "image.hpp"
-#include <id/id.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 
 #define DEBUG_REFLECTION 0 // Draws dynamic cubemap to skybox

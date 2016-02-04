@@ -6,7 +6,6 @@ gif-h      - https://github.com/ginsweater/gif-h        - Public Domain
 GL         - http://www.opengl.org/registry/            - MIT
 glad       - https://github.com/Dav1dde/glad            - MIT
 glm        - http://glm.g-truc.net/                     - MIT
-id         - https://github.com/r-lyeh/id               - zlib
 iqm        - https://github.com/lsalzman/iqm            - Public Domain
 ImGui      - https://github.com/ocornut/imgui           - MIT
 json11     - https://github.com/dropbox/json11          - MIT

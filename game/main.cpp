@@ -15,7 +15,6 @@
 #include "glrenderer/renderdevice.hpp"
 #include "game.hpp"
 #include "args.hpp"
-#include <id/id.hpp>
 #include <SDL.h>
 
 void init(Game& game)
