@@ -390,8 +390,12 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 		Transform transform;
 		setVec3(transform.position, def["position"]);
 		setVec3(transform.scale, def["scale"]);
-		if (!def["rotation"].is_null())
-			transform.rotation = quat(toVec3(def["rotation"]));
+		if (!def["rotation"].is_null()) {
+			const Json& rot = def["rotation"];
+			if (rot.is_array() && rot.array_items().size() == 4)
+				transform.rotation = quat(rot[3].number_value(), rot[0].number_value(), rot[1].number_value(), rot[2].number_value());
+			else transform.rotation = quat(toVec3(rot));
+		}
 		entity.add(transform);
 	}
 
