@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
 		Controller& controller = cameraEnt.get<Controller>();
 		Camera& camera = cameraEnt.get<Camera>();
 
-		imgui.newFrame();
+		imgui.newFrame(game.engine.window);
 
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) {

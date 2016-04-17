@@ -555,17 +555,14 @@ enum STBVorbisError
 #include <string.h>
 #include <assert.h>
 #include <math.h>
-#if !(defined(__APPLE__) || defined(MACOSX) || defined(macintosh) || defined(Macintosh))
+#if !(defined(__APPLE__) || defined(MACOSX) || defined(macintosh) || defined(Macintosh) || defined(__FreeBSD__))
 #include <malloc.h>
 #endif
 #else
 #define NULL 0
 #endif
 
-#if defined(__MINGW32__) && defined(__forceinline)
-  #undef __forceinline
-  #define __forceinline inline
-#elif !defined(_MSC_VER) && !defined(__forceinline)
+#if !defined(_MSC_VER) && !(defined(__MINGW32__) && defined(__forceinline))
    #if __GNUC__
       #define __forceinline inline
    #else

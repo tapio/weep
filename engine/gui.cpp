@@ -15,9 +15,9 @@ ImGuiSystem::~ImGuiSystem()
 	ImGui_ImplSdlGL3_Shutdown();
 }
 
-void ImGuiSystem::newFrame()
+void ImGuiSystem::newFrame(SDL_Window* window)
 {
-	ImGui_ImplSdlGL3_NewFrame();
+	ImGui_ImplSdlGL3_NewFrame(window);
 }
 
 bool ImGuiSystem::processEvent(SDL_Event* event)
