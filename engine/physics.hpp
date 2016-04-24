@@ -2,6 +2,7 @@
 #include "common.hpp"
 #include "bullet/btBulletCollisionCommon.h"
 #include "bullet/btBulletDynamicsCommon.h"
+#include "bullet/BulletCollision/Gimpact/btGImpactShape.h"
 
 class PhysicsSystem : public System
 {

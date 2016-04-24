@@ -448,6 +448,9 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 		const Model& model = entity.get<Model>();
 		const Transform& transform = entity.get<Transform>();
 
+		float mass = 0.f;
+		setNumber(mass, bodyDef["mass"]);
+
 		btCollisionShape* shape = NULL;
 		const string& shapeStr = bodyDef["shape"].string_value();
 		vec3 extents = model.bounds.max - model.bounds.min;
@@ -461,16 +464,27 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 			float r = glm::max(extents.x, extents.z) * 0.5f;
 			shape = new btCapsuleShape(r, extents.y);
 		} else if (shapeStr == "trimesh") {
-			if (!model.lods[0].geometry->collisionMesh)
-				model.lods[0].geometry->generateCollisionTriMesh();
-			shape = new btBvhTriangleMeshShape(model.lods[0].geometry->collisionMesh, true);
+			Geometry* colGeo = nullptr;
+			if (bodyDef["geometry"].is_string()) {
+				colGeo = resources.getGeometry(bodyDef["geometry"].string_value());
+			} else {
+				if (bodyDef["geometry"].is_array())
+					logError("LODs not supported for collision mesh.");
+				colGeo = model.lods[0].geometry;
+			}
+			if (!colGeo->collisionMesh)
+				colGeo->generateCollisionTriMesh();
+			if (mass <= 0.f) { // Static mesh
+				shape = new btBvhTriangleMeshShape(colGeo->collisionMesh, true);
+			} else {
+				shape = new btGImpactMeshShape(colGeo->collisionMesh);
+				static_cast<btGImpactMeshShape*>(shape)->updateBound();
+			}
 		} else {
 			logError("Unknown shape %s", shapeStr.c_str());
 		}
+		ASSERT((shapeStr == "trimesh" || bodyDef["geometry"].is_null()) && "Trimesh shape type required if body.geometry is specified");
 		ASSERT(shape);
-
-		float mass = 0.f;
-		setNumber(mass, bodyDef["mass"]);
 
 		btVector3 inertia(0, 0, 0);
 		shape->calculateLocalInertia(mass, inertia);
