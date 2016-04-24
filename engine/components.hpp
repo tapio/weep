@@ -76,6 +76,22 @@ struct ContactTracker
 	bool hadContact = false;
 };
 
+struct TriggerVolume
+{
+	uint times = -1;
+	uint groups = 0;
+	Bounds bounds;
+	uint receiverModule = 0;
+	uint enterMessage = 0;
+	uint exitMessage = 0;
+};
+
+struct TriggerGroup
+{
+	uint group = 0;
+	bool triggered = false;
+};
+
 struct Light
 {
 	enum Type {

@@ -533,6 +533,40 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 		entity.add<ContactTracker>();
 	}
 
+	if (def["triggerVolume"].is_object()) {
+		ASSERT(entity.has<Transform>());
+		const Json& triggerDef = def["triggerVolume"];
+		TriggerVolume& trigger = entity.add<TriggerVolume>();
+
+		setNumber(trigger.times, triggerDef["times"]);
+		setNumber(trigger.bounds.radius, triggerDef["radius"]);
+		setVec3(trigger.bounds.min, triggerDef["min"]);
+		setVec3(trigger.bounds.min, triggerDef["max"]);
+
+		if (triggerDef["receiver"].is_string())
+			trigger.receiverModule = id::hash(triggerDef["receiver"].string_value());
+		if (triggerDef["enterMessage"].is_string())
+			trigger.enterMessage = id::hash(triggerDef["enterMessage"].string_value());
+		else if (triggerDef["enterMessage"].is_number())
+			trigger.enterMessage = triggerDef["enterMessage"].number_value();
+		if (triggerDef["exitMessage"].is_string())
+			trigger.exitMessage = id::hash(triggerDef["exitMessage"].string_value());
+		else if (triggerDef["exitMessage"].is_number())
+			trigger.exitMessage = triggerDef["exitMessage"].number_value();
+
+		if (triggerDef["groups"].is_number())
+			trigger.groups = 1 << (uint)triggerDef["groups"].number_value();
+		else if (triggerDef["groups"].is_array()) {
+			for (const auto& item : triggerDef["groups"].array_items())
+				trigger.groups |= 1 << (uint)item.number_value();
+		}
+	}
+
+	if (def["triggerGroup"].is_number()) {
+		ASSERT(entity.has<Transform>());
+		entity.add<TriggerGroup>().group = 1 << (uint)def["triggerGroup"].number_value();
+	}
+
 	if (!def["moveSound"].is_null()) {
 		const Json& soundDef = def["moveSound"];
 		MoveSound sound;

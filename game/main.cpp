@@ -10,6 +10,7 @@
 #include "animation.hpp"
 #include "audio.hpp"
 #include "module.hpp"
+#include "triggers.hpp"
 #include "gui.hpp"
 #include "image.hpp"
 #include "glrenderer/renderdevice.hpp"
@@ -26,6 +27,7 @@ void init(Game& game)
 	game.entities.add_system<AudioSystem>();
 	game.entities.add_system<ModuleSystem>();
 	game.entities.get_system<ModuleSystem>().load(Engine::settings["modules"], false);
+	game.entities.add_system<TriggerSystem>();
 	game.entities.add_system<ImGuiSystem>(game.engine.window);
 	game.entities.get_system<ImGuiSystem>().applyDefaultStyle();
 	game.scene = SceneLoader(game.entities);
@@ -68,6 +70,7 @@ int main(int argc, char* argv[])
 		PhysicsSystem& physics = game.entities.get_system<PhysicsSystem>();
 		AudioSystem& audio = game.entities.get_system<AudioSystem>();
 		AnimationSystem& animation = game.entities.get_system<AnimationSystem>();
+		TriggerSystem& triggers = game.entities.get_system<TriggerSystem>();
 		ModuleSystem& modules = game.entities.get_system<ModuleSystem>();
 		ImGuiSystem& imgui = game.entities.get_system<ImGuiSystem>();
 		Entity cameraEnt = game.entities.get_entity_by_tag("camera");
@@ -154,6 +157,11 @@ int main(int argc, char* argv[])
 		modules.call($id(UPDATE), &game);
 		END_CPU_SAMPLE()
 
+		// Triggers
+		BEGIN_CPU_SAMPLE(triggerTime)
+		triggers.update(game.entities, game.engine.dt);
+		END_CPU_SAMPLE()
+
 		// Animation
 		BEGIN_CPU_SAMPLE(animTime)
 		animation.update(game.entities, game.engine.dt);
@@ -232,6 +240,7 @@ int main(int argc, char* argv[])
 	game.entities.get_system<RenderSystem>().reset(game.entities); // TODO: Should not be needed...
 
 	game.entities.remove_system<ImGuiSystem>();
+	game.entities.remove_system<TriggerSystem>();
 	game.entities.remove_system<ModuleSystem>();
 	game.entities.remove_system<AudioSystem>();
 	game.entities.remove_system<PhysicsSystem>();

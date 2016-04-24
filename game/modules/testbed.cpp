@@ -35,5 +35,15 @@ EXPORT void ModuleFunc(uint msg, void* param)
 #endif
 			break;
 		}
+		case $id(TRIGGER_ENTER):
+		{
+			logDebug("ENTER TRIGGER VOLUME");
+			break;
+		}
+		case $id(TRIGGER_EXIT):
+		{
+			logDebug("EXIT TRIGGER VOLUME");
+			break;
+		}
 	}
 }

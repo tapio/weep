@@ -12,6 +12,7 @@
 	"objects": [
 	{
 		"name": "camera",
+		"triggerGroup": 0,
 		"geometry": "debug/cube.obj",
 		"body": {
 			"shape": "capsule",
@@ -178,5 +179,28 @@
 			"normalMap": null
 		},
 		"position": [ -12, 0, -4 ]
+	},
+
+
+	{
+		"material": {
+			"diffuse": [ 1, 0, 0 ],
+			"ambient": [ 0.001, 0.001, 0.001 ],
+			"shininess": 8
+		},
+		"geometry": [
+			{ "debug/sphere_hi.obj": 10.0 },
+			{ "debug/sphere.obj": 30.0 },
+			{ "debug/sphere_lo.obj": 1e999 }
+		],
+		"triggerVolume": {
+			"groups": [ 0 ],
+			"radius": 3,
+			"receiver": "testbed",
+			"enterMessage": "TRIGGER_ENTER",
+			"exitMessage": "TRIGGER_EXIT"
+		},
+		"scale": 3,
+		"position": [ -6, 0, -14 ]
 	}
 ]}
