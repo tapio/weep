@@ -1,9 +1,9 @@
 bl_info = {
-	"name": "Weep json scene format",
+	"name": "Weep JSON Scene Format",
 	"author": "Sampsa Vierros",
 	"blender": (2, 70, 0),
 	"location": "File > Import-Export",
-	"description": "",
+	"description": "Export scene to Weep Engine's JSON format",
 	"warning": "",
 	"wiki_url": "",
 	"tracker_url": "",
@@ -223,7 +223,7 @@ def exportScene(context, operator, filepath):
 class ExportWeepJson(bpy.types.Operator, ExportHelper):
 	bl_idname = "export_scene.json"
 	bl_desciption = ''
-	bl_label = "Export scene to Weep scene description"
+	bl_label = "Export Weep JSON"
 	bl_space_type = "Properties"
 	bl_region_type = "WINDOW"
 
@@ -240,7 +240,7 @@ class ExportWeepJson(bpy.types.Operator, ExportHelper):
 		return {'RUNNING_MODAL'}
 
 def menu_func(self, context):
-    self.layout.operator(ExportWeepJson.bl_idname, text="Export scene (.json)")
+    self.layout.operator(ExportWeepJson.bl_idname, text="Weep Engine (.json)")
 
 
 def register():
