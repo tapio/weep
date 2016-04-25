@@ -209,12 +209,14 @@ def exportScene(context, operator, filepath):
 
 	# Scene writeback
 	data = json.dumps(hierarchy, sort_keys=False, indent=4, separators=(',', ': '), cls=BlenderEncoder)
+	data = data.replace("    ", "\t");
 	fp = open(filepath, 'w')
 	fp.write(data)
 	fp.close()
 
 	# Library writeback
 	data = json.dumps({"prefabs" : prefabs}, sort_keys=False, indent=4, separators=(',', ': '), cls=BlenderEncoder)
+	data = data.replace("    ", "\t");
 	fp = open(filepath+'.library', 'w')
 	fp.write(data)
 	fp.close()
