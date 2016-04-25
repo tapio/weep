@@ -7,7 +7,7 @@ bl_info = {
 	"warning": "",
 	"wiki_url": "",
 	"tracker_url": "",
-	"version": (0, 1),
+	"version": (0, 2),
 	"category": "Import-Export"}
 
 import bpy
@@ -15,34 +15,139 @@ from bpy_extras.io_utils import ExportHelper
 from bpy.props import *
 import mathutils
 
+from collections import OrderedDict
+import json
 import struct
 import string
 import math
 import ctypes
 
+# Known bugs:
+# - Group name and object name must be same
 
-class WeepSceneWriter:
-	def __init__(self, filePath):
-		self.stream = open(filePath, 'w')
-		self.indentationLevel = 0
-	def __del__(self):
-		self.stream.close()
-	def indent(self):
-		self.indentationLevel += 1
-	def deindent(self):
-		self.indentationLevel -= 1
-	def writeLine(self, line):
-		tmp = ''
-		for i in range(self.indentationLevel):
-			tmp += '\t'
-		tmp += line
-		self.stream.write(tmp)
-	def writeObject(self, prefab, position, orientation, scale):
-		self.writeLine('"prefab": "%s",\n' % prefab)
-		self.writeLine('"position": [ %f, %f, %f ],\n' % (position[0], position[2], -position[1]))
-		#self.writeLine('"rotation": [ %f, %f, %f, %f ],\n' % (orientation[0], orientation[1], orientation[3], -orientation[2]))
-		self.writeLine('"scale": [ %f, %f, %f ]\n' % (scale[0], scale[2], scale[1]))
+def B2GL(obj):
+	# Convert Blender coordinates to weep
+	if isinstance(obj, mathutils.Quaternion):
+		return [obj.x, obj.z, -obj.y, obj.w]
+	elif isinstance(obj, mathutils.Vector) and len(obj) == 3:
+		return [obj[0], obj[2], -obj[1]]
+	else:
+		return obj
 
+def is_all_one(vec):
+	for elem in vec:
+		if abs(elem-1.0) > 1e-6:
+			return False
+	return True
+
+def is_all_zero(vec):
+	if vec.length > 1e-6:
+		return False
+	return True
+
+
+class BlenderEncoder(json.JSONEncoder):
+	def default(self, obj):
+		if isinstance(obj, mathutils.Vector):
+			return [elem for elem in obj]
+		if isinstance(obj, mathutils.Color):
+			return [elem for elem in obj]
+		if isinstance(obj, mathutils.Quaternion):
+			return [obj[0], obj[1], obj[2], obj[3]]
+		return json.JSONEncoder.default(self, obj)
+
+
+def gatherGroupInfo(group, prefabs):
+	prefab = OrderedDict()
+	for obj in filter(lambda x: isinstance(x, bpy.types.Object), bpy.data.libraries[0].users_id):
+		if obj.name != group or obj.type != 'MESH':
+			continue
+		mat = obj.active_material
+		material = OrderedDict()
+		prefab["material"] = material
+		# Regular color channels and flags
+		material["diffuse"] = mat.diffuse_color*mat.diffuse_intensity
+		material["specular"] = mat.specular_color*mat.specular_intensity
+		material["shininess"] = mat.specular_hardness
+		material["alphaTest"] = mat.use_transparency
+		material["reflectivity"] = mat.raytrace_mirror.reflect_factor
+		material["castShadow"] = mat.use_cast_shadows
+		material["receiveShadow"] = mat.use_shadows
+		# These do not have their own color in blender internal
+		material["emissive"] = mat.emit*mat.diffuse_color
+		material["ambient"] = mat.ambient*mat.diffuse_color
+		# Parse textures
+		for slot in filter(lambda x: x != None, mat.texture_slots):
+			if not slot.use:
+				continue
+			# Resolve image path
+			texture = slot.texture
+			if texture.type != 'IMAGE':
+				continue
+			image = texture.image
+			filename = ''
+			if image:
+				filename = image.filepath
+			# Resolve channel
+			if slot.use_map_diffuse or slot.use_map_color_diffuse:
+				material["diffuseMap"] = filename
+				if slot.use_map_alpha:
+					material["alphaTest"] = True # Force alpha on
+				# Use diffuse channel for texture scaling and offsetting.
+				if not is_all_zero(slot.offset):
+					material["uvOffset"] = slot.offset[:2]
+				repeat = [texture.repeat_x, texture.repeat_y]
+				if not is_all_one(repeat):
+					material["uvRepeat"] = repeat
+			elif slot.use_map_color_spec:
+				material["specularMap"] = filename
+			elif slot.use_map_normal or texture.use_normal_map:
+				material["normalMap"] = filename
+			elif slot.use_map_ambient:
+				material["aoMap"] = filename
+			elif slot.use_map_displacement:
+				material["heightMap"] = filename
+				material["parallax"] = slot.displacement_factor
+			elif slot.use_map_emit:
+				material["emissionMap"] = filename
+			elif slot.use_map_mirror or slot.use_map_raymir:
+				material["reflectionMap"] = filename
+		# Physics info
+		if obj.rigid_body:
+			body = obj.rigid_body
+			types = {'BOX' : 'box', \
+				'SPHERE' : 'sphere', \
+				'CYLINDER' : 'cylinder', \
+				'CONE' : 'cone', \
+				'CAPSULE' : 'capsule', \
+				'CONVEX_HULL' : 'hull', \
+				'MESH' : 'trimesh'}
+			prefab["body"] = {'shape' : types[body.collision_shape], \
+				'mass' : body.mass, 'friction' : body.friction}
+	prefabs[group] = prefab
+
+def gatherLightInfo(lamp, entity):
+	entity["light"] = OrderedDict()
+	light = entity["light"]
+	light["color"] = lamp.color
+	# Shadows (mostly unused)
+	castsShadows = False
+	if lamp.shadow_method != 'NOSHADOW':
+		castsShadows = True
+		shadowColor = lamp.shadow_color
+	if lamp.shadow_method == 'BUFFER_SHADOW':
+		near = lamp.shadow_buffer_clip_start
+		far = lamp.shadow_buffer_clip_end
+	# Light variety
+	if lamp.type == 'POINT':
+		light["type"] = 'point'
+		light["distance"] = lamp.distance
+		# No easy way to include decay
+	elif lamp.type == 'SUN':
+		# Directional light
+		pass
+	elif lamp.type == 'SPOT':
+		spot_angle = lamp.spot_size
 
 def exportScene(context, operator, filepath):
 	# Switch out of editmode
@@ -50,15 +155,23 @@ def exportScene(context, operator, filepath):
 	if mode == 'EDIT_MESH':
 		bpy.ops.object.editmode_toggle()
 
-	entities = []
+	# Prefill weep scene header
+	hierarchy = OrderedDict()
+	hierarchy["include"] = "prefabs.json"
+	hierarchy["objects"] = []
+	objects = hierarchy["objects"]
+	# Group specific data is saved separately to a library
+	prefabs = OrderedDict()
+
 	scene = context.scene
 	for obj in scene.objects:
 		loc, rot, scale = obj.matrix_world.decompose()
-		entity = {}
+		entity = OrderedDict()
 		# Blender axis x z -y
-		entity['pos'] = loc # vec3
-		entity['rot'] = rot # vec4 (quat)
-		entity['scale'] = scale	# vec3
+		entity['position'] = B2GL(loc)
+		entity['rotation'] = B2GL(rot)
+		if not is_all_one(scale):
+			entity['scale'] = B2GL(scale)
 		# Skip local geometry
 		if obj.type == 'MESH':
 			continue
@@ -70,67 +183,42 @@ def exportScene(context, operator, filepath):
 			if obj.dupli_type == 'GROUP':
 				group = obj.dupli_group.name
 				entity['prefab'] = group
-				entities.append(entity)
+				if group not in prefabs:
+					gatherGroupInfo(group, prefabs)
+				objects.append(entity)
 		elif obj.type == 'LAMP':
 			lamp = obj.data
-			# Commons
-			color = lamp.color                   # vec3
-			energy = lamp.energy                 # float
-			# Shadows	
-			castsShadows = False
-			if lamp.shadow_method != 'NOSHADOW':
-				castsShadows = True
-				shadowColor = lamp.shadow_color      # vec3
-			if lamp.shadow_method == 'BUFFER_SHADOW':
-				near = lamp.shadow_buffer_clip_start # float
-				far = lamp.shadow_buffer_clip_end    # float
-			# Falloffs (floats)
-			#constant = 0.0
-			#linear = lamp.linear_attenuation
-			#quadratic = lamp.quadratic_attenuation
-			if lamp.type == 'POINT':
-				variety = 'point'				
-				distance = lamp.distance             # float
-			elif lamp.type == 'SUN':
-				variety = 'directional'
-			elif lamp.type == 'SPOT':
-				variety = 'spot'
-				distance = lamp.distance             # float
-				spot_angle = lamp.spot_size          # float (in radians)
-				inner_spot_angle = spot_angle*lamp.spot_blend # INCORRECT
+			gatherLightInfo(lamp, entity)
+			objects.append(entity)
 		elif obj.type == 'CAMERA':
+			# Placeholder
 			camera = obj.data
+			entity['prefab'] = "camera"
 			variety = camera.type
-			fov = camera.angle # float (in radians)
+			fov = camera.angle
 			near = camera.clip_start
 			far = camera.clip_end
-			if variety != 'PERSP':
-				orto_scale = camera.orto_scale
+			objects.append(entity)
 		elif obj.type == 'CURVE':
+			# Not yet in use (could be useful for waypoints later on)
 			curve = obj.data
 			for spline in curve.splines:
 				if spline.type != 'NURBS':
 					continue
 				points = [point.co for point in spline.points]
-			
-	# Writeback
-	writer = WeepSceneWriter(filepath)
-	writer.writeLine('{\n')
-	writer.indent()
-	writer.writeLine('"objects": [\n')
-	writer.indent()
-	writer.writeLine('{\n')
-	for entity in entities:
-		writer.indent()
-		writer.writeObject(entity['prefab'], entity['pos'], entity['rot'], entity['scale'])
-		writer.deindent()
-		writer.writeLine('},{\n')
-	writer.deindent()
-	writer.writeLine(']\n')
-	writer.deindent()
-	writer.writeLine('}\n')
 
-		
+	# Scene writeback
+	data = json.dumps(hierarchy, sort_keys=False, indent=4, separators=(',', ': '), cls=BlenderEncoder)
+	fp = open(filepath, 'w')
+	fp.write(data)
+	fp.close()
+
+	# Library writeback
+	data = json.dumps({"prefabs" : prefabs}, sort_keys=False, indent=4, separators=(',', ': '), cls=BlenderEncoder)
+	fp = open(filepath+'.library', 'w')
+	fp.write(data)
+	fp.close()
+
 ################################################################################
 class ExportWeepJson(bpy.types.Operator, ExportHelper):
 	bl_idname = "export_scene.json"
@@ -138,15 +226,15 @@ class ExportWeepJson(bpy.types.Operator, ExportHelper):
 	bl_label = "Export scene to Weep scene description"
 	bl_space_type = "Properties"
 	bl_region_type = "WINDOW"
-	
+
 	filename_ext = ".json"
 	filter_glob = StringProperty(default="*.json", options={'HIDDEN'})
 	filepath = bpy.props.StringProperty(name="File path", default="~/")
-	
+
 	def execute(self, context):
 		exportScene(context, self, self.properties.filepath);
 		return {'FINISHED'}
-	
+
 	def invoke(self, context, event):
 		context.window_manager.fileselect_add(self)
 		return {'RUNNING_MODAL'}
@@ -165,5 +253,5 @@ def unregister():
 
 if __name__ == "__main__":
 	register()
-		
+
 
