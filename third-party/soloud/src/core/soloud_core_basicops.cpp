@@ -83,9 +83,16 @@ namespace SoLoud
 		{
 			setVoiceVolume(ch, aVolume);
 		}
-		setVoiceRelativePlaySpeed(ch, 1);
 
+		// Fix initial voice volume ramp up		
 		int i;
+		for (i = 0; i < MAX_CHANNELS; i++)
+		{
+			mVoice[ch]->mCurrentChannelVolume[i] = mVoice[ch]->mChannelVolume[i] * mVoice[ch]->mOverallVolume;
+		}
+
+		setVoiceRelativePlaySpeed(ch, 1);
+		
 		for (i = 0; i < FILTERS_PER_STREAM; i++)
 		{
 			if (aSound.mFilter[i])
@@ -118,7 +125,7 @@ namespace SoLoud
 			mLastClockedTime = aSoundTime;
 		unlockAudioMutex();
 		int samples = 0;
-		if (lasttime != 0)
+		if (aSoundTime > lasttime)
 		{
 			samples = (int)floor((aSoundTime - lasttime) * mSamplerate);
 		}

@@ -1081,7 +1081,7 @@ typedef int errno_t;
 #endif
 
 #if (!defined(_WIN64) && !defined(__APPLE__)) || (defined(__MINGW32__) && !defined(RSIZE_T_DEFINED))
-typedef unsigned int rsize_t;
+typedef size_t rsize_t;
 #endif
 
 #if defined(RMT_PLATFORM_MACOS) && !defined(_RSIZE_T)

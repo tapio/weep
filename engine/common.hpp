@@ -89,9 +89,9 @@ struct id
 #ifdef USE_PROFILER
 	#define RMT_USE_OPENGL 1
 	#include "remotery/Remotery.h"
-	#define BEGIN_CPU_SAMPLE(name) rmt_BeginCPUSample(name);
+	#define BEGIN_CPU_SAMPLE(name) rmt_BeginCPUSample(name, 0);
 	#define END_CPU_SAMPLE(name) rmt_EndCPUSample();
-	#define SCOPED_CPU_SAMPLE(name) rmt_ScopedCPUSample(name);
+	#define SCOPED_CPU_SAMPLE(name) rmt_ScopedCPUSample(name, 0);
 	#define BEGIN_GPU_SAMPLE(name) rmt_BeginOpenGLSample(name);
 	#define END_GPU_SAMPLE() rmt_EndOpenGLSample();
 	#define SCOPED_GPU_SAMPLE(name) rmt_ScopedOpenGLSample(name);
