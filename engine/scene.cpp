@@ -22,6 +22,22 @@
 
 namespace {
 
+	// /foo/bar/baz.txt --> /foo/bar/
+	string dirname(const string& path) {
+		size_t pos = path.find_last_of("/");
+		if (pos != string::npos)
+			return path.substr(0, pos + 1);
+		else return "";
+	}
+
+	string resolvePath(const string& dir, const string& path) {
+		ASSERT(!path.empty());
+		ASSERT(dir.empty() || dir[dir.size()-1] == '/');
+		if (!path.empty() && path[0] == '/')
+			return path.substr(1);
+		return dir + path;
+	}
+
 	Json assign(Json lhs, const Json& rhs) {
 		ASSERT(rhs.is_object());
 		Json::object object;
@@ -97,7 +113,7 @@ namespace {
 			dst = src.string_value();
 	}
 
-	Material& parseMaterial(Material& material, const Json& def, Resources& resources) {
+	Material& parseMaterial(Material& material, const Json& def, Resources& resources, const string& pathContext) {
 		ASSERT(def.is_object());
 		setString(material.shaderName, def["shaderName"]);
 		setFlag(material.flags, Material::TESSELLATE, def["tessellate"]);
@@ -119,35 +135,35 @@ namespace {
 			material.uvRepeat = toVec2(def["uvRepeat"]);
 
 		if (!def["diffuseMap"].is_null()) {
-			material.map[Material::DIFFUSE_MAP] = resources.getImageAsync(def["diffuseMap"].string_value());
+			material.map[Material::DIFFUSE_MAP] = resources.getImageAsync(resolvePath(pathContext, def["diffuseMap"].string_value()));
 			material.map[Material::DIFFUSE_MAP]->sRGB = true;
 		}
 		if (!def["specularMap"].is_null()) {
-			material.map[Material::SPECULAR_MAP] = resources.getImageAsync(def["specularMap"].string_value());
+			material.map[Material::SPECULAR_MAP] = resources.getImageAsync(resolvePath(pathContext, def["specularMap"].string_value()));
 			material.map[Material::SPECULAR_MAP]->sRGB = true;
 		}
 		if (!def["emissionMap"].is_null()) {
-			material.map[Material::EMISSION_MAP] = resources.getImageAsync(def["emissionMap"].string_value());
+			material.map[Material::EMISSION_MAP] = resources.getImageAsync(resolvePath(pathContext, def["emissionMap"].string_value()));
 			material.map[Material::EMISSION_MAP]->sRGB = true;
 		}
 		if (!def["normalMap"].is_null())
-			material.map[Material::NORMAL_MAP] = resources.getImageAsync(def["normalMap"].string_value());
+			material.map[Material::NORMAL_MAP] = resources.getImageAsync(resolvePath(pathContext, def["normalMap"].string_value()));
 		if (!def["heightMap"].is_null())
-			material.map[Material::HEIGHT_MAP] = resources.getImageAsync(def["heightMap"].string_value());
+			material.map[Material::HEIGHT_MAP] = resources.getImageAsync(resolvePath(pathContext, def["heightMap"].string_value()));
 		if (!def["aoMap"].is_null())
-			material.map[Material::AO_MAP] = resources.getImageAsync(def["aoMap"].string_value());
+			material.map[Material::AO_MAP] = resources.getImageAsync(resolvePath(pathContext, def["aoMap"].string_value()));
 		if (!def["reflectionMap"].is_null())
-			material.map[Material::REFLECTION_MAP] = resources.getImageAsync(def["reflectionMap"].string_value());
+			material.map[Material::REFLECTION_MAP] = resources.getImageAsync(resolvePath(pathContext, def["reflectionMap"].string_value()));
 
 		return material;
 	}
 
-	void parseModel(Model& model, const Json& def, Resources& resources) {
+	void parseModel(Model& model, const Json& def, Resources& resources, const string& pathContext) {
 		// Parse geometry
 		if (!def["geometry"].is_null()) {
 			const Json& defGeom = def["geometry"];
 			if (defGeom.is_string()) {
-				const string geomPath = defGeom.string_value();
+				const string geomPath = resolvePath(pathContext, defGeom.string_value());
 				if (endsWith(geomPath, ".png") || endsWith(geomPath, ".jpg") || endsWith(geomPath, ".jpeg") || endsWith(geomPath, ".tga"))
 					model.lods[0].geometry = resources.getHeightmap(geomPath);
 				else model.lods[0].geometry = resources.getGeometry(geomPath);
@@ -157,7 +173,8 @@ namespace {
 				int i = 0;
 				for (auto& lodDef : lods) {
 					ASSERT(lodDef.is_object());
-					model.lods[i].geometry = resources.getGeometry(lodDef.object_items().begin()->first);
+					const string geomPath = resolvePath(pathContext, lodDef.object_items().begin()->first);
+					model.lods[i].geometry = resources.getGeometry(geomPath);
 					model.lods[i].distSq = lodDef.object_items().begin()->second.number_value();
 					model.lods[i].distSq *= model.lods[i].distSq;
 					++i;
@@ -172,29 +189,30 @@ namespace {
 			ASSERT(model.materials.size() <= 1);
 			if (model.materials.empty())
 				model.materials.emplace_back();
-			parseMaterial(model.materials.back(), materialDef, resources);
+			parseMaterial(model.materials.back(), materialDef, resources, pathContext);
 		} else if (materialDef.is_array()) {
 			if (model.materials.empty()) {
 				for (auto& matDef : materialDef.array_items()) {
 					model.materials.emplace_back();
-					parseMaterial(model.materials.back(), matDef, resources);
+					parseMaterial(model.materials.back(), matDef, resources, pathContext);
 				}
 			} else {
 				ASSERT(model.materials.size() == materialDef.array_items().size());
 				for (uint i = 0; i < materialDef.array_items().size(); ++i)
-					parseMaterial(model.materials[i], materialDef[i], resources);
+					parseMaterial(model.materials[i], materialDef[i], resources, pathContext);
 			}
 		}
 	}
 
-	Environment parseEnvironment(const Json& def, Resources& resources)
+	Environment parseEnvironment(const Json& def, Resources& resources, const string& pathContext)
 	{
 		Environment env;
 		ASSERT(def.is_object());
 		if (def["skybox"].is_string()) {
 			env.skyType = Environment::SKY_SKYBOX;
-			const string& skyboxPath = def["skybox"].string_value();
+			string skyboxPath = def["skybox"].string_value();
 			if (skyboxPath.back() == '/' || skyboxPath.back() == '\\') {
+				skyboxPath = resolvePath(pathContext, skyboxPath);
 				env.skybox[0] = resources.getImage(skyboxPath + "px.jpg");
 				env.skybox[1] = resources.getImage(skyboxPath + "nx.jpg");
 				env.skybox[2] = resources.getImage(skyboxPath + "py.jpg");
@@ -202,13 +220,14 @@ namespace {
 				env.skybox[4] = resources.getImage(skyboxPath + "pz.jpg");
 				env.skybox[5] = resources.getImage(skyboxPath + "nz.jpg");
 			} else {
+				skyboxPath = resolvePath(pathContext, skyboxPath);
 				for (int i = 0; i < 6; i++)
 					env.skybox[i] = resources.getImage(skyboxPath);
 			}
 		} else if (def["skybox"].is_array()) {
 			env.skyType = Environment::SKY_SKYBOX;
 			for (int i = 0; i < 6; i++)
-				env.skybox[i] = resources.getImage(def["skybox"][i].string_value());
+				env.skybox[i] = resources.getImage(resolvePath(pathContext, def["skybox"][i].string_value()));
 		}
 		else env.skyType = Environment::SKY_PROCEDURAL;
 		for (int i = 0; i < 6; i++)
@@ -238,7 +257,7 @@ void SceneLoader::load(const string& path, Resources& resources)
 
 	if (!m_environment.is_null() && world->has_system<RenderSystem>()) {
 		RenderSystem& renderer = world->get_system<RenderSystem>();
-		renderer.env() = parseEnvironment(m_environment, resources);
+		renderer.env() = parseEnvironment(m_environment, resources, dirname(path));
 		renderer.device().setEnvironment(&renderer.env());
 	}
 
@@ -273,6 +292,7 @@ void SceneLoader::load(const string& path, Resources& resources)
 
 void SceneLoader::load_internal(const string& path, Resources& resources)
 {
+	string pathContext = dirname(path);
 	std::string err;
 	Json jsonScene = Json::parse(resources.getText(path, Resources::NO_CACHE), err);
 	if (!err.empty())
@@ -281,10 +301,10 @@ void SceneLoader::load_internal(const string& path, Resources& resources)
 	if (jsonScene.is_object()) {
 		// Handle includes
 		if (jsonScene["include"].is_string()) {
-			load_internal(jsonScene["include"].string_value(), resources);
+			load_internal(resolvePath(pathContext, jsonScene["include"].string_value()), resources);
 		} else if (jsonScene["include"].is_array()) {
 			for (auto& includePath : jsonScene["include"].array_items())
-				load_internal(includePath.string_value(), resources);
+				load_internal(resolvePath(pathContext, includePath.string_value()), resources);
 		}
 
 		// Parse modules
@@ -303,7 +323,7 @@ void SceneLoader::load_internal(const string& path, Resources& resources)
 			ImGuiSystem& imgui = world->get_system<ImGuiSystem>();
 			for (auto& it : fonts) {
 				ASSERT(it.second.is_object());
-				string path = resources.findPath(it.second["path"].string_value());
+				string path = resources.findPath(resolvePath(pathContext, it.second["path"].string_value()));
 				float size = it.second["size"].number_value();
 				imgui.loadFont(it.first, path, size);
 			}
@@ -315,11 +335,11 @@ void SceneLoader::load_internal(const string& path, Resources& resources)
 			AudioSystem& audio = world->get_system<AudioSystem>();
 			for (auto& it : sounds) {
 				if (it.second.is_string()) {
-					audio.add(it.first, resources.getBinary(it.second.string_value()));
+					audio.add(it.first, resources.getBinary(resolvePath(pathContext, it.second.string_value())));
 				} else if (it.second.is_array()) {
 					for (auto& it2 : it.second.array_items()) {
 						ASSERT(it2.is_string());
-						audio.add(it.first, resources.getBinary(it2.string_value()));
+						audio.add(it.first, resources.getBinary(resolvePath(pathContext, it2.string_value())));
 					}
 				}
 			}
@@ -336,11 +356,11 @@ void SceneLoader::load_internal(const string& path, Resources& resources)
 	// Parse objects
 	const Json::array& objects = jsonScene.is_array() ? jsonScene.array_items() : jsonScene["objects"].array_items();
 	for (uint i = 0; i < objects.size(); ++i) {
-		instantiate(objects[i], resources);
+		instantiate(objects[i], resources, pathContext);
 	}
 }
 
-Entity SceneLoader::instantiate(Json def, Resources& resources)
+Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pathContext)
 {
 	ASSERT(def.is_object());
 
@@ -351,7 +371,7 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 			def = assign(prefabIter->second, def);
 		} else if (endsWith(prefabName, ".json")) {
 				string err;
-				Json extPrefab = Json::parse(resources.getText(prefabName, Resources::NO_CACHE), err);
+				Json extPrefab = Json::parse(resources.getText(resolvePath(pathContext, prefabName), Resources::NO_CACHE), err);
 				if (!err.empty()) {
 					logError("Failed to parse prefab \"%s\": %s", prefabName.c_str(), err.c_str());
 				} else {
@@ -424,7 +444,7 @@ Entity SceneLoader::instantiate(Json def, Resources& resources)
 
 	if (!def["geometry"].is_null()) {
 		Model model;
-		parseModel(model, def, resources);
+		parseModel(model, def, resources, pathContext);
 		entity.add(model);
 		numModels++;
 	}

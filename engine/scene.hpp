@@ -12,7 +12,7 @@ public:
 	void load(const string& path, Resources& resources);
 	void reset();
 
-	Entity instantiate(Json def, Resources& resources);
+	Entity instantiate(Json def, Resources& resources, const string& pathContext = "");
 
 	Entities* world = nullptr;
 	std::map<string, Json> prefabs;
