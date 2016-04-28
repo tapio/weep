@@ -7,7 +7,7 @@ bl_info = {
 	"warning": "",
 	"wiki_url": "",
 	"tracker_url": "",
-	"version": (0, 3),
+	"version": (0, 31),
 	"category": "Import-Export"}
 
 import bpy
@@ -23,6 +23,8 @@ import math
 import ctypes
 import os.path
 
+MAX_LAYERS = 20
+
 # Known bugs:
 # - Group name and object name must be same
 # - Particle system "pick random" feature does not work, must create separate
@@ -30,7 +32,7 @@ import os.path
 # - Automatic mesh exporting does not work for non-local groups
 # - Unsaved files save geometry to home path
 
-def B2GL(obj, scale=True):
+def B2GL(obj, scale=False):
 	# Convert Blender coordinates to weep
 	if isinstance(obj, mathutils.Quaternion):
 		return [obj.x, obj.z, -obj.y, obj.w]
@@ -72,17 +74,26 @@ def gatherObjectInfo(obj, prefab, export_mesh = False, workdir=''):
 		prefab["geometry"] = obj.name+'.obj'
 	# Export geometry to Wavefront .obj file if appropriate
 	if export_mesh:
+		# This blob moves object to origin, removes rotation and scale, and
+		# moves the object to layer one. Used to negate certain aspects of
+		# .obj exporter.
 		obj.select = True
 		transform = obj.matrix_world.copy()
 		loc, rot, scale = obj.location.copy(), obj.rotation_quaternion.copy(), obj.scale.copy()
 		obj.location = mathutils.Vector([0, 0, 0])
 		obj.scale = mathutils.Vector([1, 1, 1])
 		obj.rotation_quaternion = mathutils.Quaternion([1, 0, 0, 0])
+		moved = False
+		if not obj.layers[0]: 
+			moved = True
+			obj.layers[0] = True
 		bpy.ops.export_scene.obj(filepath=workdir+'/'+prefab["geometry"], \
-			axis_forward='Z', axis_up='Y', use_selection=True,  \
+			axis_forward='-Z', axis_up='Y', use_selection=True,  \
 			use_materials=False, use_triangles=True)
 		obj.select = False
 		obj.location, obj.rotation_quaternion, obj.scale = loc, rot, scale
+		if moved:
+			obj.layers[0] = False
 	# Physics info
 	if obj.rigid_body:
 		body = obj.rigid_body
@@ -152,6 +163,12 @@ def gatherObjectInfo(obj, prefab, export_mesh = False, workdir=''):
 
 def gatherGroupInfo(group, prefabs, export_mesh=False, workdir=''):
 	prefab = OrderedDict()
+	for obj in filter(lambda x: isinstance(x, bpy.types.Object), bpy.data.objects):
+		if obj.name != group or obj.type != 'MESH':
+			continue
+		gatherObjectInfo(obj, prefab, export_mesh, workdir)
+		prefabs[group] = prefab
+		return
 	for obj in filter(lambda x: isinstance(x, bpy.types.Object), bpy.data.libraries[0].users_id):
 		if obj.name != group or obj.type != 'MESH':
 			continue
@@ -209,7 +226,7 @@ def exportScene(context, operator, filepath, export_library, export_meshes):
 			entity['scale'] = B2GL(scale, True)
 		# Local geometry goes to scene file and can carry nice particle systems
 		if obj.type == 'MESH':
-			if obj.hide == True:
+			if obj.hide_render == True:
 				continue
 			gatherObjectInfo(obj, entity, export_meshes, workdir)
 			objects.append(entity)
@@ -225,7 +242,7 @@ def exportScene(context, operator, filepath, export_library, export_meshes):
 							continue
 						entity = OrderedDict()
 						entity['position'] = B2GL(particle.location)
-						entity['rotation'] = B2GL(particle.rotation)
+						entity['rotation'] = B2GL(particle.rotation) # not quaternion
 						entity['scale'] = [particle.size]*3
 						entity['prefab'] = group
 						objects.append(entity)
