@@ -7,7 +7,7 @@
 ImGuiSystem::ImGuiSystem(SDL_Window* window)
 {
 	ImGui_ImplSdlGL3_Init(window);
-	m_imguiState = ImGui::GetInternalState();
+	m_imguiContext = ImGui::GetCurrentContext();
 }
 
 ImGuiSystem::~ImGuiSystem()
@@ -51,7 +51,7 @@ bool ImGuiSystem::usingKeyboard() const
 
 void ImGuiSystem::applyInternalState()
 {
-	ImGui::SetInternalState(m_imguiState);
+	ImGui::SetCurrentContext(m_imguiContext);
 }
 
 ImFont* ImGuiSystem::loadFont(const string& name, const string& path, float size)

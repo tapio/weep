@@ -34,7 +34,7 @@
 
 #include "type_vec.hpp"
 #ifdef GLM_SWIZZLE
-#	if GLM_HAS_ANONYMOUS_UNION
+#	if GLM_HAS_UNRESTRICTED_UNIONS
 #		include "_swizzle.hpp"
 #	else
 #		include "_swizzle_func.hpp"
@@ -55,7 +55,7 @@ namespace glm
 
 		// -- Data --
 
-#		if GLM_HAS_ANONYMOUS_UNION
+#		if GLM_HAS_UNRESTRICTED_UNIONS
 			union
 			{
 				struct{ T x, y, z; };
@@ -95,50 +95,50 @@ namespace glm
 
 		// -- Implicit basic constructors --
 
-		GLM_FUNC_DECL tvec3() GLM_DEFAULT_CTOR;
-		GLM_FUNC_DECL tvec3(tvec3<T, P> const & v) GLM_DEFAULT;
+		GLM_FUNC_DECL GLM_CONSTEXPR tvec3() GLM_DEFAULT_CTOR;
+		GLM_FUNC_DECL GLM_CONSTEXPR tvec3(tvec3<T, P> const & v) GLM_DEFAULT;
 		template <precision Q>
-		GLM_FUNC_DECL tvec3(tvec3<T, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR tvec3(tvec3<T, Q> const & v);
 
 		// -- Explicit basic constructors --
 
-		GLM_FUNC_DECL explicit tvec3(ctor);
-		GLM_FUNC_DECL explicit tvec3(T scalar);
-		GLM_FUNC_DECL tvec3(T a, T b, T c);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR explicit tvec3(ctor);
+		GLM_FUNC_DECL GLM_CONSTEXPR explicit tvec3(T scalar);
+		GLM_FUNC_DECL GLM_CONSTEXPR tvec3(T a, T b, T c);
 
 		// -- Conversion scalar constructors --
 
 		/// Explicit converions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename A, typename B, typename C>
-		GLM_FUNC_DECL tvec3(A a, B b, C c);
+		GLM_FUNC_DECL GLM_CONSTEXPR tvec3(A a, B b, C c);
 		template <typename A, typename B, typename C>
-		GLM_FUNC_DECL tvec3(tvec1<A, P> const & a, tvec1<B, P> const & b, tvec1<C, P> const & c);
+		GLM_FUNC_DECL GLM_CONSTEXPR tvec3(tvec1<A, P> const & a, tvec1<B, P> const & b, tvec1<C, P> const & c);
 
 		// -- Conversion vector constructors --
 
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename A, typename B, precision Q>
-		GLM_FUNC_DECL tvec3(tvec2<A, Q> const & a, B b);
+		GLM_FUNC_DECL GLM_CONSTEXPR tvec3(tvec2<A, Q> const & a, B b);
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename A, typename B, precision Q>
-		GLM_FUNC_DECL tvec3(tvec2<A, Q> const & a, tvec1<B, Q> const & b);
+		GLM_FUNC_DECL GLM_CONSTEXPR tvec3(tvec2<A, Q> const & a, tvec1<B, Q> const & b);
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename A, typename B, precision Q>
-		GLM_FUNC_DECL tvec3(A a, tvec2<B, Q> const & b);
+		GLM_FUNC_DECL GLM_CONSTEXPR tvec3(A a, tvec2<B, Q> const & b);
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename A, typename B, precision Q>
-		GLM_FUNC_DECL tvec3(tvec1<A, Q> const & a, tvec2<B, Q> const & b);
+		GLM_FUNC_DECL GLM_CONSTEXPR tvec3(tvec1<A, Q> const & a, tvec2<B, Q> const & b);
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename U, precision Q>
-		GLM_FUNC_DECL GLM_EXPLICIT tvec3(tvec4<U, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR GLM_EXPLICIT tvec3(tvec4<U, Q> const & v);
 
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename U, precision Q>
-		GLM_FUNC_DECL GLM_EXPLICIT tvec3(tvec3<U, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR GLM_EXPLICIT tvec3(tvec3<U, Q> const & v);
 
 		// -- Swizzle constructors --
 
-#		if GLM_HAS_ANONYMOUS_UNION && defined(GLM_SWIZZLE)
+#		if GLM_HAS_UNRESTRICTED_UNIONS && defined(GLM_SWIZZLE)
 			template <int E0, int E1, int E2>
 			GLM_FUNC_DECL tvec3(detail::_swizzle<3, T, P, tvec3<T, P>, E0, E1, E2, -1> const & that)
 			{
@@ -156,7 +156,7 @@ namespace glm
 			{
 				*this = tvec3<T, P>(scalar, v());
 			}
-#		endif// GLM_HAS_ANONYMOUS_UNION && defined(GLM_SWIZZLE)
+#		endif// GLM_HAS_UNRESTRICTED_UNIONS && defined(GLM_SWIZZLE)
 
 		// -- Unary arithmetic operators --
 

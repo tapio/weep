@@ -35,7 +35,7 @@
 #include "../fwd.hpp"
 #include "type_vec.hpp"
 #ifdef GLM_SWIZZLE
-#	if GLM_HAS_ANONYMOUS_UNION
+#	if GLM_HAS_UNRESTRICTED_UNIONS
 #		include "_swizzle.hpp"
 #	else
 #		include "_swizzle_func.hpp"
@@ -56,7 +56,7 @@ namespace glm
 
 		// -- Data --
 
-#		if GLM_HAS_ANONYMOUS_UNION
+#		if GLM_HAS_UNRESTRICTED_UNIONS
 			union
 			{
 				T x;
@@ -94,41 +94,41 @@ namespace glm
 
 		// -- Implicit basic constructors --
 
-		GLM_FUNC_DECL tvec1() GLM_DEFAULT_CTOR;
-		GLM_FUNC_DECL tvec1(tvec1<T, P> const & v) GLM_DEFAULT;
+		GLM_FUNC_DECL GLM_CONSTEXPR tvec1() GLM_DEFAULT_CTOR;
+		GLM_FUNC_DECL GLM_CONSTEXPR tvec1(tvec1<T, P> const & v) GLM_DEFAULT;
 		template <precision Q>
-		GLM_FUNC_DECL tvec1(tvec1<T, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR tvec1(tvec1<T, Q> const & v);
 
 		// -- Explicit basic constructors --
 
-		GLM_FUNC_DECL explicit tvec1(ctor);
-		GLM_FUNC_DECL explicit tvec1(T scalar);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR explicit tvec1(ctor);
+		GLM_FUNC_DECL GLM_CONSTEXPR explicit tvec1(T scalar);
 
 		// -- Conversion vector constructors --
 
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename U, precision Q>
-		GLM_FUNC_DECL GLM_EXPLICIT tvec1(tvec2<U, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR GLM_EXPLICIT tvec1(tvec2<U, Q> const & v);
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename U, precision Q>
-		GLM_FUNC_DECL GLM_EXPLICIT tvec1(tvec3<U, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR GLM_EXPLICIT tvec1(tvec3<U, Q> const & v);
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename U, precision Q>
-		GLM_FUNC_DECL GLM_EXPLICIT tvec1(tvec4<U, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR GLM_EXPLICIT tvec1(tvec4<U, Q> const & v);
 
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename U, precision Q>
-		GLM_FUNC_DECL GLM_EXPLICIT tvec1(tvec1<U, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR GLM_EXPLICIT tvec1(tvec1<U, Q> const & v);
 
 		// -- Swizzle constructors --
 
-#		if(GLM_HAS_ANONYMOUS_UNION && defined(GLM_SWIZZLE))
+#		if(GLM_HAS_UNRESTRICTED_UNIONS && defined(GLM_SWIZZLE))
 			template <int E0>
 			GLM_FUNC_DECL tvec1(detail::_swizzle<1, T, P, tvec1<T, P>, E0, -1,-2,-3> const & that)
 			{
 				*this = that();
 			}
-#		endif//(GLM_HAS_ANONYMOUS_UNION && defined(GLM_SWIZZLE))
+#		endif//(GLM_HAS_UNRESTRICTED_UNIONS && defined(GLM_SWIZZLE))
 
 		// -- Unary arithmetic operators --
 

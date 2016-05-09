@@ -30,11 +30,13 @@
 /// @author Christophe Riccio
 ///////////////////////////////////////////////////////////////////////////////////
 
-namespace glm{
+namespace glm
+{
+#	if GLM_HAS_UNRESTRICTED_UNIONS
 
 #	if !GLM_HAS_DEFAULTED_FUNCTIONS
 		template <>
-		GLM_FUNC_QUALIFIER tvec4<float, simd>::tvec4()
+		GLM_FUNC_QUALIFIER GLM_CONSTEXPR_CTOR tvec4<float, simd>::tvec4()
 #			ifndef GLM_FORCE_NO_CTOR_INIT
 				: data(_mm_setzero_ps())
 #			endif
@@ -42,12 +44,12 @@ namespace glm{
 #	endif//!GLM_HAS_DEFAULTED_FUNCTIONS
 
 	template <>
-	GLM_FUNC_QUALIFIER tvec4<float, simd>::tvec4(float s) :
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR_SIMD tvec4<float, simd>::tvec4(float s) :
 		data(_mm_set1_ps(s))
 	{}
 
 	template <>
-	GLM_FUNC_QUALIFIER tvec4<float, simd>::tvec4(float a, float b, float c, float d) :
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR_SIMD tvec4<float, simd>::tvec4(float a, float b, float c, float d) :
 		data(_mm_set_ps(d, c, b, a))
 	{}
 
@@ -74,4 +76,21 @@ namespace glm{
 		this->data = _mm_add_ps(this->data, _mm_set_ps1(static_cast<float>(v.x)));
 		return *this;
 	}
+
+	template <>
+	GLM_FUNC_QUALIFIER tvec4<float, simd> operator+(tvec4<float, simd> const & v1, tvec4<float, simd> const & v2)
+	{
+		tvec4<float, glm::simd> Result(uninitialize);
+		Result.data = _mm_add_ps(v1.data, v2.data);
+		return Result;
+	}
+
+	template <>
+	GLM_FUNC_QUALIFIER tvec4<float, simd> operator*(tvec4<float, simd> const & v1, tvec4<float, simd> const & v2)
+	{
+		tvec4<float, glm::simd> Result(uninitialize);
+		Result.data = _mm_mul_ps(v1.data, v2.data);
+		return Result;
+	}
+#endif//GLM_HAS_UNRESTRICTED_UNIONS
 }//namespace glm

@@ -66,7 +66,7 @@ namespace glm
 	}
 
 	template <typename T, precision P>
-	GLM_FUNC_QUALIFIER tmat3x4<T, P>::tmat3x4(ctor)
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR_CTOR tmat3x4<T, P>::tmat3x4(ctor)
 	{}
 
 	template <typename T, precision P>
@@ -163,7 +163,7 @@ namespace glm
 		this->value[2] = col_type(m[2], 0);
 	}
 
-	template <typename T, precision P> 
+	template <typename T, precision P>
 	GLM_FUNC_QUALIFIER tmat3x4<T, P>::tmat3x4(tmat4x4<T, P> const & m)
 	{
 		this->value[0] = col_type(m[0]);
@@ -171,7 +171,7 @@ namespace glm
 		this->value[2] = col_type(m[2]);
 	}
 
-	template <typename T, precision P> 
+	template <typename T, precision P>
 	GLM_FUNC_QUALIFIER tmat3x4<T, P>::tmat3x4(tmat2x3<T, P> const & m)
 	{
 		this->value[0] = col_type(m[0], 0);
@@ -179,7 +179,7 @@ namespace glm
 		this->value[2] = col_type(0, 0, 1, 0);
 	}
 
-	template <typename T, precision P> 
+	template <typename T, precision P>
 	GLM_FUNC_QUALIFIER tmat3x4<T, P>::tmat3x4(tmat3x2<T, P> const & m)
 	{
 		this->value[0] = col_type(m[0], 0, 0);
@@ -187,7 +187,7 @@ namespace glm
 		this->value[2] = col_type(m[2], 1, 0);
 	}
 
-	template <typename T, precision P> 
+	template <typename T, precision P>
 	GLM_FUNC_QUALIFIER tmat3x4<T, P>::tmat3x4(tmat2x4<T, P> const & m)
 	{
 		this->value[0] = col_type(m[0]);
@@ -195,7 +195,7 @@ namespace glm
 		this->value[2] = col_type(0, 0, 1, 0);
 	}
 
-	template <typename T, precision P> 
+	template <typename T, precision P>
 	GLM_FUNC_QUALIFIER tmat3x4<T, P>::tmat3x4(tmat4x2<T, P> const & m)
 	{
 		this->value[0] = col_type(m[0], 0, 0);
@@ -203,7 +203,7 @@ namespace glm
 		this->value[2] = col_type(m[2], 1, 0);
 	}
 
-	template <typename T, precision P> 
+	template <typename T, precision P>
 	GLM_FUNC_QUALIFIER tmat3x4<T, P>::tmat3x4(tmat4x3<T, P> const & m)
 	{
 		this->value[0] = col_type(m[0], 0);

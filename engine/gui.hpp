@@ -26,7 +26,7 @@ public:
 		ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoSavedSettings;
 
 private:
-	void* m_imguiState = nullptr;
+	ImGuiContext* m_imguiContext = nullptr;
 	std::unordered_map<uint, ImFont*> m_fonts;
 };
 

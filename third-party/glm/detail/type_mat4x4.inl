@@ -129,7 +129,7 @@ namespace detail
 	}
 
 	template <typename T, precision P>
-	GLM_FUNC_QUALIFIER tmat4x4<T, P>::tmat4x4(ctor)
+	GLM_FUNC_QUALIFIER GLM_CONSTEXPR_CTOR tmat4x4<T, P>::tmat4x4(ctor)
 	{}
 
 	template <typename T, precision P>
@@ -758,3 +758,7 @@ namespace detail
 		return (m1[0] != m2[0]) || (m1[1] != m2[1]) || (m1[2] != m2[2]) || (m1[3] != m2[3]);
 	}
 }//namespace glm
+
+#if GLM_ARCH != GLM_ARCH_PURE
+#	include "type_mat4x4_simd.inl"
+#endif

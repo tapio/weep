@@ -82,21 +82,21 @@ namespace glm
 
 		// -- Implicit basic constructors --
 
-		GLM_FUNC_DECL tquat() GLM_DEFAULT_CTOR;
-		GLM_FUNC_DECL tquat(tquat<T, P> const & q) GLM_DEFAULT;
+		GLM_FUNC_DECL GLM_CONSTEXPR tquat() GLM_DEFAULT_CTOR;
+		GLM_FUNC_DECL GLM_CONSTEXPR tquat(tquat<T, P> const & q) GLM_DEFAULT;
 		template <precision Q>
-		GLM_FUNC_DECL tquat(tquat<T, Q> const & q);
+		GLM_FUNC_DECL GLM_CONSTEXPR tquat(tquat<T, Q> const & q);
 
 		// -- Explicit basic constructors --
 
-		GLM_FUNC_DECL explicit tquat(ctor);
-		GLM_FUNC_DECL tquat(T const & s, tvec3<T, P> const & v);
-		GLM_FUNC_DECL tquat(T const & w, T const & x, T const & y, T const & z);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR explicit tquat(ctor);
+		GLM_FUNC_DECL GLM_CONSTEXPR tquat(T const & s, tvec3<T, P> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR tquat(T const & w, T const & x, T const & y, T const & z);
 
 		// -- Conversion constructors --
 
 		template <typename U, precision Q>
-		GLM_FUNC_DECL GLM_EXPLICIT tquat(tquat<U, Q> const & q);
+		GLM_FUNC_DECL GLM_CONSTEXPR GLM_EXPLICIT tquat(tquat<U, Q> const & q);
 
 		/// Explicit conversion operators
 #		if GLM_HAS_EXPLICIT_CONVERSION_OPERATORS

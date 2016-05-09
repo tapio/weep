@@ -326,11 +326,12 @@ static inline bool in_range(long x, long lower, long upper) {
     return (x >= lower && x <= upper);
 }
 
+namespace {
 /* JsonParser
  *
  * Object that tracks all state of an in-progress parse.
  */
-struct JsonParser {
+struct JsonParser final {
 
     /* State
      */
@@ -718,6 +719,7 @@ struct JsonParser {
         return fail("expected value, got " + esc(ch));
     }
 };
+}//namespace {
 
 Json Json::parse(const string &in, string &err, JsonParse strategy) {
     JsonParser parser { in, 0, err, false, strategy };
@@ -733,15 +735,18 @@ Json Json::parse(const string &in, string &err, JsonParse strategy) {
 
 // Documented in json11.hpp
 vector<Json> Json::parse_multi(const string &in,
+                               std::string::size_type &parser_stop_pos,
                                string &err,
                                JsonParse strategy) {
     JsonParser parser { in, 0, err, false, strategy };
-
+    parser_stop_pos = 0;
     vector<Json> json_vec;
     while (parser.i != in.size() && !parser.failed) {
         json_vec.push_back(parser.parse_json(0));
         // Check for another object
         parser.consume_garbage();
+        if (!parser.failed)
+            parser_stop_pos = parser.i;
     }
     return json_vec;
 }
