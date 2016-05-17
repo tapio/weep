@@ -45,18 +45,6 @@ Many might be unpolished...
 * Built-in screenshot and gif movie capture
 * Runs on Linux and Windows (mostly)
 
-## Design Principles
-
-Use modern OpenGL with no regard to e.g. ES 2.0 compatibility. While no other rendering backends are planned, keep OpenGL code separated in the render device class and pull render API independent stuff to a higher level.
-
-Avoid creating engine specific formats and prefer to load easily editable, widely used files such as obj, png and jpg directly. This also avoids the need for an asset build step. However, don't try to support everything under the sun, but instead focus on few good ones that get the job done.
-
-Try to be cross-platform but actively only on Linux and Windows.
-
-Avoid dependencies and prefer small, embeddable ones. Use no GPL licensed code (expect possibly with separate tools).
-
-Use modern C++11 with STL, but no Boost. Also try to keep the amount of templates and inheritance at a minimum, and prefer simple solution instead of lots of abstraction levels etc.
-
 ## Known Issues
 
 Here's some things that need work. The list is by no means exhaustive.
@@ -68,7 +56,7 @@ Here's some things that need work. The list is by no means exhaustive.
 * Animation and sound systems are very basic
 * Gameplay modules barely work on Windows and hotloading fails in some situations
 * Entity/component destroying works poorly as it's currently implemented
-* Windows support is fragile
+* Windows support is fragile as I mainly develop this on a Linux box
 
 ## Dependencies
 
@@ -76,18 +64,18 @@ You need CMake and C++11 capable compiler. Currently Clang works best as GCC bre
 
 A number of third-party libraries are included in the repository and built as a part of the build process (see "third-party" subfolder). In addition, you need SDL 2.0.2+ and OpenGL drivers installed.
 
-The core repository only includes some debug assets, so you probably also want to have "weep-media" repository (cloned as a sub folder next to this readme).
+The core repository only includes some debug assets, so you probably also want to have `weep-media` repository (cloned as a sub folder next to this readme).
 
 ## Building
 
 	mkdir build
 	cd build
 	cmake ..
-	make
+	cmake --build .
 
 ## Running
 
-Run "weep" from the build directory. You can give the scene to load as a command line argument or select it from the dev tools.
+Run "weep" from the build directory. You can give the scene to load as a command line argument or select it from the dev tools. See the Readme in `weep-media` repository for some example scenes.
 
 ## Acknowledgements
 
