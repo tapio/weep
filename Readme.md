@@ -1,7 +1,7 @@
 WeepEngine ![Logo](data/logo/weep-logo-32.png)
 ==============================================
 
-This is a small personal game engine. It's mainly a platform for me to experiment with OpenGL and perhaps build small game prototypes. While you can use it too under the MIT license, you probably shouldn't as it's incomplete, inefficient and buggy.
+This is a small personal game engine. It's mainly a platform for me to experiment with OpenGL and perhaps build small game prototypes. While you can use it too under the MIT license, you probably shouldn't as it's incomplete, inefficient, buggy and largely undocumented.
 
 ![Skyrunner](docs/pics/skyrunner.gif)
 ![Pong](docs/pics/pong.gif)  
