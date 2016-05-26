@@ -178,20 +178,19 @@ EXPORT void ModuleFunc(uint msg, void* param)
 
 					// TODO: Don't do every frame
 					std::vector<string> fileList = game.resources.listFiles(".", ".json");
-					const char* sceneFiles[fileList.size()];
-					int temp = 0;
-					for (auto& it : fileList)
-						sceneFiles[temp++] = it.c_str();
 					static int selectedScene = 0;
-					ImGui::Combo("##Scenes", &selectedScene, sceneFiles, fileList.size());
+					ImGui::Combo("##Scenes", &selectedScene, [](void* data, int index, const char** out_text) {
+						*out_text = (*static_cast<const std::vector<string>*>(data))[index].c_str();
+						return true;
+					}, &fileList, fileList.size());
 					ImGui::SameLine();
 					if (ImGui::Button("Load##SceneCombo")) {
-						game.scenePath = sceneFiles[selectedScene];
+						game.scenePath = fileList[selectedScene];
 						game.reload = true;
 					}
 
 					const char* prefabs[game.scene.prefabs.size()];
-					temp = 0;
+					int temp = 0;
 					for (auto it : game.scene.prefabs)
 						prefabs[temp++] = it.first.c_str();
 					static int selectedPrefab = 0;
