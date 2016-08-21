@@ -1,34 +1,5 @@
-///////////////////////////////////////////////////////////////////////////////////
-/// OpenGL Mathematics (glm.g-truc.net)
-///
-/// Copyright (c) 2005 - 2015 G-Truc Creation (www.g-truc.net)
-/// Permission is hereby granted, free of charge, to any person obtaining a copy
-/// of this software and associated documentation files (the "Software"), to deal
-/// in the Software without restriction, including without limitation the rights
-/// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-/// copies of the Software, and to permit persons to whom the Software is
-/// furnished to do so, subject to the following conditions:
-/// 
-/// The above copyright notice and this permission notice shall be included in
-/// all copies or substantial portions of the Software.
-/// 
-/// Restrictions:
-///		By making use of the Software for military purposes, you choose to make
-///		a Bunny unhappy.
-/// 
-/// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-/// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-/// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-/// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-/// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-/// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-/// THE SOFTWARE.
-///
 /// @ref core
 /// @file glm/detail/type_vec2.hpp
-/// @date 2008-08-18 / 2013-08-27
-/// @author Christophe Riccio
-///////////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
@@ -55,7 +26,17 @@ namespace glm
 
 		// -- Data --
 
-#		if GLM_HAS_UNRESTRICTED_UNIONS
+#		if GLM_HAS_ALIGNED_TYPE
+#			if GLM_COMPILER & GLM_COMPILER_GCC
+#				pragma GCC diagnostic push
+#				pragma GCC diagnostic ignored "-Wpedantic"
+#			endif
+#			if GLM_COMPILER & GLM_COMPILER_CLANG
+#				pragma clang diagnostic push
+#				pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#				pragma clang diagnostic ignored "-Wnested-anon-types"
+#			endif
+		
 			union
 			{
 				struct{ T x, y; };
@@ -63,17 +44,25 @@ namespace glm
 				struct{ T s, t; };
 
 #				ifdef GLM_SWIZZLE
-					_GLM_SWIZZLE2_2_MEMBERS(T, P, tvec2, x, y)
-					_GLM_SWIZZLE2_2_MEMBERS(T, P, tvec2, r, g)
-					_GLM_SWIZZLE2_2_MEMBERS(T, P, tvec2, s, t)
-					_GLM_SWIZZLE2_3_MEMBERS(T, P, tvec3, x, y)
-					_GLM_SWIZZLE2_3_MEMBERS(T, P, tvec3, r, g)
-					_GLM_SWIZZLE2_3_MEMBERS(T, P, tvec3, s, t)
-					_GLM_SWIZZLE2_4_MEMBERS(T, P, tvec4, x, y)
-					_GLM_SWIZZLE2_4_MEMBERS(T, P, tvec4, r, g)
-					_GLM_SWIZZLE2_4_MEMBERS(T, P, tvec4, s, t)
+					_GLM_SWIZZLE2_2_MEMBERS(T, P, glm::tvec2, x, y)
+					_GLM_SWIZZLE2_2_MEMBERS(T, P, glm::tvec2, r, g)
+					_GLM_SWIZZLE2_2_MEMBERS(T, P, glm::tvec2, s, t)
+					_GLM_SWIZZLE2_3_MEMBERS(T, P, glm::tvec3, x, y)
+					_GLM_SWIZZLE2_3_MEMBERS(T, P, glm::tvec3, r, g)
+					_GLM_SWIZZLE2_3_MEMBERS(T, P, glm::tvec3, s, t)
+					_GLM_SWIZZLE2_4_MEMBERS(T, P, glm::tvec4, x, y)
+					_GLM_SWIZZLE2_4_MEMBERS(T, P, glm::tvec4, r, g)
+					_GLM_SWIZZLE2_4_MEMBERS(T, P, glm::tvec4, s, t)
 #				endif//GLM_SWIZZLE
+
 			};
+		
+#			if GLM_COMPILER & GLM_COMPILER_CLANG
+#				pragma clang diagnostic pop
+#			endif
+#			if GLM_COMPILER & GLM_COMPILER_GCC
+#				pragma GCC diagnostic pop
+#			endif
 #		else
 			union {T x, r, s;};
 			union {T y, g, t;};
@@ -127,10 +116,9 @@ namespace glm
 		GLM_FUNC_DECL GLM_CONSTEXPR GLM_EXPLICIT tvec2(tvec2<U, Q> const & v);
 
 		// -- Swizzle constructors --
-
 #		if GLM_HAS_UNRESTRICTED_UNIONS && defined(GLM_SWIZZLE)
 			template <int E0, int E1>
-			GLM_FUNC_DECL tvec2(detail::_swizzle<2, T, P, tvec2<T, P>, E0, E1,-1,-2> const & that)
+			GLM_FUNC_DECL tvec2(detail::_swizzle<2, T, P, glm::tvec2, E0, E1,-1,-2> const& that)
 			{
 				*this = that();
 			}
