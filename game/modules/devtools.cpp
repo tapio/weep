@@ -17,6 +17,8 @@ static bool s_autoReloadShaders = true;
 static std::vector<string> s_shaderFiles;
 static std::vector<uint> s_shaderTimestamps;
 
+#define Tooltip(...) if (ImGui::IsItemHovered()) ImGui::SetTooltip(__VA_ARGS__);
+
 static void reloadShaders(Game& game)
 {
 	game.resources.clearTextCache();
@@ -133,10 +135,12 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					ImGui::ColorEdit3("Fog Color", (float*)&env.fogColor);
 					ImGui::SliderFloat("Fog Density", &env.fogDensity, 0.0f, 1.0f);
 					ImGui::SliderInt("Sky Type", (int*)&env.skyType, 0, Environment::SKY_COUNT-1);
+					Tooltip("Skybox, Procedural");
 				}
 				if (ImGui::CollapsingHeader("Post Effects")) {
 					Environment& env = renderer.env();
 					ImGui::SliderFloat3("Vignette", (float*)&env.vignette, 0.0f, 1.0f);
+					Tooltip("Radius, smoothness, strength");
 					ImGui::SliderFloat("Sepia", &env.sepia, 0.0f, 1.0f);
 					ImGui::SliderFloat("Saturation", &env.saturation, -1.0f, 1.0f);
 					ImGui::SliderFloat("Chromatic Aberration", &env.chromaticAberration, 0.0f, 1.0f);
