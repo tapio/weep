@@ -4,7 +4,7 @@
 #pragma once
 
 #include "type_vec.hpp"
-#ifdef GLM_SWIZZLE
+#if GLM_SWIZZLE == GLM_SWIZZLE_ENABLED
 #	if GLM_HAS_UNRESTRICTED_UNIONS
 #		include "_swizzle.hpp"
 #	else
@@ -26,7 +26,10 @@ namespace glm
 
 		// -- Data --
 
-#		if GLM_HAS_ALIGNED_TYPE
+#		if GLM_HAS_ONLY_XYZW
+			T x, y;
+
+#		elif GLM_HAS_ALIGNED_TYPE
 #			if GLM_COMPILER & GLM_COMPILER_GCC
 #				pragma GCC diagnostic push
 #				pragma GCC diagnostic ignored "-Wpedantic"
@@ -43,7 +46,7 @@ namespace glm
 				struct{ T r, g; };
 				struct{ T s, t; };
 
-#				ifdef GLM_SWIZZLE
+#				if GLM_SWIZZLE == GLM_SWIZZLE_ENABLED
 					_GLM_SWIZZLE2_2_MEMBERS(T, P, glm::tvec2, x, y)
 					_GLM_SWIZZLE2_2_MEMBERS(T, P, glm::tvec2, r, g)
 					_GLM_SWIZZLE2_2_MEMBERS(T, P, glm::tvec2, s, t)
@@ -67,7 +70,7 @@ namespace glm
 			union {T x, r, s;};
 			union {T y, g, t;};
 
-#			ifdef GLM_SWIZZLE
+#			if GLM_SWIZZLE == GLM_SWIZZLE_ENABLED
 				GLM_SWIZZLE_GEN_VEC_FROM_VEC2(T, P, tvec2, tvec2, tvec3, tvec4)
 #			endif//GLM_SWIZZLE
 #		endif
@@ -76,53 +79,53 @@ namespace glm
 
 		/// Return the count of components of the vector
 		typedef length_t length_type;
-		GLM_FUNC_DECL GLM_CONSTEXPR length_type length() const;
+		GLM_FUNC_DECL static length_type length(){return 2;}
 
 		GLM_FUNC_DECL T & operator[](length_type i);
 		GLM_FUNC_DECL T const & operator[](length_type i) const;
 
 		// -- Implicit basic constructors --
 
-		GLM_FUNC_DECL GLM_CONSTEXPR tvec2() GLM_DEFAULT_CTOR;
-		GLM_FUNC_DECL GLM_CONSTEXPR tvec2(tvec2<T, P> const& v) GLM_DEFAULT;
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR tvec2() GLM_DEFAULT_CTOR;
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR tvec2(tvec2<T, P> const& v) GLM_DEFAULT;
 		template <precision Q>
-		GLM_FUNC_DECL GLM_CONSTEXPR tvec2(tvec2<T, Q> const& v);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR tvec2(tvec2<T, Q> const& v);
 
 		// -- Explicit basic constructors --
 
 		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR explicit tvec2(ctor);
-		GLM_FUNC_DECL GLM_CONSTEXPR explicit tvec2(T scalar);
-		GLM_FUNC_DECL GLM_CONSTEXPR tvec2(T s1, T s2);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR explicit tvec2(T scalar);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR tvec2(T s1, T s2);
 
 		// -- Conversion constructors --
 
 		/// Explicit converions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename A, typename B>
-		GLM_FUNC_DECL GLM_CONSTEXPR tvec2(A x, B y);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR tvec2(A x, B y);
 		template <typename A, typename B>
-		GLM_FUNC_DECL GLM_CONSTEXPR tvec2(tvec1<A, P> const & v1, tvec1<B, P> const & v2);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR tvec2(tvec1<A, P> const & v1, tvec1<B, P> const & v2);
 
 		// -- Conversion vector constructors --
 
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename U, precision Q>
-		GLM_FUNC_DECL GLM_CONSTEXPR GLM_EXPLICIT tvec2(tvec3<U, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR GLM_EXPLICIT tvec2(tvec3<U, Q> const & v);
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename U, precision Q>
-		GLM_FUNC_DECL GLM_CONSTEXPR GLM_EXPLICIT tvec2(tvec4<U, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR GLM_EXPLICIT tvec2(tvec4<U, Q> const & v);
 
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename U, precision Q>
-		GLM_FUNC_DECL GLM_CONSTEXPR GLM_EXPLICIT tvec2(tvec2<U, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR GLM_EXPLICIT tvec2(tvec2<U, Q> const & v);
 
 		// -- Swizzle constructors --
-#		if GLM_HAS_UNRESTRICTED_UNIONS && defined(GLM_SWIZZLE)
+#		if GLM_HAS_UNRESTRICTED_UNIONS && (GLM_SWIZZLE == GLM_SWIZZLE_ENABLED)
 			template <int E0, int E1>
 			GLM_FUNC_DECL tvec2(detail::_swizzle<2, T, P, glm::tvec2, E0, E1,-1,-2> const& that)
 			{
 				*this = that();
 			}
-#		endif// GLM_HAS_UNRESTRICTED_UNIONS && defined(GLM_SWIZZLE)
+#		endif// GLM_HAS_UNRESTRICTED_UNIONS && (GLM_SWIZZLE == GLM_SWIZZLE_ENABLED)
 
 		// -- Unary arithmetic operators --
 

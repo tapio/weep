@@ -5,7 +5,7 @@
 
 #include "../fwd.hpp"
 #include "type_vec.hpp"
-#ifdef GLM_SWIZZLE
+#if GLM_SWIZZLE == GLM_SWIZZLE_ENABLED
 #	if GLM_HAS_UNRESTRICTED_UNIONS
 #		include "_swizzle.hpp"
 #	else
@@ -27,7 +27,10 @@ namespace glm
 
 		// -- Data --
 
-#		if GLM_HAS_ALIGNED_TYPE
+#		if GLM_HAS_ONLY_XYZW
+			T x;
+
+#		elif GLM_HAS_ALIGNED_TYPE
 #			if GLM_COMPILER & GLM_COMPILER_GCC
 #				pragma GCC diagnostic push
 #				pragma GCC diagnostic ignored "-Wpedantic"
@@ -44,7 +47,7 @@ namespace glm
 				T r;
 				T s;
 /*
-#				ifdef GLM_SWIZZLE
+#				if GLM_SWIZZLE == GLM_SWIZZLE_ENABLED
 					_GLM_SWIZZLE1_2_MEMBERS(T, P, tvec2, x)
 					_GLM_SWIZZLE1_2_MEMBERS(T, P, tvec2, r)
 					_GLM_SWIZZLE1_2_MEMBERS(T, P, tvec2, s)
@@ -66,7 +69,7 @@ namespace glm
 #		else
 			union {T x, r, s;};
 /*
-#			ifdef GLM_SWIZZLE
+#			if GLM_SWIZZLE == GLM_SWIZZLE_ENABLED
 				GLM_SWIZZLE_GEN_VEC_FROM_VEC1(T, P, tvec2, tvec2, tvec3, tvec4)
 #			endif//GLM_SWIZZLE*/
 #		endif
@@ -75,48 +78,48 @@ namespace glm
 
 		/// Return the count of components of the vector
 		typedef length_t length_type;
-		GLM_FUNC_DECL GLM_CONSTEXPR length_type length() const;
+		GLM_FUNC_DECL static length_type length(){return 1;}
 
 		GLM_FUNC_DECL T & operator[](length_type i);
 		GLM_FUNC_DECL T const & operator[](length_type i) const;
 
 		// -- Implicit basic constructors --
 
-		GLM_FUNC_DECL GLM_CONSTEXPR tvec1() GLM_DEFAULT_CTOR;
-		GLM_FUNC_DECL GLM_CONSTEXPR tvec1(tvec1<T, P> const & v) GLM_DEFAULT;
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR tvec1() GLM_DEFAULT_CTOR;
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR tvec1(tvec1<T, P> const & v) GLM_DEFAULT;
 		template <precision Q>
-		GLM_FUNC_DECL GLM_CONSTEXPR tvec1(tvec1<T, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR tvec1(tvec1<T, Q> const & v);
 
 		// -- Explicit basic constructors --
 
 		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR explicit tvec1(ctor);
-		GLM_FUNC_DECL GLM_CONSTEXPR explicit tvec1(T scalar);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR explicit tvec1(T scalar);
 
 		// -- Conversion vector constructors --
 
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename U, precision Q>
-		GLM_FUNC_DECL GLM_CONSTEXPR GLM_EXPLICIT tvec1(tvec2<U, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR GLM_EXPLICIT tvec1(tvec2<U, Q> const & v);
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename U, precision Q>
-		GLM_FUNC_DECL GLM_CONSTEXPR GLM_EXPLICIT tvec1(tvec3<U, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR GLM_EXPLICIT tvec1(tvec3<U, Q> const & v);
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename U, precision Q>
-		GLM_FUNC_DECL GLM_CONSTEXPR GLM_EXPLICIT tvec1(tvec4<U, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR GLM_EXPLICIT tvec1(tvec4<U, Q> const & v);
 
 		/// Explicit conversions (From section 5.4.1 Conversion and scalar constructors of GLSL 1.30.08 specification)
 		template <typename U, precision Q>
-		GLM_FUNC_DECL GLM_CONSTEXPR GLM_EXPLICIT tvec1(tvec1<U, Q> const & v);
+		GLM_FUNC_DECL GLM_CONSTEXPR_CTOR GLM_EXPLICIT tvec1(tvec1<U, Q> const & v);
 
 		// -- Swizzle constructors --
 /*
-#		if(GLM_HAS_UNRESTRICTED_UNIONS && defined(GLM_SWIZZLE))
+#		if(GLM_HAS_UNRESTRICTED_UNIONS && (GLM_SWIZZLE == GLM_SWIZZLE_ENABLED))
 			template <int E0>
 			GLM_FUNC_DECL tvec1(detail::_swizzle<1, T, P, tvec1, E0, -1,-2,-3> const & that)
 			{
 				*this = that();
 			}
-#		endif//(GLM_HAS_UNRESTRICTED_UNIONS && defined(GLM_SWIZZLE))
+#		endif//(GLM_HAS_UNRESTRICTED_UNIONS && (GLM_SWIZZLE == GLM_SWIZZLE_ENABLED))
 */
 		// -- Unary arithmetic operators --
 

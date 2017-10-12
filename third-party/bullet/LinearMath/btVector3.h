@@ -267,8 +267,18 @@ public:
 
 	/**@brief Return the norm (length) of the vector */
 	SIMD_FORCE_INLINE btScalar norm() const
-	{
+	{		
 		return length();
+	}
+
+	/**@brief Return the norm (length) of the vector */
+	SIMD_FORCE_INLINE btScalar safeNorm() const
+	{
+		btScalar d = length2();
+		//workaround for some clang/gcc issue of sqrtf(tiny number) = -INF
+		if (d>SIMD_EPSILON)
+			return btSqrt(d);
+		return btScalar(0);
 	}
 
   /**@brief Return the distance squared between the ends of this and another vector
@@ -281,14 +291,16 @@ public:
 
 	SIMD_FORCE_INLINE btVector3& safeNormalize() 
 	{
-		btVector3 absVec = this->absolute();
-		int maxIndex = absVec.maxAxis();
-		if (absVec[maxIndex]>0)
+		btScalar l2 = length2();
+		//triNormal.normalize();
+		if (l2 >= SIMD_EPSILON*SIMD_EPSILON)
 		{
-			*this /= absVec[maxIndex];
-			return *this /= length();
+			(*this) /= btSqrt(l2);
 		}
-		setValue(1,0,0);
+		else
+		{
+			setValue(1, 0, 0);
+		}
 		return *this;
 	}
 
@@ -356,7 +368,7 @@ public:
 		return btAcos(dot(v) / s);
 	}
 	
-  /**@brief Return a vector will the absolute values of each element */
+  /**@brief Return a vector with the absolute values of each element */
 	SIMD_FORCE_INLINE btVector3 absolute() const 
 	{
 
@@ -1147,7 +1159,6 @@ public:
 		if (m_floats[3] > maxVal)
 		{
 			maxIndex = 3;
-			maxVal = m_floats[3];
 		}
 
 		return maxIndex;
@@ -1176,7 +1187,6 @@ public:
 		if (m_floats[3] < minVal)
 		{
 			minIndex = 3;
-			minVal = m_floats[3];
 		}
 		
 		return minIndex;

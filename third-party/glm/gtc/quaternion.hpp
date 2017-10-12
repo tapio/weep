@@ -21,7 +21,7 @@
 #include "../vec4.hpp"
 #include "../gtc/constants.hpp"
 
-#if(defined(GLM_MESSAGES) && !defined(GLM_EXT_INCLUDED))
+#if GLM_MESSAGES == GLM_MESSAGES_ENABLED && !defined(GLM_EXT_INCLUDED)
 #	pragma message("GLM: GLM_GTC_quaternion extension included")
 #endif
 
@@ -71,7 +71,7 @@ namespace glm
 
 		typedef length_t length_type;
 		/// Return the count of components of a quaternion
-		GLM_FUNC_DECL GLM_CONSTEXPR length_type length() const;
+		GLM_FUNC_DECL static length_type length(){return 4;}
 
 		GLM_FUNC_DECL T & operator[](length_type i);
 		GLM_FUNC_DECL T const & operator[](length_type i) const;

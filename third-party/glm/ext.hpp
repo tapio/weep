@@ -27,14 +27,18 @@
 
 #pragma once
 
-#if(defined(GLM_MESSAGES) && !defined(GLM_MESSAGE_EXT_INCLUDED_DISPLAYED))
+#include "glm.hpp"
+
+#if GLM_MESSAGES == GLM_MESSAGES_ENABLED && !defined(GLM_MESSAGE_EXT_INCLUDED_DISPLAYED)
 #	define GLM_MESSAGE_EXT_INCLUDED_DISPLAYED
 #	pragma message("GLM: All extensions included (not recommanded)")
 #endif//GLM_MESSAGES
 
 #include "./gtc/bitfield.hpp"
+#include "./gtc/color_space.hpp"
 #include "./gtc/constants.hpp"
 #include "./gtc/epsilon.hpp"
+#include "./gtc/functions.hpp"
 #include "./gtc/integer.hpp"
 #include "./gtc/matrix_access.hpp"
 #include "./gtc/matrix_integer.hpp"
@@ -46,6 +50,7 @@
 #include "./gtc/random.hpp"
 #include "./gtc/reciprocal.hpp"
 #include "./gtc/round.hpp"
+//#include "./gtc/type_aligned.hpp"
 #include "./gtc/type_precision.hpp"
 #include "./gtc/type_ptr.hpp"
 #include "./gtc/ulp.hpp"
@@ -91,11 +96,14 @@
 #include "./gtx/quaternion.hpp"
 #include "./gtx/raw_data.hpp"
 #include "./gtx/rotate_vector.hpp"
+
 #include "./gtx/spline.hpp"
 #include "./gtx/std_based_type.hpp"
+
 #if !(GLM_COMPILER & GLM_COMPILER_CUDA)
 #	include "./gtx/string_cast.hpp"
 #endif
+
 #include "./gtx/transform.hpp"
 #include "./gtx/transform2.hpp"
 #include "./gtx/vector_angle.hpp"

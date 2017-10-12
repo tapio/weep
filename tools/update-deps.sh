@@ -28,7 +28,7 @@ $WGET $GHBASEURL/ginsweater/gif-h/master/gif.h -O gif-h/gif.h &
 $WGET $GHBASEURL/ginsweater/gif-h/master/LICENSE -O gif-h/LICENSE &
 
 # ImGui
-for f in imconfig.h imgui.cpp imgui.h imgui_demo.cpp imgui_draw.cpp imgui_internal.h LICENSE stb_rect_pack.h stb_textedit.h stb_truetype.h; do
+for f in imconfig.h imgui.cpp imgui.h imgui_demo.cpp imgui_draw.cpp imgui_internal.h LICENSE.txt stb_rect_pack.h stb_textedit.h stb_truetype.h; do
 	$WGET $GHBASEURL/ocornut/imgui/master/$f -O imgui/$f &
 done
 $WGET $GHBASEURL/ocornut/imgui/master/examples/sdl_opengl3_example/imgui_impl_sdl_gl3.h -O imgui/imgui_impl_sdl_gl3.h &
@@ -37,7 +37,7 @@ $WGET $GHBASEURL/ocornut/imgui/master/examples/sdl_opengl3_example/imgui_impl_sd
 # GLM
 GLMPATH=/tmp/glm
 rm -rf "$GLMPATH"
-git clone --depth=1 https://github.com/g-truc/glm "$GLMPATH"
+git clone --branch=0.9.8 --depth=1 https://github.com/g-truc/glm "$GLMPATH"
 
 rm -r glm
 mkdir -p glm
@@ -46,7 +46,7 @@ cp -v "$GLMPATH/copying.txt" "glm/"
 rm -v "glm/CMakeLists.txt"
 rm -v "glm/detail/glm.cpp"
 rm -v "glm/detail/dummy.cpp"
-
+#wget https://github.com/g-truc/glm/blob/manual/copying.txt
 
 # Bullet
 BULLETPATH=/tmp/bullet3

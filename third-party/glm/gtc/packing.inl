@@ -618,7 +618,7 @@ namespace detail
 		float const MaxColor = max(Color.x, max(Color.y, Color.z));
 
 		float const ExpSharedP = max(-15.f - 1.f, floor(log2(MaxColor))) + 1.0f + 15.f;
-		float const MaxShared = floor(MaxColor / pow(2.0f, (ExpSharedP - 16.f - 9.f)) + 0.5f);
+		float const MaxShared = floor(MaxColor / pow(2.0f, (ExpSharedP - 15.f - 9.f)) + 0.5f);
 		float const ExpShared = MaxShared == pow(2.0f, 9.0f) ? ExpSharedP + 1.0f : ExpSharedP;
 
 		uvec3 const ColorComp(floor(Color / pow(2.f, (ExpShared - 15.f - 9.f)) + 0.5f));
@@ -725,7 +725,7 @@ namespace detail
 
 	GLM_FUNC_QUALIFIER uint16 packUnorm1x5_1x6_1x5(vec3 const & v)
 	{
-		u32vec3 const Unpack(round(clamp(v, 0.0f, 1.0f) * vec3(15.f, 31.f, 15.f)));
+		u32vec3 const Unpack(round(clamp(v, 0.0f, 1.0f) * vec3(31.f, 63.f, 31.f)));
 		detail::u5u6u5 Result;
 		Result.data.x = Unpack.x;
 		Result.data.y = Unpack.y;
@@ -735,7 +735,7 @@ namespace detail
 
 	GLM_FUNC_QUALIFIER vec3 unpackUnorm1x5_1x6_1x5(uint16 v)
 	{
-		vec3 const ScaleFactor(1.f / 15.f, 1.f / 31.f, 1.f / 15.f);
+		vec3 const ScaleFactor(1.f / 31.f, 1.f / 63.f, 1.f / 31.f);
 		detail::u5u6u5 Unpack;
 		Unpack.pack = v;
 		return vec3(Unpack.data.x, Unpack.data.y, Unpack.data.z) * ScaleFactor;
@@ -743,7 +743,7 @@ namespace detail
 
 	GLM_FUNC_QUALIFIER uint16 packUnorm3x5_1x1(vec4 const & v)
 	{
-		u32vec4 const Unpack(round(clamp(v, 0.0f, 1.0f) * vec4(15.f, 15.f, 15.f, 1.f)));
+		u32vec4 const Unpack(round(clamp(v, 0.0f, 1.0f) * vec4(31.f, 31.f, 31.f, 1.f)));
 		detail::u5u5u5u1 Result;
 		Result.data.x = Unpack.x;
 		Result.data.y = Unpack.y;
@@ -754,7 +754,7 @@ namespace detail
 
 	GLM_FUNC_QUALIFIER vec4 unpackUnorm3x5_1x1(uint16 v)
 	{
-		vec4 const ScaleFactor(1.f / 15.f, 1.f / 15.f, 1.f / 15.f, 1.f);
+		vec4 const ScaleFactor(1.f / 31.f, 1.f / 31.f, 1.f / 31.f, 1.f);
 		detail::u5u5u5u1 Unpack;
 		Unpack.pack = v;
 		return vec4(Unpack.data.x, Unpack.data.y, Unpack.data.z, Unpack.data.w) * ScaleFactor;
