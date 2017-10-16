@@ -26,6 +26,7 @@ struct Texture
 	void create();
 	void upload(Image& image);
 	void uploadCube(Image* images[6]);
+	void uploadArray(const std::vector<Image*>& images);
 	void update();
 	void destroy();
 	bool valid() const { return id > 0; }

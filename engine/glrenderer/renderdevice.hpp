@@ -45,6 +45,7 @@ public:
 		float maxAnisotropy;
 		int maxSamples;
 		int maxSamplers;
+		int maxArrayTextureLayers;
 	} caps;
 
 	struct Stats

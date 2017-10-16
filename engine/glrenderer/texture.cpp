@@ -52,6 +52,31 @@ void Texture::uploadCube(Image* images[6])
 	update();
 }
 
+void Texture::uploadArray(const std::vector<Image*>& images)
+{
+	type = GL_TEXTURE_2D_ARRAY;
+	glBindTexture(type, id);
+	const Image& firstImage = *images[0];
+	const int mipLevelCount = 1;
+	const int width = firstImage.width;
+	const int height = firstImage.height;
+	const uint internalFormat = firstImage.sRGB ? formats_sRGB[firstImage.channels] : formats[firstImage.channels];
+	glTexStorage3D(GL_TEXTURE_2D_ARRAY, mipLevelCount, internalFormat, width, height, images.size());
+	for (uint i = 0; i < images.size(); ++i) {
+		Image& image = *images[i];
+		ASSERT(image.width == width);
+		ASSERT(image.height == height);
+		ASSERT(image.channels == image.channels);
+		glTexSubImage3D(type, 0, 0, 0, i, width, height, 1, formats[image.channels], GL_UNSIGNED_BYTE, &image.data.front());
+		//glTexImage3D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, internalFormat, image.width, image.height, i,
+		//0, formats[image.channels], GL_UNSIGNED_BYTE, &image.data.front());
+	}
+	if (minFilter == GL_LINEAR_MIPMAP_LINEAR || minFilter == GL_LINEAR_MIPMAP_NEAREST
+		|| minFilter == GL_NEAREST_MIPMAP_LINEAR || minFilter == GL_NEAREST_MIPMAP_NEAREST)
+		glGenerateMipmap(type);
+	update();
+}
+
 void Texture::update()
 {
 	glBindTexture(type, id);
