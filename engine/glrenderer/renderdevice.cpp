@@ -618,7 +618,7 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 	glUseProgram(0);
 	m_commonBlock.uniforms.projectionMatrix = camera.projection;
 	m_commonBlock.uniforms.viewMatrix = camera.view;
-	m_commonBlock.uniforms.cameraPosition = camera.position;
+	m_commonBlock.uniforms.cameraPosition = camera.view[3];
 	m_commonBlock.uniforms.globalAmbient = m_env->ambient;
 	m_commonBlock.uniforms.shadowDarkness = m_env->shadowDarkness;
 	m_commonBlock.uniforms.bloomThreshold = m_env->bloomThreshold;
@@ -646,7 +646,7 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 	m_commonBlock.upload();
 
 	if (tech == TECH_REFLECTION)
-		setupCubeMatrices(m_commonBlock.uniforms.projectionMatrix, camera.position);
+		setupCubeMatrices(m_commonBlock.uniforms.projectionMatrix, camera.view[3]);
 
 	// Shadow map textures
 	for (uint i = 0; i < countof(m_shadowFbo); ++i) {

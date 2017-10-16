@@ -275,10 +275,7 @@ void SceneLoader::load(const string& path, Resources& resources)
 		camera.makePerspective(45, ar, 0.1, 1000);
 		if (cameraEnt.has<Transform>()) {
 			Transform& trans = cameraEnt.get<Transform>();
-			// TODO: Should probably not have pos/rot duplicated
-			camera.position = trans.position;
-			camera.rotation = trans.rotation;
-			camera.updateViewMatrix();
+			camera.updateViewMatrix(trans.position, trans.rotation);
 		} else {
 			camera.view = glm::lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
 		}

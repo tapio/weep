@@ -5,6 +5,7 @@
 class RenderDevice;
 class Resources;
 struct Camera;
+struct Transform;
 struct Model;
 
 class RenderSystem : public System
@@ -13,7 +14,7 @@ public:
 	RenderSystem(Resources& resources);
 	~RenderSystem();
 
-	void render(Entities& entities, Camera& camera);
+	void render(Entities& entities, Camera& camera, const Transform& camTransform);
 	void reset(Entities& entities);
 
 	Environment& env() { return m_env; }

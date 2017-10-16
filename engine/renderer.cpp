@@ -11,10 +11,10 @@
 class Frustum
 {
 public:
-	Frustum(const Camera& camera) {
+	Frustum(const Camera& camera, vec3 position, quat rotation) {
 		m_radius = camera.far * 0.5f;
-		vec3 dir = camera.rotation * vec3(0, 0, -1);
-		m_center = camera.position + dir * m_radius;
+		vec3 dir = rotation * vec3(0, 0, -1);
+		m_center = position + dir * m_radius;
 	}
 
 	bool visible(const Transform& transform, const Model& model) const {
@@ -54,27 +54,29 @@ void RenderSystem::toggleWireframe()
 	m_device->toggleWireframe();
 }
 
-void RenderSystem::render(Entities& entities, Camera& camera)
+void RenderSystem::render(Entities& entities, Camera& camera, const Transform& camTransform)
 {
 	m_device->stats = RenderDevice::Stats();
 
 	struct ReflectionProbe { float priority; vec3 pos; };
 	std::vector<ReflectionProbe> reflectionProbes;
 	std::vector<Light> lights;
-	Frustum frustum(camera);
 
 	START_MEASURE(prerenderMs)
-	camera.updateViewMatrix();
+	vec3 camPos = camTransform.position;
+	quat camRot = camTransform.rotation;
+	camera.updateViewMatrix(camPos, camRot);
+	Frustum frustum(camera, camPos, camRot);
 
 	entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
 		// Update transform
 		transform.updateMatrix();
 		// Update LOD
 		#ifdef SHIPPING_BUILD
-		model.geometry = model.getLod2(glm::distance2(camera.position, transform.position));
+		model.geometry = model.getLod2(glm::distance2(camTransform.position, transform.position));
 		#else
 		model.geometry = settings.forceLod >= 0 ? model.lods[settings.forceLod].geometry
-			: model.getLod2(glm::distance2(camera.position, transform.position));
+			: model.getLod2(glm::distance2(camPos, transform.position));
 		#endif
 		// Figure out candidates for reflection location
 		if (frustum.visible(transform, model)) {
@@ -83,7 +85,7 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 				if (mat.reflectivity > reflectivity)
 					reflectivity = mat.reflectivity;
 			if (reflectivity > 0.01f) {
-				float priority = glm::distance2(camera.position, transform.position);
+				float priority = glm::distance2(camPos, transform.position);
 				priority *= 1.1f - reflectivity;
 				reflectionProbes.push_back({ priority, transform.position });
 			}
@@ -94,7 +96,7 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	});
 
 	// TODO: Better prioritizing
-	vec3 lightTarget = camera.position + camera.rotation * vec3(0, 0, -2);
+	vec3 lightTarget = camPos + camRot * vec3(0, 0, -2);
 	entities.for_each<Light>([&](Entity, Light& light) {
 		light.priority = glm::distance2(lightTarget, light.position);
 		lights.push_back(light);
@@ -127,8 +129,8 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	BEGIN_GPU_SAMPLE(ShadowPass)
 	Light sun;
 	sun.type = Light::DIRECTIONAL_LIGHT;
-	sun.position = camera.position + normalize(m_env.sunPosition) * 10.f;
-	sun.target = camera.position;
+	sun.position = camPos + normalize(m_env.sunPosition) * 10.f;
+	sun.target = camPos;
 	m_device->setupShadowPass(sun, 0);
 	if (settings.shadows) {
 		entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
@@ -160,15 +162,16 @@ void RenderSystem::render(Entities& entities, Camera& camera)
 	START_MEASURE(reflectionMs)
 	BEGIN_GPU_SAMPLE(ReflectionPass)
 	Camera reflCam = camera;
+	vec3 reflCamPos = camPos;
 	reflCam.makePerspective(glm::radians(90.0f), 1.f, 0.25f, 50.f);
 	if (!reflectionProbes.empty()) {
-		reflCam.position = reflectionProbes.front().pos;
-		reflCam.updateViewMatrix();
+		reflCamPos = reflectionProbes.front().pos;
+		reflCam.updateViewMatrix(reflCamPos, camRot);
 	}
 	m_device->setupRenderPass(reflCam, lights, TECH_REFLECTION);
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 		float maxDist = model.bounds.radius + reflCam.far;
-		if (!model.materials.empty() && model.geometry && glm::distance2(reflCam.position, transform.position) < maxDist * maxDist)
+		if (!model.materials.empty() && model.geometry && glm::distance2(reflCamPos, transform.position) < maxDist * maxDist)
 			m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
 	});
 	m_device->renderSkybox();

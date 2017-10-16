@@ -64,7 +64,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				ModuleSystem& modules = game.entities.get_system<ModuleSystem>();
 				Entity cameraEnt = game.entities.get_entity_by_tag("camera");
 				Controller& controller = cameraEnt.get<Controller>();
-				Camera& camera = cameraEnt.get<Camera>();
+				Transform& cameraTrans = cameraEnt.get<Transform>();
 
 				ImGui::Text("Right mouse button to toggle mouse grab.");
 				ImGui::Text("FPS: %d (%.3fms)", int(1.0 / game.engine.dt), game.engine.dt * 1000.f);
@@ -106,7 +106,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					ImGui::Checkbox("ImGui Metrics", &imguiMetrics);
 				}
 				if (ImGui::CollapsingHeader("Camera")) {
-					ImGui::Text("Position: %.1f %.1f %.1f", camera.position.x, camera.position.y, camera.position.z);
+					ImGui::Text("Position: %.1f %.1f %.1f", cameraTrans.position.x, cameraTrans.position.y, cameraTrans.position.z);
 					if (ImGui::Checkbox("Fly", &controller.fly)) {
 						if (cameraEnt.has<btRigidBody>()) {
 							btRigidBody& body = cameraEnt.get<btRigidBody>();
@@ -208,19 +208,19 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					ImGui::SameLine();
 					if (ImGui::Button("Shoot")) {
 						create = true;
-						vel = glm::rotate(camera.rotation, vec3(0, 0, -20));
+						vel = glm::rotate(cameraTrans.rotation, vec3(0, 0, -20));
 					}
 					if (create) {
 						Entity e = game.scene.instantiate(game.scene.prefabs[prefabs[selectedPrefab]], game.resources);
-						vec3 pos = camera.position + glm::rotate(camera.rotation, vec3(0, 0, -2));
+						vec3 pos = cameraTrans.position + glm::rotate(cameraTrans.rotation, vec3(0, 0, -2));
 						if (e.has<Transform>()) {
 							Transform& trans = e.get<Transform>();
 							trans.position = pos;
-							trans.rotation = camera.rotation;
+							trans.rotation = cameraTrans.rotation;
 						}
 						if (e.has<btRigidBody>()) {
 							btRigidBody& body = e.get<btRigidBody>();
-							btTransform trans(convert(camera.rotation), convert(pos));
+							btTransform trans(convert(cameraTrans.rotation), convert(pos));
 							body.setWorldTransform(trans);
 							body.setLinearVelocity(convert(vel));
 						}

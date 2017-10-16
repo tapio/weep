@@ -34,8 +34,8 @@ void init(Game& game)
 	game.scene.load(game.scenePath, game.resources);
 	Entity cameraEnt = game.entities.get_entity_by_tag("camera");
 	ASSERT(cameraEnt.is_alive());
-	Camera& camera = cameraEnt.get<Camera>();
-	cameraEnt.add<Controller>(camera.position, camera.rotation);
+	Transform& camTrans = cameraEnt.get<Transform>();
+	cameraEnt.add<Controller>(camTrans.position, camTrans.rotation);
 	if (cameraEnt.has<btRigidBody>())
 		cameraEnt.get<Controller>().body = &cameraEnt.get<btRigidBody>();
 	game.entities.get_system<ModuleSystem>().call($id(INIT), &game);
@@ -76,6 +76,7 @@ int main(int argc, char* argv[])
 		Entity cameraEnt = game.entities.get_entity_by_tag("camera");
 		Controller& controller = cameraEnt.get<Controller>();
 		Camera& camera = cameraEnt.get<Camera>();
+		Transform& cameraTrans = cameraEnt.get<Transform>();
 
 		imgui.newFrame(game.engine.window);
 
@@ -173,25 +174,25 @@ int main(int argc, char* argv[])
 		END_CPU_SAMPLE()
 
 		if (cameraEnt.has<btRigidBody>()) {
-			btRigidBody& body = cameraEnt.get<btRigidBody>();
-			camera.position = convert(body.getCenterOfMassPosition());
+			//btRigidBody& body = cameraEnt.get<btRigidBody>();
+			//camera.position = convert(body.getCenterOfMassPosition());
 			if (cameraEnt.has<GroundTracker>())
 				controller.onGround = cameraEnt.get<GroundTracker>().onGround;
 		} else if (controller.enabled) {
-			camera.position = controller.position;
+			cameraTrans.position = controller.position;
 		}
 		if (controller.enabled)
-			camera.rotation = controller.rotation;
+			cameraTrans.rotation = controller.rotation;
 
 		// Audio
 		BEGIN_CPU_SAMPLE(audioTime)
-		audio.update(game.entities, camera);
+		audio.update(game.entities, cameraTrans);
 		END_CPU_SAMPLE()
 
 		// Graphics
 		BEGIN_CPU_SAMPLE(renderTimeMs)
 		BEGIN_GPU_SAMPLE(GPURender)
-		renderer.render(game.entities, camera);
+		renderer.render(game.entities, camera, cameraTrans);
 		END_GPU_SAMPLE()
 		END_CPU_SAMPLE()
 

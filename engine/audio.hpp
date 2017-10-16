@@ -4,7 +4,7 @@
 #include "soloud_wav.h"
 #include <unordered_map>
 
-struct Camera;
+struct Transform;
 
 class AudioSystem : public System
 {
@@ -12,7 +12,7 @@ public:
 	AudioSystem();
 	~AudioSystem();
 	void reset();
-	void update(Entities& entities, Camera& camera);
+	void update(Entities& entities, const Transform& listener);
 
 	void add(const string& name, const std::vector<char>& data);
 	void play(uint eventId);

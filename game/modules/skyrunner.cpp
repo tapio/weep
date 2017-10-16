@@ -57,8 +57,8 @@ static void startNextLevel(Game& game)
 	cameraEnt = game.entities.get_entity_by_tag("camera");
 	ASSERT(cameraEnt.is_alive());
 	cameraEnt.get<Transform>().setPosition(startPos);
-	Camera& camera = cameraEnt.get<Camera>();
-	cameraEnt.add<Controller>(camera.position, camera.rotation);
+	Transform& cameraTrans = cameraEnt.get<Transform>();
+	cameraEnt.add<Controller>(cameraTrans.position, cameraTrans.rotation);
 	Controller& controller = cameraEnt.get<Controller>();
 	controller.body = &cameraEnt.get<btRigidBody>();
 	controller.fast = 1.f;
