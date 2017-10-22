@@ -203,6 +203,14 @@ void RenderDevice::loadShaders()
 	m_shaderNames.reserve(shaders.size());
 	for (auto& it : shaders) {
 		const Json& shaderFiles = it.second["shaders"];
+
+#ifdef GLES3
+		if (shaderFiles["geom"].is_string() || shaderFiles["tesc"].is_string() || shaderFiles["tese"].is_string()) {
+			logWarning("Skipping gles3 incompatible shader %s", it.first.c_str());
+			continue;
+		}
+#endif
+
 		string file;
 		m_shaders.emplace_back(it.first);
 		ShaderProgram& program = m_shaders.back();
