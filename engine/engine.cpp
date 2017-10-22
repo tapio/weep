@@ -35,9 +35,15 @@ void Engine::init(const string& configPath)
 	if (!err.empty())
 		panic("Error reading config from \"%s\": %s", configPath.c_str(), err.c_str());
 
+#ifdef GLES3
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+#else
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+#endif
 	int contextFlags = SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
 	if (settings["renderer"]["gldebug"].bool_value())
 		contextFlags |= SDL_GL_CONTEXT_DEBUG_FLAG;

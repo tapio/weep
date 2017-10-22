@@ -6,6 +6,7 @@ set(EXE_NAME "weep" CACHE STRING "Executable name")
 set(INSTALL_DIR "weep" CACHE STRING "Installation directory name")
 option(SHIPPING_BUILD "Remove debug stuff" OFF)
 option(USE_REMOTERY "Use Remotery profiler" ON)
+option(USE_GLES3 "Use GLES3 rendering" OFF)
 
 # Avoid source tree pollution
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
@@ -79,6 +80,9 @@ link_directories(${PROJECT_BINARY_DIR})
 
 add_library(deps STATIC ${DEPS_SOURCES})
 add_library(engine STATIC ${ENGINE_SOURCES})
+if(USE_GLES3)
+	target_compile_definitions(engine PUBLIC -DGLES3)
+endif()
 
 add_executable(${EXE_NAME} ${GAME_SOURCES} ${SHADER_SOURCES} ${CONFIG_SOURCES})
 set_target_properties(${EXE_NAME} PROPERTIES ENABLE_EXPORTS ON)
