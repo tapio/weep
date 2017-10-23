@@ -75,11 +75,31 @@ RenderDevice::RenderDevice(Resources& resources)
 	else s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
 	glDebugMessageCallback((GLDEBUGPROC)debugCallback, NULL);
 
+	GLint numExtensions, i;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+	for (i = 0; i < numExtensions; i++) {
+		const char* ext = (const char*)glGetStringi(GL_EXTENSIONS, i);
+		if (strstr(ext, "geometry_shader") != 0)
+			caps.geometryShaders = true;
+		if (strstr(ext, "tessellation_shader") != 0)
+			caps.tessellationShaders = true;
+		//logDebug("%s", ext);
+	}
+
+	caps.gles = strncmp((const char*)glGetString(GL_VERSION), "OpenGL ES", strlen("OpenGL ES")) == 0;
+	if (caps.gles) { // TODO: Should not force disable, but shader extensions require fixing
+		caps.geometryShaders = false;
+		caps.tessellationShaders = false;
+	}
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &caps.maxAnisotropy);
 	glGetIntegerv(GL_MAX_COLOR_TEXTURE_SAMPLES, &caps.maxSamples);
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &caps.maxSamplers);
 	glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &caps.maxArrayTextureLayers);
 	//logDebug("%.1f %d %d %d", caps.maxAnisotropy, caps.maxSamples, caps.maxSamplers, caps.maxArrayTextureLayers);
+	if (!caps.geometryShaders)
+		logDebug("No geometry shader support.");
+	if (!caps.tessellationShaders)
+		logDebug("No tessellation shader support.");
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glViewport(0, 0, Engine::width(), Engine::height());
@@ -143,12 +163,10 @@ void RenderDevice::resizeRenderTargets()
 		m_reflectionFbo.destroy();
 	// Set up floating point framebuffer to render HDR scene to
 	int samples = Engine::settings["renderer"]["msaa"].number_value();
-#ifdef GLES3
-	if (samples > 1) {
+	if (caps.gles && samples > 1) {
 		logWarning("MSAA is not currently supported on GLES3.");
 		samples = 0;
 	}
-#endif
 	if (samples > 1) {
 		m_msaaFbo.width = Engine::width();
 		m_msaaFbo.height = Engine::height();
@@ -210,12 +228,14 @@ void RenderDevice::loadShaders()
 	for (auto& it : shaders) {
 		const Json& shaderFiles = it.second["shaders"];
 
-#ifdef GLES3
-		if (shaderFiles["geom"].is_string() || shaderFiles["tesc"].is_string() || shaderFiles["tese"].is_string()) {
-			logWarning("Skipping gles3 incompatible shader %s", it.first.c_str());
+		if (!caps.geometryShaders && shaderFiles["geom"].is_string()) {
+			logWarning("Skipping unsupported geometry shader %s", it.first.c_str());
 			continue;
 		}
-#endif
+		else if (!caps.tessellationShaders && (shaderFiles["tesc"].is_string() || shaderFiles["tese"].is_string())) {
+			logWarning("Skipping unsupported tessellation shader %s", it.first.c_str());
+			continue;
+		}
 
 		string file;
 		m_shaders.emplace_back(it.first);
@@ -226,6 +246,8 @@ void RenderDevice::loadShaders()
 			defineText = "#version " + it.second["version"].string_value() + "\n";
 		else defineText = "#version " + Engine::settings["renderer"]["glslversion"].string_value() + "\n";
 		defineText += m_resources.getText("shaders/extensions.glsl", Resources::USE_CACHE);
+		if (caps.gles)
+			defineText += "precision highp float;\n"; // TODO: Allow precision config?
 
 		const Json& defines = it.second["defines"];
 		if (!defines.is_null()) {
@@ -483,11 +505,12 @@ bool RenderDevice::uploadMaterial(Material& material)
 	// Other techs are always auto generated
 	{
 		// Simpler reflection shader
-#ifndef GLES3
-		tag &= ~(USE_SHADOW_MAP | USE_AO_MAP | USE_REFLECTION_MAP | USE_PARALLAX_MAP | USE_ENV_MAP | USE_TESSELLATION);
-		material.shaderId[TECH_REFLECTION] = generateShader(tag | USE_CUBE_RENDER);
-		ASSERT(material.shaderId[TECH_REFLECTION] >= 0 && "Reflection shader generating failed");
-#endif
+		if (caps.geometryShaders) {
+			tag &= ~(USE_SHADOW_MAP | USE_AO_MAP | USE_REFLECTION_MAP | USE_PARALLAX_MAP | USE_ENV_MAP | USE_TESSELLATION);
+			material.shaderId[TECH_REFLECTION] = generateShader(tag | USE_CUBE_RENDER);
+			ASSERT(material.shaderId[TECH_REFLECTION] >= 0 && "Reflection shader generating failed");
+		}
+
 		// Depth
 		tag = USE_DEPTH;
 		if (material.flags & Material::ANIMATED)
@@ -496,10 +519,10 @@ bool RenderDevice::uploadMaterial(Material& material)
 			tag |= USE_ALPHA_TEST | USE_DIFFUSE_MAP;
 		material.shaderId[TECH_DEPTH] = generateShader(tag);
 		ASSERT(material.shaderId[TECH_DEPTH] >= 0 && "Depth shader generating failed");
-#ifndef GLES3
-		material.shaderId[TECH_DEPTH_CUBE] = generateShader(tag | USE_DEPTH_CUBE);
-		ASSERT(material.shaderId[TECH_DEPTH_CUBE] >= 0 && "Depth cube shader generating failed");
-#endif
+		if (caps.geometryShaders) {
+			material.shaderId[TECH_DEPTH_CUBE] = generateShader(tag | USE_DEPTH_CUBE);
+			ASSERT(material.shaderId[TECH_DEPTH_CUBE] >= 0 && "Depth cube shader generating failed");
+		}
 	}
 
 	bool dirty = false;

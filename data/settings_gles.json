@@ -6,16 +6,16 @@
 	},
 	"renderer": {
 		"gldebug": true,
-		"profile": "core",
+		"profile": "es",
 		"glslversion": "400 core",
 		"vsync": true,
-		"msaa": 8,
+		"msaa": 0,
 		"shadowMapSize": 2048,
 		"shadowCubeSize": 512,
 		"reflectionCubeSize": 512
 	},
 	"devtools": true,
-	"scene": "debugscene.json",
+	"scene": "minimal.json",
 	"moddir": "../weep-media/",
 	"modules": [ "logo", "devtools", "settings", "testbed" ]
 }

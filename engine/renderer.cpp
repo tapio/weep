@@ -59,10 +59,11 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	m_device->stats = RenderDevice::Stats();
 
 	bool cubeShadows = settings.shadows;
-#ifdef GLES3
-	cubeShadows = false;
-	settings.dynamicReflections = false;
-#endif
+	if (!m_device->caps.geometryShaders)
+	{
+		cubeShadows = false;
+		settings.dynamicReflections = false;
+	}
 
 	struct ReflectionProbe { float priority; vec3 pos; };
 	std::vector<ReflectionProbe> reflectionProbes;

@@ -42,6 +42,9 @@ public:
 	void useProgram(const ShaderProgram& program);
 
 	struct Caps {
+		bool geometryShaders = false;
+		bool tessellationShaders = false;
+		bool gles = false;
 		float maxAnisotropy;
 		int maxSamples;
 		int maxSamplers;
