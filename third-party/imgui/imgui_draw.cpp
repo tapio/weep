@@ -222,7 +222,7 @@ void ImDrawList::UpdateTextureID()
 
     // Try to merge with previous command if it matches, else use current command
     ImDrawCmd* prev_cmd = CmdBuffer.Size > 1 ? curr_cmd - 1 : NULL;
-    if (prev_cmd && prev_cmd->TextureId == curr_texture_id && memcmp(&prev_cmd->ClipRect, &GetCurrentClipRect(), sizeof(ImVec4)) == 0 && prev_cmd->UserCallback == NULL)
+    if (curr_cmd->ElemCount == 0 && prev_cmd && prev_cmd->TextureId == curr_texture_id && memcmp(&prev_cmd->ClipRect, &GetCurrentClipRect(), sizeof(ImVec4)) == 0 && prev_cmd->UserCallback == NULL)
         CmdBuffer.pop_back();
     else
         curr_cmd->TextureId = curr_texture_id;
@@ -339,7 +339,7 @@ void ImDrawList::ChannelsMerge()
         if (int sz = ch.CmdBuffer.Size) { memcpy(cmd_write, ch.CmdBuffer.Data, sz * sizeof(ImDrawCmd)); cmd_write += sz; }
         if (int sz = ch.IdxBuffer.Size) { memcpy(_IdxWritePtr, ch.IdxBuffer.Data, sz * sizeof(ImDrawIdx)); _IdxWritePtr += sz; }
     }
-    AddDrawCmd();
+    UpdateClipRect(); // We call this instead of AddDrawCmd(), so that empty channels won't produce an extra draw call.
     _ChannelsCount = 1;
 }
 
@@ -1035,6 +1035,43 @@ void ImDrawData::ScaleClipRects(const ImVec2& scale)
 }
 
 //-----------------------------------------------------------------------------
+// Shade functions
+//-----------------------------------------------------------------------------
+
+// Generic linear color gradient, write to RGB fields, leave A untouched.
+void ImGui::ShadeVertsLinearColorGradientKeepAlpha(ImDrawVert* vert_start, ImDrawVert* vert_end, ImVec2 gradient_p0, ImVec2 gradient_p1, ImU32 col0, ImU32 col1)
+{
+    ImVec2 gradient_extent = gradient_p1 - gradient_p0;
+    float gradient_inv_length2 = 1.0f / ImLengthSqr(gradient_extent);
+    for (ImDrawVert* vert = vert_start; vert < vert_end; vert++)
+    {
+        float d = ImDot(vert->pos - gradient_p0, gradient_extent);
+        float t = ImClamp(d * gradient_inv_length2, 0.0f, 1.0f);
+        int r = ImLerp((int)(col0 >> IM_COL32_R_SHIFT) & 0xFF, (int)(col1 >> IM_COL32_R_SHIFT) & 0xFF, t);
+        int g = ImLerp((int)(col0 >> IM_COL32_G_SHIFT) & 0xFF, (int)(col1 >> IM_COL32_G_SHIFT) & 0xFF, t);
+        int b = ImLerp((int)(col0 >> IM_COL32_B_SHIFT) & 0xFF, (int)(col1 >> IM_COL32_B_SHIFT) & 0xFF, t);
+        vert->col = (r << IM_COL32_R_SHIFT) | (g << IM_COL32_G_SHIFT) | (b << IM_COL32_B_SHIFT) | (vert->col & IM_COL32_A_MASK);
+    }
+}
+
+// Scan and shade backward from the end of given vertices. Assume vertices are text only (= vert_start..vert_end going left to right) so we can break as soon as we are out the gradient bounds.
+void ImGui::ShadeVertsLinearAlphaGradientForLeftToRightText(ImDrawVert* vert_start, ImDrawVert* vert_end, float gradient_p0_x, float gradient_p1_x)
+{
+    float gradient_extent_x = gradient_p1_x - gradient_p0_x;
+    float gradient_inv_length2 = 1.0f / (gradient_extent_x * gradient_extent_x);
+    int full_alpha_count = 0;
+    for (ImDrawVert* vert = vert_end - 1; vert >= vert_start; vert--)
+    {
+        float d = (vert->pos.x - gradient_p0_x) * (gradient_extent_x);
+        float alpha_mul = 1.0f - ImClamp(d * gradient_inv_length2, 0.0f, 1.0f);
+        if (alpha_mul >= 1.0f && ++full_alpha_count > 2)
+            return; // Early out
+        int a = (int)(((vert->col >> IM_COL32_A_SHIFT) & 0xFF) * alpha_mul);
+        vert->col = (vert->col & ~IM_COL32_A_MASK) | (a << IM_COL32_A_SHIFT);
+    }
+}
+
+//-----------------------------------------------------------------------------
 // ImFontConfig
 //-----------------------------------------------------------------------------
 
@@ -1540,7 +1577,6 @@ bool    ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
         const float off_x = cfg.GlyphOffset.x;
         const float off_y = cfg.GlyphOffset.y + (float)(int)(dst_font->Ascent + 0.5f);
 
-        dst_font->FallbackGlyph = NULL; // Always clear fallback so FindGlyph can return NULL. It will be set again in BuildLookupTable()
         for (int i = 0; i < tmp.RangesCount; i++)
         {
             stbtt_pack_range& range = tmp.Ranges[i];
@@ -1582,14 +1618,12 @@ void ImFontAtlasBuildSetupFont(ImFontAtlas* atlas, ImFont* font, ImFontConfig* f
 {
     if (!font_config->MergeMode)
     {
-        font->ContainerAtlas = atlas;
-        font->ConfigData = font_config;
-        font->ConfigDataCount = 0;
+        font->ClearOutputData();
         font->FontSize = font_config->SizePixels;
+        font->ConfigData = font_config;
+        font->ContainerAtlas = atlas;
         font->Ascent = ascent;
         font->Descent = descent;
-        font->Glyphs.resize(0);
-        font->MetricsTotalSurface = 0;
     }
     font->ConfigDataCount++;
 }
@@ -1866,7 +1900,8 @@ ImFont::ImFont()
 {
     Scale = 1.0f;
     FallbackChar = (ImWchar)'?';
-    Clear();
+    DisplayOffset = ImVec2(0.0f, 1.0f);
+    ClearOutputData();
 }
 
 ImFont::~ImFont()
@@ -1879,13 +1914,12 @@ ImFont::~ImFont()
     if (g.Font == this)
         g.Font = NULL;
     */
-    Clear();
+    ClearOutputData();
 }
 
-void    ImFont::Clear()
+void    ImFont::ClearOutputData()
 {
     FontSize = 0.0f;
-    DisplayOffset = ImVec2(0.0f, 1.0f);
     Glyphs.clear();
     IndexAdvanceX.clear();
     IndexLookup.clear();
