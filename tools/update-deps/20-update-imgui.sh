@@ -9,6 +9,5 @@ done
 $WGET $GHBASEURL/ocornut/imgui/master/examples/sdl_opengl3_example/imgui_impl_sdl_gl3.h -O imgui/imgui_impl_sdl_gl3.h &
 $WGET $GHBASEURL/ocornut/imgui/master/examples/sdl_opengl3_example/imgui_impl_sdl_gl3.cpp -O imgui/imgui_impl_sdl_gl3.cpp &
 
-#TODO Make a patch
-echo "Please revert the \"gl3w\" change at the top of imgui_impl_sdl_gl3.cpp"
-
+wait
+patch --verbose -p0 < "$PATCHDIR/20-ImGUIImpl.patch"
