@@ -143,6 +143,12 @@ void RenderDevice::resizeRenderTargets()
 		m_reflectionFbo.destroy();
 	// Set up floating point framebuffer to render HDR scene to
 	int samples = Engine::settings["renderer"]["msaa"].number_value();
+#ifdef GLES3
+	if (samples > 1) {
+		logWarning("MSAA is not currently supported on GLES3.");
+		samples = 0;
+	}
+#endif
 	if (samples > 1) {
 		m_msaaFbo.width = Engine::width();
 		m_msaaFbo.height = Engine::height();
