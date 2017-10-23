@@ -483,9 +483,11 @@ bool RenderDevice::uploadMaterial(Material& material)
 	// Other techs are always auto generated
 	{
 		// Simpler reflection shader
+#ifndef GLES3
 		tag &= ~(USE_SHADOW_MAP | USE_AO_MAP | USE_REFLECTION_MAP | USE_PARALLAX_MAP | USE_ENV_MAP | USE_TESSELLATION);
 		material.shaderId[TECH_REFLECTION] = generateShader(tag | USE_CUBE_RENDER);
 		ASSERT(material.shaderId[TECH_REFLECTION] >= 0 && "Reflection shader generating failed");
+#endif
 		// Depth
 		tag = USE_DEPTH;
 		if (material.flags & Material::ANIMATED)
@@ -493,9 +495,11 @@ bool RenderDevice::uploadMaterial(Material& material)
 		if (material.flags & Material::ALPHA_TEST)
 			tag |= USE_ALPHA_TEST | USE_DIFFUSE_MAP;
 		material.shaderId[TECH_DEPTH] = generateShader(tag);
-		material.shaderId[TECH_DEPTH_CUBE] = generateShader(tag | USE_DEPTH_CUBE);
 		ASSERT(material.shaderId[TECH_DEPTH] >= 0 && "Depth shader generating failed");
+#ifndef GLES3
+		material.shaderId[TECH_DEPTH_CUBE] = generateShader(tag | USE_DEPTH_CUBE);
 		ASSERT(material.shaderId[TECH_DEPTH_CUBE] >= 0 && "Depth cube shader generating failed");
+#endif
 	}
 
 	bool dirty = false;
