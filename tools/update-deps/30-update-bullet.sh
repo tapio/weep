@@ -20,7 +20,5 @@ rm -vr "bullet/BulletDynamics/Featherstone"
 rm -vr "bullet/BulletDynamics/MLCPSolvers"
 find bullet -type f \( -name 'CMakeLists.txt' -o -name 'premake4.lua' \) -delete
 
-# TODO: Make a patch
-echo
-echo "Please fix btRigidBody constructor parameters to optional"
+patch -p0 < "$PATCHDIR/01-btRigidBodyConstructor.patch"
 
