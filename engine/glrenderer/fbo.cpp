@@ -42,8 +42,9 @@ void FBO::create()
 		uint attach = depth ? GL_DEPTH_ATTACHMENT : (GL_COLOR_ATTACHMENT0 + i);
 		glFramebufferTexture(GL_FRAMEBUFFER, attach, tex[i], 0);
 	}
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		logError("Framebuffer not complete!");
+	uint fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (fbStatus != GL_FRAMEBUFFER_COMPLETE)
+		logError("Framebuffer not complete! (%d)", fbStatus);
 	if (numTextures >= 3) {
 		GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 		glDrawBuffers(2, attachments);
