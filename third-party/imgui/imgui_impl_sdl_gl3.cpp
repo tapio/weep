@@ -219,8 +219,15 @@ bool ImGui_ImplSdlGL3_CreateDeviceObjects()
     glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &last_array_buffer);
     glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &last_vertex_array);
 
+    int attr = 0;
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &attr);
+    bool gles = attr == SDL_GL_CONTEXT_PROFILE_ES;
+
+    const GLchar *vertex_prefix = gles
+        ? "#version 300 es\n"
+        : "#version 330\n";
+
     const GLchar *vertex_shader =
-        "#version 330\n"
         "uniform mat4 ProjMtx;\n"
         "in vec2 Position;\n"
         "in vec2 UV;\n"
@@ -234,8 +241,13 @@ bool ImGui_ImplSdlGL3_CreateDeviceObjects()
         "	gl_Position = ProjMtx * vec4(Position.xy,0,1);\n"
         "}\n";
 
+    const GLchar* vertex_shaders[] = { vertex_prefix, vertex_shader };
+
+    const GLchar *fragment_prefix = gles
+        ? "#version 300 es\nprecision mediump float;\n"
+        : "#version 330\n";
+
     const GLchar* fragment_shader =
-        "#version 330\n"
         "uniform sampler2D Texture;\n"
         "in vec2 Frag_UV;\n"
         "in vec4 Frag_Color;\n"
@@ -245,11 +257,13 @@ bool ImGui_ImplSdlGL3_CreateDeviceObjects()
         "	Out_Color = Frag_Color * texture( Texture, Frag_UV.st);\n"
         "}\n";
 
+    const GLchar* fragment_shaders[] = { fragment_prefix, fragment_shader };
+
     g_ShaderHandle = glCreateProgram();
     g_VertHandle = glCreateShader(GL_VERTEX_SHADER);
     g_FragHandle = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(g_VertHandle, 1, &vertex_shader, 0);
-    glShaderSource(g_FragHandle, 1, &fragment_shader, 0);
+    glShaderSource(g_VertHandle, 2, vertex_shaders, 0);
+    glShaderSource(g_FragHandle, 2, fragment_shaders, 0);
     glCompileShader(g_VertHandle);
     glCompileShader(g_FragHandle);
     glAttachShader(g_ShaderHandle, g_VertHandle);
