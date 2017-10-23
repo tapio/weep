@@ -20,5 +20,5 @@ rm -vr "bullet/BulletDynamics/Featherstone"
 rm -vr "bullet/BulletDynamics/MLCPSolvers"
 find bullet -type f \( -name 'CMakeLists.txt' -o -name 'premake4.lua' \) -delete
 
-patch -p0 < "$PATCHDIR/01-btRigidBodyConstructor.patch"
+patch --verbose -p0 < "$PATCHDIR/30-btRigidBodyConstructor.patch"
 
