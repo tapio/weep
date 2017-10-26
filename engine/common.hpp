@@ -44,6 +44,7 @@ void logError(const char* format, ...);
 void panic(const char* format, ...);
 
 string readFile(const string& path);
+bool writeFile(const string& path, const string& contents);
 string replace(string str, const string& search, const string& replace);
 bool endsWith(const string& str, const string& ending);
 uint timestamp(const string& path);

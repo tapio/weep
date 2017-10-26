@@ -132,6 +132,13 @@ string readFile(const string& path)
 	return buffer.str();
 }
 
+bool writeFile(const string& path, const string& contents)
+{
+	std::ofstream f(path);
+	f << contents;
+	return f.good();
+}
+
 string replace(string str, const string& search, const string& replace)
 {
 	for (size_t pos = 0, len = replace.length(); ; pos += len) {
