@@ -37,6 +37,8 @@ static const mat4 s_shadowBiasMatrix(
 	0.5f, 0.5f, 0.5f, 1.0f
 );
 
+static const string floatPrecisionString = "precision highp float;\n";
+
 enum ShaderFeature {
 	USE_FOG = 1 << 0,
 	USE_DIFFUSE = 1 << 1,
@@ -247,7 +249,7 @@ void RenderDevice::loadShaders()
 		else defineText = "#version " + Engine::settings["renderer"]["glslversion"].string_value() + "\n";
 		defineText += m_resources.getText("shaders/extensions.glsl", Resources::USE_CACHE);
 		if (caps.gles)
-			defineText += "precision highp float;\n"; // TODO: Allow precision config?
+			defineText += floatPrecisionString; // TODO: Allow precision config?
 
 		const Json& defines = it.second["defines"];
 		if (!defines.is_null()) {
@@ -301,6 +303,8 @@ int RenderDevice::generateShader(uint tags)
 
 	string defineText =	"#version " + Engine::settings["renderer"]["glslversion"].string_value() + "\n";
 	defineText += m_resources.getText("shaders/extensions.glsl", Resources::USE_CACHE);
+	if (caps.gles)
+		defineText += floatPrecisionString; // TODO: Allow precision config?
 
 #define HANDLE_FEATURE(x) if (tags & x) defineText += "#define " #x " 1\n";
 	HANDLE_FEATURE(USE_FOG)

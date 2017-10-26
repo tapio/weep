@@ -9,6 +9,12 @@ layout(binding = 22) uniform sampler2D depthMap;
 
 layout(location = 0) out vec4 fragment;
 
+#ifdef GL_ES
+	#define CONST
+#else
+	#define CONST const
+#endif
+
 #define gamma(x) pow((x), vec3(1.0 / 2.2));
 
 // http://filmicgames.com/archives/75
@@ -108,7 +114,7 @@ void main()
 	// Chromatic Aberration
 	if (chromaticAberration > 0) {
 		float d = distance(uv, vec2(0.5, 0.5));
-		const vec3 chromaticOffsets = vec3(-0.1, 0.0, 0.1) * chromaticAberration * d;
+		CONST vec3 chromaticOffsets = vec3(-0.1, 0.0, 0.1) * chromaticAberration * d;
 		hdrColor = vec3(
 			texture(sceneMap, vec2(uv.x + chromaticOffsets.r, uv.y)).r,
 			texture(sceneMap, vec2(uv.x + chromaticOffsets.g, uv.y)).g,

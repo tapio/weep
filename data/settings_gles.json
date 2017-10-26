@@ -7,7 +7,7 @@
 	"renderer": {
 		"gldebug": true,
 		"profile": "es",
-		"glslversion": "400 core",
+		"glslversion": "300 es",
 		"vsync": true,
 		"msaa": 0,
 		"shadowMapSize": 2048,
