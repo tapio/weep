@@ -251,6 +251,7 @@ namespace {
 
 void SceneLoader::load(const string& path, Resources& resources)
 {
+	logDebug("Start loading scene %s", path.c_str());
 	uint t0 = Engine::timems();
 	m_environment = Json();
 	load_internal(path, resources);
@@ -284,7 +285,7 @@ void SceneLoader::load(const string& path, Resources& resources)
 	resources.startAsyncLoading();
 
 	uint t1 = Engine::timems();
-	logDebug("Loaded scene in %dms with %d models, %d bodies, %d lights, %d prefabs", t1 - t0, numModels, numBodies, numLights, prefabs.size());
+	logDebug("Loaded scene %s in %dms with %d models, %d bodies, %d lights, %d prefabs", path.c_str(), t1 - t0, numModels, numBodies, numLights, prefabs.size());
 }
 
 void SceneLoader::load_internal(const string& path, Resources& resources)
