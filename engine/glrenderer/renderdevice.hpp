@@ -82,11 +82,11 @@ private:
 	void drawBatch(const Batch& batch, bool tessellate = false);
 	void renderFullscreenQuad();
 
-	FBO m_msaaFbo;
-	FBO m_fbo;
-	FBO m_pingPongFbo[2];
+	FBO m_msaaFbo = { "fbo_msaa" };
+	FBO m_fbo = { "fbo_master" };
+	FBO m_pingPongFbo[2] = { {"fbo_pingpong_a"}, {"fbo_pingpong_b"} };
 	FBO m_shadowFbo[MAX_SHADOWS];
-	FBO m_reflectionFbo;
+	FBO m_reflectionFbo = { "fbo_reflection" };
 
 	GPUGeometry m_fullscreenQuad;
 	GPUGeometry m_skyboxCube;

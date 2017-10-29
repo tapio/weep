@@ -72,9 +72,10 @@ RenderDevice::RenderDevice(Resources& resources)
 	logInfo("OpenGL Version:  %s", glGetString(GL_VERSION));
 	logInfo("GLSL Version:    %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-	if (Engine::settings["renderer"]["gldebug"].bool_value())
+	if (Engine::settings["renderer"]["gldebug"].bool_value()) {
 		s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_NOTIFICATION;
-	else s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	} else s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
 	glDebugMessageCallback((GLDEBUGPROC)debugCallback, NULL);
 
 	GLint numExtensions, i;
@@ -137,8 +138,12 @@ RenderDevice::RenderDevice(Resources& resources)
 	m_placeholderTex.create();
 	m_placeholderTex.upload(temp);
 
+	for (uint i = 0; i < countof(m_shadowFbo); ++i)
+		m_shadowFbo[i].name = "fbo_shadow_" + std::to_string(i);
+
 	resizeRenderTargets();
 
+	logDebug("Creating uniform blocks...");
 	m_commonBlock.create();
 	m_objectBlock.create();
 	m_materialBlock.create();
@@ -150,6 +155,7 @@ RenderDevice::RenderDevice(Resources& resources)
 
 void RenderDevice::resizeRenderTargets()
 {
+	logDebug("Creating render targets...");
 	if (m_msaaFbo.valid())
 		m_msaaFbo.destroy();
 	if (m_fbo.valid())
