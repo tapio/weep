@@ -145,7 +145,7 @@ float shadow_mapping()
 #ifdef USE_PCF
 	float shadow = 0.0;
 	float pcfRadius = 0.75;
-	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+	vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0));
 	const int samples = 4;
 	for (int i = 0; i < samples; ++i) {
 		//int index = i;

@@ -108,11 +108,11 @@ vec3 fxaa(vec2 uv, vec2 step)
 void main()
 {
 	vec2 uv = inData.texcoord;
-	vec2 screenSize = textureSize(sceneMap, 0);
+	vec2 screenSize = vec2(textureSize(sceneMap, 0));
 	vec2 pixelSize = 1.0 / screenSize;
 	vec3 hdrColor;
 	// Chromatic Aberration
-	if (chromaticAberration > 0) {
+	if (chromaticAberration > 0.0) {
 		float d = distance(uv, vec2(0.5, 0.5));
 		CONST vec3 chromaticOffsets = vec3(-0.1, 0.0, 0.1) * chromaticAberration * d;
 		hdrColor = vec3(
@@ -125,11 +125,11 @@ void main()
 	else hdrColor = texture(sceneMap, uv).rgb;
 
 	// Bloom
-	if (bloomThreshold > 0)
+	if (bloomThreshold > 0.0)
 		hdrColor += texture(bloomMap, uv).rgb; // Bloom
 
 	// Vignette
-	if (vignette.z > 0) {
+	if (vignette.z > 0.0) {
 		float d = distance(uv, vec2(0.5, 0.5));
 		float vig = smoothstep(vignette.x, vignette.x - vignette.y, d);
 		hdrColor = mix(hdrColor, hdrColor * vig, vignette.z);
@@ -144,7 +144,7 @@ void main()
 	}
 
 	// Sepia
-	if (sepia > 0) {
+	if (sepia > 0.0) {
 		vec3 sepiaColor = vec3(
 			dot(hdrColor, vec3(0.393, 0.769, 0.189)),
 			dot(hdrColor, vec3(0.349, 0.686, 0.168)),
@@ -153,7 +153,7 @@ void main()
 	}
 
 	// Scanlines
-	if (scanlines > 0)
+	if (scanlines > 0.0)
 		if (mod(floor(uv.y * screenSize.y), scanlines + 1.0) < 1.0)
 			hdrColor *= luminance;
 
