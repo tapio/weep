@@ -89,8 +89,7 @@ RenderDevice::RenderDevice(Resources& resources)
 	}
 
 	caps.gles = strncmp((const char*)glGetString(GL_VERSION), "OpenGL ES", strlen("OpenGL ES")) == 0;
-	if (caps.gles) { // TODO: Should not force disable, but shader extensions require fixing
-		caps.geometryShaders = false;
+	if (caps.gles) { // TODO: Should not force disable, but shader extensions / #version require fixing
 		caps.tessellationShaders = false;
 	}
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &caps.maxAnisotropy);
