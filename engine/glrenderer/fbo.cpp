@@ -48,7 +48,7 @@ void FBO::create()
 			for (uint j = 0; j < 6; ++j)
 				glFramebufferTexture2D(GL_FRAMEBUFFER, attach, GL_TEXTURE_CUBE_MAP_POSITIVE_X + j, tex[i], 0);
 		} else {
-			glFramebufferTexture2D(GL_FRAMEBUFFER, attach, GL_TEXTURE_2D, tex[i], 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, attach, texType, tex[i], 0);
 		}
 	}
 	uint fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
