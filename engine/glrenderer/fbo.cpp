@@ -46,11 +46,12 @@ void FBO::create()
 	if (fbStatus != GL_FRAMEBUFFER_COMPLETE)
 		logError("Framebuffer not complete! (%d)", fbStatus);
 	if (numTextures >= 3) {
-		GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		GLenum attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 		glDrawBuffers(2, attachments);
 	} else if (numTextures == 1 && depthAttachment == 0) {
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
+		GLenum attachment = GL_NONE;
+		glDrawBuffers(1, &attachment);
+		glReadBuffer(attachment);
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

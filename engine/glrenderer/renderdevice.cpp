@@ -870,11 +870,13 @@ void RenderDevice::postRender()
 	if (m_msaaFbo.valid()) {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_msaaFbo.fbo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo.fbo);
-		glReadBuffer(GL_COLOR_ATTACHMENT0);
-		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		GLenum buf = GL_COLOR_ATTACHMENT0;
+		glReadBuffer(buf);
+		glDrawBuffers(1, &buf);
 		glBlitFramebuffer(0, 0, m_msaaFbo.width, m_msaaFbo.height, 0, 0, m_fbo.width, m_fbo.height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		glReadBuffer(GL_COLOR_ATTACHMENT1);
-		glDrawBuffer(GL_COLOR_ATTACHMENT1);
+		buf = GL_COLOR_ATTACHMENT1;
+		glReadBuffer(buf);
+		glDrawBuffers(1, &buf);
 		glBlitFramebuffer(0, 0, m_msaaFbo.width, m_msaaFbo.height, 0, 0, m_fbo.width, m_fbo.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	}
 
