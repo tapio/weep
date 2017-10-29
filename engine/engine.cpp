@@ -35,26 +35,25 @@ void Engine::init(const string& configPath)
 	if (!err.empty())
 		panic("Error reading config from \"%s\": %s", configPath.c_str(), err.c_str());
 
-	// TODO: Allow to request different context versions?
 	string profile = settings["renderer"]["profile"].string_value();
 	if (profile == "es")
-	{
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-	}
 	else if (profile == "compatibility")
-	{
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
-	}
 	else
-	{
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+
+	int versionMajor = 4;
+	int versionMinor = 3;
+	if (settings["renderer"]["version"].is_array())
+	{
+		const auto& verArr = settings["renderer"]["version"].array_items();
+		versionMajor = verArr[0].int_value();
+		versionMinor = verArr[1].int_value();
 	}
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, versionMajor);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, versionMinor);
+	//logDebug("Requesting %s %d.%d", profile.c_str(), versionMajor, versionMinor);
 
 	int contextFlags = SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
 	if (settings["renderer"]["gldebug"].bool_value())

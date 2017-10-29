@@ -7,6 +7,7 @@
 	"renderer": {
 		"gldebug": true,
 		"profile": "es",
+		"version": [3, 0],
 		"glslversion": "300 es",
 		"vsync": true,
 		"msaa": 0,
