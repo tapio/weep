@@ -43,10 +43,10 @@ void FBO::create()
 				glTexParameteri(texType, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		}
 		uint attach = depth ? GL_DEPTH_ATTACHMENT : (GL_COLOR_ATTACHMENT0 + i);
-		//glFramebufferTexture(GL_FRAMEBUFFER, attach, tex[i], 0);
 		if (cube) {
-			for (uint j = 0; j < 6; ++j)
-				glFramebufferTexture2D(GL_FRAMEBUFFER, attach, GL_TEXTURE_CUBE_MAP_POSITIVE_X + j, tex[i], 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, attach, tex[i], 0);
+			//for (uint j = 0; j < 6; ++j)
+			//	glFramebufferTexture2D(GL_FRAMEBUFFER, attach, GL_TEXTURE_CUBE_MAP_POSITIVE_X + j, tex[i], 0);
 		} else {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, attach, texType, tex[i], 0);
 		}

@@ -78,6 +78,10 @@ RenderDevice::RenderDevice(Resources& resources)
 	} else s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
 	glDebugMessageCallback((GLDEBUGPROC)debugCallback, NULL);
 
+	int versionMajor = 0, versionMinor = 0;
+	glGetIntegerv(GL_MAJOR_VERSION, &versionMajor);
+	glGetIntegerv(GL_MINOR_VERSION, &versionMinor);
+
 	GLint numExtensions, i;
 	glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
 	for (i = 0; i < numExtensions; i++) {
@@ -89,6 +93,7 @@ RenderDevice::RenderDevice(Resources& resources)
 		//logDebug("%s", ext);
 	}
 
+	caps.cubeFboAttachment = versionMajor >= 3 && versionMinor >= 2;
 	caps.gles = strncmp((const char*)glGetString(GL_VERSION), "OpenGL ES", strlen("OpenGL ES")) == 0;
 	if (caps.gles) { // TODO: Should not force disable, but shader extensions / #version require fixing
 		caps.tessellationShaders = false;

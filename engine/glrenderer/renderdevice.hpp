@@ -44,6 +44,7 @@ public:
 	struct Caps {
 		bool geometryShaders = false;
 		bool tessellationShaders = false;
+		bool cubeFboAttachment = false;
 		bool gles = false;
 		float maxAnisotropy;
 		int maxSamples;

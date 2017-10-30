@@ -59,7 +59,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	m_device->stats = RenderDevice::Stats();
 
 	bool cubeShadows = settings.shadows;
-	if (!m_device->caps.geometryShaders)
+	if (!m_device->caps.geometryShaders || !m_device->caps.cubeFboAttachment)
 	{
 		cubeShadows = false;
 		settings.dynamicReflections = false;
@@ -176,13 +176,10 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	START_MEASURE(reflectionMs)
 	BEGIN_GPU_SAMPLE(ReflectionPass)
 	if (settings.dynamicReflections) {
-		Camera reflCam = camera;
-		vec3 reflCamPos = camPos;
-		reflCam.makePerspective(glm::radians(90.0f), 1.f, 0.25f, 50.f);
-		if (!reflectionProbes.empty()) {
-			reflCamPos = reflectionProbes.front().pos;
-			reflCam.updateViewMatrix(reflCamPos, camRot);
-		}
+		Camera reflCam;
+		reflCam.makePerspective(glm::radians(90.0f), 1.f, 0.1f, 50.f);
+		vec3 reflCamPos = reflectionProbes.empty() ? camPos : reflectionProbes.front().pos;
+		reflCam.updateViewMatrix(reflCamPos, camRot);
 		m_device->setupRenderPass(reflCam, lights, TECH_REFLECTION);
 		entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 			float maxDist = model.bounds.radius + reflCam.far;
