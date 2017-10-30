@@ -886,7 +886,7 @@ void RenderDevice::postRender()
 	}
 
 	uint pingpong = 0;
-	//if (m_env->bloomIntensity >= 1.f && m_env->bloomThreshold > 0.f)
+	if (m_env->bloomIntensity >= 1.f && m_env->bloomThreshold > 0.f)
 	{
 		// Blur bloom texture
 		uint amount = (uint)m_env->bloomIntensity;
@@ -907,6 +907,12 @@ void RenderDevice::postRender()
 			renderFullscreenQuad();
 			pingpong = !pingpong;
 		}
+	}
+	else
+	{
+		m_pingPongFbo[pingpong].bind();
+		glClear(GL_COLOR_BUFFER_BIT);
+		pingpong = !pingpong;
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
