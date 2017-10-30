@@ -471,7 +471,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 	uint tag = USE_FOG | USE_DIFFUSE;
 	if (material.shininess > 0.f)
 		tag |= USE_SPECULAR;
-	if (material.flags & Material::TESSELLATE)
+	if (material.flags & Material::TESSELLATE && caps.tessellationShaders)
 		tag |= USE_TESSELLATION;
 	if (material.flags & Material::RECEIVE_SHADOW)
 		tag |= USE_SHADOW_MAP;
