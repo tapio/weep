@@ -179,7 +179,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		Camera reflCam;
 		reflCam.makePerspective(glm::radians(90.0f), 1.f, 0.1f, 50.f);
 		vec3 reflCamPos = reflectionProbes.empty() ? camPos : reflectionProbes.front().pos;
-		reflCam.updateViewMatrix(reflCamPos, camRot);
+		reflCam.updateViewMatrix(reflCamPos);
 		m_device->setupRenderPass(reflCam, lights, TECH_REFLECTION);
 		entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 			float maxDist = model.bounds.radius + reflCam.far;
