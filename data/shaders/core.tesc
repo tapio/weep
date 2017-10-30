@@ -4,6 +4,12 @@ layout(vertices = 3) out;
 VERTEX_DATA(in, inData[]);
 VERTEX_DATA(out, outData[]);
 
+#ifdef GL_ES
+	#define CONST
+#else
+	#define CONST const
+#endif
+
 #define ID gl_InvocationID
 
 vec2 project(vec3 p)
@@ -37,8 +43,8 @@ void main()
 #endif
 
 	// Set tessellation levels
-	const int idA = (ID + 0) % 3;
-	const int idB = (ID + 1) % 3;
+	CONST int idA = (ID + 0) % 3;
+	CONST int idB = (ID + 1) % 3;
 	float dist = distance(project(inData[idA].position), project(inData[idB].position));
 	gl_TessLevelOuter[ID] = calculateTessLevel(dist);
 	barrier();
