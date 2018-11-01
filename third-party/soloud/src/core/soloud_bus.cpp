@@ -34,16 +34,16 @@ namespace SoLoud
 		mFlags |= PROTECTED | INAUDIBLE_TICK;
 	}
 	
-	void BusInstance::getAudio(float *aBuffer, unsigned int aSamples)
+	unsigned int BusInstance::getAudio(float *aBuffer, unsigned int aSamplesToRead, unsigned int aBufferSize)
 	{
 		int handle = mParent->mChannelHandle;
 		if (handle == 0) 
 		{
 			// Avoid reuse of scratch data if this bus hasn't played anything yet
 			unsigned int i;
-			for (i = 0; i < aSamples * mChannels; i++)
+			for (i = 0; i < aBufferSize * mChannels; i++)
 				aBuffer[i] = 0;
-			return;
+			return aSamplesToRead;
 		}
 		
 		Soloud *s = mParent->mSoloud;
@@ -53,19 +53,19 @@ namespace SoLoud
 			mScratch.init(mScratchSize * MAX_CHANNELS);
 		}
 		
-		s->mixBus(aBuffer, aSamples, mScratch.mData, handle, mSamplerate, mChannels);
+		s->mixBus(aBuffer, aSamplesToRead, aBufferSize, mScratch.mData, handle, mSamplerate, mChannels);
 
 		int i;
 		if (mParent->mFlags & AudioSource::VISUALIZATION_DATA)
 		{
-			if (aSamples > 255)
+			if (aSamplesToRead > 255)
 			{
 				for (i = 0; i < 256; i++)
 				{
 					int j;
 					mVisualizationWaveData[i] = 0;
 					for (j = 0; j < (signed)mChannels; j++)
-						mVisualizationWaveData[i] += aBuffer[i + aSamples * j];
+						mVisualizationWaveData[i] += aBuffer[i + aBufferSize * j];
 				}
 			}
 			else
@@ -76,10 +76,11 @@ namespace SoLoud
 					int j;
 					mVisualizationWaveData[i] = 0;
 					for (j = 0; j < (signed)mChannels; j++)
-						mVisualizationWaveData[i] += aBuffer[(i % aSamples) + aSamples * j];
+						mVisualizationWaveData[i] += aBuffer[(i % aSamplesToRead) + aBufferSize * j];
 				}
 			}
 		}
+		return aSamplesToRead;
 	}
 
 	bool BusInstance::hasEnded()
@@ -112,8 +113,7 @@ namespace SoLoud
 	{
 		if (mChannelHandle)
 		{
-			// We should be inside the mutex at the moment, so stop using the "internal" functions
-			mSoloud->stopVoice(mSoloud->getVoiceFromHandle(mChannelHandle));
+			stop();
 			mChannelHandle = 0;
 			mInstance = 0;
 		}
@@ -265,8 +265,8 @@ namespace SoLoud
 
 			for (i = 0; i < 256; i++)
 			{
-				float real = temp[i];
-				float imag = temp[i+512];
+				float real = temp[i * 2];
+				float imag = temp[i * 2 + 1];
 				mFFTData[i] = (float)sqrt(real*real+imag*imag);
 			}
 		}

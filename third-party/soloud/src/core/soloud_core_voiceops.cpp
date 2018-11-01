@@ -30,6 +30,8 @@ namespace SoLoud
 {
 	result Soloud::setVoiceRelativePlaySpeed(unsigned int aVoice, float aSpeed)
 	{
+		SOLOUD_ASSERT(aVoice < VOICE_COUNT);
+		SOLOUD_ASSERT(mInsideAudioThreadMutex);
 		if (aSpeed <= 0.0f)
 		{
 			return INVALID_PARAMETER;
@@ -46,6 +48,8 @@ namespace SoLoud
 
 	void Soloud::setVoicePause(unsigned int aVoice, int aPause)
 	{
+		SOLOUD_ASSERT(aVoice < VOICE_COUNT);
+		SOLOUD_ASSERT(mInsideAudioThreadMutex);
 		mActiveVoiceDirty = true;
 		if (mVoice[aVoice])
 		{
@@ -64,6 +68,8 @@ namespace SoLoud
 
 	void Soloud::setVoicePan(unsigned int aVoice, float aPan)
 	{
+		SOLOUD_ASSERT(aVoice < VOICE_COUNT);
+		SOLOUD_ASSERT(mInsideAudioThreadMutex);
 		if (mVoice[aVoice])
 		{
 			mVoice[aVoice]->mPan = aPan;
@@ -88,6 +94,8 @@ namespace SoLoud
 
 	void Soloud::setVoiceVolume(unsigned int aVoice, float aVolume)
 	{
+		SOLOUD_ASSERT(aVoice < VOICE_COUNT);
+		SOLOUD_ASSERT(mInsideAudioThreadMutex);
 		mActiveVoiceDirty = true;
 		if (mVoice[aVoice])
 		{
@@ -98,6 +106,8 @@ namespace SoLoud
 
 	void Soloud::stopVoice(unsigned int aVoice)
 	{
+		SOLOUD_ASSERT(aVoice < VOICE_COUNT);
+		SOLOUD_ASSERT(mInsideAudioThreadMutex);
 		mActiveVoiceDirty = true;
 		if (mVoice[aVoice])
 		{
@@ -110,12 +120,16 @@ namespace SoLoud
 
 	void Soloud::updateVoiceRelativePlaySpeed(unsigned int aVoice)
 	{
+		SOLOUD_ASSERT(aVoice < VOICE_COUNT);
+		SOLOUD_ASSERT(mInsideAudioThreadMutex);
 		mVoice[aVoice]->mOverallRelativePlaySpeed = m3dData[aVoice].mDopplerValue * mVoice[aVoice]->mSetRelativePlaySpeed;
 		mVoice[aVoice]->mSamplerate = mVoice[aVoice]->mBaseSamplerate * mVoice[aVoice]->mOverallRelativePlaySpeed;
 	}
 
 	void Soloud::updateVoiceVolume(unsigned int aVoice)
 	{
+		SOLOUD_ASSERT(aVoice < VOICE_COUNT);
+		SOLOUD_ASSERT(mInsideAudioThreadMutex);
 		mVoice[aVoice]->mOverallVolume = mVoice[aVoice]->mSetVolume * m3dData[aVoice].m3dVolume;
 	}
 }

@@ -186,6 +186,12 @@ namespace SoLoud
 			speaker[i].mZ = m3dSpeakerPosition[3 * i + 2];
 			speaker[i].normalize();
 		}
+		for (; i < MAX_CHANNELS; i++)
+		{
+			speaker[i].mX = 0;
+			speaker[i].mY = 0;
+			speaker[i].mZ = 0;
+		}
 
 		vec3 lpos, lvel, at, up;
 		at.mX = m3dAt[0];
@@ -276,7 +282,7 @@ namespace SoLoud
 
 			// Apply volume to channels based on speaker vectors
 			int j;
-			for (j = 0; j < MAX_CHANNELS; j++)
+			for (j = 0; j < (signed)mChannels; j++)
 			{
 				float speakervol = (speaker[j].dot(pos) + 1) / 2;
 				if (speaker[j].null())
@@ -285,6 +291,10 @@ namespace SoLoud
 				//speakervol = (speakervol * speakervol + speakervol) / 2;
 				//speakervol = speakervol * speakervol;
 				v->mChannelVolume[j] = vol * speakervol;
+			}
+			for (; j < MAX_CHANNELS; j++)
+			{
+				v->mChannelVolume[j] = 0;
 			}
 
 			v->m3dVolume = vol;
@@ -367,8 +377,6 @@ namespace SoLoud
 		mVoice[v]->mFlags |= AudioSourceInstance::PROCESS_3D;
 		set3dSourceParameters(h, aPosX, aPosY, aPosZ, aVelX, aVelY, aVelZ);
 
-		unlockAudioMutex();
-
 		int samples = 0;
 		if (aSound.mFlags & AudioSource::DISTANCE_DELAY)
 		{
@@ -395,6 +403,14 @@ namespace SoLoud
 		}
 
 		updateVoiceVolume(v);
+		
+		// Fix initial voice volume ramp up
+		int i;
+		for (i = 0; i < MAX_CHANNELS; i++)
+		{
+			mVoice[v]->mCurrentChannelVolume[i] = mVoice[v]->mChannelVolume[i] * mVoice[v]->mOverallVolume;
+		}
+
 		if (mVoice[v]->mOverallVolume < 0.01f)
 		{
 			// Inaudible.
@@ -411,9 +427,10 @@ namespace SoLoud
 		}
 		mActiveVoiceDirty = true;
 
+		unlockAudioMutex();
 		setDelaySamples(h, samples);
 		setPause(h, aPaused);
-		return h;		
+		return h;
 	}
 
 	handle Soloud::play3dClocked(time aSoundTime, AudioSource &aSound, float aPosX, float aPosY, float aPosZ, float aVelX, float aVelY, float aVelZ, float aVolume, unsigned int aBus)
@@ -449,6 +466,7 @@ namespace SoLoud
 		}
 
 		update3dVoices((unsigned int *)&v, 1);
+		lockAudioMutex();
 		updateVoiceRelativePlaySpeed(v);
 		int j;
 		for (j = 0; j < MAX_CHANNELS; j++)
@@ -457,6 +475,14 @@ namespace SoLoud
 		}
 
 		updateVoiceVolume(v);
+
+		// Fix initial voice volume ramp up
+		int i;
+		for (i = 0; i < MAX_CHANNELS; i++)
+		{
+			mVoice[v]->mCurrentChannelVolume[i] = mVoice[v]->mChannelVolume[i] * mVoice[v]->mOverallVolume;
+		}
+
 		if (mVoice[v]->mOverallVolume < 0.01f)
 		{
 			// Inaudible.
@@ -472,6 +498,7 @@ namespace SoLoud
 			mVoice[v]->mFlags &= ~AudioSourceInstance::INAUDIBLE;
 		}
 		mActiveVoiceDirty = true;
+		unlockAudioMutex();
 
 		setDelaySamples(h, samples);
 		setPause(h, 0);

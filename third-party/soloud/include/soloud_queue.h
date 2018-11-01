@@ -22,61 +22,50 @@ freely, subject to the following restrictions:
    distribution.
 */
 
-#ifndef SOLOUD_WAVSTREAM_H
-#define SOLOUD_WAVSTREAM_H
+#ifndef SOLOUD_QUEUE_H
+#define SOLOUD_QUEUE_H
 
-#include <stdio.h>
 #include "soloud.h"
 
-struct stb_vorbis;
+#define SOLOUD_QUEUE_MAX 32
 
 namespace SoLoud
 {
-	class WavStream;
-	class File;
+	class Queue;
 
-	class WavStreamInstance : public AudioSourceInstance
+	class QueueInstance : public AudioSourceInstance
 	{
-		WavStream *mParent;
-		unsigned int mOffset;
-		File *mFile;
-		stb_vorbis *mOgg;
-		unsigned int mOggFrameSize;
-		unsigned int mOggFrameOffset;
-		float **mOggOutputs;
+		Queue *mParent;
 	public:
-		WavStreamInstance(WavStream *aParent);
+		QueueInstance(Queue *aParent);
 		virtual unsigned int getAudio(float *aBuffer, unsigned int aSamplesToRead, unsigned int aBufferSize);
-		virtual result rewind();
 		virtual bool hasEnded();
-		virtual ~WavStreamInstance();
+		virtual ~QueueInstance();
 	};
 
-	class WavStream : public AudioSource
+	class Queue : public AudioSource
 	{
-		result loadwav(File * fp);
-		result loadogg(File * fp);
 	public:
-		int mOgg;
-		char *mFilename;
-		File *mMemFile;
-		File *mStreamFile;
-		unsigned int mDataOffset;
-		unsigned int mBits;
-		unsigned int mSampleCount;
-
-		WavStream();
-		virtual ~WavStream();
-		result load(const char *aFilename);
-		result loadMem(unsigned char *aData, unsigned int aDataLen, bool aCopy = false, bool aTakeOwnership = true);
-		result loadToMem(const char *aFilename);
-		result loadFile(File *aFile);
-		result loadFileToMem(File *aFile);		
-		virtual AudioSourceInstance *createInstance();
-		time getLength();
-
+		Queue();
+		virtual QueueInstance *createInstance();
+		// Play sound through the queue
+		result play(AudioSource &aSound);
+        // Number of audio sources queued for replay
+        unsigned int getQueueCount();
+		// Is this audio source currently playing?
+		bool isCurrentlyPlaying(AudioSource &aSound);
+		// Set params by reading them from an audio source
+		result setParamsFromAudioSource(AudioSource &aSound);
+		// Set params manually
+		result setParams(float aSamplerate, unsigned int aChannels = 2);
+		
 	public:
-		result parse(File *aFile);
+	    unsigned int mReadIndex, mWriteIndex, mCount;
+	    SoLoud::AudioSourceInstance *mSource[SOLOUD_QUEUE_MAX];
+		QueueInstance *mInstance;
+		handle mQueueHandle;
+		void findQueueHandle();
+		
 	};
 };
 

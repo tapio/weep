@@ -1,9 +1,4 @@
-SoLoud contains various third party libraries which vary in licenses,
-but are all extremely liberal; no attribution in binary form is required.
-For more information, see SoLoud manual or http://soloud-audio.com/legal.html
-
-SoLoud proper is licensed under the zlib/libpng license:
-
+/*
 SoLoud audio engine
 Copyright (c) 2013-2018 Jari Komppa
 
@@ -25,3 +20,35 @@ freely, subject to the following restrictions:
 
    3. This notice may not be removed or altered from any source
    distribution.
+*/
+
+#ifndef SOLOUD_WAVESHAPERFILTER_H
+#define SOLOUD_WAVESHAPERFILTER_H
+
+#include "soloud.h"
+
+namespace SoLoud
+{
+	class WaveShaperFilter;
+
+	class WaveShaperFilterInstance : public FilterInstance
+	{	
+		WaveShaperFilter *mParent;
+	public:
+		virtual void filterChannel(float *aBuffer, unsigned int aSamples, float aSamplerate, time aTime, unsigned int aChannel, unsigned int aChannels);
+		virtual ~WaveShaperFilterInstance();
+		WaveShaperFilterInstance(WaveShaperFilter *aParent);
+	};
+
+	class WaveShaperFilter : public Filter
+	{
+	public:
+		float mAmount, mWet;
+		virtual WaveShaperFilterInstance *createInstance();
+		result setParams(float aAmount, float aWet = 1.0f);
+		WaveShaperFilter();
+		virtual ~WaveShaperFilter();
+	};
+}
+
+#endif

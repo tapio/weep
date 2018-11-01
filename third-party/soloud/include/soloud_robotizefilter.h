@@ -1,9 +1,4 @@
-SoLoud contains various third party libraries which vary in licenses,
-but are all extremely liberal; no attribution in binary form is required.
-For more information, see SoLoud manual or http://soloud-audio.com/legal.html
-
-SoLoud proper is licensed under the zlib/libpng license:
-
+/*
 SoLoud audio engine
 Copyright (c) 2013-2018 Jari Komppa
 
@@ -25,3 +20,41 @@ freely, subject to the following restrictions:
 
    3. This notice may not be removed or altered from any source
    distribution.
+*/
+
+#ifndef SOLOUD_ROBOTIZEFILTER_H
+#define SOLOUD_ROBOTIZEFILTER_H
+
+#include "soloud.h"
+#include "soloud_fftfilter.h"
+
+namespace SoLoud
+{
+	class RobotizeFilter;
+
+	class RobotizeFilterInstance : public FFTFilterInstance
+	{
+		enum FILTERATTRIBUTE
+		{
+			WET = 0
+		};
+		RobotizeFilter *mParent;
+	public:
+		virtual void fftFilterChannel(float *aFFTBuffer, unsigned int aSamples, float aSamplerate, time aTime, unsigned int aChannel, unsigned int aChannels);
+		RobotizeFilterInstance(RobotizeFilter *aParent);
+	};
+
+	class RobotizeFilter : public FFTFilter
+	{
+	public:
+		enum FILTERATTRIBUTE
+		{
+			WET = 0
+		};
+		float mBoost;
+		virtual FilterInstance *createInstance();
+		RobotizeFilter();
+	};
+}
+
+#endif

@@ -1,9 +1,4 @@
-SoLoud contains various third party libraries which vary in licenses,
-but are all extremely liberal; no attribution in binary form is required.
-For more information, see SoLoud manual or http://soloud-audio.com/legal.html
-
-SoLoud proper is licensed under the zlib/libpng license:
-
+/*
 SoLoud audio engine
 Copyright (c) 2013-2018 Jari Komppa
 
@@ -25,3 +20,37 @@ freely, subject to the following restrictions:
 
    3. This notice may not be removed or altered from any source
    distribution.
+*/
+
+#include <string.h>
+#include "soloud.h"
+#include "soloud_robotizefilter.h"
+
+
+namespace SoLoud
+{
+	RobotizeFilterInstance::RobotizeFilterInstance(RobotizeFilter *aParent)
+	{
+		mParent = aParent;
+		initParams(1);
+		mParam[WET] = 1.0;
+	}
+
+	void RobotizeFilterInstance::fftFilterChannel(float *aFFTBuffer, unsigned int aSamples, float aSamplerate, time aTime, unsigned int aChannel, unsigned int aChannels)
+	{
+		unsigned int i;
+		for (i = 0; i < aSamples; i++)
+		{
+			aFFTBuffer[i*2] = 0;
+		}
+	}
+
+	RobotizeFilter::RobotizeFilter()
+	{
+	}
+
+	FilterInstance *RobotizeFilter::createInstance()
+	{
+		return new RobotizeFilterInstance(this);
+	}
+}

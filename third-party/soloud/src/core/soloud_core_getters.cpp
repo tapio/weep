@@ -79,6 +79,8 @@ namespace SoLoud
 	unsigned int Soloud::getActiveVoiceCount()
 	{
 		lockAudioMutex();
+		if (mActiveVoiceDirty)
+			calcActiveVoices();
 		unsigned int c = mActiveVoiceCount;
 		unlockAudioMutex();
 		return c;
@@ -116,6 +118,20 @@ namespace SoLoud
 		return 0;
 	}
 
+
+	time Soloud::getLoopPoint(handle aVoiceHandle)
+	{
+		lockAudioMutex();
+		int ch = getVoiceFromHandle(aVoiceHandle);
+		if (ch == -1)
+		{
+			unlockAudioMutex();
+			return 0;
+		}
+		time v = mVoice[ch]->mLoopPoint;
+		unlockAudioMutex();
+		return v;
+	}
 
 	bool Soloud::getLooping(handle aVoiceHandle)
 	{
@@ -197,6 +213,20 @@ namespace SoLoud
 			return 0;
 		}
 		double v = mVoice[ch]->mStreamTime;
+		unlockAudioMutex();
+		return v;
+	}
+
+	time Soloud::getStreamPosition(handle aVoiceHandle)
+	{
+		lockAudioMutex();
+		int ch = getVoiceFromHandle(aVoiceHandle);
+		if (ch == -1)
+		{
+			unlockAudioMutex();
+			return 0;
+		}
+		double v = mVoice[ch]->mStreamPosition;
 		unlockAudioMutex();
 		return v;
 	}
