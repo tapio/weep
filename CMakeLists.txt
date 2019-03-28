@@ -46,6 +46,12 @@ else()
 	list(APPEND LIBS ${OPENGL_gl_LIBRARY})
 endif()
 
+if(WIN32)
+	add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_CUSTOM="glad/glad.h")
+else()
+	add_definitions(-DIMGUI_IMPL_OPENGL_LOADER_CUSTOM="GL/glcorearb.h")
+endif()
+
 if(USE_REMOTERY)
 	add_definitions(-DUSE_PROFILER=1 -DRMT_USE_OPENGL=1 -DRMT_USE_POSIX_THREADNAMES=1)
 	if(WIN32)

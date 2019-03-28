@@ -1,28 +1,43 @@
 #include "gui.hpp"
 #include "engine.hpp"
-#include "imgui/imgui_impl_sdl_gl3.h"
+#include "imgui/imgui_impl_opengl3.h"
+#include "imgui/imgui_impl_sdl.h"
 #include <SDL_events.h>
 
 
-ImGuiSystem::ImGuiSystem(SDL_Window* window)
+ImGuiSystem::ImGuiSystem(SDL_Window* window, void* gl_context)
 {
-	ImGui_ImplSdlGL3_Init(window);
-	m_imguiContext = ImGui::GetCurrentContext();
+	IMGUI_CHECKVERSION();
+	m_imguiContext = ImGui::CreateContext();
+
+	int attr = 0;
+	SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &attr);
+	bool gles = attr == SDL_GL_CONTEXT_PROFILE_ES;
+	const char* glsl_version = gles
+		? "#version 300 es\n"
+		: "#version 330\n";
+
+	ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
+	ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
 ImGuiSystem::~ImGuiSystem()
 {
-	ImGui_ImplSdlGL3_Shutdown();
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplSDL2_Shutdown();
+	ImGui::DestroyContext();
 }
 
 void ImGuiSystem::newFrame(SDL_Window* window)
 {
-	ImGui_ImplSdlGL3_NewFrame(window);
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplSDL2_NewFrame(window);
+	ImGui::NewFrame();
 }
 
 bool ImGuiSystem::processEvent(SDL_Event* event)
 {
-	ImGui_ImplSdlGL3_ProcessEvent(event);
+	ImGui_ImplSDL2_ProcessEvent(event);
 	ImGuiIO& io = ImGui::GetIO();
 	switch (event->type) {
 		case SDL_KEYDOWN:
@@ -37,6 +52,12 @@ bool ImGuiSystem::processEvent(SDL_Event* event)
 			return io.WantCaptureMouse;
 	}
 	return false;
+}
+
+void ImGuiSystem::render()
+{
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
 bool ImGuiSystem::usingMouse() const
@@ -106,8 +127,8 @@ void ImGuiSystem::applyDefaultStyle()
 	style.Colors[ImGuiCol_Header]                = ImVec4(0.40f, 0.78f, 0.90f, 0.45f);
 	style.Colors[ImGuiCol_HeaderHovered]         = ImVec4(0.45f, 0.78f, 0.90f, 0.80f);
 	style.Colors[ImGuiCol_HeaderActive]          = ImVec4(0.53f, 0.71f, 0.78f, 0.80f);
-	style.Colors[ImGuiCol_CloseButton]           = ImVec4(0.50f, 0.78f, 0.90f, 0.50f);
-	style.Colors[ImGuiCol_CloseButtonHovered]    = ImVec4(0.70f, 0.78f, 0.90f, 0.60f);
+	//style.Colors[ImGuiCol_CloseButton]           = ImVec4(0.50f, 0.78f, 0.90f, 0.50f);
+	//style.Colors[ImGuiCol_CloseButtonHovered]    = ImVec4(0.70f, 0.78f, 0.90f, 0.60f);
 	ImGuiIO& io = ImGui::GetIO();
 	io.Fonts->AddFontDefault();
 }

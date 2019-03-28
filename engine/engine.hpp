@@ -27,6 +27,7 @@ public:
 
 	float dt = 0.f;
 	struct SDL_Window* window = nullptr;
+	void* glContext = nullptr;
 
 	uint threads = 0;
 	static thread_pool& threadpool() {
@@ -41,7 +42,6 @@ private:
 	int m_width = 0;
 	int m_height = 0;
 	uint64 m_prevTime = 0;
-	void* m_glcontext = nullptr;
 	thread_pool m_threadpool = {threads};
 #ifdef USE_PROFILER
 	Remotery* m_remotery = nullptr;

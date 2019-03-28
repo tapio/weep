@@ -28,7 +28,7 @@ void init(Game& game)
 	game.entities.add_system<ModuleSystem>();
 	game.entities.get_system<ModuleSystem>().load(Engine::settings["modules"], false);
 	game.entities.add_system<TriggerSystem>();
-	game.entities.add_system<ImGuiSystem>(game.engine.window);
+	game.entities.add_system<ImGuiSystem>(game.engine.window, game.engine.glContext);
 	game.entities.get_system<ImGuiSystem>().applyDefaultStyle();
 	game.scene = SceneLoader(game.entities);
 	game.scene.load(game.scenePath, game.resources);
@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
 		//ImGui::ShowTestWindow();
 		//ImGui::ShowStyleEditor();
 
-		ImGui::Render();
+		imgui.render();
 
 		if (screenshot) {
 			START_MEASURE(screenshotMs)

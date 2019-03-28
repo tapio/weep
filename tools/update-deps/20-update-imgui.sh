@@ -3,11 +3,14 @@
 source "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"/config.sh
 
 # ImGui
-for f in imconfig.h imgui.cpp imgui.h imgui_demo.cpp imgui_draw.cpp imgui_internal.h LICENSE.txt stb_rect_pack.h stb_textedit.h stb_truetype.h; do
+for f in LICENSE.txt imconfig.h imgui.cpp imgui.h imgui_demo.cpp imgui_draw.cpp imgui_internal.h imgui_widgets.cpp imstb_rectpack.h imstb_textedit.h imstb_truetype.h; do
 	$WGET $GHBASEURL/ocornut/imgui/master/$f -O imgui/$f &
 done
-$WGET $GHBASEURL/ocornut/imgui/master/examples/sdl_opengl3_example/imgui_impl_sdl_gl3.h -O imgui/imgui_impl_sdl_gl3.h &
-$WGET $GHBASEURL/ocornut/imgui/master/examples/sdl_opengl3_example/imgui_impl_sdl_gl3.cpp -O imgui/imgui_impl_sdl_gl3.cpp &
+$WGET $GHBASEURL/ocornut/imgui/master/misc/cpp/imgui_stdlib.h -O imgui/imgui_stdlib.h &
+$WGET $GHBASEURL/ocornut/imgui/master/misc/cpp/imgui_stdlib.cpp -O imgui/imgui_stdlib.cpp &
+$WGET $GHBASEURL/ocornut/imgui/master/examples/imgui_impl_opengl3.h -O imgui/imgui_impl_opengl3.h &
+$WGET $GHBASEURL/ocornut/imgui/master/examples/imgui_impl_opengl3.cpp -O imgui/imgui_impl_opengl3.cpp &
+$WGET $GHBASEURL/ocornut/imgui/master/examples/imgui_impl_sdl.h -O imgui/imgui_impl_sdl.h &
+$WGET $GHBASEURL/ocornut/imgui/master/examples/imgui_impl_sdl.cpp -O imgui/imgui_impl_sdl.cpp &
 
 wait
-patch --verbose -p0 < "$PATCHDIR/20-ImGUIImpl.patch"

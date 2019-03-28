@@ -85,8 +85,8 @@ void Engine::init(const string& configPath)
 		panic("Window creation failed: %s", SDL_GetError());
 	}
 
-	m_glcontext = SDL_GL_CreateContext(window);
-	if (!m_glcontext) {
+	glContext = SDL_GL_CreateContext(window);
+	if (!glContext) {
 		panic("Context creation failed: %s", SDL_GetError());
 	}
 
@@ -126,7 +126,7 @@ void Engine::deinit()
 	rmt_UnbindOpenGL();
 	rmt_DestroyGlobalInstance(m_remotery);
 #endif
-	SDL_GL_DeleteContext(m_glcontext);
+	SDL_GL_DeleteContext(glContext);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 }

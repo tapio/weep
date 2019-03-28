@@ -6,13 +6,14 @@
 class ImGuiSystem : public System
 {
 public:
-	ImGuiSystem(struct SDL_Window* window);
+	ImGuiSystem(struct SDL_Window* window, void* gl_context);
 	~ImGuiSystem();
 
 	NONCOPYABLE(ImGuiSystem);
 
 	void newFrame(SDL_Window* window);
 	bool processEvent(union SDL_Event* event);
+	void render();
 	bool usingMouse() const;
 	bool usingKeyboard() const;
 	void applyDefaultStyle();
