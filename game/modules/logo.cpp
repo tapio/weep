@@ -26,7 +26,9 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 				logoTex.create();
 				logoTex.upload(*logoImg);
 			}
-			ImGui::SetNextWindowPos(ImVec2(10, ImGui::GetIO().DisplaySize.y - 32 - 10));
+			ImVec2 windowPos = ImGui::GetMainViewport()->Pos;
+			ImVec2 windowSize = ImGui::GetMainViewport()->Size;
+			ImGui::SetNextWindowPos(ImVec2(windowPos.x + 10, windowPos.y + windowSize.y - 32 - 10));
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 			ImGui::Begin("##LogoWindow", NULL, ImGuiSystem::MinimalWindow);
 			ImFont* font = game.entities.get_system<ImGuiSystem>().getFont($id(logo-font));

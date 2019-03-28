@@ -9,6 +9,9 @@ ImGuiSystem::ImGuiSystem(SDL_Window* window, void* gl_context)
 {
 	IMGUI_CHECKVERSION();
 	m_imguiContext = ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 	int attr = 0;
 	SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &attr);
@@ -60,6 +63,13 @@ void ImGuiSystem::render()
 	ImGui::Render();
 	BEGIN_GPU_SAMPLE(ImGuiRender)
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) 	{
+		SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
+		SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+		SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
+	}
 	END_GPU_SAMPLE()
 	END_CPU_SAMPLE()
 }

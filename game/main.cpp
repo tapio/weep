@@ -107,6 +107,10 @@ int main(int argc, char* argv[])
 				running = false;
 				break;
 			}
+			if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_CLOSE && e.window.windowID == SDL_GetWindowID(game.engine.window)) {
+				running = false;
+				break;
+			}
 
 			if (!active && imgui.processEvent(&e))
 				continue;

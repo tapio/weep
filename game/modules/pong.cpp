@@ -182,8 +182,10 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			}
 
 			ScopedFont sf(s_game->entities, $id(pong_big));
-			float x = (Engine::width() - s_pointsWindowWidth) * 0.5f;
-			ImGui::SetNextWindowPos(ImVec2(x, 20));
+			ImVec2 windowPos = ImGui::GetMainViewport()->Pos;
+			ImVec2 windowSize = ImGui::GetMainViewport()->Size;
+			float x = (windowSize.x - s_pointsWindowWidth) * 0.5f;
+			ImGui::SetNextWindowPos(ImVec2(windowPos.x + x, windowPos.y + 20));
 			ImGui::Begin("##Points", NULL, ImGuiSystem::MinimalWindow);
 			s_pointsWindowWidth = ImGui::GetWindowWidth();
 			ImGui::Text("%d  -  %d", s_points[0], s_points[1]);
@@ -191,7 +193,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 
 			if (s_winner >= 0) {
 				s_game->entities.get_system<RenderSystem>().env().saturation = -1.f;
-				ImGui::SetNextWindowPosCenter();
+				ImGui::SetNextWindowPosCenter(ImGuiCond_Always);
 				ImGui::Begin("##Winner", NULL, ImGuiSystem::MinimalWindow);
 				ImGui::Text("%s Won!", s_names[s_winner]);
 				ImGui::End();

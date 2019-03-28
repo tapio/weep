@@ -68,7 +68,7 @@ static void startNextLevel(Game& game)
 
 static void doMainMenu(Game& game)
 {
-	ImGui::SetNextWindowPosCenter();
+	ImGui::SetNextWindowPosCenter(ImGuiCond_Always);
 	ImGui::Begin("##SkyrunnerMenu", NULL, ImGuiSystem::MinimalWindow);
 	{
 		ScopedFont sf(game.entities, $id(skyrunner_big));
@@ -160,7 +160,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			ScopedFont sf(game.entities, $id(skyrunner_big));
 			if (glm::distance2(curPos, goalPos) < 1.1f || levelComplete) {
 				levelComplete = true;
-				ImGui::SetNextWindowPosCenter();
+				ImGui::SetNextWindowPosCenter(ImGuiCond_Always);
 				ImGui::Begin("", NULL, ImGuiSystem::MinimalWindow);
 				ImGui::Text("Good Job! %.2f s", gameTime);
 				ImGui::End();
@@ -174,12 +174,13 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 						startNextLevel(game);
 				}
 			} else if (gameTime < 3) {
-				ImGui::SetNextWindowPosCenter();
+				ImGui::SetNextWindowPosCenter(ImGuiCond_Always);
 				ImGui::Begin("##start", NULL, ImGuiSystem::MinimalWindow);
 				ImGui::Text("Run to the end!");
 				ImGui::End();
 			} else {
-				ImGui::SetNextWindowPos(ImVec2(20, 20));
+				ImVec2 windowPos = ImGui::GetMainViewport()->Pos;
+				ImGui::SetNextWindowPos(ImVec2(windowPos.x + 20, windowPos.y + 20));
 				ImGui::Begin("##time", NULL, ImGuiSystem::MinimalWindow);
 				ImGui::Text("Time: %.2f", gameTime);
 				ImGui::End();

@@ -4,7 +4,10 @@
 #include <unordered_map>
 
 namespace ImGui {
-	inline void SetNextWindowPosCenter() { ImGuiIO& io = GetIO(); SetNextWindowPos({ io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f }, 0, { 0.5f, 0.5f }); }
+	inline void SetNextWindowPosCenter(ImGuiCond cond = 0) {
+		ImVec2 pos = ImGui::GetMainViewport()->GetCenter();
+		SetNextWindowPos({ pos.x , pos.y }, cond, { 0.5f, 0.5f });
+	}
 };
 
 class ImGuiSystem : public System
@@ -28,7 +31,7 @@ public:
 
 	static const int MinimalWindow =
 		ImGuiWindowFlags_NoTitleBar|ImGuiWindowFlags_NoResize|ImGuiWindowFlags_NoMove|ImGuiWindowFlags_NoScrollbar|
-		ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoSavedSettings;
+		ImGuiWindowFlags_NoCollapse|ImGuiWindowFlags_AlwaysAutoResize|ImGuiWindowFlags_NoSavedSettings|ImGuiWindowFlags_NoDocking;
 
 private:
 	ImGuiContext* m_imguiContext = nullptr;

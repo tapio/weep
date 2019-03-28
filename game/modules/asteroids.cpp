@@ -296,7 +296,8 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			}
 
 			ScopedFont sf(s_game->entities, $id(asteroids_hud));
-			ImGui::SetNextWindowPos(ImVec2(20, 20));
+			ImVec2 windowPos = ImGui::GetMainViewport()->Pos;
+			ImGui::SetNextWindowPos(ImVec2(windowPos.x + 20, windowPos.y + 20));
 			ImGui::Begin("##Points", NULL, ImGuiSystem::MinimalWindow);
 			ImGui::Text("Shields: %d", glm::max(0, (int)s_hp));
 			ImGui::Text("Score: %d", s_score);
@@ -305,7 +306,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			if (s_gameOver) {
 				s_game->entities.get_system<RenderSystem>().env().saturation = -1.f;
 				ScopedFont sf(s_game->entities, $id(asteroids_big));
-				ImGui::SetNextWindowPosCenter();
+				ImGui::SetNextWindowPosCenter(ImGuiCond_Always);
 				ImGui::Begin("##GameOver", NULL, ImGuiSystem::MinimalWindow);
 				ImGui::Text("Game Over!");
 				ImGui::Text("Score: %d", s_score);
