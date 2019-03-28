@@ -89,6 +89,15 @@ namespace SoLoud
 				mVoice[aVoice]->mChannelVolume[4] = l;
 				mVoice[aVoice]->mChannelVolume[5] = r;
 			}
+			if (mVoice[aVoice]->mChannels == 8)
+			{
+				mVoice[aVoice]->mChannelVolume[2] = 1.0f / (float)sqrt(2.0f);
+				mVoice[aVoice]->mChannelVolume[3] = 1;
+				mVoice[aVoice]->mChannelVolume[4] = l;
+				mVoice[aVoice]->mChannelVolume[5] = r;
+				mVoice[aVoice]->mChannelVolume[6] = l;
+				mVoice[aVoice]->mChannelVolume[7] = r;
+			}
 		}
 	}
 
@@ -113,8 +122,17 @@ namespace SoLoud
 		{
 			// Delete via temporary variable to avoid recursion
 			AudioSourceInstance * v = mVoice[aVoice];
-			mVoice[aVoice] = 0;			
+			mVoice[aVoice] = 0;
 			delete v;
+
+			unsigned int i;
+			for (i = 0; i < mMaxActiveVoices; i++)
+			{
+				if (mResampleDataOwner[i] == v)
+				{
+					mResampleDataOwner[i] = NULL;
+				}
+			}
 		}
 	}
 

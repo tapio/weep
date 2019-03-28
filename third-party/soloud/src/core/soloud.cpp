@@ -1,6 +1,6 @@
 /*
 SoLoud audio engine
-Copyright (c) 2013-2014 Jari Komppa
+Copyright (c) 2013-2018 Jari Komppa
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
@@ -39,9 +39,9 @@ freely, subject to the following restrictions:
 #include <float.h>
 #endif
 
-#if !defined(WITH_SDL2) && !defined(WITH_SDL) && !defined(WITH_PORTAUDIO) && \
+#if !defined(WITH_SDL2) && !defined(WITH_SDL1) && !defined(WITH_PORTAUDIO) && \
    !defined(WITH_OPENAL) && !defined(WITH_XAUDIO2) && !defined(WITH_WINMM) && \
-   !defined(WITH_WASAPI) && !defined(WITH_OSS) && !defined(WITH_SDL_STATIC) && \
+   !defined(WITH_WASAPI) && !defined(WITH_OSS) && !defined(WITH_SDL1_STATIC) && \
    !defined(WITH_SDL2_STATIC) && !defined(WITH_ALSA) && !defined(WITH_OPENSLES) && \
    !defined(WITH_NULL) && !defined(WITH_COREAUDIO) && !defined(WITH_VITA_HOMEBREW)
 #error It appears you haven't enabled any of the back-ends. Please #define one or more of the WITH_ defines (or use premake) '
@@ -61,6 +61,7 @@ namespace SoLoud
 		delete[] mBasePtr;
 		mBasePtr = 0;
 		mData = 0;
+		mFloats = aFloats;
 #ifdef DISABLE_SIMD
 		mBasePtr = new unsigned char[aFloats * sizeof(float)];
 		if (mBasePtr == NULL)
@@ -73,6 +74,11 @@ namespace SoLoud
 		mData = (float *)(((size_t)mBasePtr + 15)&~15);
 #endif
 		return SO_NO_ERROR;
+	}
+
+	void AlignedFloatBuffer::clear()
+	{
+		memset(mData, 0, sizeof(float) * mFloats);
 	}
 
 	AlignedFloatBuffer::~AlignedFloatBuffer()
@@ -112,9 +118,11 @@ namespace SoLoud
 		mAudioSourceID = 1;
 		mBackendString = 0;
 		mBackendID = 0;
-		mActiveVoiceDirty = 1;
+		mActiveVoiceDirty = true;
 		mActiveVoiceCount = 0;
 		int i;
+		for (i = 0; i < VOICE_COUNT; i++)
+			mActiveVoice[i] = 0;
 		for (i = 0; i < FILTERS_PER_STREAM; i++)
 		{
 			mFilter[i] = NULL;
@@ -125,6 +133,10 @@ namespace SoLoud
 			mFFTData[i] = 0;
 			mVisualizationWaveData[i] = 0;
 			mWaveData[i] = 0;
+		}
+		for (i = 0; i < MAX_CHANNELS; i++)
+		{
+			mVisualizationChannelVolume[i] = 0;
 		}
 		for (i = 0; i < VOICE_COUNT; i++)
 		{
@@ -149,6 +161,8 @@ namespace SoLoud
 		mMaxActiveVoices = 16;
 		mHighestVoice = 0;
 		mActiveVoiceDirty = true;
+		mResampleData = NULL;
+		mResampleDataOwner = NULL;
 	}
 
 	Soloud::~Soloud()
@@ -164,6 +178,8 @@ namespace SoLoud
 		for (i = 0; i < mVoiceGroupCount; i++)
 			delete[] mVoiceGroup[i];
 		delete[] mVoiceGroup;
+		delete[] mResampleData;
+		delete[] mResampleDataOwner;
 	}
 
 	void Soloud::deinit()
@@ -179,7 +195,7 @@ namespace SoLoud
 
 	result Soloud::init(unsigned int aFlags, unsigned int aBackend, unsigned int aSamplerate, unsigned int aBufferSize, unsigned int aChannels)
 	{		
-		if (aBackend >= BACKEND_MAX || aChannels == 3 || aChannels == 5 || aChannels > 6)
+		if (aBackend >= BACKEND_MAX || aChannels == 3 || aChannels == 5 || aChannels == 7 || aChannels > MAX_CHANNELS)
 			return INVALID_PARAMETER;
 
 		deinit();
@@ -196,17 +212,18 @@ namespace SoLoud
 		if (aSamplerate != Soloud::AUTO) samplerate = aSamplerate;
 		if (aBufferSize != Soloud::AUTO) buffersize = aBufferSize;
 
-#if defined(WITH_SDL_STATIC)
-		if (aBackend == Soloud::SDL || 
-			aBackend == Soloud::AUTO)
+#if defined(WITH_SDL1_STATIC)
+		if (!inited &&
+			(aBackend == Soloud::SDL1 || 
+			aBackend == Soloud::AUTO))
 		{
 			if (aBufferSize == Soloud::AUTO) buffersize = 2048;
 
-			int ret = sdlstatic_init(this, aFlags, samplerate, buffersize, aChannels);
+			int ret = sdl1static_init(this, aFlags, samplerate, buffersize, aChannels);
 			if (ret == 0)
 			{
 				inited = 1;
-				mBackendID = Soloud::SDL;
+				mBackendID = Soloud::SDL1;
 			}
 
 			if (ret != 0 && aBackend != Soloud::AUTO)
@@ -215,8 +232,9 @@ namespace SoLoud
 #endif
 
 #if defined(WITH_SDL2_STATIC)
-		if (aBackend == Soloud::SDL2 ||
-			aBackend == Soloud::AUTO)
+		if (!inited &&
+			(aBackend == Soloud::SDL2 ||
+			aBackend == Soloud::AUTO))
 		{
 			if (aBufferSize == Soloud::AUTO) buffersize = 2048;
 
@@ -232,18 +250,37 @@ namespace SoLoud
 		}
 #endif
 
-#if defined(WITH_SDL) || defined(WITH_SDL2)
-		if (aBackend == Soloud::SDL || 
-			aBackend == Soloud::SDL2 ||
-			aBackend == Soloud::AUTO)
+#if defined(WITH_SDL2)
+		if (!inited &&
+			(aBackend == Soloud::SDL2 ||
+			aBackend == Soloud::AUTO))
 		{
 			if (aBufferSize == Soloud::AUTO) buffersize = 2048;
 
-			int ret = sdl_init(this, aFlags, samplerate, buffersize, aChannels);
+			int ret = sdl2_init(this, aFlags, samplerate, buffersize, aChannels);
 			if (ret == 0)
 			{
 				inited = 1;
-				mBackendID = Soloud::SDL;
+				mBackendID = Soloud::SDL2;
+			}
+
+			if (ret != 0 && aBackend != Soloud::AUTO)
+				return ret;
+		}
+#endif
+
+#if defined(WITH_SDL1)
+		if (!inited &&
+			(aBackend == Soloud::SDL1 || 
+			aBackend == Soloud::AUTO))
+		{
+			if (aBufferSize == Soloud::AUTO) buffersize = 2048;
+
+			int ret = sdl1_init(this, aFlags, samplerate, buffersize, aChannels);
+			if (ret == 0)
+			{
+				inited = 1;
+				mBackendID = Soloud::SDL1;
 			}
 
 			if (ret != 0 && aBackend != Soloud::AUTO)
@@ -314,6 +351,7 @@ namespace SoLoud
 			aBackend == Soloud::AUTO))
 		{
 			if (aBufferSize == Soloud::AUTO) buffersize = 4096;
+			if (aSamplerate == Soloud::AUTO) samplerate = 48000;
 
 			int ret = wasapi_init(this, aFlags, samplerate, buffersize, aChannels);
 			if (ret == 0)
@@ -423,8 +461,9 @@ namespace SoLoud
 #endif
 
 #if defined(WITH_VITA_HOMEBREW)
-		if (aBackend == Soloud::VITA_HOMEBREW || 
-			aBackend == Soloud::AUTO)
+		if (!inited &&
+			(aBackend == Soloud::VITA_HOMEBREW || 
+			aBackend == Soloud::AUTO))
 		{
 			int ret = vita_homebrew_init(this, aFlags, samplerate, buffersize, aChannels);
 			if (ret == 0)
@@ -475,6 +514,13 @@ namespace SoLoud
 		mScratchNeeded = mScratchSize;
 		mScratch.init(mScratchSize * MAX_CHANNELS);
 		mOutputScratch.init(mScratchSize * MAX_CHANNELS);
+		mResampleData = new AlignedFloatBuffer[mMaxActiveVoices * 2];
+		mResampleDataOwner = new AudioSourceInstance*[mMaxActiveVoices];
+		unsigned int i;
+		for (i = 0; i < mMaxActiveVoices * 2; i++)
+			mResampleData[i].init(SAMPLE_GRANULARITY * MAX_CHANNELS);
+		for (i = 0; i < mMaxActiveVoices; i++)
+			mResampleDataOwner[i] = NULL;
 		mFlags = aFlags;
 		mPostClipScaler = 0.95f;
 		switch (mChannels)
@@ -534,8 +580,39 @@ namespace SoLoud
 			m3dSpeakerPosition[5 * 3 + 1] = 0;
 			m3dSpeakerPosition[5 * 3 + 2] = -1;
 			break;
+		case 8:
+			m3dSpeakerPosition[0 * 3 + 0] = 2;
+			m3dSpeakerPosition[0 * 3 + 1] = 0;
+			m3dSpeakerPosition[0 * 3 + 2] = 1;
+			m3dSpeakerPosition[1 * 3 + 0] = -2;
+			m3dSpeakerPosition[1 * 3 + 1] = 0;
+			m3dSpeakerPosition[1 * 3 + 2] = 1;
 
+			// center and subwoofer. 
+			m3dSpeakerPosition[2 * 3 + 0] = 0;
+			m3dSpeakerPosition[2 * 3 + 1] = 0;
+			m3dSpeakerPosition[2 * 3 + 2] = 1;
+			// Sub should be "mix of everything". We'll handle it as a special case and make it a null vector.
+			m3dSpeakerPosition[3 * 3 + 0] = 0;
+			m3dSpeakerPosition[3 * 3 + 1] = 0;
+			m3dSpeakerPosition[3 * 3 + 2] = 0;
 
+			// side
+			m3dSpeakerPosition[4 * 3 + 0] = 2;
+			m3dSpeakerPosition[4 * 3 + 1] = 0;
+			m3dSpeakerPosition[4 * 3 + 2] = 0;
+			m3dSpeakerPosition[5 * 3 + 0] = -2;
+			m3dSpeakerPosition[5 * 3 + 1] = 0;
+			m3dSpeakerPosition[5 * 3 + 2] = 0;
+
+			// back
+			m3dSpeakerPosition[6 * 3 + 0] = 2;
+			m3dSpeakerPosition[6 * 3 + 1] = 0;
+			m3dSpeakerPosition[6 * 3 + 2] = -1;
+			m3dSpeakerPosition[7 * 3 + 0] = -2;
+			m3dSpeakerPosition[7 * 3 + 1] = 0;
+			m3dSpeakerPosition[7 * 3 + 2] = -1;
+			break;
 		}
 	}
 
@@ -564,6 +641,17 @@ namespace SoLoud
 			mWaveData[i] = mVisualizationWaveData[i];
 		unlockAudioMutex();
 		return mWaveData;
+	}
+
+	float Soloud::getApproximateVolume(unsigned int aChannel)
+	{
+		if (aChannel > mChannels)
+			return 0;
+		float vol = 0;
+		lockAudioMutex();
+		vol = mVisualizationChannelVolume[aChannel];
+		unlockAudioMutex();
+		return vol;
 	}
 
 
@@ -599,6 +687,8 @@ namespace SoLoud
 		float vd = (aVolume1 - aVolume0) / aSamples;
 		float v = aVolume0;
 		unsigned int i, j, c, d;
+		unsigned int samplequads = (aSamples + 3) / 4; // rounded up
+
 		// Clip
 		if (mFlags & CLIP_ROUNDOFF)
 		{
@@ -622,7 +712,7 @@ namespace SoLoud
 			{
 				__m128 vol = _mm_load_ps(volumes.mData);
 
-				for (i = 0; i < aSamples / 4; i++)
+				for (i = 0; i < samplequads; i++)
 				{
 					//float f1 = origdata[c] * v;	c++; v += vd;
 					__m128 f = _mm_load_ps(&aBuffer.mData[c]);
@@ -677,7 +767,7 @@ namespace SoLoud
 			for (j = 0; j < mChannels; j++)
 			{
 				__m128 vol = _mm_load_ps(volumes.mData);
-				for (i = 0; i < aSamples / 4; i++)
+				for (i = 0; i < samplequads; i++) 
 				{
 					//float f1 = aBuffer.mData[c] * v; c++; v += vd;
 					__m128 f = _mm_load_ps(&aBuffer.mData[c]);
@@ -703,6 +793,7 @@ namespace SoLoud
 		float vd = (aVolume1 - aVolume0) / aSamples;
 		float v = aVolume0;
 		unsigned int i, j, c, d;
+		unsigned int samplequads = (aSamples + 3) / 4; // rounded up
 		// Clip
 		if (mFlags & CLIP_ROUNDOFF)
 		{
@@ -711,7 +802,7 @@ namespace SoLoud
 			for (j = 0; j < mChannels; j++)
 			{
 				v = aVolume0;
-				for (i = 0; i < aSamples/4; i++)
+				for (i = 0; i < samplequads; i++)
 				{
 					float f1 = aBuffer.mData[c] * v; c++; v += vd;
 					float f2 = aBuffer.mData[c] * v; c++; v += vd;
@@ -737,7 +828,7 @@ namespace SoLoud
 			for (j = 0; j < mChannels; j++)
 			{
 				v = aVolume0;
-				for (i = 0; i < aSamples / 4; i++)
+				for (i = 0; i < samplequads; i++) 
 				{
 					float f1 = aBuffer.mData[c] * v; c++; v += vd;
 					float f2 = aBuffer.mData[c] * v; c++; v += vd;
@@ -825,7 +916,7 @@ namespace SoLoud
 		int ofs = 0;
 		switch (aChannels)
 		{
-		case 1: // Target is mono. Sum everything. (1->1, 2->1, 4->1, 6->1)
+		case 1: // Target is mono. Sum everything. (1->1, 2->1, 4->1, 6->1, 8->1)
 			for (j = 0, ofs = 0; j < aVoice->mChannels; j++, ofs += aBufferSize)
 			{
 				pan[0] = aVoice->mCurrentChannelVolume[0];
@@ -839,7 +930,7 @@ namespace SoLoud
 		case 2:
 			switch (aVoice->mChannels)
 			{
-			case 6: // 6->2, just sum lefties and righties, add a bit of center, ignore sub?
+			case 8: // 8->2, just sum lefties and righties, add a bit of center and sub?
 				for (j = 0; j < aSamplesToRead; j++)
 				{
 					pan[0] += pani[0];
@@ -847,11 +938,28 @@ namespace SoLoud
 					float s1 = aScratch[j];
 					float s2 = aScratch[aBufferSize + j];
 					float s3 = aScratch[aBufferSize * 2 + j];
-					//float s4 = aScratch[aBufferSize * 3 + j];
+					float s4 = aScratch[aBufferSize * 3 + j];
 					float s5 = aScratch[aBufferSize * 4 + j];
 					float s6 = aScratch[aBufferSize * 5 + j];
-					aBuffer[j + 0] += 0.3f * (s1 + s3 + s5) * pan[0];
-					aBuffer[j + aBufferSize] += 0.3f * (s2 + s3 + s6) * pan[1];
+					float s7 = aScratch[aBufferSize * 6 + j];
+					float s8 = aScratch[aBufferSize * 7 + j];
+					aBuffer[j + 0]           += 0.2f * (s1 + s3 + s4 + s5 + s7) * pan[0];
+					aBuffer[j + aBufferSize] += 0.2f * (s2 + s3 + s4 + s6 + s8) * pan[1];
+				}
+				break;
+			case 6: // 6->2, just sum lefties and righties, add a bit of center and sub?
+				for (j = 0; j < aSamplesToRead; j++)
+				{
+					pan[0] += pani[0];
+					pan[1] += pani[1];
+					float s1 = aScratch[j];
+					float s2 = aScratch[aBufferSize + j];
+					float s3 = aScratch[aBufferSize * 2 + j];
+					float s4 = aScratch[aBufferSize * 3 + j];
+					float s5 = aScratch[aBufferSize * 4 + j];
+					float s6 = aScratch[aBufferSize * 5 + j];
+					aBuffer[j + 0] += 0.3f * (s1 + s3 + s4 + s5) * pan[0];
+					aBuffer[j + aBufferSize] += 0.3f * (s2 + s3 + s4 + s6) * pan[1];
 				}
 				break;
 			case 4: // 4->2, just sum lefties and righties
@@ -893,7 +1001,7 @@ namespace SoLoud
 		case 4:
 			switch (aVoice->mChannels)
 			{
-			case 6: // 6->4, add a bit of center, ignore sub?
+			case 8: // 8->4, add a bit of center, sub?
 				for (j = 0; j < aSamplesToRead; j++)
 				{
 					pan[0] += pani[0];
@@ -903,10 +1011,32 @@ namespace SoLoud
 					float s1 = aScratch[j];
 					float s2 = aScratch[aBufferSize + j];
 					float s3 = aScratch[aBufferSize * 2 + j];
-					//float s4 = aScratch[aBufferSize * 3 + j];
+					float s4 = aScratch[aBufferSize * 3 + j];
 					float s5 = aScratch[aBufferSize * 4 + j];
 					float s6 = aScratch[aBufferSize * 5 + j];
-					float c = s3 * 0.7f;
+					float s7 = aScratch[aBufferSize * 6 + j];
+					float s8 = aScratch[aBufferSize * 7 + j];
+					float c = (s3 + s4) * 0.7f;
+					aBuffer[j + 0]               += s1 * pan[0] + c;
+					aBuffer[j + aBufferSize]     += s2 * pan[1] + c;
+					aBuffer[j + aBufferSize * 2] += 0.5f * (s5 + s7) * pan[2];
+					aBuffer[j + aBufferSize * 3] += 0.5f * (s6 + s8) * pan[3];
+				}
+				break;
+			case 6: // 6->4, add a bit of center, sub?
+				for (j = 0; j < aSamplesToRead; j++)
+				{
+					pan[0] += pani[0];
+					pan[1] += pani[1];
+					pan[2] += pani[2];
+					pan[3] += pani[3];
+					float s1 = aScratch[j];
+					float s2 = aScratch[aBufferSize + j];
+					float s3 = aScratch[aBufferSize * 2 + j];
+					float s4 = aScratch[aBufferSize * 3 + j];
+					float s5 = aScratch[aBufferSize * 4 + j];
+					float s6 = aScratch[aBufferSize * 5 + j];
+					float c = (s3 + s4) * 0.7f;
 					aBuffer[j + 0] += s1 * pan[0] + c;
 					aBuffer[j + aBufferSize] += s2 * pan[1] + c;
 					aBuffer[j + aBufferSize * 2] += s5 * pan[2];
@@ -964,6 +1094,31 @@ namespace SoLoud
 		case 6:
 			switch (aVoice->mChannels)
 			{
+			case 8: // 8->6
+				for (j = 0; j < aSamplesToRead; j++)
+				{
+					pan[0] += pani[0];
+					pan[1] += pani[1];
+					pan[2] += pani[2];
+					pan[3] += pani[3];
+					pan[4] += pani[4];
+					pan[5] += pani[5];
+					float s1 = aScratch[j];
+					float s2 = aScratch[aBufferSize + j];
+					float s3 = aScratch[aBufferSize * 2 + j];
+					float s4 = aScratch[aBufferSize * 3 + j];
+					float s5 = aScratch[aBufferSize * 4 + j];
+					float s6 = aScratch[aBufferSize * 5 + j];
+					float s7 = aScratch[aBufferSize * 6 + j];
+					float s8 = aScratch[aBufferSize * 7 + j];
+					aBuffer[j + 0] += s1 * pan[0];
+					aBuffer[j + aBufferSize] += s2 * pan[1];
+					aBuffer[j + aBufferSize * 2] += s3 * pan[2];
+					aBuffer[j + aBufferSize * 3] += s4 * pan[3];
+					aBuffer[j + aBufferSize * 4] += 0.5f * (s5 + s7) * pan[4];
+					aBuffer[j + aBufferSize * 5] += 0.5f * (s6 + s8) * pan[5];
+				}
+				break;
 			case 6: // 6->6
 				for (j = 0; j < aSamplesToRead; j++)
 				{
@@ -1047,6 +1202,137 @@ namespace SoLoud
 				break;
 			}
 			break;
+		case 8:
+			switch (aVoice->mChannels)
+			{
+			case 8: // 8->8
+				for (j = 0; j < aSamplesToRead; j++)
+				{
+					pan[0] += pani[0];
+					pan[1] += pani[1];
+					pan[2] += pani[2];
+					pan[3] += pani[3];
+					pan[4] += pani[4];
+					pan[5] += pani[5];
+					pan[6] += pani[6];
+					pan[7] += pani[7];
+					float s1 = aScratch[j];
+					float s2 = aScratch[aBufferSize + j];
+					float s3 = aScratch[aBufferSize * 2 + j];
+					float s4 = aScratch[aBufferSize * 3 + j];
+					float s5 = aScratch[aBufferSize * 4 + j];
+					float s6 = aScratch[aBufferSize * 5 + j];
+					float s7 = aScratch[aBufferSize * 6 + j];
+					float s8 = aScratch[aBufferSize * 7 + j];
+					aBuffer[j + 0] += s1 * pan[0];
+					aBuffer[j + aBufferSize] += s2 * pan[1];
+					aBuffer[j + aBufferSize * 2] += s3 * pan[2];
+					aBuffer[j + aBufferSize * 3] += s4 * pan[3];
+					aBuffer[j + aBufferSize * 4] += s5 * pan[4];
+					aBuffer[j + aBufferSize * 5] += s6 * pan[5];
+					aBuffer[j + aBufferSize * 6] += s7 * pan[6];
+					aBuffer[j + aBufferSize * 7] += s8 * pan[7];
+				}
+				break;
+			case 6: // 6->8
+				for (j = 0; j < aSamplesToRead; j++)
+				{
+					pan[0] += pani[0];
+					pan[1] += pani[1];
+					pan[2] += pani[2];
+					pan[3] += pani[3];
+					pan[4] += pani[4];
+					pan[5] += pani[5];
+					pan[6] += pani[6];
+					pan[7] += pani[7];
+					float s1 = aScratch[j];
+					float s2 = aScratch[aBufferSize + j];
+					float s3 = aScratch[aBufferSize * 2 + j];
+					float s4 = aScratch[aBufferSize * 3 + j];
+					float s5 = aScratch[aBufferSize * 4 + j];
+					float s6 = aScratch[aBufferSize * 5 + j];
+					aBuffer[j + 0] += s1 * pan[0];
+					aBuffer[j + aBufferSize] += s2 * pan[1];
+					aBuffer[j + aBufferSize * 2] += s3 * pan[2];
+					aBuffer[j + aBufferSize * 3] += s4 * pan[3];
+					aBuffer[j + aBufferSize * 4] += 0.5f * (s5 + s1) * pan[4];
+					aBuffer[j + aBufferSize * 5] += 0.5f * (s6 + s2) * pan[5];
+					aBuffer[j + aBufferSize * 6] += s5 * pan[6];
+					aBuffer[j + aBufferSize * 7] += s6 * pan[7];
+				}
+				break;
+			case 4: // 4->8
+				for (j = 0; j < aSamplesToRead; j++)
+				{
+					pan[0] += pani[0];
+					pan[1] += pani[1];
+					pan[2] += pani[2];
+					pan[3] += pani[3];
+					pan[4] += pani[4];
+					pan[5] += pani[5];
+					pan[6] += pani[6];
+					pan[7] += pani[7];
+					float s1 = aScratch[j];
+					float s2 = aScratch[aBufferSize + j];
+					float s3 = aScratch[aBufferSize * 2 + j];
+					float s4 = aScratch[aBufferSize * 3 + j];
+					aBuffer[j + 0] += s1 * pan[0];
+					aBuffer[j + aBufferSize] += s2 * pan[1];
+					aBuffer[j + aBufferSize * 2] += 0.5f * (s1 + s2) * pan[2];
+					aBuffer[j + aBufferSize * 3] += 0.25f * (s1 + s2 + s3 + s4) * pan[3];
+					aBuffer[j + aBufferSize * 4] += 0.5f * (s1 + s3) * pan[4];
+					aBuffer[j + aBufferSize * 5] += 0.5f * (s2 + s4) * pan[5];
+					aBuffer[j + aBufferSize * 6] += s3 * pan[4];
+					aBuffer[j + aBufferSize * 7] += s4 * pan[5];
+				}
+				break;
+			case 2: // 2->8
+				for (j = 0; j < aSamplesToRead; j++)
+				{
+					pan[0] += pani[0];
+					pan[1] += pani[1];
+					pan[2] += pani[2];
+					pan[3] += pani[3];
+					pan[4] += pani[4];
+					pan[5] += pani[5];
+					pan[6] += pani[6];
+					pan[7] += pani[7];
+					float s1 = aScratch[j];
+					float s2 = aScratch[aBufferSize + j];
+					aBuffer[j + 0] += s1 * pan[0];
+					aBuffer[j + aBufferSize] += s2 * pan[1];
+					aBuffer[j + aBufferSize * 2] += 0.5f * (s1 + s2) * pan[2];
+					aBuffer[j + aBufferSize * 3] += 0.5f * (s1 + s2) * pan[3];
+					aBuffer[j + aBufferSize * 4] += s1 * pan[4];
+					aBuffer[j + aBufferSize * 5] += s2 * pan[5];
+					aBuffer[j + aBufferSize * 6] += s1 * pan[6];
+					aBuffer[j + aBufferSize * 7] += s2 * pan[7];
+				}
+				break;
+			case 1: // 1->8
+				for (j = 0; j < aSamplesToRead; j++)
+				{
+					pan[0] += pani[0];
+					pan[1] += pani[1];
+					pan[2] += pani[2];
+					pan[3] += pani[3];
+					pan[4] += pani[4];
+					pan[5] += pani[5];
+					pan[6] += pani[6];
+					pan[7] += pani[7];
+					float s = aScratch[j];
+					aBuffer[j + 0] += s * pan[0];
+					aBuffer[j + aBufferSize] += s * pan[1];
+					aBuffer[j + aBufferSize * 2] += s * pan[2];
+					aBuffer[j + aBufferSize * 3] += s * pan[3];
+					aBuffer[j + aBufferSize * 4] += s * pan[4];
+					aBuffer[j + aBufferSize * 5] += s * pan[5];
+					aBuffer[j + aBufferSize * 6] += s * pan[6];
+					aBuffer[j + aBufferSize * 7] += s * pan[7];
+				}
+				break;
+			}
+			break;
 		}
 
 		for (k = 0; k < aChannels; k++)
@@ -1107,7 +1393,7 @@ namespace SoLoud
 					if (voice->mLeftoverSamples == 0)
 					{
 						// Swap resample buffers (ping-pong)
-						AudioSourceResampleData * t = voice->mResampleData[0];
+						AlignedFloatBuffer * t = voice->mResampleData[0];
 						voice->mResampleData[0] = voice->mResampleData[1];
 						voice->mResampleData[1] = t;
 
@@ -1116,7 +1402,7 @@ namespace SoLoud
 						int readcount = 0;
 						if (!voice->hasEnded() || voice->mFlags & AudioSourceInstance::LOOPING)
 						{
-							readcount = voice->getAudio(voice->mResampleData[0]->mBuffer, SAMPLE_GRANULARITY, SAMPLE_GRANULARITY);
+							readcount = voice->getAudio(voice->mResampleData[0]->mData, SAMPLE_GRANULARITY, SAMPLE_GRANULARITY);
 							if (readcount < SAMPLE_GRANULARITY)
 							{
 								if (voice->mFlags & AudioSourceInstance::LOOPING)
@@ -1124,7 +1410,7 @@ namespace SoLoud
 									while (readcount < SAMPLE_GRANULARITY && voice->seek(voice->mLoopPoint, mScratch.mData, mScratchSize) == SO_NO_ERROR)
 									{
 										voice->mLoopCount++;
-										int inc = voice->getAudio(voice->mResampleData[0]->mBuffer + readcount, SAMPLE_GRANULARITY - readcount, SAMPLE_GRANULARITY);
+										int inc = voice->getAudio(voice->mResampleData[0]->mData + readcount, SAMPLE_GRANULARITY - readcount, SAMPLE_GRANULARITY);
 										readcount += inc;
 										if (inc == 0) break;
 									}
@@ -1137,7 +1423,7 @@ namespace SoLoud
 						{
 							unsigned int i;
 							for (i = 0; i < voice->mChannels; i++)
-								memset(voice->mResampleData[0]->mBuffer + readcount + SAMPLE_GRANULARITY * i, 0, sizeof(float) * (SAMPLE_GRANULARITY - readcount));
+								memset(voice->mResampleData[0]->mData + readcount + SAMPLE_GRANULARITY * i, 0, sizeof(float) * (SAMPLE_GRANULARITY - readcount));
 						}
 
 						// If we go past zero, crop to zero (a bit of a kludge)
@@ -1159,7 +1445,7 @@ namespace SoLoud
 							if (voice->mFilter[j])
 							{
 								voice->mFilter[j]->filter(
-									voice->mResampleData[0]->mBuffer,
+									voice->mResampleData[0]->mData,
 									SAMPLE_GRANULARITY, 
 									voice->mChannels,
 									voice->mSamplerate,
@@ -1199,8 +1485,8 @@ namespace SoLoud
 					{
 						for (j = 0; j < voice->mChannels; j++)
 						{
-							resample(voice->mResampleData[0]->mBuffer + SAMPLE_GRANULARITY * j,
-								voice->mResampleData[1]->mBuffer + SAMPLE_GRANULARITY * j,
+							resample(voice->mResampleData[0]->mData + SAMPLE_GRANULARITY * j,
+								voice->mResampleData[1]->mData + SAMPLE_GRANULARITY * j,
 									 aScratch + aBufferSize * j + outofs, 
 									 voice->mSrcOffset,
 									 writesamples,
@@ -1257,7 +1543,7 @@ namespace SoLoud
 					if (voice->mLeftoverSamples == 0)
 					{
 						// Swap resample buffers (ping-pong)
-						AudioSourceResampleData * t = voice->mResampleData[0];
+						AlignedFloatBuffer * t = voice->mResampleData[0];
 						voice->mResampleData[0] = voice->mResampleData[1];
 						voice->mResampleData[1] = t;
 
@@ -1266,7 +1552,7 @@ namespace SoLoud
 						int readcount = 0;
 						if (!voice->hasEnded() || voice->mFlags & AudioSourceInstance::LOOPING)
 						{
-							readcount = voice->getAudio(voice->mResampleData[0]->mBuffer, SAMPLE_GRANULARITY, SAMPLE_GRANULARITY);
+							readcount = voice->getAudio(voice->mResampleData[0]->mData, SAMPLE_GRANULARITY, SAMPLE_GRANULARITY);
 							if (readcount < SAMPLE_GRANULARITY)
 							{
 								if (voice->mFlags & AudioSourceInstance::LOOPING)
@@ -1274,7 +1560,7 @@ namespace SoLoud
 									while (readcount < SAMPLE_GRANULARITY && voice->seek(voice->mLoopPoint, mScratch.mData, mScratchSize) == SO_NO_ERROR)
 									{
 										voice->mLoopCount++;
-										readcount += voice->getAudio(voice->mResampleData[0]->mBuffer + readcount, SAMPLE_GRANULARITY - readcount, SAMPLE_GRANULARITY);
+										readcount += voice->getAudio(voice->mResampleData[0]->mData + readcount, SAMPLE_GRANULARITY - readcount, SAMPLE_GRANULARITY);
 									}
 								}
 							}
@@ -1338,6 +1624,58 @@ namespace SoLoud
 		}
 	}
 
+	void Soloud::mapResampleBuffers()
+	{
+		SOLOUD_ASSERT(mMaxActiveVoices < 256);
+		char live[256];
+		memset(live, 0, mMaxActiveVoices);
+		unsigned int i, j;
+		for (i = 0; i < mMaxActiveVoices; i++)
+		{
+			for (j = 0; j < mMaxActiveVoices; j++)
+			{
+				if (mResampleDataOwner[i] && mResampleDataOwner[i] == mVoice[mActiveVoice[j]])
+				{
+					live[i] |= 1; // Live channel
+					live[j] |= 2; // Live voice
+				}
+			}
+		}
+
+		for (i = 0; i < mMaxActiveVoices; i++)
+		{
+			if (!(live[i] & 1) && mResampleDataOwner[i]) // For all dead channels with owners..
+			{
+				mResampleDataOwner[i]->mResampleData[0] = 0;
+				mResampleDataOwner[i]->mResampleData[1] = 0;
+				mResampleDataOwner[i] = 0;
+			}
+		}
+
+		int latestfree = 0;
+		for (i = 0; i < mActiveVoiceCount; i++)
+		{
+			if (!(live[i] & 2) && mVoice[mActiveVoice[i]]) // For all live voices with no channel..
+			{
+				int found = -1;
+				for (j = latestfree; found == -1 && j < mMaxActiveVoices; j++)
+				{
+					if (mResampleDataOwner[j] == 0)
+					{
+						found = j;
+					}
+				}
+				SOLOUD_ASSERT(found != -1);
+				mResampleDataOwner[found] = mVoice[mActiveVoice[i]];
+				mResampleDataOwner[found]->mResampleData[0] = &mResampleData[found * 2 + 0];
+				mResampleDataOwner[found]->mResampleData[1] = &mResampleData[found * 2 + 1];
+				mResampleDataOwner[found]->mResampleData[0]->clear();
+				mResampleDataOwner[found]->mResampleData[1]->clear();
+				latestfree = found + 1;
+			}
+		}
+	}
+
 	void Soloud::calcActiveVoices()
 	{
 		// TODO: consider whether we need to re-evaluate the active voices all the time.
@@ -1370,6 +1708,7 @@ namespace SoLoud
 		{
 			// everything is audible, early out
 			mActiveVoiceCount = candidates;
+			mapResampleBuffers();
 			return;
 		}
 
@@ -1423,6 +1762,7 @@ namespace SoLoud
 			len = stack[--pos];          
 		}	
 		// TODO: should the rest of the voices be flagged INAUDIBLE?
+		mapResampleBuffers();
 	}
 
 	void Soloud::mix_internal(unsigned int aSamples)
@@ -1545,6 +1885,10 @@ namespace SoLoud
 
 		if (mFlags & ENABLE_VISUALIZATION)
 		{
+			for (i = 0; i < MAX_CHANNELS; i++)
+			{
+				mVisualizationChannelVolume[i] = 0;
+			}
 			if (aSamples > 255)
 			{
 				for (i = 0; i < 256; i++)
@@ -1553,7 +1897,11 @@ namespace SoLoud
 					mVisualizationWaveData[i] = 0;
 					for (j = 0; j < (signed)mChannels; j++)
 					{
-						mVisualizationWaveData[i] += mScratch.mData[i + j * aSamples];
+						float sample = mScratch.mData[i + j * aSamples];
+						float absvol = (float)fabs(sample);
+						if (mVisualizationChannelVolume[j] < absvol)
+							mVisualizationChannelVolume[j] = absvol;
+						mVisualizationWaveData[i] += sample;
 					}
 				}
 			}
@@ -1566,7 +1914,11 @@ namespace SoLoud
 					mVisualizationWaveData[i] = 0;
 					for (j = 0; j < (signed)mChannels; j++)
 					{
-						mVisualizationWaveData[i] += mScratch.mData[(i % aSamples) + j * aSamples];
+						float sample = mScratch.mData[(i % aSamples) + j * aSamples];
+						float absvol = (float)fabs(sample);
+						if (mVisualizationChannelVolume[j] < absvol)
+							mVisualizationChannelVolume[j] = absvol;
+						mVisualizationWaveData[i] += sample;
 					}
 				}
 			}

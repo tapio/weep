@@ -59,16 +59,6 @@ namespace SoLoud
 		mDopplerValue = 1.0f;
 	}
 
-	AudioSourceResampleData::AudioSourceResampleData()
-	{
-		mBuffer = 0;
-	}
-	
-	AudioSourceResampleData::~AudioSourceResampleData()
-	{
-		delete[] mBuffer;
-	}
-
 	AudioSourceInstance::AudioSourceInstance()
 	{
 		mPlayIndex = 0;
@@ -99,8 +89,8 @@ namespace SoLoud
 			mCurrentChannelVolume[i] = 0;
 		}
 		// behind pointers because we swap between the two buffers
-		mResampleData[0] = new AudioSourceResampleData;
-		mResampleData[1] = new AudioSourceResampleData;
+		mResampleData[0] = 0;
+		mResampleData[1] = 0;
 		mSrcOffset = 0;
 		mLeftoverSamples = 0;
 		mDelaySamples = 0;
@@ -113,9 +103,7 @@ namespace SoLoud
 		for (i = 0; i < FILTERS_PER_STREAM; i++)
 		{
 			delete mFilter[i];
-		}
-		delete mResampleData[0];
-		delete mResampleData[1];
+		}		
 	}
 
 	void AudioSourceInstance::init(AudioSource &aSource, int aPlayIndex)

@@ -23,7 +23,7 @@ freely, subject to the following restrictions:
 */
 
 #if defined(_WIN32)||defined(_WIN64)
-#include <Windows.h>
+#include <windows.h>
 #else
 #include <pthread.h>
 #include <unistd.h>
@@ -194,7 +194,11 @@ namespace SoLoud
 
 		void sleep(int aMSec)
 		{
-			usleep(aMSec * 1000);
+			//usleep(aMSec * 1000);
+			struct timespec req = {0};
+			req.tv_sec = 0;
+			req.tv_nsec = aMSec * 1000000L;
+			nanosleep(&req, (struct timespec *)NULL);
 		}
 
         void wait(ThreadHandle aThreadHandle)

@@ -70,6 +70,16 @@ namespace SoLoud
 			return INVALID_PARAMETER;
 		lockAudioMutex();
 		mMaxActiveVoices = aVoiceCount;
+		delete[] mResampleData;
+		delete[] mResampleDataOwner;
+		mResampleData = new AlignedFloatBuffer[aVoiceCount * 2];
+		mResampleDataOwner = new AudioSourceInstance*[aVoiceCount];
+		unsigned int i;
+		for (i = 0; i < aVoiceCount * 2; i++)
+			mResampleData[i].init(SAMPLE_GRANULARITY * MAX_CHANNELS);
+		for (i = 0; i < aVoiceCount; i++)
+			mResampleDataOwner[i] = NULL;
+		mActiveVoiceDirty = true;
 		unlockAudioMutex();
 		return SO_NO_ERROR;
 	}
@@ -124,7 +134,16 @@ namespace SoLoud
 				mVoice[ch]->mChannelVolume[4] = aLBVolume;
 				mVoice[ch]->mChannelVolume[5] = aRBVolume;
 			}
-		FOR_ALL_VOICES_POST
+			if (mVoice[ch]->mChannels == 8)
+			{
+				mVoice[ch]->mChannelVolume[2] = aCVolume;
+				mVoice[ch]->mChannelVolume[3] = aSVolume;
+				mVoice[ch]->mChannelVolume[4] = (aLVolume + aLBVolume) * 0.5f;
+				mVoice[ch]->mChannelVolume[5] = (aRVolume + aRBVolume) * 0.5f;
+				mVoice[ch]->mChannelVolume[6] = aLBVolume;
+				mVoice[ch]->mChannelVolume[7] = aRBVolume;
+			}
+			FOR_ALL_VOICES_POST
 	}
 
 	void Soloud::setInaudibleBehavior(handle aVoiceHandle, bool aMustTick, bool aKill)

@@ -26,17 +26,68 @@ freely, subject to the following restrictions:
 #include <stdio.h>
 #include <stdlib.h>
 #include "soloud.h"
+#include "dr_flac.h"
+#include "dr_mp3.h"
+#include "dr_wav.h"
 #include "soloud_wavstream.h"
 #include "soloud_file.h"
 #include "stb_vorbis.h"
 
 namespace SoLoud
 {
+	size_t drflac_read_func(void* pUserData, void* pBufferOut, size_t bytesToRead)
+	{
+		File *fp = (File*)pUserData;
+		return fp->read((unsigned char*)pBufferOut, (unsigned int)bytesToRead);
+	}
+
+	size_t drmp3_read_func(void* pUserData, void* pBufferOut, size_t bytesToRead)
+	{
+		File *fp = (File*)pUserData;
+		return fp->read((unsigned char*)pBufferOut, (unsigned int)bytesToRead);
+	}
+
+	size_t drwav_read_func(void* pUserData, void* pBufferOut, size_t bytesToRead)
+	{
+		File *fp = (File*)pUserData;
+		return fp->read((unsigned char*)pBufferOut, (unsigned int)bytesToRead);
+	}
+
+	drflac_bool32 drflac_seek_func(void* pUserData, int offset, drflac_seek_origin origin)
+	{
+		File *fp = (File*)pUserData;
+		if (origin != drflac_seek_origin_start)
+			offset += fp->pos();
+		fp->seek(offset);
+		return 1;
+	}
+
+	drmp3_bool32 drmp3_seek_func(void* pUserData, int offset, drmp3_seek_origin origin)
+	{
+		File *fp = (File*)pUserData;
+		if (origin != drmp3_seek_origin_start)
+			offset += fp->pos();
+		fp->seek(offset);
+		return 1;
+	}
+
+	drmp3_bool32 drwav_seek_func(void* pUserData, int offset, drwav_seek_origin origin)
+	{
+		File *fp = (File*)pUserData;
+		if (origin != drwav_seek_origin_start)
+			offset += fp->pos();
+		fp->seek(offset);
+		return 1;
+	}
+
 	WavStreamInstance::WavStreamInstance(WavStream *aParent)
 	{
 		mParent = aParent;
 		mOffset = 0;
-		mOgg = 0;
+		mCodec.mOgg = 0;
+		mCodec.mFlac = 0;
+		mCodec.mMp3 = 0;
+		mCodec.mWav = 0;
 		mFile = 0;
 		if (aParent->mMemFile)
 		{
@@ -64,13 +115,24 @@ namespace SoLoud
 		
 		if (mFile)
 		{
-			if (mParent->mOgg)
+			if (mParent->mFiletype == WAVSTREAM_WAV)
+			{
+				mCodec.mWav = drwav_open(drwav_read_func, drwav_seek_func, (void*)mFile);
+				if (!mCodec.mWav)
+				{
+					if (mFile != mParent->mStreamFile)
+						delete mFile;
+					mFile = 0;
+				}
+			}
+			else
+			if (mParent->mFiletype == WAVSTREAM_OGG)
 			{
 				int e;
 
-				mOgg = stb_vorbis_open_file((Soloud_Filehack *)mFile, 0, &e, 0);
+				mCodec.mOgg = stb_vorbis_open_file((Soloud_Filehack *)mFile, 0, &e, 0);
 
-				if (!mOgg)
+				if (!mCodec.mOgg)
 				{
 					if (mFile != mParent->mStreamFile)
 						delete mFile;
@@ -81,75 +143,71 @@ namespace SoLoud
 				mOggOutputs = 0;
 			}
 			else
-			{		
-				mFile->seek(aParent->mDataOffset);
+			if (mParent->mFiletype == WAVSTREAM_FLAC)
+			{
+				mCodec.mFlac = drflac_open(drflac_read_func, drflac_seek_func, (void*)mFile);
+				if (!mCodec.mFlac)
+				{
+					if (mFile != mParent->mStreamFile)
+						delete mFile;
+					mFile = 0;
+				}
+			}
+			else
+			if (mParent->mFiletype == WAVSTREAM_MP3)
+			{
+				mCodec.mMp3 = new drmp3;
+				if (!drmp3_init(mCodec.mMp3, drmp3_read_func, drmp3_seek_func, (void*)mFile, NULL))
+				{
+					delete mCodec.mMp3;
+					mCodec.mMp3 = 0;
+					if (mFile != mParent->mStreamFile)
+						delete mFile;
+					mFile = 0;
+				}
+			}
+			else
+			{
+				if (mFile != mParent->mStreamFile)
+					delete mFile;
+				mFile = NULL;
+				return;
 			}
 		}
 	}
 
 	WavStreamInstance::~WavStreamInstance()
 	{
-		if (mOgg)
+		switch (mParent->mFiletype)
 		{
-			stb_vorbis_close(mOgg);
+		case WAVSTREAM_OGG:
+			if (mCodec.mOgg)
+			{
+				stb_vorbis_close(mCodec.mOgg);
+			}
+			break;
+		case WAVSTREAM_FLAC:
+			if (mCodec.mFlac)
+			{
+				drflac_close(mCodec.mFlac);
+			}
+			break;
+		case WAVSTREAM_MP3:
+			if (mCodec.mMp3)
+			{
+				drmp3_uninit(mCodec.mMp3);
+				delete mCodec.mMp3;
+			}
+			break;
+		case WAVSTREAM_WAV:
+			if (mCodec.mWav)
+			{
+				drwav_close(mCodec.mWav);
+			}
 		}
 		if (mFile != mParent->mStreamFile)
 		{
 			delete mFile;
-		}
-	}
-
-	static void getWavData(File * aFile, float * aBuffer, int aSamples, int aPitch, int aChannels, int aSrcChannels, int aBits)
-	{
-		int i, j;
-		if (aBits == 8)
-		{
-			for (i = 0; i < aSamples; i++)
-			{
-				for (j = 0; j < aSrcChannels; j++)
-				{
-					if (j == 0)
-					{
-						aBuffer[i] = ((signed)aFile->read8() - 128) / (float)0x80;
-					}
-					else
-					{
-						if (aChannels > 1 && j == 1)
-						{
-							aBuffer[i + aPitch] = ((signed)aFile->read8() - 128) / (float)0x80;
-						}
-						else
-						{
-							aFile->read8();
-						}
-					}
-				}
-			}
-		}
-		else
-		if (aBits == 16)
-		{
-			for (i = 0; i < aSamples; i++)
-			{
-				for (j = 0; j < aSrcChannels; j++)
-				{
-					if (j == 0)
-					{
-						aBuffer[i] = ((signed short)aFile->read16()) / (float)0x8000;
-					}
-					else
-					{
-						if (aChannels > 1 && j == 1)
-						{
-							aBuffer[i + aPitch] = ((signed short)aFile->read16()) / (float)0x8000;
-						}
-						else
-						{
-							aFile->read16();
-						}
-					}
-				}
-			}
 		}
 	}
 
@@ -164,87 +222,148 @@ namespace SoLoud
 			samples = aFrameSize - aFrameOffset;
 		}
 
-		if (aChannels == 1)
+		int i;
+		for (i = 0; i < aChannels; i++)
 		{
-			memcpy(aBuffer, aOggOutputs[0] + aFrameOffset, sizeof(float) * samples);
-		}
-		else
-		{
-			memcpy(aBuffer, aOggOutputs[0] + aFrameOffset, sizeof(float) * samples);
-			memcpy(aBuffer + aPitch, aOggOutputs[1] + aFrameOffset, sizeof(float) * samples);
+			memcpy(aBuffer + aPitch * i, aOggOutputs[i] + aFrameOffset, sizeof(float) * samples);
 		}
 		return samples;
 	}
 
+	
+
 	unsigned int WavStreamInstance::getAudio(float *aBuffer, unsigned int aSamplesToRead, unsigned int aBufferSize)
 	{			
-		unsigned int channels = mChannels;
-
+		unsigned int offset = 0;
 		if (mFile == NULL)
 			return 0;
-
-		if (mOgg)
+		switch (mParent->mFiletype)
 		{
-			unsigned int offset = 0;			
-			if (mOggFrameOffset < mOggFrameSize)
+		case WAVSTREAM_FLAC:
 			{
-				int b = getOggData(mOggOutputs, aBuffer, aSamplesToRead, aBufferSize, mOggFrameSize, mOggFrameOffset, channels);
-				mOffset += b;
-				offset += b;
-				mOggFrameOffset += b;
-			}
+				unsigned int i, j, k;
 
-			while (offset < aSamplesToRead)
-			{
-				mOggFrameSize = stb_vorbis_get_frame_float(mOgg, NULL, &mOggOutputs);
-				mOggFrameOffset = 0;
-				int b = getOggData(mOggOutputs, aBuffer + offset, aSamplesToRead - offset, aBufferSize, mOggFrameSize, mOggFrameOffset, channels);
-				mOffset += b;
-				offset += b;
-				mOggFrameOffset += b;
-
-				if (mOffset >= mParent->mSampleCount || b == 0)
+				for (i = 0; i < aSamplesToRead; i += 512)
 				{
-					mOffset += offset;
-					return offset;
+					float tmp[512 * MAX_CHANNELS];
+					unsigned int blockSize = (aSamplesToRead - i) > 512 ? 512 : aSamplesToRead - i;
+					offset += (unsigned int)drflac_read_pcm_frames_f32(mCodec.mFlac, blockSize, tmp);
+
+					for (j = 0; j < blockSize; j++)
+					{
+						for (k = 0; k < mChannels; k++)
+						{
+							aBuffer[k * aSamplesToRead + i + j] = tmp[j * mCodec.mFlac->channels + k];
+						}
+					}
+				}
+				mOffset += offset;
+				return offset;
+			}
+			break;
+		case WAVSTREAM_MP3:
+			{
+				unsigned int i, j, k;
+
+				for (i = 0; i < aSamplesToRead; i += 512)
+				{
+					float tmp[512 * MAX_CHANNELS];
+					unsigned int blockSize = (aSamplesToRead - i) > 512 ? 512 : aSamplesToRead - i;
+					offset += (unsigned int)drmp3_read_pcm_frames_f32(mCodec.mMp3, blockSize, tmp);
+
+					for (j = 0; j < blockSize; j++)
+					{
+						for (k = 0; k < mChannels; k++)
+						{
+							aBuffer[k * aSamplesToRead + i + j] = tmp[j * mCodec.mMp3->channels + k];
+						}
+					}
+				}
+				mOffset += offset;
+				return offset;
+			}
+		break;
+		case WAVSTREAM_OGG:
+			{
+				if (mOggFrameOffset < mOggFrameSize)
+				{
+					int b = getOggData(mOggOutputs, aBuffer, aSamplesToRead, aBufferSize, mOggFrameSize, mOggFrameOffset, mChannels);
+					mOffset += b;
+					offset += b;
+					mOggFrameOffset += b;
+				}
+
+				while (offset < aSamplesToRead)
+				{
+					mOggFrameSize = stb_vorbis_get_frame_float(mCodec.mOgg, NULL, &mOggOutputs);
+					mOggFrameOffset = 0;
+					int b = getOggData(mOggOutputs, aBuffer + offset, aSamplesToRead - offset, aBufferSize, mOggFrameSize, mOggFrameOffset, mChannels);
+					mOffset += b;
+					offset += b;
+					mOggFrameOffset += b;
+
+					if (mOffset >= mParent->mSampleCount || b == 0)
+					{
+						mOffset += offset;
+						return offset;
+					}
 				}
 			}
-		}
-		else
-		{
-			unsigned int copysize = aSamplesToRead;
-			unsigned int maxSamples = mParent->mSampleCount;
+			break;
+		case WAVSTREAM_WAV:
+			{
+				unsigned int i, j, k;
 
-			if (copysize + mOffset > maxSamples)
-			{
-				copysize = maxSamples - mOffset;
-			}
+				for (i = 0; i < aSamplesToRead; i += 512)
+				{
+					float tmp[512 * MAX_CHANNELS];
+					unsigned int blockSize = (aSamplesToRead - i) > 512 ? 512 : aSamplesToRead - i;
+					offset += (unsigned int)drwav_read_pcm_frames_f32(mCodec.mWav, blockSize, tmp);
 
-			getWavData(mFile, aBuffer, copysize, aBufferSize, channels, mParent->mChannels, mParent->mBits);
-		
-			if (copysize != aSamplesToRead)
-			{
-				mOffset += copysize;
-				return copysize;						
+					for (j = 0; j < blockSize; j++)
+					{
+						for (k = 0; k < mChannels; k++)
+						{
+							aBuffer[k * aSamplesToRead + i + j] = tmp[j * mCodec.mWav->channels + k];
+						}
+					}
+				}
+				mOffset += offset;
+				return offset;
 			}
-			else
-			{
-				mOffset += aSamplesToRead;
-			}
+			break;
 		}
 		return aSamplesToRead;
 	}
 
 	result WavStreamInstance::rewind()
 	{
-		if (mOgg)
+		switch (mParent->mFiletype)
 		{
-			stb_vorbis_seek_start(mOgg);
-		}
-		else
-		if (mFile)
-		{
-			mFile->seek(mParent->mDataOffset);
+		case WAVSTREAM_OGG:
+			if (mCodec.mOgg)
+			{
+				stb_vorbis_seek_start(mCodec.mOgg);
+			}
+			break;
+		case WAVSTREAM_FLAC:
+			if (mCodec.mFlac)
+			{
+				drflac_seek_to_pcm_frame(mCodec.mFlac, 0);
+			}
+			break;
+		case WAVSTREAM_MP3:
+			if (mCodec.mMp3)
+			{
+				drmp3_seek_to_pcm_frame(mCodec.mMp3, 0);
+			}
+			break;
+		case WAVSTREAM_WAV:
+			if (mCodec.mWav)
+			{
+				drwav_seek_to_pcm_frame(mCodec.mWav, 0);
+			}
+			break;
 		}
 		mOffset = 0;
 		mStreamPosition = 0.0f;
@@ -264,9 +383,7 @@ namespace SoLoud
 	{
 		mFilename = 0;
 		mSampleCount = 0;
-		mOgg = 0;
-		mDataOffset = 0;
-		mBits = 0;
+		mFiletype = WAVSTREAM_WAV;
 		mMemFile = 0;
 		mStreamFile = 0;
 	}
@@ -282,81 +399,24 @@ namespace SoLoud
 
 	result WavStream::loadwav(File * fp)
 	{
-		fp->seek(4);
-		int wavsize = fp->read32();
-		if (fp->read32() != MAKEDWORD('W', 'A', 'V', 'E'))
-		{
+		fp->seek(0);
+		drwav* decoder = drwav_open(drwav_read_func, drwav_seek_func, (void*)fp);
+
+		if (decoder == NULL)
 			return FILE_LOAD_FAILED;
-		}
-		int chunk = fp->read32();
-		if (chunk == MAKEDWORD('J', 'U', 'N', 'K'))
-		{
-			int size = fp->read32();
-			if (size & 1)
-			{
-				size += 1;
-			}
-			int i;
-			for (i = 0; i < size; i++)
-				fp->read8();
-			chunk = fp->read32();
-		}
-		if (chunk != MAKEDWORD('f', 'm', 't', ' '))
-		{
-			return FILE_LOAD_FAILED;
-		}
-		int subchunk1size = fp->read32();
-		int audioformat = fp->read16();
-		int channels = fp->read16();
-		int samplerate = fp->read32();
-		int byterate = fp->read32();
-		int blockalign = fp->read16();
-		int bitspersample = fp->read16();
 
-		if (audioformat != 1 ||
-			subchunk1size != 16 ||
-			(bitspersample != 8 && bitspersample != 16))
+		mChannels = decoder->channels;
+		if (mChannels > MAX_CHANNELS)
 		{
-			return FILE_LOAD_FAILED;
-		}
-		
-		chunk = fp->read32();
-		
-		if (chunk == MAKEDWORD('L','I','S','T'))
-		{
-			int size = fp->read32();
-			int i;
-			for (i = 0; i < size; i++)
-				fp->read8();
-			chunk = fp->read32();
-		}
-		
-		if (chunk != MAKEDWORD('d','a','t','a'))
-		{
-			return FILE_LOAD_FAILED;
+			mChannels = MAX_CHANNELS;
 		}
 
-		int readchannels = 1;
+		mBaseSamplerate = (float)decoder->sampleRate;
+		mSampleCount = (unsigned int)decoder->totalSampleCount;
+		mFiletype = WAVSTREAM_WAV;
+		drwav_close(decoder);
 
-		mChannels = channels;
-
-		if (channels > 1)
-		{
-			readchannels = 2;
-			mChannels = 2;
-		}
-
-		int subchunk2size = fp->read32();
-		
-		int samples = (subchunk2size / (bitspersample / 8)) / channels;
-		
-		mDataOffset = fp->pos();
-		mBits = bitspersample;
-		mBaseSamplerate = (float)samplerate;
-		mSampleCount = samples;
-		mOgg = 0;
-
-		return 0;
+		return SO_NO_ERROR;
 	}
 
 	result WavStream::loadogg(File * fp)
@@ -368,19 +428,65 @@ namespace SoLoud
 		if (v == NULL)
 			return FILE_LOAD_FAILED;
 		stb_vorbis_info info = stb_vorbis_get_info(v);
-		mChannels = 1;
-		if (info.channels > 1)
+		mChannels = info.channels;
+		if (info.channels > MAX_CHANNELS)
 		{
-			mChannels = 2;
+			mChannels = MAX_CHANNELS;
 		}
 		mBaseSamplerate = (float)info.sample_rate;
 		int samples = stb_vorbis_stream_length_in_samples(v);
 		stb_vorbis_close(v);
-		mOgg = 1;
+		mFiletype = WAVSTREAM_OGG;
 
 		mSampleCount = samples;
 
 		return 0;
+	}
+
+	result WavStream::loadflac(File * fp)
+	{
+		fp->seek(0);
+		drflac* decoder = drflac_open(drflac_read_func, drflac_seek_func, (void*)fp);
+
+		if (decoder == NULL)
+			return FILE_LOAD_FAILED;
+		
+		mChannels = decoder->channels;
+		if (mChannels > MAX_CHANNELS)
+		{
+			mChannels = MAX_CHANNELS;
+		}
+
+		mBaseSamplerate = (float)decoder->sampleRate;
+		mSampleCount = (unsigned int)decoder->totalPCMFrameCount;
+		mFiletype = WAVSTREAM_FLAC;
+		drflac_close(decoder);
+
+		return SO_NO_ERROR;
+	}
+
+	result WavStream::loadmp3(File * fp)
+	{
+		fp->seek(0);
+		drmp3 decoder;
+		if (!drmp3_init(&decoder, drmp3_read_func, drmp3_seek_func, (void*)fp, NULL))
+			return FILE_LOAD_FAILED;
+
+
+		mChannels = decoder.channels;
+		if (mChannels > MAX_CHANNELS)
+		{
+			mChannels = MAX_CHANNELS;
+		}
+
+		drmp3_uint64 samples = drmp3_get_pcm_frame_count(&decoder);
+
+		mBaseSamplerate = (float)decoder.sampleRate;
+		mSampleCount = (unsigned int)samples;
+		mFiletype = WAVSTREAM_MP3;
+		drmp3_uninit(&decoder);
+
+		return SO_NO_ERROR;
 	}
 
 	result WavStream::load(const char *aFilename)
@@ -520,6 +626,16 @@ namespace SoLoud
 		if (tag == MAKEDWORD('R', 'I', 'F', 'F'))
 		{
 			res = loadwav(aFile);
+		}
+		else
+		if (tag == MAKEDWORD('f', 'L', 'a', 'C'))
+		{
+			res = loadflac(aFile);
+		}
+		else
+		if (loadmp3(aFile) == SO_NO_ERROR)
+		{
+			res = SO_NO_ERROR;
 		}
 		else
 		{
