@@ -21,7 +21,7 @@ Engine::~Engine()
 void Engine::init(const string& configPath)
 {
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-		panic(SDL_GetError());
+		panic("SDL_INIT_VIDEO failed: %s", SDL_GetError());
 	}
 
 	logInfo("Logical CPU cores: %d, RAM: %dMB, L1 cache line size: %dkB", SDL_GetCPUCount(), SDL_GetSystemRAM(), SDL_GetCPUCacheLineSize());
@@ -35,13 +35,34 @@ void Engine::init(const string& configPath)
 	if (!err.empty())
 		panic("Error reading config from \"%s\": %s", configPath.c_str(), err.c_str());
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-	int contextFlags = SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
+	int contextFlags = 0;
+
+	string profile = settings["renderer"]["profile"].string_value();
+	if (profile == "es")
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+	else if (profile == "compatibility")
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+	else {
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+		contextFlags |= SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG;
+	}
+
+	int versionMajor = 4;
+	int versionMinor = 3;
+	if (settings["renderer"]["version"].is_array())
+	{
+		const auto& verArr = settings["renderer"]["version"].array_items();
+		versionMajor = verArr[0].int_value();
+		versionMinor = verArr[1].int_value();
+	}
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, versionMajor);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, versionMinor);
+	//logDebug("Requesting %s %d.%d", profile.c_str(), versionMajor, versionMinor);
+
 	if (settings["renderer"]["gldebug"].bool_value())
 		contextFlags |= SDL_GL_CONTEXT_DEBUG_FLAG;
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, contextFlags);
+	if (contextFlags != 0)
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, contextFlags);
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
@@ -61,12 +82,12 @@ void Engine::init(const string& configPath)
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_width, m_height,
 		SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | fullscreen);
 	if (!window) {
-		panic(SDL_GetError());
+		panic("Window creation failed: %s", SDL_GetError());
 	}
 
 	m_glcontext = SDL_GL_CreateContext(window);
 	if (!m_glcontext) {
-		panic(SDL_GetError());
+		panic("Context creation failed: %s", SDL_GetError());
 	}
 
 	moduleInit();

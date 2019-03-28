@@ -1,8 +1,14 @@
 
-VERTEX_DATA(in, input);
+VERTEX_DATA(in, inData);
 
 layout(location = 0) out vec4 fragment;
 layout(location = 1) out vec4 brightFragment;
+
+#ifdef GL_ES
+	#define CONST
+#else
+	#define CONST const
+#endif
 
 #if defined(USE_NORMAL_MAP) || defined(USE_PARALLAX_MAP)
 // http://www.thetenthplanet.de/archives/1180
@@ -41,10 +47,10 @@ vec3 perturb_normal(mat3 TBN, vec2 texcoord)
 // http://sunandblackcat.com/tipFullView.php?topicid=28
 vec2 parallax_mapping(vec2 texcoord, vec3 viewDir)
 {
-	const float heightScale = material.parallax;
+	CONST float heightScale = material.parallax;
 	// number of depth layers
-	const float minLayers = 12;
-	const float maxLayers = 32;
+	const float minLayers = 12.0;
+	const float maxLayers = 32.0;
 	float numLayers = mix(maxLayers, minLayers, abs(dot(vec3(0.0, 0.0, 1.0), viewDir)));
 	// calculate the size of each layer
 	float layerDepth = 1.0 / numLayers;
@@ -124,7 +130,7 @@ float random(vec3 seed, int i) {
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
 float shadow_mapping()
 {
-	vec4 pos = input.shadowcoord;
+	vec4 pos = inData.shadowcoord;
 	vec3 projCoords = pos.xyz / pos.w;
 
 	if (projCoords.z > 1.0)
@@ -139,12 +145,12 @@ float shadow_mapping()
 #ifdef USE_PCF
 	float shadow = 0.0;
 	float pcfRadius = 0.75;
-	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+	vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0));
 	const int samples = 4;
 	for (int i = 0; i < samples; ++i) {
 		//int index = i;
 		int index = int(16.0 * random(gl_FragCoord.xyy, i)) % 16;
-		//int index = int(16.0 * random(floor(input.worldPosition.xyz * 1000.0), i)) % 16;
+		//int index = int(16.0 * random(floor(inData.worldPosition.xyz * 1000.0), i)) % 16;
 		float closestDepth = texture(shadowMap, projCoords.xy + poissonDisk[index] * texelSize * pcfRadius).r;
 		shadow += currentDepth > closestDepth ? 1.0 : 0.0;
 	}
@@ -159,19 +165,19 @@ float shadow_mapping()
 // http://www.sunandblackcat.com/tipFullView.php?topicid=36
 float shadow_mapping_cube(in int lightIndex, in int shadowIndex)
 {
-	vec3 fragToLight = input.worldPosition - lights[lightIndex].position;
+	vec3 fragToLight = inData.worldPosition - lights[lightIndex].position;
 	float far = lights[lightIndex].params.x;
 	const float bias = 0.005;
 	float currentDepth = length(fragToLight) - bias;
 #if 0 && defined(USE_PCF)
 	float shadow = 0.0;
-	float viewDistance = length(cameraPosition - input.worldPosition);
+	float viewDistance = length(cameraPosition - inData.worldPosition);
 	float pcfRadius = (1.0 + (viewDistance / far)) / 100.0;
 	const int samples = 4;
 	for (int i = 0; i < samples; ++i) {
 		int index = i;
 		//int index = int(20.0 * random(gl_FragCoord.xyy, i)) % 20;
-		//int index = int(20.0 * random(floor(input.worldPosition.xyz * 1000.0), i)) % 20;
+		//int index = int(20.0 * random(floor(inData.worldPosition.xyz * 1000.0), i)) % 20;
 		vec3 uvw = fragToLight + gridSamplingDisk[index] * pcfRadius;
 		float closestDepth = texture(shadowCube[shadowIndex], uvw).r;
 		closestDepth *= far;
@@ -195,9 +201,9 @@ void main()
 	vec3 emissionComp = material.emissive;
 	float alpha = 1.f;
 
-	vec3 viewDir = normalize(-input.position);
-	vec3 normal = normalize(input.normal);
-	vec2 texcoord = input.texcoord;
+	vec3 viewDir = normalize(-inData.position);
+	vec3 normal = normalize(inData.normal);
+	vec2 texcoord = inData.texcoord;
 
 #if defined(USE_NORMAL_MAP) || defined(USE_PARALLAX_MAP)
 	mat3 TBN = cotangent_frame(normal, -viewDir, texcoord);
@@ -246,7 +252,7 @@ void main()
 	float sunAmount = 0.0;
 #if defined(USE_DIFFUSE) || defined(USE_SPECULAR)
 
-	if (sunColor.r > 0 || sunColor.g > 0 || sunColor.b > 0) {
+	if (sunColor.r > 0.0 || sunColor.g > 0.0 || sunColor.b > 0.0) {
 		vec3 sunDir = normalize((viewMatrix * vec4(sunPosition, 0.0)).xyz);
 		sunAmount = max(dot(viewDir, -sunDir), 0.0);
 
@@ -264,11 +270,11 @@ void main()
 		// Sun specular
 #ifdef USE_SPECULAR
 #ifdef USE_PHONG
-		const float energy = (2.0 + material.shininess) / (2.0 * PI);
+		CONST float energy = (2.0 + material.shininess) / (2.0 * PI);
 		vec3 reflectDir = reflect(-sunDir, normal);
 		float spec = energy * pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 #else // Blinn-Phong
-		const float energy = (8.0 + material.shininess) / (8.0 * PI);
+		CONST float energy = (8.0 + material.shininess) / (8.0 * PI);
 		vec3 halfDir = normalize(sunDir + viewDir);
 		float spec = energy * pow(max(dot(normal, halfDir), 0.0), material.shininess);
 #endif
@@ -277,19 +283,19 @@ void main()
 	}
 
 	// Point lights
-	const int count = min(numLights, MAX_LIGHTS);
+	CONST int count = min(numLights, MAX_LIGHTS);
 	for (int i = 0; i < count; ++i)
 	{
 		UniformLightData light = lights[i];
 		vec3 lightPos = (viewMatrix * vec4(light.position, 1.0)).xyz;
 
 		// Attenuation
-		float distance = length(lightPos - input.position);
+		float distance = length(lightPos - inData.position);
 		if (distance >= light.params.x)
 			continue;
 		float attenuation = pow(saturate(1.0 - distance / light.params.x), light.params.y);
 
-		vec3 lightDir = normalize(lightPos - input.position);
+		vec3 lightDir = normalize(lightPos - inData.position);
 
 		// Shadow
 		float visibility = 1.0;
@@ -307,11 +313,11 @@ void main()
 		// Specular
 #ifdef USE_SPECULAR
 #ifdef USE_PHONG
-		const float energy = (2.0 + material.shininess) / (2.0 * PI);
+		CONST float energy = (2.0 + material.shininess) / (2.0 * PI);
 		vec3 reflectDir = reflect(-lightDir, normal);
 		float spec = energy * pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 #else // Blinn-Phong
-		const float energy = (8.0 + material.shininess) / (8.0 * PI);
+		CONST float energy = (8.0 + material.shininess) / (8.0 * PI);
 		vec3 halfDir = normalize(lightDir + viewDir);
 		float spec = energy * pow(max(dot(normal, halfDir), 0.0), material.shininess);
 #endif
@@ -341,7 +347,7 @@ void main()
 
 #ifdef USE_VERTEX_COLOR
 	// May be useful with e.g. baking AO to vertex color, but needs different modes
-	fragment *= input.color;
+	fragment *= inData.color;
 #endif
 
 #ifdef USE_FOG

@@ -3,7 +3,7 @@
 
 struct FBO
 {
-	FBO() {}
+	FBO(const string& debugName = "") : name(debugName) {}
 	~FBO();
 
 	NONCOPYABLE(FBO);
@@ -15,6 +15,7 @@ struct FBO
 
 	static const uint MAX_TEXTURES = 3;
 
+	string name;
 	uint fbo = 0;
 	uint tex[MAX_TEXTURES] = {0, 0, 0};
 	uint numTextures = 1;

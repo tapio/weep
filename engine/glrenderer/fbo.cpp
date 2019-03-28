@@ -10,6 +10,7 @@ FBO::~FBO()
 
 void FBO::create()
 {
+	logDebug("Create FBO %s", name.c_str());
 	ASSERT(width && height);
 	ASSERT(!cube || samples <= 1);
 	uint texType = GL_TEXTURE_2D;
@@ -21,16 +22,18 @@ void FBO::create()
 	for (uint i = 0; i < numTextures; ++i) {
 		glBindTexture(texType, tex[i]);
 		bool depth = i == depthAttachment;
-		uint internalFormat = depth ? GL_DEPTH_COMPONENT : GL_RGB16F;
+		uint internalFormat = depth ? GL_DEPTH_COMPONENT24 : GL_RGB16F;
+		uint format = depth ? GL_DEPTH_COMPONENT : GL_RGB;
+		uint type = depth ? GL_UNSIGNED_INT : GL_FLOAT;
 		if (samples > 1)
 			glTexImage2DMultisample(texType, samples, internalFormat, width, height, GL_TRUE);
 		else {
 			if (cube) {
 				for (uint j = 0; j < 6; ++j)
 					glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + j, 0, internalFormat, width, height, 0,
-						depth ? GL_DEPTH_COMPONENT : GL_RGB, GL_FLOAT, NULL);
+						format, type, NULL);
 			} else {
-				glTexImage2D(texType, 0, internalFormat, width, height, 0, depth ? GL_DEPTH_COMPONENT : GL_RGB, GL_FLOAT, NULL);
+				glTexImage2D(texType, 0, internalFormat, width, height, 0, format, type, NULL);
 			}
 			glTexParameteri(texType, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(texType, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -40,16 +43,24 @@ void FBO::create()
 				glTexParameteri(texType, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		}
 		uint attach = depth ? GL_DEPTH_ATTACHMENT : (GL_COLOR_ATTACHMENT0 + i);
-		glFramebufferTexture(GL_FRAMEBUFFER, attach, tex[i], 0);
+		if (cube) {
+			glFramebufferTexture(GL_FRAMEBUFFER, attach, tex[i], 0);
+			//for (uint j = 0; j < 6; ++j)
+			//	glFramebufferTexture2D(GL_FRAMEBUFFER, attach, GL_TEXTURE_CUBE_MAP_POSITIVE_X + j, tex[i], 0);
+		} else {
+			glFramebufferTexture2D(GL_FRAMEBUFFER, attach, texType, tex[i], 0);
+		}
 	}
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		logError("Framebuffer not complete!");
+	uint fbStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (fbStatus != GL_FRAMEBUFFER_COMPLETE)
+		logError("Framebuffer not complete! (%d)", fbStatus);
 	if (numTextures >= 3) {
-		GLuint attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		GLenum attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
 		glDrawBuffers(2, attachments);
 	} else if (numTextures == 1 && depthAttachment == 0) {
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
+		GLenum attachment = GL_NONE;
+		glDrawBuffers(1, &attachment);
+		glReadBuffer(attachment);
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

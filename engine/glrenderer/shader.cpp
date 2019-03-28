@@ -1,15 +1,17 @@
 #include "shader.hpp"
 #include "glutil.hpp"
 
-static const GLenum s_shaderTypes[] = {
+//#define DUMP_SHADERS
+
+constexpr GLenum s_shaderTypes[] = {
 	GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER,
 	GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_COMPUTE_SHADER
 };
 
-static const char* s_shaderTypeNames[] = {
+constexpr const char* s_shaderTypeNames[] = {
 	"vertex", "fragment", "geometry", "tess control", "tess eval", "compute"
 };
-
+static_assert(countof(s_shaderTypeNames) == countof(s_shaderTypes), "Array size mismatch");
 
 ShaderProgram::ShaderProgram(const std::string& debugName)
 	: name(debugName)
@@ -24,6 +26,12 @@ ShaderProgram::~ShaderProgram()
 
 bool ShaderProgram::compile(ShaderType type, const string& text, const std::string& defines)
 {
+#ifdef DUMP_SHADERS
+	constexpr const char* s_shaderTypeExtensions[] = { ".vert", ".frag", ".geom", ".tesc", ".tese", ".comp" };
+	static_assert(countof(s_shaderTypeExtensions) == countof(s_shaderTypes), "Array size mismatch");
+	writeFile("/tmp/" + name + s_shaderTypeExtensions[type], defines + text);
+#endif
+
 	GLsizei lengths[] = { (GLsizei)defines.length(), (GLsizei)text.length() };
 	const GLchar* strings[] = { (const GLchar*)defines.c_str(), (const GLchar*)text.c_str() };
 	uint& shaderId = m_shaderIds[type];

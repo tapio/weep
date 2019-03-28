@@ -26,6 +26,7 @@ void Texture::destroy()
 
 void Texture::upload(Image& image)
 {
+	logDebug("Uploading texture %s", image.path.c_str());
 	type = GL_TEXTURE_2D;
 	glBindTexture(type, id);
 	uint internalFormat = image.sRGB ? formats_sRGB[image.channels] : formats[image.channels];

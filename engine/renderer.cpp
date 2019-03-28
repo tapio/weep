@@ -58,6 +58,13 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 {
 	m_device->stats = RenderDevice::Stats();
 
+	bool cubeShadows = settings.shadows;
+	if (!m_device->caps.geometryShaders || !m_device->caps.cubeFboAttachment)
+	{
+		cubeShadows = false;
+		settings.dynamicReflections = false;
+	}
+
 	struct ReflectionProbe { float priority; vec3 pos; };
 	std::vector<ReflectionProbe> reflectionProbes;
 	std::vector<Light> lights;
@@ -78,22 +85,27 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		model.geometry = settings.forceLod >= 0 ? model.lods[settings.forceLod].geometry
 			: model.getLod2(glm::distance2(camPos, transform.position));
 		#endif
-		// Figure out candidates for reflection location
-		if (frustum.visible(transform, model)) {
-			float reflectivity = 0.f;
-			for (auto& mat : model.materials)
-				if (mat.reflectivity > reflectivity)
-					reflectivity = mat.reflectivity;
-			if (reflectivity > 0.01f) {
-				float priority = glm::distance2(camPos, transform.position);
-				priority *= 1.1f - reflectivity;
-				reflectionProbes.push_back({ priority, transform.position });
+	});
+
+	if (settings.dynamicReflections) {
+		entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
+			// Figure out candidates for reflection location
+			if (frustum.visible(transform, model)) {
+				float reflectivity = 0.f;
+				for (auto& mat : model.materials)
+					if (mat.reflectivity > reflectivity)
+						reflectivity = mat.reflectivity;
+				if (reflectivity > 0.01f) {
+					float priority = glm::distance2(camPos, transform.position);
+					priority *= 1.1f - reflectivity;
+					reflectionProbes.push_back({ priority, transform.position });
+				}
 			}
-		}
-	});
-	std::sort(reflectionProbes.begin(), reflectionProbes.end(), [](const ReflectionProbe& a, const ReflectionProbe& b) {
-		return a.priority < b.priority;
-	});
+		});
+		std::sort(reflectionProbes.begin(), reflectionProbes.end(), [](const ReflectionProbe& a, const ReflectionProbe& b) {
+			return a.priority < b.priority;
+		});
+	}
 
 	// TODO: Better prioritizing
 	vec3 lightTarget = camPos + camRot * vec3(0, 0, -2);
@@ -141,18 +153,20 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	}
 
 	// TODO: Account for non-point lights
-	uint numCubeShadows = std::min((uint)lights.size(), (uint)MAX_SHADOW_CUBES);
-	for (uint i = 0; i < numCubeShadows; ++i) {
-		Light& light = lights[i];
-		m_device->setupShadowPass(light, 1+i);
-		if (settings.shadows) {
-			entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
-				if (model.materials.empty() || !model.geometry)
-					return;
-				float maxDist = model.bounds.radius + light.distance;
-				if (glm::distance2(light.position, transform.position) < maxDist * maxDist)
-					m_device->renderShadow(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
-			});
+	if (cubeShadows) {
+		uint numCubeShadows = std::min((uint)lights.size(), (uint)MAX_SHADOW_CUBES);
+		for (uint i = 0; i < numCubeShadows; ++i) {
+			Light& light = lights[i];
+			m_device->setupShadowPass(light, 1+i);
+			if (settings.shadows) {
+				entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
+					if (model.materials.empty() || !model.geometry)
+						return;
+					float maxDist = model.bounds.radius + light.distance;
+					if (glm::distance2(light.position, transform.position) < maxDist * maxDist)
+						m_device->renderShadow(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
+				});
+			}
 		}
 	}
 	END_GPU_SAMPLE()
@@ -161,17 +175,19 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	// Reflection pass
 	START_MEASURE(reflectionMs)
 	BEGIN_GPU_SAMPLE(ReflectionPass)
-	Camera reflCam;
-	reflCam.makePerspective(glm::radians(90.0f), 1.f, 0.25f, 50.f);
-	vec3 reflCamPos = reflectionProbes.empty() ? camPos : reflectionProbes.front().pos;
-	reflCam.updateViewMatrix(reflCamPos, quat());
-	m_device->setupRenderPass(reflCam, lights, TECH_REFLECTION);
-	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
-		float maxDist = model.bounds.radius + reflCam.far;
-		if (!model.materials.empty() && model.geometry && glm::distance2(reflCamPos, transform.position) < maxDist * maxDist)
-			m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
-	});
-	m_device->renderSkybox();
+	if (settings.dynamicReflections) {
+		Camera reflCam;
+		reflCam.makePerspective(glm::radians(90.0f), 1.f, 0.1f, 50.f);
+		vec3 reflCamPos = reflectionProbes.empty() ? camPos : reflectionProbes.front().pos;
+		reflCam.updateViewMatrix(reflCamPos);
+		m_device->setupRenderPass(reflCam, lights, TECH_REFLECTION);
+		entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
+			float maxDist = model.bounds.radius + reflCam.far;
+			if (!model.materials.empty() && model.geometry && glm::distance2(reflCamPos, transform.position) < maxDist * maxDist)
+				m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
+		});
+		m_device->renderSkybox();
+	}
 	END_GPU_SAMPLE()
 	END_MEASURE(reflectionMs)
 

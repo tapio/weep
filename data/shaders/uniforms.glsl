@@ -121,7 +121,7 @@ UBO_PREFIX(UniformPostProcessBlock, 6)
 		TANGENT_VARYINGS \
 		VERTEX_COLOR_VARYINGS \
 		SHADOW_VARYINGS \
-	} name;
+	} name
 
 #ifdef USE_ANIMATION
 #define USE_SKINNING

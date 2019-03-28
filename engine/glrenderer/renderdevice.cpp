@@ -37,6 +37,8 @@ static const mat4 s_shadowBiasMatrix(
 	0.5f, 0.5f, 0.5f, 1.0f
 );
 
+static const string floatPrecisionString = "precision highp float;\n";
+
 enum ShaderFeature {
 	USE_FOG = 1 << 0,
 	USE_DIFFUSE = 1 << 1,
@@ -70,16 +72,41 @@ RenderDevice::RenderDevice(Resources& resources)
 	logInfo("OpenGL Version:  %s", glGetString(GL_VERSION));
 	logInfo("GLSL Version:    %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-	if (Engine::settings["renderer"]["gldebug"].bool_value())
+	if (Engine::settings["renderer"]["gldebug"].bool_value()) {
 		s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_NOTIFICATION;
-	else s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+	} else s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
 	glDebugMessageCallback((GLDEBUGPROC)debugCallback, NULL);
 
+	int versionMajor = 0, versionMinor = 0;
+	glGetIntegerv(GL_MAJOR_VERSION, &versionMajor);
+	glGetIntegerv(GL_MINOR_VERSION, &versionMinor);
+
+	GLint numExtensions, i;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+	for (i = 0; i < numExtensions; i++) {
+		const char* ext = (const char*)glGetStringi(GL_EXTENSIONS, i);
+		if (strstr(ext, "geometry_shader") != 0)
+			caps.geometryShaders = true;
+		if (strstr(ext, "tessellation_shader") != 0)
+			caps.tessellationShaders = true;
+		//logDebug("%s", ext);
+	}
+
+	caps.cubeFboAttachment = versionMajor >= 3 && versionMinor >= 2;
+	caps.gles = strncmp((const char*)glGetString(GL_VERSION), "OpenGL ES", strlen("OpenGL ES")) == 0;
+	if (caps.gles) { // TODO: Should not force disable, but shader extensions / #version require fixing
+		caps.tessellationShaders = false;
+	}
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &caps.maxAnisotropy);
 	glGetIntegerv(GL_MAX_COLOR_TEXTURE_SAMPLES, &caps.maxSamples);
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &caps.maxSamplers);
 	glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &caps.maxArrayTextureLayers);
 	//logDebug("%.1f %d %d %d", caps.maxAnisotropy, caps.maxSamples, caps.maxSamplers, caps.maxArrayTextureLayers);
+	if (!caps.geometryShaders)
+		logDebug("No geometry shader support.");
+	if (!caps.tessellationShaders)
+		logDebug("No tessellation shader support.");
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glViewport(0, 0, Engine::width(), Engine::height());
@@ -116,8 +143,12 @@ RenderDevice::RenderDevice(Resources& resources)
 	m_placeholderTex.create();
 	m_placeholderTex.upload(temp);
 
+	for (uint i = 0; i < countof(m_shadowFbo); ++i)
+		m_shadowFbo[i].name = "fbo_shadow_" + std::to_string(i);
+
 	resizeRenderTargets();
 
+	logDebug("Creating uniform blocks...");
 	m_commonBlock.create();
 	m_objectBlock.create();
 	m_materialBlock.create();
@@ -129,6 +160,7 @@ RenderDevice::RenderDevice(Resources& resources)
 
 void RenderDevice::resizeRenderTargets()
 {
+	logDebug("Creating render targets...");
 	if (m_msaaFbo.valid())
 		m_msaaFbo.destroy();
 	if (m_fbo.valid())
@@ -143,6 +175,10 @@ void RenderDevice::resizeRenderTargets()
 		m_reflectionFbo.destroy();
 	// Set up floating point framebuffer to render HDR scene to
 	int samples = Engine::settings["renderer"]["msaa"].number_value();
+	if (caps.gles && samples > 1) {
+		logWarning("MSAA is not currently supported on GLES3.");
+		samples = 0;
+	}
 	if (samples > 1) {
 		m_msaaFbo.width = Engine::width();
 		m_msaaFbo.height = Engine::height();
@@ -203,6 +239,16 @@ void RenderDevice::loadShaders()
 	m_shaderNames.reserve(shaders.size());
 	for (auto& it : shaders) {
 		const Json& shaderFiles = it.second["shaders"];
+
+		if (!caps.geometryShaders && shaderFiles["geom"].is_string()) {
+			logWarning("Skipping unsupported geometry shader %s", it.first.c_str());
+			continue;
+		}
+		else if (!caps.tessellationShaders && (shaderFiles["tesc"].is_string() || shaderFiles["tese"].is_string())) {
+			logWarning("Skipping unsupported tessellation shader %s", it.first.c_str());
+			continue;
+		}
+
 		string file;
 		m_shaders.emplace_back(it.first);
 		ShaderProgram& program = m_shaders.back();
@@ -212,6 +258,8 @@ void RenderDevice::loadShaders()
 			defineText = "#version " + it.second["version"].string_value() + "\n";
 		else defineText = "#version " + Engine::settings["renderer"]["glslversion"].string_value() + "\n";
 		defineText += m_resources.getText("shaders/extensions.glsl", Resources::USE_CACHE);
+		if (caps.gles)
+			defineText += floatPrecisionString; // TODO: Allow precision config?
 
 		const Json& defines = it.second["defines"];
 		if (!defines.is_null()) {
@@ -265,6 +313,8 @@ int RenderDevice::generateShader(uint tags)
 
 	string defineText =	"#version " + Engine::settings["renderer"]["glslversion"].string_value() + "\n";
 	defineText += m_resources.getText("shaders/extensions.glsl", Resources::USE_CACHE);
+	if (caps.gles)
+		defineText += floatPrecisionString; // TODO: Allow precision config?
 
 #define HANDLE_FEATURE(x) if (tags & x) defineText += "#define " #x " 1\n";
 	HANDLE_FEATURE(USE_FOG)
@@ -426,7 +476,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 	uint tag = USE_FOG | USE_DIFFUSE;
 	if (material.shininess > 0.f)
 		tag |= USE_SPECULAR;
-	if (material.flags & Material::TESSELLATE)
+	if (material.flags & Material::TESSELLATE && caps.tessellationShaders)
 		tag |= USE_TESSELLATION;
 	if (material.flags & Material::RECEIVE_SHADOW)
 		tag |= USE_SHADOW_MAP;
@@ -469,9 +519,12 @@ bool RenderDevice::uploadMaterial(Material& material)
 	// Other techs are always auto generated
 	{
 		// Simpler reflection shader
-		tag &= ~(USE_SHADOW_MAP | USE_AO_MAP | USE_REFLECTION_MAP | USE_PARALLAX_MAP | USE_ENV_MAP | USE_TESSELLATION);
-		material.shaderId[TECH_REFLECTION] = generateShader(tag | USE_CUBE_RENDER);
-		ASSERT(material.shaderId[TECH_REFLECTION] >= 0 && "Reflection shader generating failed");
+		if (caps.geometryShaders) {
+			tag &= ~(USE_SHADOW_MAP | USE_AO_MAP | USE_REFLECTION_MAP | USE_PARALLAX_MAP | USE_ENV_MAP | USE_TESSELLATION);
+			material.shaderId[TECH_REFLECTION] = generateShader(tag | USE_CUBE_RENDER);
+			ASSERT(material.shaderId[TECH_REFLECTION] >= 0 && "Reflection shader generating failed");
+		}
+
 		// Depth
 		tag = USE_DEPTH;
 		if (material.flags & Material::ANIMATED)
@@ -479,9 +532,11 @@ bool RenderDevice::uploadMaterial(Material& material)
 		if (material.flags & Material::ALPHA_TEST)
 			tag |= USE_ALPHA_TEST | USE_DIFFUSE_MAP;
 		material.shaderId[TECH_DEPTH] = generateShader(tag);
-		material.shaderId[TECH_DEPTH_CUBE] = generateShader(tag | USE_DEPTH_CUBE);
 		ASSERT(material.shaderId[TECH_DEPTH] >= 0 && "Depth shader generating failed");
-		ASSERT(material.shaderId[TECH_DEPTH_CUBE] >= 0 && "Depth cube shader generating failed");
+		if (caps.geometryShaders) {
+			material.shaderId[TECH_DEPTH_CUBE] = generateShader(tag | USE_DEPTH_CUBE);
+			ASSERT(material.shaderId[TECH_DEPTH_CUBE] >= 0 && "Depth cube shader generating failed");
+		}
 	}
 
 	bool dirty = false;
@@ -825,16 +880,18 @@ void RenderDevice::postRender()
 	if (m_msaaFbo.valid()) {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_msaaFbo.fbo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fbo.fbo);
-		glReadBuffer(GL_COLOR_ATTACHMENT0);
-		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		GLenum buf = GL_COLOR_ATTACHMENT0;
+		glReadBuffer(buf);
+		glDrawBuffers(1, &buf);
 		glBlitFramebuffer(0, 0, m_msaaFbo.width, m_msaaFbo.height, 0, 0, m_fbo.width, m_fbo.height, GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		glReadBuffer(GL_COLOR_ATTACHMENT1);
-		glDrawBuffer(GL_COLOR_ATTACHMENT1);
+		buf = GL_COLOR_ATTACHMENT1;
+		glReadBuffer(buf);
+		glDrawBuffers(1, &buf);
 		glBlitFramebuffer(0, 0, m_msaaFbo.width, m_msaaFbo.height, 0, 0, m_fbo.width, m_fbo.height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	}
 
 	uint pingpong = 0;
-	//if (m_env->bloomIntensity >= 1.f && m_env->bloomThreshold > 0.f)
+	if (m_env->bloomIntensity >= 1.f && m_env->bloomThreshold > 0.f)
 	{
 		// Blur bloom texture
 		uint amount = (uint)m_env->bloomIntensity;
@@ -855,6 +912,12 @@ void RenderDevice::postRender()
 			renderFullscreenQuad();
 			pingpong = !pingpong;
 		}
+	}
+	else
+	{
+		m_pingPongFbo[pingpong].bind();
+		glClear(GL_COLOR_BUFFER_BIT);
+		pingpong = !pingpong;
 	}
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

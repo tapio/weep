@@ -127,7 +127,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					ImGui::SliderInt("Tonemap", (int*)&env.tonemap, 0, Environment::TONEMAP_COUNT-1);
 					ImGui::SliderFloat("Exposure", &env.exposure, 0.0f, 10.0f);
 					ImGui::SliderFloat("Bloom Threshold", &env.bloomThreshold, 0.0f, 2.0f);
-					ImGui::SliderFloat("Bloom Intensity", &env.bloomIntensity, 1.0f, 10.0f);
+					ImGui::SliderFloat("Bloom Intensity", &env.bloomIntensity, 1.0f, 10.0f, "%.0f");
 					ImGui::SliderFloat("Shadow Darkness", &env.shadowDarkness, 0.0f, 1.0f);
 					ImGui::ColorEdit3("Ambient", (float*)&env.ambient);
 					ImGui::ColorEdit3("Sun Color", (float*)&env.sunColor);

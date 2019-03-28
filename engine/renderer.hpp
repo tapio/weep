@@ -25,6 +25,7 @@ public:
 
 	struct Settings {
 		bool shadows = true;
+		bool dynamicReflections = true;
 		int forceLod = -1;
 	} settings;
 

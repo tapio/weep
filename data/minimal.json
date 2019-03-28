@@ -1,0 +1,32 @@
+{
+	"include": [ "debugprefabs.json" ],
+	"environment": {
+		"sunColor": [ 0.3, 0.3, 0.3 ],
+		"sunPosition": [ 4, 2, 4 ],
+		"skybox_disabled": [
+			"debug/skybox/px.png", "debug/skybox/nx.png",
+			"debug/skybox/py.png", "debug/skybox/ny.png",
+			"debug/skybox/pz.png", "debug/skybox/nz.png"
+		]
+	},
+	"objects": [
+	{
+		"name": "camera",
+		"triggerGroup": 0,
+		"geometry": "debug/cube.obj",
+		"body": {
+			"shape": "capsule",
+			"mass": 100,
+			"angularFactor": 0,
+			"noSleep": true
+		},
+		"scale": [ 0.4, 1, 0.4 ],
+		"position": [ 0, 0.5, 0 ]
+	},{
+		"prefab": "plane",
+		"material": { "uvRepeat": 20 },
+		"position": [ 0, -0.5, 0 ],
+		"scale": [ 50, 0.01, 50 ],
+		"body": { "mass": 0, "shape": "box" }
+	}
+]}
