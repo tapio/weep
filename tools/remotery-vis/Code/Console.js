@@ -19,9 +19,9 @@ Console = (function()
 
 		// This accumulates log text as fast as is required
 		this.PageTextBuffer = "";
-		this.LastPageTextBufferLen = 0;
+		this.PageTextUpdatePending = false;
 		this.AppTextBuffer = "";
-		this.LastAppTextBufferLen = 0;
+		this.AppTextUpdatePending = false;
 
 		// Setup command history control
 		this.CommandHistory = LocalStore.Get("App", "Global", "CommandHistory", [ ]);
@@ -36,13 +36,14 @@ Console = (function()
 		// Setup log requests from the server
 		this.Server = server;
 		server.SetConsole(this);
-		server.AddMessageHandler("LOG", Bind(OnLog, this));
+		server.AddMessageHandler("LOGM", Bind(OnLog, this));
 	}
 
 
 	Console.prototype.Log = function(text)
 	{
 		this.PageTextBuffer = LogText(this.PageTextBuffer, text);
+		this.PageTextUpdatePending = true;
 	}
 
 
@@ -65,9 +66,12 @@ Console = (function()
 	}
 
 
-	function OnLog(self, socket, message)
+	function OnLog(self, socket, data_view)
 	{
-		self.AppTextBuffer = LogText(self.AppTextBuffer, message.text);
+		var data_view_reader = new DataViewReader(data_view, 4);
+		var text = data_view_reader.GetString();
+		self.AppTextBuffer = LogText(self.AppTextBuffer, text);
+		self.AppTextUpdatePending = true;
 	}
 
 
@@ -100,20 +104,20 @@ Console = (function()
 	{
 		// Reset the current text buffer as html
 
-		if (self.LastPageTextBufferLen != self.PageTextBuffer.length)
+		if (self.PageTextUpdatePending)
 		{
 			var page_node = self.PageContainer.Node;
 			page_node.innerHTML = self.PageTextBuffer;
 			page_node.scrollTop = page_node.scrollHeight;
-			self.LastPageTextBufferLen = self.PageTextBuffer.length;
+			self.PageTextUpdatePending = false;
 		}
 
-		if (self.LastAppTextBufferLen != self.AppTextBuffer.length)
-		{		
+		if (self.AppTextUpdatePending)
+		{
 			var app_node = self.AppContainer.Node;
 			app_node.innerHTML = self.AppTextBuffer;
 			app_node.scrollTop = app_node.scrollHeight;
-			self.LastAppTextBufferLen = self.AppTextBuffer.length;
+			self.AppTextUpdatePending = false;
 		}
 	}
 
