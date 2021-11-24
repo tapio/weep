@@ -9,6 +9,8 @@
 #include <cstdint>
 #include <bitset>
 #include <typeindex>
+#include <functional>
+#include <stdexcept>
 
 #ifndef ECS_ASSERT
 #include <cassert>

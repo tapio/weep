@@ -8,6 +8,13 @@
 #ifdef __cplusplus
 #define UBO_PREFIX(name, bindpoint) struct name { static const uint binding = bindpoint;
 #define UBO_SUFFIX(varname) };
+// Old windows header cruft leaking in from somewhere...
+#ifdef near
+#undef near
+#endif
+#ifdef far
+#undef far
+#endif
 #else
 #define UBO_PREFIX(name, bindpoint) layout(binding = bindpoint, std140) uniform name {
 #define UBO_SUFFIX(varname) } varname;

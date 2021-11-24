@@ -91,6 +91,11 @@ namespace {
 			dst = (T)src.number_value();
 	}
 
+	template<typename T> void setEnum(T& dst, const Json& src) {
+		if (src.is_number())
+			dst = (T)(int)src.number_value();
+	}
+
 	template<typename T> void setFlag(T& dst, uint flag, const Json& src) {
 		if (src.is_bool()) {
 			if (src.bool_value()) dst |= flag;
@@ -238,7 +243,7 @@ namespace {
 		setNumber(env.shadowDarkness, def["shadowDarkness"]);
 		setNumber(env.bloomThreshold, def["bloomThreshold"]);
 		setNumber(env.bloomIntensity, def["bloomIntensity"]);
-		setNumber(env.tonemap, def["tonemap"]);
+		setEnum(env.tonemap, def["tonemap"]);
 		setColor(env.ambient, def["ambient"]);
 		if (!def["sunPosition"].is_null())
 			env.sunPosition = toVec3(def["sunPosition"]);

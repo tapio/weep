@@ -193,7 +193,7 @@ EXPORT void ModuleFunc(uint msg, void* param)
 						game.reload = true;
 					}
 
-					const char* prefabs[game.scene.prefabs.size()];
+					const char* prefabs[1024]; // No VLAs in VS for game.scene.prefabs.size()
 					int temp = 0;
 					for (auto it : game.scene.prefabs)
 						prefabs[temp++] = it.first.c_str();
