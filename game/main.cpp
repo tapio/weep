@@ -19,13 +19,15 @@
 #include <SDL.h>
 
 #if EMBED_MODULES
-void ModuleFunc_asteroids(uint msg, void* param);
-void ModuleFunc_devtools(uint msg, void* param);
-void ModuleFunc_logo(uint msg, void* param);
-void ModuleFunc_pong(uint msg, void* param);
-void ModuleFunc_settings(uint msg, void* param);
-void ModuleFunc_skyrunner(uint msg, void* param);
-void ModuleFunc_testbed(uint msg, void* param);
+#define DECLARE_MODULE_FUNC(name) void ModuleFunc_##name(uint msg, void* param)
+#define REGISTER_MODULE_FUNC(modules, name) modules.registerEmbeddedModule(#name, ModuleFunc_##name)
+DECLARE_MODULE_FUNC(asteroids);
+DECLARE_MODULE_FUNC(devtools);
+DECLARE_MODULE_FUNC(logo);
+DECLARE_MODULE_FUNC(pong);
+DECLARE_MODULE_FUNC(settings);
+DECLARE_MODULE_FUNC(skyrunner);
+DECLARE_MODULE_FUNC(testbed);
 #endif
 
 void init(Game& game)
@@ -38,13 +40,13 @@ void init(Game& game)
 	game.entities.add_system<ModuleSystem>();
 	ModuleSystem& modules = game.entities.get_system<ModuleSystem>();
 #if EMBED_MODULES
-	modules.registerEmbeddedModule("asteroids", ModuleFunc_asteroids);
-	modules.registerEmbeddedModule("devtools", ModuleFunc_devtools);
-	modules.registerEmbeddedModule("logo", ModuleFunc_logo);
-	modules.registerEmbeddedModule("pong", ModuleFunc_pong);
-	modules.registerEmbeddedModule("settings", ModuleFunc_settings);
-	modules.registerEmbeddedModule("skyrunner", ModuleFunc_skyrunner);
-	modules.registerEmbeddedModule("testbed", ModuleFunc_testbed);
+	REGISTER_MODULE_FUNC(modules, asteroids);
+	REGISTER_MODULE_FUNC(modules, devtools);
+	REGISTER_MODULE_FUNC(modules, logo);
+	REGISTER_MODULE_FUNC(modules, pong);
+	REGISTER_MODULE_FUNC(modules, settings);
+	REGISTER_MODULE_FUNC(modules, skyrunner);
+	REGISTER_MODULE_FUNC(modules, testbed);
 #endif
 	modules.load(Engine::settings["modules"], false);
 	game.entities.add_system<TriggerSystem>();
