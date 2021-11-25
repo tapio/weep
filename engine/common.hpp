@@ -80,10 +80,16 @@ struct id
 	T(const T&) = delete; \
 	T& operator=(const T&) = delete
 
-#ifdef _WIN32
+#if defined(EMBED_MODULES)
+#define EXPORT
+#elif defined(_WIN32)
 #define EXPORT extern "C" __declspec(dllexport)
 #else
 #define EXPORT extern "C"
+#endif
+
+#ifndef MODULE_FUNC_NAME
+#define MODULE_FUNC_NAME ModuleFunc
 #endif
 
 //#define USE_PROFILER 1 // From CMake
@@ -91,7 +97,7 @@ struct id
 	#define RMT_USE_OPENGL 1
 	#include "remotery/Remotery.h"
 	#define BEGIN_CPU_SAMPLE(name) rmt_BeginCPUSample(name, 0);
-	#define END_CPU_SAMPLE(name) rmt_EndCPUSample();
+	#define END_CPU_SAMPLE() rmt_EndCPUSample();
 	#define SCOPED_CPU_SAMPLE(name) rmt_ScopedCPUSample(name, 0);
 	#define BEGIN_GPU_SAMPLE(name) rmt_BeginOpenGLSample(name);
 	#define END_GPU_SAMPLE() rmt_EndOpenGLSample();
@@ -99,7 +105,7 @@ struct id
 	#define PROFILER_LOG(text) rmt_LogText(text);
 #else
 	#define BEGIN_CPU_SAMPLE(name)
-	#define END_CPU_SAMPLE(name)
+	#define END_CPU_SAMPLE()
 	#define SCOPED_CPU_SAMPLE(name)
 	#define BEGIN_GPU_SAMPLE(name)
 	#define END_GPU_SAMPLE()

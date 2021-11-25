@@ -105,7 +105,7 @@ static void doMainMenu(Game& game)
 }
 
 
-EXPORT void ModuleFunc(uint msg, void* param)
+EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 {
 	Game& game = *static_cast<Game*>(param);
 	switch (msg) {
@@ -175,12 +175,12 @@ EXPORT void ModuleFunc(uint msg, void* param)
 				}
 			} else if (gameTime < 3) {
 				ImGui::SetNextWindowPosCenter();
-				ImGui::Begin("", NULL, ImGuiSystem::MinimalWindow);
+				ImGui::Begin("##start", NULL, ImGuiSystem::MinimalWindow);
 				ImGui::Text("Run to the end!");
 				ImGui::End();
 			} else {
 				ImGui::SetNextWindowPos(ImVec2(20, 20));
-				ImGui::Begin("", NULL, ImGuiSystem::MinimalWindow);
+				ImGui::Begin("##time", NULL, ImGuiSystem::MinimalWindow);
 				ImGui::Text("Time: %.2f", gameTime);
 				ImGui::End();
 			}

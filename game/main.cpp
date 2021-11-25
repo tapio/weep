@@ -18,6 +18,16 @@
 #include "args.hpp"
 #include <SDL.h>
 
+#if EMBED_MODULES
+void ModuleFunc_asteroids(uint msg, void* param);
+void ModuleFunc_devtools(uint msg, void* param);
+void ModuleFunc_logo(uint msg, void* param);
+void ModuleFunc_pong(uint msg, void* param);
+void ModuleFunc_settings(uint msg, void* param);
+void ModuleFunc_skyrunner(uint msg, void* param);
+void ModuleFunc_testbed(uint msg, void* param);
+#endif
+
 void init(Game& game)
 {
 	game.entities = Entities();
@@ -26,7 +36,17 @@ void init(Game& game)
 	game.entities.add_system<PhysicsSystem>();
 	game.entities.add_system<AudioSystem>();
 	game.entities.add_system<ModuleSystem>();
-	game.entities.get_system<ModuleSystem>().load(Engine::settings["modules"], false);
+	ModuleSystem& modules = game.entities.get_system<ModuleSystem>();
+#if EMBED_MODULES
+	modules.registerEmbeddedModule("asteroids", ModuleFunc_asteroids);
+	modules.registerEmbeddedModule("devtools", ModuleFunc_devtools);
+	modules.registerEmbeddedModule("logo", ModuleFunc_logo);
+	modules.registerEmbeddedModule("pong", ModuleFunc_pong);
+	modules.registerEmbeddedModule("settings", ModuleFunc_settings);
+	modules.registerEmbeddedModule("skyrunner", ModuleFunc_skyrunner);
+	modules.registerEmbeddedModule("testbed", ModuleFunc_testbed);
+#endif
+	modules.load(Engine::settings["modules"], false);
 	game.entities.add_system<TriggerSystem>();
 	game.entities.add_system<ImGuiSystem>(game.engine.window, game.engine.glContext);
 	game.entities.get_system<ImGuiSystem>().applyDefaultStyle();
@@ -38,7 +58,7 @@ void init(Game& game)
 	cameraEnt.add<Controller>(camTrans.position, camTrans.rotation);
 	if (cameraEnt.has<btRigidBody>())
 		cameraEnt.get<Controller>().body = &cameraEnt.get<btRigidBody>();
-	game.entities.get_system<ModuleSystem>().call($id(INIT), &game);
+	modules.call($id(INIT), &game);
 }
 
 int main(int argc, char* argv[])

@@ -19,6 +19,21 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif()
 
+if (MSVC)
+	# Too noisy type conversion warnings
+	add_compile_options(/wd4244)
+	add_compile_options(/wd4267)
+endif()
+
+# Plugin modules cause problems except with Clang on Linux, so embed them instead
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT WIN32)
+	set(EMBED_MODULES OFF)
+	message("Hot-loadable plugin modules enabled.")
+else()
+	set(EMBED_MODULES ON)
+	message("Embedding plugin modules inside exe.")
+endif()
+
 # Enable C++11 support and other compiler flags...
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	message(STATUS "${CMAKE_CXX_COMPILER_ID} detected, adding compile flags")
@@ -32,12 +47,6 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
 else()
 	set(CMAKE_CXX_STANDARD 11)
 	set(CMAKE_CXX_STANDARD_REQUIRED YES)
-endif()
-
-if (DEFINED MSVC_VERSION)
-	if (MSVC_VERSION GREATER_EQUAL 1500)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++11")
-	endif()
 endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -114,6 +123,11 @@ endif()
 set(GAME_MAIN "game/main.cpp")
 list(REMOVE_ITEM GAME_SOURCES "${PROJECT_SOURCE_DIR}/${GAME_MAIN}")
 
+if(EMBED_MODULES)
+	add_definitions(-DEMBED_MODULES)
+	list(APPEND GAME_SOURCES ${MODULES_SOURCES})
+endif()
+
 add_library(deps STATIC ${DEPS_SOURCES})
 add_library(engine STATIC ${ENGINE_SOURCES})
 add_library(game STATIC ${GAME_SOURCES})
@@ -142,23 +156,32 @@ target_link_libraries(${EXE_NAME} PRIVATE game engine deps ${LIBS})
 install(TARGETS ${EXE_NAME} DESTINATION ${INSTALL_DIR}/bin)
 
 # Game module plugins
-foreach(GAME_MODULE_FILE ${MODULES_SOURCES})
-	get_filename_component(GAME_MODULE_NAME ${GAME_MODULE_FILE} NAME_WE)
-	add_library(${GAME_MODULE_NAME} MODULE ${GAME_MODULE_FILE})
-	set_props(${GAME_MODULE_NAME})
-	if(WIN32)
-		# TODO This is very suboptimal...
-		target_link_libraries(${GAME_MODULE_NAME} PRIVATE game engine deps ${LIBS})
-	else()
-		target_link_libraries(${GAME_MODULE_NAME} ${EXE_NAME})
-	endif()
-	install(TARGETS ${GAME_MODULE_NAME}
-			RUNTIME DESTINATION ${INSTALL_DIR}/bin
-			LIBRARY DESTINATION ${INSTALL_DIR}/bin
-			PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
-						GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ)
-endforeach()
-
+if (EMBED_MODULES)
+	foreach(GAME_MODULE_FILE ${MODULES_SOURCES})
+		get_filename_component(GAME_MODULE_NAME ${GAME_MODULE_FILE} NAME_WE)
+		add_library(${GAME_MODULE_NAME} STATIC ${GAME_MODULE_FILE})
+		target_compile_definitions(${GAME_MODULE_NAME} PRIVATE -DMODULE_FUNC_NAME=ModuleFunc_${GAME_MODULE_NAME})
+		list(APPEND EMBEDDED_LIBS ${GAME_MODULE_NAME})
+	endforeach()
+	target_link_libraries(${EXE_NAME} PRIVATE ${EMBEDDED_LIBS})
+else()
+	foreach(GAME_MODULE_FILE ${MODULES_SOURCES})
+		get_filename_component(GAME_MODULE_NAME ${GAME_MODULE_FILE} NAME_WE)
+		add_library(${GAME_MODULE_NAME} MODULE ${GAME_MODULE_FILE})
+		set_props(${GAME_MODULE_NAME})
+		if(WIN32)
+			# TODO This is very suboptimal...
+			target_link_libraries(${GAME_MODULE_NAME} PRIVATE game engine deps ${LIBS})
+		else()
+			target_link_libraries(${GAME_MODULE_NAME} ${EXE_NAME})
+		endif()
+		install(TARGETS ${GAME_MODULE_NAME}
+				RUNTIME DESTINATION ${INSTALL_DIR}/bin
+				LIBRARY DESTINATION ${INSTALL_DIR}/bin
+				PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+							GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ)
+	endforeach()
+endif()
 
 if(UNIX AND NOT APPLE)
 	configure_file("WeepEngine.cmake.desktop" "WeepEngine.desktop")

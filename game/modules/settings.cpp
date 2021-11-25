@@ -9,7 +9,7 @@
 #include "../game.hpp"
 
 
-EXPORT void ModuleFunc(uint msg, void* param)
+EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 {
 	Game& game = *static_cast<Game*>(param);
 	switch (msg) {

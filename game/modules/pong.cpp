@@ -26,7 +26,7 @@ static float s_resetTime = 0;
 static Tween s_dieAnim = Tween(0.25f, false);
 static Tween s_startAnim = Tween(0.35f, false);
 
-void begin(int dir) {
+static void begin(int dir) {
 	Entity cameraEnt = s_game->entities.get_entity_by_tag("camera");
 	Controller& controller = cameraEnt.get<Controller>();
 	controller.enabled = false;
@@ -54,7 +54,7 @@ void begin(int dir) {
 	}
 }
 
-void reset() {
+static void reset() {
 	s_points[0] = 0;
 	s_points[1] = 0;
 	s_winner = -1;
@@ -64,7 +64,7 @@ void reset() {
 	begin(glm::linearRand(0, 1) ? 1 : -1);
 }
 
-void steer(const string& paddleName, int dir) {
+static void steer(const string& paddleName, int dir) {
 	const float paddleVel = 12.f;
 	Entity paddle = s_game->entities.get_entity_by_tag(paddleName);
 	if (paddle.is_alive()) {
@@ -73,7 +73,7 @@ void steer(const string& paddleName, int dir) {
 	}
 }
 
-EXPORT void ModuleFunc(uint msg, void* param)
+EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 {
 	switch (msg) {
 		case $id(INIT):

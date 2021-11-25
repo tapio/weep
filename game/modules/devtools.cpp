@@ -33,7 +33,7 @@ static void reloadShaders(Game& game)
 		s_shaderTimestamps[i] = timestamp(s_shaderFiles[i]);
 }
 
-EXPORT void ModuleFunc(uint msg, void* param)
+EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 {
 	Game& game = *static_cast<Game*>(param);
 	switch (msg) {
@@ -147,17 +147,19 @@ EXPORT void ModuleFunc(uint msg, void* param)
 					ImGui::SliderFloat("Scanlines", &env.scanlines, 0.0f, 4.0f);
 				}
 				if (ImGui::CollapsingHeader("Modules")) {
-					if (ImGui::Button("Reload all##Modules")) {
-						modules.load(Engine::settings["modules"]);
-						modules.call($id(INIT), &game);
+					if (modules.canReloadAnything) {
+						if (ImGui::Button("Reload all##Modules")) {
+							modules.load(Engine::settings["modules"]);
+							modules.call($id(INIT), &game);
+						}
+						ImGui::SameLine();
+						ImGui::Checkbox("Auto Reload##Modules", &s_autoReloadModules);
 					}
-					ImGui::SameLine();
-					ImGui::Checkbox("Auto Reload##Modules", &s_autoReloadModules);
 					ImGui::Text("Active modules:");
 					for (auto& it : modules.modules) {
 						ImGui::Checkbox(it.second.name.c_str(), &it.second.enabled);
 						ImGui::SameLine();
-						if (ImGui::Button(("Reload##" + it.second.name).c_str())) {
+						if (!it.second.embedded && ImGui::Button(("Reload##" + it.second.name).c_str())) {
 							modules.reload(it.first);
 							break; // Must break as iterator will be invalidated
 						}

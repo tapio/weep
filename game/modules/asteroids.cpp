@@ -17,21 +17,21 @@
 #include <glm/gtc/random.hpp>
 #include <glm/gtx/component_wise.hpp>
 
+namespace {
+	struct Physics {
+		vec2 pos = {0.f, 0.f};
+		vec2 vel = {0.f, 0.f};
+		float angle = 0.f;
+		float angVel = 0.f;
+	};
 
-struct Physics {
-	vec2 pos = {0.f, 0.f};
-	vec2 vel = {0.f, 0.f};
-	float angle = 0.f;
-	float angVel = 0.f;
-};
-
-struct Asteroid {
-	float hp = 5.f;
-};
-struct Laser {
-	float range = 10.f;
-};
-
+	struct Asteroid {
+		float hp = 5.f;
+	};
+	struct Laser {
+		float range = 10.f;
+	};
+}
 
 static const float turnSpeed = 4.f;
 static const float maxSpeed = 6.f;
@@ -55,7 +55,7 @@ static float s_fireTime = 0;
 static Tween s_damageAnim = Tween(0.25f, false);
 static Tween s_startAnim = Tween(0.35f, false);
 
-void spawnAsteroid() {
+static void spawnAsteroid() {
 	Entity asteroid = s_game->entities.create();
 	asteroid.add<Asteroid>();
 	Transform& trans = asteroid.add<Transform>();
@@ -81,7 +81,7 @@ void spawnAsteroid() {
 	model.materials.emplace_back(material);
 }
 
-void spawnLaser(vec2 pos, float angle, float speed) {
+static void spawnLaser(vec2 pos, float angle, float speed) {
 	Entity laser = s_game->entities.create();
 	laser.add<Laser>();
 	Transform& trans = laser.add<Transform>();
@@ -107,7 +107,7 @@ void spawnLaser(vec2 pos, float angle, float speed) {
 	model.materials.emplace_back(material);
 }
 
-void begin() {
+static void begin() {
 	Entity cameraEnt = s_game->entities.get_entity_by_tag("camera");
 	Controller& controller = cameraEnt.get<Controller>();
 	controller.enabled = false;
@@ -125,7 +125,7 @@ void begin() {
 		spawnAsteroid();
 }
 
-void reset() {
+static void reset() {
 	std::srand(std::time(0));
 	s_score = 0;
 	s_hp = 100.f;
@@ -140,7 +140,7 @@ void reset() {
 	begin();
 }
 
-void thrust(float dir, float dt) {
+static void thrust(float dir, float dt) {
 	Entity pl = s_game->entities.get_entity_by_tag("player");
 	Physics& phys = pl.get<Physics>();
 	float thrust = dir * accel * dt;
@@ -150,13 +150,13 @@ void thrust(float dir, float dt) {
 		phys.vel = normalize(phys.vel) * maxSpeed;
 }
 
-void steer(float dir, float dt) {
+static void steer(float dir, float dt) {
 	Entity pl = s_game->entities.get_entity_by_tag("player");
 	Physics& phys = pl.get<Physics>();
 	phys.angle += turnSpeed * dir * dt;
 }
 
-void fire(float dt) {
+static void fire(float dt) {
 	s_fireTime -= dt;
 	if (s_fireTime <= 0) {
 		s_fireTime = fireDelay;
@@ -169,13 +169,13 @@ void fire(float dt) {
 	}
 }
 
-bool hitTest(vec2 posA, vec2 posB, float rA, float rB) {
+static bool hitTest(vec2 posA, vec2 posB, float rA, float rB) {
 	float d2 = glm::distance2(posA, posB);
 	float r2 = (rA + rB) * 0.75f; r2 *= r2;
 	return d2 <= r2;
 }
 
-void simulate(float dt) {
+static void simulate(float dt) {
 	s_game->entities.for_each<Physics, Transform>([&](Entity e, Physics& phys, Transform& trans) {
 		phys.pos += phys.vel * dt;
 		phys.angle += phys.angVel * dt;
@@ -235,7 +235,7 @@ void simulate(float dt) {
 
 }
 
-EXPORT void ModuleFunc(uint msg, void* param)
+EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 {
 	switch (msg) {
 		case $id(INIT):
