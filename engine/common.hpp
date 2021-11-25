@@ -119,4 +119,4 @@ struct id
 	BEGIN_CPU_SAMPLE(var_name)
 #define END_MEASURE(var_name) \
 	float var_name = (SDL_GetPerformanceCounter() - _t0_##var_name) / (double)SDL_GetPerformanceFrequency() * 1000.0; \
-	END_CPU_SAMPLE(var_name)
+	END_CPU_SAMPLE()

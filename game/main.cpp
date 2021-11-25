@@ -257,7 +257,7 @@ int main(int argc, char* argv[])
 			init(game);
 			game.reload = false;
 		}
-		END_CPU_SAMPLE(MainLoop)
+		END_CPU_SAMPLE()
 	}
 
 	game.entities.get_system<RenderSystem>().reset(game.entities); // TODO: Should not be needed...
