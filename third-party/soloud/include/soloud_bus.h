@@ -1,6 +1,6 @@
 /*
 SoLoud audio engine
-Copyright (c) 2013-2014 Jari Komppa
+Copyright (c) 2013-2020 Jari Komppa
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
@@ -33,10 +33,11 @@ namespace SoLoud
 
 	class BusInstance : public AudioSourceInstance
 	{
+	public:
 		Bus *mParent;
 		unsigned int mScratchSize;
 		AlignedFloatBuffer mScratch;
-	public:
+
 		// Approximate volume for channels.
 		float mVisualizationChannelVolume[MAX_CHANNELS];
 		// Mono-mixed wave data for visualization and for visualization FFT input
@@ -67,6 +68,8 @@ namespace SoLoud
 		result setChannels(unsigned int aChannels);
 		// Enable or disable visualization data gathering
 		void setVisualizationEnable(bool aEnable);
+		// Move a live sound to this bus
+		void annexSound(handle aVoiceHandle);
 		
 		// Calculate and get 256 floats of FFT data for visualization. Visualization has to be enabled before use.
 		float *calcFFT();
@@ -76,9 +79,18 @@ namespace SoLoud
 
 		// Get approximate volume for output channel for visualization. Visualization has to be enabled before use.
 		float getApproximateVolume(unsigned int aChannel);
+
+		// Get number of immediate child voices to this bus
+		unsigned int getActiveVoiceCount();
+
+		// Get current the resampler for this bus
+		unsigned int getResampler();
+		// Set the resampler for this bus
+		void setResampler(unsigned int aResampler);
 	public:
 		BusInstance *mInstance;
 		unsigned int mChannelHandle;
+		unsigned int mResampler;
 		// FFT output data
 		float mFFTData[256];
 		// Snapshot of wave data for visualization

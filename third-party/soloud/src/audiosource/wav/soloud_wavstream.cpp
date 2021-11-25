@@ -82,12 +82,11 @@ namespace SoLoud
 
 	WavStreamInstance::WavStreamInstance(WavStream *aParent)
 	{
+		mOggFrameSize = 0;
 		mParent = aParent;
 		mOffset = 0;
 		mCodec.mOgg = 0;
 		mCodec.mFlac = 0;
-		mCodec.mMp3 = 0;
-		mCodec.mWav = 0;
 		mFile = 0;
 		if (aParent->mMemFile)
 		{
@@ -117,9 +116,11 @@ namespace SoLoud
 		{
 			if (mParent->mFiletype == WAVSTREAM_WAV)
 			{
-				mCodec.mWav = drwav_open(drwav_read_func, drwav_seek_func, (void*)mFile);
-				if (!mCodec.mWav)
+				mCodec.mWav = new drwav;
+				if (!drwav_init(mCodec.mWav, drwav_read_func, drwav_seek_func, (void*)mFile, NULL))
 				{
+					delete mCodec.mWav;
+					mCodec.mWav = 0;
 					if (mFile != mParent->mStreamFile)
 						delete mFile;
 					mFile = 0;
@@ -145,7 +146,7 @@ namespace SoLoud
 			else
 			if (mParent->mFiletype == WAVSTREAM_FLAC)
 			{
-				mCodec.mFlac = drflac_open(drflac_read_func, drflac_seek_func, (void*)mFile);
+				mCodec.mFlac = drflac_open(drflac_read_func, drflac_seek_func, (void*)mFile, NULL);
 				if (!mCodec.mFlac)
 				{
 					if (mFile != mParent->mStreamFile)
@@ -197,13 +198,17 @@ namespace SoLoud
 			{
 				drmp3_uninit(mCodec.mMp3);
 				delete mCodec.mMp3;
+				mCodec.mMp3 = 0;
 			}
 			break;
 		case WAVSTREAM_WAV:
 			if (mCodec.mWav)
 			{
-				drwav_close(mCodec.mWav);
+				drwav_uninit(mCodec.mWav);
+				delete mCodec.mWav;
+				mCodec.mWav = 0;
 			}
+			break;
 		}
 		if (mFile != mParent->mStreamFile)
 		{
@@ -235,6 +240,7 @@ namespace SoLoud
 	unsigned int WavStreamInstance::getAudio(float *aBuffer, unsigned int aSamplesToRead, unsigned int aBufferSize)
 	{			
 		unsigned int offset = 0;
+		float tmp[512 * MAX_CHANNELS];
 		if (mFile == NULL)
 			return 0;
 		switch (mParent->mFiletype)
@@ -245,7 +251,6 @@ namespace SoLoud
 
 				for (i = 0; i < aSamplesToRead; i += 512)
 				{
-					float tmp[512 * MAX_CHANNELS];
 					unsigned int blockSize = (aSamplesToRead - i) > 512 ? 512 : aSamplesToRead - i;
 					offset += (unsigned int)drflac_read_pcm_frames_f32(mCodec.mFlac, blockSize, tmp);
 
@@ -267,7 +272,6 @@ namespace SoLoud
 
 				for (i = 0; i < aSamplesToRead; i += 512)
 				{
-					float tmp[512 * MAX_CHANNELS];
 					unsigned int blockSize = (aSamplesToRead - i) > 512 ? 512 : aSamplesToRead - i;
 					offset += (unsigned int)drmp3_read_pcm_frames_f32(mCodec.mMp3, blockSize, tmp);
 
@@ -316,7 +320,6 @@ namespace SoLoud
 
 				for (i = 0; i < aSamplesToRead; i += 512)
 				{
-					float tmp[512 * MAX_CHANNELS];
 					unsigned int blockSize = (aSamplesToRead - i) > 512 ? 512 : aSamplesToRead - i;
 					offset += (unsigned int)drwav_read_pcm_frames_f32(mCodec.mWav, blockSize, tmp);
 
@@ -334,6 +337,25 @@ namespace SoLoud
 			break;
 		}
 		return aSamplesToRead;
+	}
+
+	result WavStreamInstance::seek(double aSeconds, float* mScratch, unsigned int mScratchSize)
+	{
+		if (mCodec.mOgg)
+		{
+			int pos = (int)floor(mBaseSamplerate * aSeconds);
+			stb_vorbis_seek(mCodec.mOgg, pos);
+			// Since the position that we just sought to might not be *exactly*
+			// the position we asked for, we're re-calculating the position just
+			// for the sake of correctness.
+			mOffset = stb_vorbis_get_sample_offset(mCodec.mOgg);
+			double newPosition = float(mOffset / mBaseSamplerate);
+			mStreamPosition = newPosition;
+			return 0;
+		}
+		else {
+			return AudioSourceInstance::seek(aSeconds, mScratch, mScratchSize);
+		}
 	}
 
 	result WavStreamInstance::rewind()
@@ -400,21 +422,21 @@ namespace SoLoud
 	result WavStream::loadwav(File * fp)
 	{
 		fp->seek(0);
-		drwav* decoder = drwav_open(drwav_read_func, drwav_seek_func, (void*)fp);
+		drwav decoder;
 
-		if (decoder == NULL)
+		if (!drwav_init(&decoder, drwav_read_func, drwav_seek_func, (void*)fp, NULL))
 			return FILE_LOAD_FAILED;
 
-		mChannels = decoder->channels;
+		mChannels = decoder.channels;
 		if (mChannels > MAX_CHANNELS)
 		{
 			mChannels = MAX_CHANNELS;
 		}
 
-		mBaseSamplerate = (float)decoder->sampleRate;
-		mSampleCount = (unsigned int)decoder->totalSampleCount;
+		mBaseSamplerate = (float)decoder.sampleRate;
+		mSampleCount = (unsigned int)decoder.totalPCMFrameCount;
 		mFiletype = WAVSTREAM_WAV;
-		drwav_close(decoder);
+		drwav_uninit(&decoder);
 
 		return SO_NO_ERROR;
 	}
@@ -446,7 +468,7 @@ namespace SoLoud
 	result WavStream::loadflac(File * fp)
 	{
 		fp->seek(0);
-		drflac* decoder = drflac_open(drflac_read_func, drflac_seek_func, (void*)fp);
+		drflac* decoder = drflac_open(drflac_read_func, drflac_seek_func, (void*)fp, NULL);
 
 		if (decoder == NULL)
 			return FILE_LOAD_FAILED;
@@ -518,7 +540,7 @@ namespace SoLoud
 		return 0;
 	}
 
-	result WavStream::loadMem(unsigned char *aData, unsigned int aDataLen, bool aCopy, bool aTakeOwnership)
+	result WavStream::loadMem(const unsigned char *aData, unsigned int aDataLen, bool aCopy, bool aTakeOwnership)
 	{
 		delete[] mFilename;
 		delete mMemFile;

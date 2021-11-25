@@ -1,6 +1,6 @@
 /*
 Bullet Continuous Collision Detection and Physics Library
-Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
+Copyright (c) 2003-2006 Erwin Coumans  https://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -187,13 +187,6 @@ btBroadphasePair
 
 	BT_DECLARE_ALIGNED_ALLOCATOR();
 
-	btBroadphasePair(const btBroadphasePair& other)
-		: m_pProxy0(other.m_pProxy0),
-		  m_pProxy1(other.m_pProxy1),
-		  m_algorithm(other.m_algorithm),
-		  m_internalInfo1(other.m_internalInfo1)
-	{
-	}
 	btBroadphasePair(btBroadphaseProxy & proxy0, btBroadphaseProxy & proxy1)
 	{
 		//keep them sorted, so the std::set operations work

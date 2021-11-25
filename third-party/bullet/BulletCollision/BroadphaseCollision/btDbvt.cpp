@@ -1,6 +1,6 @@
 /*
 Bullet Continuous Collision Detection and Physics Library
-Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
+Copyright (c) 2003-2006 Erwin Coumans  https://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -80,6 +80,7 @@ static DBVT_INLINE void deletenode(btDbvt* pdbvt,
 static void recursedeletenode(btDbvt* pdbvt,
 							  btDbvtNode* node)
 {
+	if (node == 0) return;
 	if (!node->isleaf())
 	{
 		recursedeletenode(pdbvt, node->childs[0]);

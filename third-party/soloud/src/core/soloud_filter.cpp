@@ -27,6 +27,31 @@ freely, subject to the following restrictions:
 namespace SoLoud
 {
 
+	int Filter::getParamCount()
+	{
+		return 1; // there's always WET
+	}
+
+	const char* Filter::getParamName(unsigned int aParamIndex)
+	{
+		return "Wet";
+	}
+
+	unsigned int Filter::getParamType(unsigned int aParamIndex)
+	{
+		return Filter::FLOAT_PARAM;
+	}
+	
+	float Filter::getParamMax(unsigned int aParamIndex)
+	{
+		return 1;
+	}
+
+	float Filter::getParamMin(unsigned int aParamIndex)
+	{
+		return 0;
+	}
+
 	Filter::Filter()
 	{
 	}
@@ -125,16 +150,16 @@ namespace SoLoud
 		return mParam[aAttributeId];
 	}
 
-	void FilterInstance::filter(float *aBuffer, unsigned int aSamples, unsigned int aChannels, float aSamplerate, double aTime)
+	void FilterInstance::filter(float *aBuffer, unsigned int aSamples, unsigned int aBufferSize, unsigned int aChannels, float aSamplerate, double aTime)
 	{
 		unsigned int i;
 		for (i = 0; i < aChannels; i++)
 		{
-			filterChannel(aBuffer + i * aSamples, aSamples, aSamplerate, aTime, i, aChannels);
+			filterChannel(aBuffer + i * aBufferSize, aSamples, aSamplerate, aTime, i, aChannels);
 		}
 	}
 
-	void FilterInstance::filterChannel(float *aBuffer, unsigned int aSamples, float aSamplerate, double aTime, unsigned int aChannel, unsigned int aChannels)
+	void FilterInstance::filterChannel(float * /*aBuffer*/, unsigned int /*aSamples*/, float /*aSamplerate*/, double /*aTime*/, unsigned int /*aChannel*/, unsigned int /*aChannels*/)
 	{
 	}
 

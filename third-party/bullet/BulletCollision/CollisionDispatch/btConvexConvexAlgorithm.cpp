@@ -1,6 +1,6 @@
 /*
 Bullet Continuous Collision Detection and Physics Library
-Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
+Copyright (c) 2003-2006 Erwin Coumans  https://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -503,9 +503,9 @@ void btConvexConvexAlgorithm ::processCollision(const btCollisionObjectWrapper* 
 
 					gjkPairDetector.getClosestPoints(input, withoutMargin, dispatchInfo.m_debugDraw);
 					//gjkPairDetector.getClosestPoints(input,dummy,dispatchInfo.m_debugDraw);
-#endif  //ZERO_MARGIN                                                    \
-	//btScalar l2 = gjkPairDetector.getCachedSeparatingAxis().length2(); \
-	//if (l2>SIMD_EPSILON)
+#endif  //ZERO_MARGIN
+					//btScalar l2 = gjkPairDetector.getCachedSeparatingAxis().length2();
+					//if (l2>SIMD_EPSILON)
 					{
 						sepNormalWorldSpace = withoutMargin.m_reportedNormalOnWorld;  //gjkPairDetector.getCachedSeparatingAxis()*(1.f/l2);
 						//minDist = -1e30f;//gjkPairDetector.getCachedSeparatingDistance();

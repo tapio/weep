@@ -1,6 +1,6 @@
 /*
 Bullet Continuous Collision Detection and Physics Library
-Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
+Copyright (c) 2003-2006 Erwin Coumans  https://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -37,6 +37,7 @@ public:
 													 ///SubSimplexConvexCastRaytest is the default, even if kF_None is set.
 		kF_UseSubSimplexConvexCastRaytest = 1 << 2,  // Uses an approximate but faster ray versus convex intersection algorithm
 		kF_UseGjkConvexCastRaytest = 1 << 3,
+		kF_DisableHeightfieldAccelerator  = 1 << 4, //don't use the heightfield raycast accelerator. See https://github.com/bulletphysics/bullet3/pull/2062
 		kF_Terminator = 0xFFFFFFFF
 	};
 	unsigned int m_flags;

@@ -1,6 +1,6 @@
 /*
 SoLoud audio engine
-Copyright (c) 2013-2014 Jari Komppa
+Copyright (c) 2013-2020 Jari Komppa
 
 This software is provided 'as-is', without any express or implied
 warranty. In no event will the authors be held liable for any damages
@@ -40,7 +40,7 @@ namespace SoLoud
 		mParam[FlangerFilter::DELAY] = mParent->mDelay;
 	}
 
-	void FlangerFilterInstance::filter(float *aBuffer, unsigned int aSamples, unsigned int aChannels, float aSamplerate, double aTime)
+	void FlangerFilterInstance::filter(float *aBuffer, unsigned int aSamples, unsigned int aBufferSize, unsigned int aChannels, float aSamplerate, double aTime)
 	{
 		updateParams(aTime);
 
@@ -63,7 +63,7 @@ namespace SoLoud
 		for (i = 0; i < aChannels; i++)
 		{
 			int mbofs = i * mBufferLength;
-			int abofs = i * aSamples;
+			int abofs = i * aBufferSize;
 			for (j = 0; j < aSamples; j++, abofs++)
 			{
 				int delay = (int)floor(maxsamples * (1 + cos(mIndex))) / 2;
@@ -101,6 +101,44 @@ namespace SoLoud
 		return 0;
 	}
 
+	int FlangerFilter::getParamCount()
+	{
+		return 3;
+	}
+
+	const char* FlangerFilter::getParamName(unsigned int aParamIndex)
+	{
+		if (aParamIndex > 2)
+			return 0;
+		const char *names[3] = {
+			"Wet",
+			"Delay",
+			"Freq"
+		};
+		return names[aParamIndex];
+	}
+
+	unsigned int FlangerFilter::getParamType(unsigned int aParamIndex)
+	{
+		return FLOAT_PARAM;
+	}
+
+	float FlangerFilter::getParamMax(unsigned int aParamIndex)
+	{
+		switch (aParamIndex)
+		{
+		case DELAY: return 0.1f;
+		case FREQ: return 100;
+		}
+		return 1;
+	}
+
+	float FlangerFilter::getParamMin(unsigned int aParamIndex)
+	{
+		if (aParamIndex == WET)
+			return 0;
+		return 0.001f;
+	}
 
 	FilterInstance *FlangerFilter::createInstance()
 	{

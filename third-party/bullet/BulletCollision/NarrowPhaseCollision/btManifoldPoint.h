@@ -1,6 +1,6 @@
 /*
 Bullet Continuous Collision Detection and Physics Library
-Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
+Copyright (c) 2003-2006 Erwin Coumans  https://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -55,6 +55,7 @@ public:
 		: m_userPersistentData(0),
 		  m_contactPointFlags(0),
 		  m_appliedImpulse(0.f),
+		  m_prevRHS(0.f),
 		  m_appliedImpulseLateral1(0.f),
 		  m_appliedImpulseLateral2(0.f),
 		  m_contactMotion1(0.f),
@@ -71,14 +72,21 @@ public:
 					btScalar distance) : m_localPointA(pointA),
 										 m_localPointB(pointB),
 										 m_normalWorldOnB(normal),
+                     m_positionWorldOnB(0,0,0),
+                     m_positionWorldOnA(0,0,0),
 										 m_distance1(distance),
 										 m_combinedFriction(btScalar(0.)),
 										 m_combinedRollingFriction(btScalar(0.)),
 										 m_combinedSpinningFriction(btScalar(0.)),
 										 m_combinedRestitution(btScalar(0.)),
+										 m_partId0(-1),
+										 m_partId1(-1),
+										 m_index0(-1),
+										 m_index1(-1),
 										 m_userPersistentData(0),
 										 m_contactPointFlags(0),
 										 m_appliedImpulse(0.f),
+										 m_prevRHS(0.f),
 										 m_appliedImpulseLateral1(0.f),
 										 m_appliedImpulseLateral2(0.f),
 										 m_contactMotion1(0.f),
@@ -86,7 +94,9 @@ public:
 										 m_contactCFM(0.f),
 										 m_contactERP(0.f),
 										 m_frictionCFM(0.f),
-										 m_lifeTime(0)
+										 m_lifeTime(0),
+            m_lateralFrictionDir1(0,0,0),
+            m_lateralFrictionDir2(0,0,0)
 	{
 	}
 
@@ -114,6 +124,7 @@ public:
 	int m_contactPointFlags;
 
 	btScalar m_appliedImpulse;
+	btScalar m_prevRHS;
 	btScalar m_appliedImpulseLateral1;
 	btScalar m_appliedImpulseLateral2;
 	btScalar m_contactMotion1;
