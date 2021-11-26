@@ -499,8 +499,10 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 				colGeo->generateCollisionTriMesh();
 			if (mass <= 0.f) { // Static mesh
 				shape = new btBvhTriangleMeshShape(colGeo->collisionMesh, true);
+				shape->setLocalScaling(convert(transform.scale));
 			} else {
 				shape = new btGImpactMeshShape(colGeo->collisionMesh);
+				shape->setLocalScaling(convert(transform.scale));
 				static_cast<btGImpactMeshShape*>(shape)->updateBound();
 			}
 		} else {
