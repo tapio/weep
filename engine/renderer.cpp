@@ -6,7 +6,7 @@
 #include "scene.hpp"
 #include "image.hpp"
 #include <algorithm>
-
+#include <glm/gtx/component_wise.hpp>
 
 class Frustum
 {
@@ -18,7 +18,7 @@ public:
 	}
 
 	bool visible(const Transform& transform, const Model& model) const {
-		float maxDist = model.bounds.radius + m_radius;
+		float maxDist = model.bounds.radius * glm::compMax(transform.scale) + m_radius;
 		return glm::distance2(m_center, transform.position) < maxDist * maxDist;
 	}
 
@@ -162,7 +162,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 				entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 					if (model.materials.empty() || !model.geometry)
 						return;
-					float maxDist = model.bounds.radius + light.distance;
+					float maxDist = model.bounds.radius * glm::compMax(transform.scale) + light.distance;
 					if (glm::distance2(light.position, transform.position) < maxDist * maxDist)
 						m_device->renderShadow(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
 				});
@@ -182,7 +182,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		reflCam.updateViewMatrix(reflCamPos);
 		m_device->setupRenderPass(reflCam, lights, TECH_REFLECTION);
 		entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
-			float maxDist = model.bounds.radius + reflCam.far;
+			float maxDist = model.bounds.radius * glm::compMax(transform.scale) + reflCam.far;
 			if (!model.materials.empty() && model.geometry && glm::distance2(reflCamPos, transform.position) < maxDist * maxDist)
 				m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
 		});

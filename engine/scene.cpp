@@ -452,14 +452,11 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 		numModels++;
 	}
 
-	// Patch bounding box
-	// TODO: Bounding box is not correct if scale changed at runtime
+	// Apply bounding box to model
+	// TODO: This might be an artifact of world space bounds, investigate if it should be removed
 	if (entity.has<Model>() && entity.has<Transform>()) {
 		Model& model = entity.get<Model>();
-		const Transform& trans = entity.get<Transform>();
-		model.bounds.min = model.lods[0].geometry->bounds.min * trans.scale;
-		model.bounds.max = model.lods[0].geometry->bounds.max * trans.scale;
-		model.bounds.radius = model.lods[0].geometry->bounds.radius * glm::compMax(trans.scale);
+		model.bounds = model.lods[0].geometry->bounds;
 	}
 
 	// Parse body (needs to be after geometry, transform, bounds...)
@@ -499,7 +496,6 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 				colGeo->generateCollisionTriMesh();
 			if (mass <= 0.f) { // Static mesh
 				shape = new btBvhTriangleMeshShape(colGeo->collisionMesh, true);
-				shape->setLocalScaling(convert(transform.scale));
 			} else {
 				shape = new btGImpactMeshShape(colGeo->collisionMesh);
 				shape->setLocalScaling(convert(transform.scale));
@@ -511,6 +507,7 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 		ASSERT((shapeStr == "trimesh" || bodyDef["geometry"].is_null()) && "Trimesh shape type required if body.geometry is specified");
 		ASSERT(shape);
 
+		shape->setLocalScaling(convert(transform.scale));
 		btVector3 inertia(0, 0, 0);
 		if (mass > 0)
 			shape->calculateLocalInertia(mass, inertia);
