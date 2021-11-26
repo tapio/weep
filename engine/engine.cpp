@@ -78,7 +78,7 @@ void Engine::init(const string& configPath)
 	m_height = settings["screen"]["height"].int_value();
 	int fullscreen = settings["screen"]["fullscreen"].bool_value() ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0;
 
-	window = SDL_CreateWindow("App",
+	window = SDL_CreateWindow("Weep",
 		SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_width, m_height,
 		SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | fullscreen);
 	if (!window) {
