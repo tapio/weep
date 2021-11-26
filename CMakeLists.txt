@@ -37,7 +37,7 @@ endif()
 # Enable C++11 support and other compiler flags...
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 	message(STATUS "${CMAKE_CXX_COMPILER_ID} detected, adding compile flags")
-	set(COMMON_FLAGS "-std=c++11 -ffast-math -march=native -Wall -Wextra")
+	set(COMMON_FLAGS "-std=c++11 -ffast-math -march=native -Wall -Wextra -Wno-unused-parameter")
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COMMON_FLAGS}")
 	if(WIN32)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--export-all-symbols")
