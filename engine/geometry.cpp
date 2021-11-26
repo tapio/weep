@@ -82,8 +82,8 @@ Geometry::Geometry(const Image& heightmap)
 	positions.resize(numVerts);
 	texcoords.resize(numVerts);
 	normals.resize(numVerts);
-	for (int j = 0; j <= heightmap.height; ++j) {
-		for (int i = 0; i <= heightmap.width; ++i) {
+	for (int j = 0; j < heightmap.height; ++j) {
+		for (int i = 0; i < heightmap.width; ++i) {
 			// Create the vertex
 			float x = i - heightmap.width * 0.5f;
 			float z = j - heightmap.height * 0.5f;
@@ -93,7 +93,7 @@ Geometry::Geometry(const Image& heightmap)
 			texcoords[vert] = vec2((float)i / heightmap.width, (float)j / heightmap.height);
 			normals[vert] = vec3(0, 1, 0);
 			// Indexed faces
-			if (i == heightmap.width || j == heightmap.height)
+			if (i == heightmap.width-1 || j == heightmap.height-1)
 				continue;
 			uint a = i + wpoints * j;
 			uint b = i + wpoints * (j + 1);
