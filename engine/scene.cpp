@@ -510,7 +510,8 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 		ASSERT(shape);
 
 		btVector3 inertia(0, 0, 0);
-		shape->calculateLocalInertia(mass, inertia);
+		if (mass > 0)
+			shape->calculateLocalInertia(mass, inertia);
 
 		btRigidBody::btRigidBodyConstructionInfo info(mass, NULL, shape, inertia);
 		info.m_startWorldTransform = btTransform(convert(transform.rotation), convert(transform.position));
