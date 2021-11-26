@@ -82,14 +82,17 @@ ImFont* ImGuiSystem::loadFont(const string& name, const string& path, float size
 		logWarning("Font %s already loaded", name.c_str());
 		return m_fonts[id];
 	}
+	START_MEASURE(fontLoadTimeMs)
 	ImGuiIO& io = ImGui::GetIO();
 	ImFont* font = io.Fonts->AddFontFromFileTTF(path.c_str(), size, NULL, io.Fonts->GetGlyphRangesDefault());
 	if (!font) {
+		END_MEASURE(fontLoadTimeMs)
 		logError("Failed to load font %s from \"%s\"", name.c_str(), path.c_str());
 		return nullptr;
 	}
 	m_fonts[id] = font;
-	logDebug("Loaded font %s from \"%s\" (size: %.1f)", name.c_str(), path.c_str(), size);
+	END_MEASURE(fontLoadTimeMs)
+	logDebug("Loaded font %s from \"%s\" (size: %.1f) in %.1fms", name.c_str(), path.c_str(), size, fontLoadTimeMs);
 	return font;
 }
 

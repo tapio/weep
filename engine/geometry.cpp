@@ -47,11 +47,12 @@ namespace {
 
 Geometry::Geometry(const string& path)
 {
-	START_MEASURE(loadTimeMs);
+	START_MEASURE(geomLoadTimeMs);
 
 	if (endsWith(path, ".obj")) loadObj(path);
 	else if (endsWith(path, ".iqm")) loadIqm(path);
 	else {
+		END_MEASURE(geomLoadTimeMs)
 		logError("Unsupported file format for geometry %s", path.c_str());
 		return;
 	}
@@ -63,9 +64,9 @@ Geometry::Geometry(const string& path)
 	else normalizeNormals();
 	for (auto& batch : batches)
 		batch.setupAttributes();
-	END_MEASURE(loadTimeMs)
+	END_MEASURE(geomLoadTimeMs)
 	logDebug("Loaded mesh %s in %.1fms with %d batches, %d bones, %d anims, bound r: %f",
-		path.c_str(), loadTimeMs, batches.size(), bones.size(), animations.size(), bounds.radius);
+		path.c_str(), geomLoadTimeMs, batches.size(), bones.size(), animations.size(), bounds.radius);
 }
 
 Geometry::Geometry(const Image& heightmap)

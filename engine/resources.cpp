@@ -183,7 +183,7 @@ Image* Resources::getImage(const string& path)
 	return ptr.get();
 }
 
-Image*Resources::getImageAsync(const std::string& path)
+Image* Resources::getImageAsync(const std::string& path)
 {
 	ASSERT(!m_loadingActive);
 	auto& ptr = m_images[path];

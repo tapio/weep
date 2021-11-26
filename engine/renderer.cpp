@@ -122,20 +122,28 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	// Fixed amount of time for uploading each frame?
 	START_MEASURE(uploadMs)
 	BEGIN_GPU_SAMPLE(Upload)
+	int uploadCount = 0;
 	entities.for_each<Model>([&](Entity, Model& model) {
 		// Upload geometries
 		for (int i = 0; i < Model::MAX_LODS && model.lods[i].geometry; ++i) {
 			Geometry& geom = *model.lods[i].geometry;
-			if (!geom.batches.empty() && geom.batches.front().renderId < 0)
+			if (!geom.batches.empty() && geom.batches.front().renderId < 0) {
 				m_device->uploadGeometry(geom);
+				++uploadCount;
+			}
 		}
 		// Upload materials
-		for (auto& mat : model.materials)
-			if (mat.shaderId[0] < 0 || (mat.flags & Material::DIRTY_MAPS))
+		for (auto& mat : model.materials) {
+			if (mat.shaderId[0] < 0 || (mat.flags & Material::DIRTY_MAPS)) {
 				m_device->uploadMaterial(mat);
+				++uploadCount;
+			}
+		}
 	});
 	END_GPU_SAMPLE()
 	END_MEASURE(uploadMs)
+	if (uploadCount > 0)
+		logDebug("Async GPU upload operations count %d in %.1fms (cpu)", uploadCount, uploadMs);
 
 	START_MEASURE(shadowMs)
 	BEGIN_GPU_SAMPLE(ShadowPass)
