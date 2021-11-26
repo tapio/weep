@@ -1,7 +1,7 @@
 WeepEngine ![Logo](data/logo/weep-logo-32.png)
 ==============================================
 
-This is a small personal game engine. It's mainly a platform for me to experiment with OpenGL and perhaps build small game prototypes. While you can use it too under the MIT license, you probably shouldn't as it's incomplete, inefficient, buggy and largely undocumented.
+This is a small personal mostly abandoned game engine. It's mainly a platform for me to experiment with OpenGL and perhaps build small game prototypes. While you can use it too under the MIT license, you probably shouldn't as it's incomplete, inefficient, buggy and largely undocumented.
 
 ![Skyrunner](docs/pics/skyrunner.gif)
 ![Pong](docs/pics/pong.gif)  
@@ -19,7 +19,7 @@ This is a small personal game engine. It's mainly a platform for me to experimen
 
 ## Features
 
-Many might be unpolished...
+Most are quite unpolished...
 
 * OpenGL 4 forward renderer
 	- One directional sun light with shadow mapping
@@ -38,12 +38,13 @@ Many might be unpolished...
 * Basic skeletal animation (GPU skinning)
 * Entity-component based architecture
 * Physics through Bullet dynamics library
-* Hotloadable gameplay code modules
-* JSON based configuration and scene declaration
-* ImGui user interface integration
-* Sound system: positional audio, sample randomization, contact sounds
+* Modular gameplay code (hotloadable with Clang on Linux, otherwise embedded into the executable)
+* JSON based configuration and scene declaration, with prefab/inheritance support
+* Dear ImGui user interface integration
+* Sound system based on SoLoud: positional audio, sample randomization, contact sounds
+* Basic CPU/GPU profiler integration with a web-browser based UI (Remotery)
 * Built-in screenshot and gif movie capture
-* Runs on Linux and Windows (mostly)
+* Runs on Linux and Windows
 
 ## Known Issues
 
@@ -54,13 +55,13 @@ Here's some things that need work. The list is by no means exhaustive.
 * Light system is poor, should implement Forward+
 * Tonemapping needs adaptive exposure
 * Animation and sound systems are very basic
-* Gameplay modules barely work on Windows and hotloading fails in some situations
+* Gameplay module hotloading only really works on Linux with Clang
 * Entity/component destroying works poorly as it's currently implemented
-* Windows support is fragile as I mainly develop this on a Linux box
+* Can't save any changes made with dev tools (missing serialization, need to edit json by hand)
 
 ## Dependencies
 
-You need CMake and C++11 capable compiler. Currently Clang works best as GCC breaks live reload of non-trivial code plugins. Visual Studio 2019 works too, but also has issues with plugin stuff.
+You need CMake and C++11 capable compiler. Currently Clang works best as GCC breaks live reload of non-trivial code plugins. Visual Studio 2019 works too, but also has issues with plugin hotload stuff.
 
 A number of third-party libraries are included in the repository and built as a part of the build process (see "third-party" subfolder). In addition, you need SDL 2.0.2+ and OpenGL drivers installed. However, for Visual Studio x64 on Windows, SDL2 binaries and headers are provided in the repository.
 
