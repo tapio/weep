@@ -5,12 +5,20 @@ source "$THISPATH"/update-deps/config.sh
 
 FILES="$THISPATH"/update-deps/*update-*.sh
 
-for i in $FILES; do
-	echo `basename "$i"`
+function DoScript() {
+	echo `basename "$1"`
 	echo "======================="
-	$i
+	$1
 	echo "======================="
 	echo
-done
+}
+
+if [ -z "$1" ]; then
+	for i in $FILES; do
+		DoScript "$i"
+	done
+else
+	DoScript "$THISPATH"/update-deps/`basename "$1"`
+fi
 
 echo Done
