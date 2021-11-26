@@ -4,7 +4,7 @@
 #include <unordered_map>
 
 namespace ImGui {
-	inline void SetNextWindowPosCenter() { SetNextWindowPos({0, 0}, 0, {0.5f, 0.5f}); }
+	inline void SetNextWindowPosCenter() { ImGuiIO& io = GetIO(); SetNextWindowPos({ io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f }, 0, { 0.5f, 0.5f }); }
 };
 
 class ImGuiSystem : public System
