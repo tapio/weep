@@ -18,7 +18,7 @@ bool Image::load(const std::string& path_, int forceChannels)
 	path = path_;
 	unsigned char *pixels = stbi_load(path.c_str(), &width, &height, &channels, forceChannels);
 	if (!pixels) {
-		END_MEASURE(imageLoadTimeMs)
+		END_CPU_SAMPLE()
 		logError("Failed to load image %s", path.c_str());
 		return false;
 	} else if (forceChannels && channels != forceChannels) {

@@ -52,7 +52,7 @@ Geometry::Geometry(const string& path)
 	if (endsWith(path, ".obj")) loadObj(path);
 	else if (endsWith(path, ".iqm")) loadIqm(path);
 	else {
-		END_MEASURE(geomLoadTimeMs)
+		END_CPU_SAMPLE()
 		logError("Unsupported file format for geometry %s", path.c_str());
 		return;
 	}

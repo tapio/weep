@@ -53,6 +53,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 		case $id(RELOAD_SHADERS):
 		{
 			reloadShaders(game);
+			break;
 		}
 		case $id(DRAW_DEVTOOLS):
 		{
