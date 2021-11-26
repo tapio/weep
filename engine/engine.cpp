@@ -100,6 +100,7 @@ void Engine::init(const string& configPath)
 	logInfo("OpenGL Context:  %d.%d", major, minor);
 
 #ifdef USE_PROFILER
+	rmt_Settings()->enableThreadSampler = RMT_FALSE; // TODO: Investigate assert on exit with this enabled
 	rmtError rmtErr = rmt_CreateGlobalInstance(&m_remotery);
 	if (rmtErr != RMT_ERROR_NONE)
 		logError("Failed to initialize Remotery profiler (code %d)", rmtErr);

@@ -12,11 +12,11 @@ SampleWindow = (function()
 
         this.XPos = 10 + offset * 410;
         this.Window = wm.AddWindow(name, 100, 100, 100, 100);
-        this.Window.Show();
+        this.Window.ShowNoAnim();
         this.Visible = true;
 
         // Create a grid that's indexed by the unique sample ID
-        this.Grid = this.Window.AddControlNew(new WM.Grid(0, 0, 380, "calc( 100% - 17px )"));
+        this.Grid = this.Window.AddControlNew(new WM.Grid());
         var cell_data =
         {
             Name: "Samples",
@@ -35,6 +35,12 @@ SampleWindow = (function()
         };
         this.RootRow = this.Grid.Rows.Add(cell_data, "GridGroup", cell_classes);
         this.RootRow.Rows.AddIndex("_ID");
+    }
+
+
+    SampleWindow.prototype.Close = function()
+    {
+        this.Window.Close();
     }
 
 
@@ -58,9 +64,9 @@ SampleWindow = (function()
         if (visible != this.Visible)
         {
             if (visible == true)
-                this.Window.Show();
+                this.Window.ShowNoAnim();
             else
-                this.Window.Hide();
+                this.Window.HideNoAnim();
 
             this.Visible = visible;
         }
