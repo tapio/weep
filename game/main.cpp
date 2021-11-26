@@ -212,8 +212,9 @@ int main(int argc, char* argv[])
 		END_CPU_SAMPLE()
 
 		// Graphics
-		BEGIN_CPU_SAMPLE(renderTimeMs)
 		BEGIN_GPU_SAMPLE(GPURender)
+		BEGIN_CPU_SAMPLE(renderTimeMs)
+		BEGIN_GPU_SAMPLE(Renderer)
 		renderer.render(game.entities, camera, cameraTrans);
 		END_GPU_SAMPLE()
 		END_CPU_SAMPLE()
@@ -223,6 +224,7 @@ int main(int argc, char* argv[])
 		//ImGui::ShowTestWindow();
 		//ImGui::ShowStyleEditor();
 
+		// ImGui (profiler samples inside)
 		imgui.render();
 
 		if (screenshot) {
@@ -239,6 +241,8 @@ int main(int argc, char* argv[])
 
 		if (gif.recording)
 			gif.recordFrame(game.engine.dt);
+
+		END_GPU_SAMPLE() //GPURender
 
 		BEGIN_CPU_SAMPLE(swap)
 		game.engine.swap();

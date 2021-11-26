@@ -56,8 +56,12 @@ bool ImGuiSystem::processEvent(SDL_Event* event)
 
 void ImGuiSystem::render()
 {
+	BEGIN_CPU_SAMPLE(imguiRenderTimeMs)
 	ImGui::Render();
+	BEGIN_GPU_SAMPLE(ImGuiRender)
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	END_GPU_SAMPLE()
+	END_CPU_SAMPLE()
 }
 
 bool ImGuiSystem::usingMouse() const

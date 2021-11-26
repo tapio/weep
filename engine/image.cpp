@@ -40,9 +40,12 @@ bool Image::save(const string& path) const
 
 void Image::screenshot()
 {
+	BEGIN_CPU_SAMPLE(screenshotTime)
+	BEGIN_GPU_SAMPLE(Screenshot)
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	GLenum format = channels == 4 ? GL_RGBA : GL_RGB;
 	glReadPixels(0, 0, width, height, format, GL_UNSIGNED_BYTE, &data[0]);
+	END_GPU_SAMPLE()
 	// Fix orientation
 	const int lineSize = width * channels;
 	unsigned char* line_tmp = new unsigned char[lineSize];
@@ -56,6 +59,7 @@ void Image::screenshot()
 		line_b -= lineSize;
 	}
 	delete[] line_tmp;
+	END_CPU_SAMPLE()
 }
 
 
