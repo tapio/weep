@@ -14,5 +14,3 @@ cp -v "$GLMPATH/copying.txt" "glm/"
 rm -v "glm/CMakeLists.txt"
 rm -v "glm/detail/glm.cpp"
 rm -v "glm/detail/dummy.cpp"
-#$WGET https://github.com/g-truc/glm/blob/manual/copying.txt
-

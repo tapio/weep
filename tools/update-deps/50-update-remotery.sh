@@ -11,9 +11,9 @@ VISPATH="$ROOT/tools/remotery-vis"
 rm -r "$VISPATH"
 cp -vr "$REMOTERYPATH/vis/" "$VISPATH"
 
-$WGET $GHBASEURL/Celtoys/Remotery/master/lib/Remotery.h -O remotery/Remotery.h &
-$WGET $GHBASEURL/Celtoys/Remotery/master/lib/Remotery.c -O remotery/Remotery.c &
-$WGET $GHBASEURL/Celtoys/Remotery/master/LICENSE -O remotery/LICENSE &
+$CURL $GHBASEURL/Celtoys/Remotery/master/lib/Remotery.h -o remotery/Remotery.h &
+$CURL $GHBASEURL/Celtoys/Remotery/master/lib/Remotery.c -o remotery/Remotery.c &
+$CURL $GHBASEURL/Celtoys/Remotery/master/LICENSE -o remotery/LICENSE &
 
 wait
 

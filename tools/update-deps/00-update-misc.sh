@@ -3,18 +3,18 @@
 source "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"/config.sh
 
 # IQM
-$WGET $GHBASEURL/lsalzman/iqm/master/iqm.h -O iqm/iqm.h &
+$CURL $GHBASEURL/lsalzman/iqm/master/iqm.h -o iqm/iqm.h &
 
 # Json11
-$WGET $GHBASEURL/dropbox/json11/master/json11.hpp -O json11/json11.hpp &
-$WGET $GHBASEURL/dropbox/json11/master/json11.cpp -O json11/json11.cpp &
-$WGET $GHBASEURL/dropbox/json11/master/LICENSE.txt -O json11/LICENSE.txt &
+$CURL $GHBASEURL/dropbox/json11/master/json11.hpp -o json11/json11.hpp &
+$CURL $GHBASEURL/dropbox/json11/master/json11.cpp -o json11/json11.cpp &
+$CURL $GHBASEURL/dropbox/json11/master/LICENSE.txt -o json11/LICENSE.txt &
 
 # stb_image
-$WGET $GHBASEURL/nothings/stb/master/stb_image.h -O stb_image/stb_image.h &
-$WGET $GHBASEURL/nothings/stb/master/stb_image_write.h -O stb_image/stb_image_write.h &
+$CURL $GHBASEURL/nothings/stb/master/stb_image.h -o stb_image/stb_image.h &
+$CURL $GHBASEURL/nothings/stb/master/stb_image_write.h -o stb_image/stb_image_write.h &
 
 # gif-h
-$WGET $GHBASEURL/ginsweater/gif-h/master/gif.h -O gif-h/gif.h &
-$WGET $GHBASEURL/ginsweater/gif-h/master/LICENSE -O gif-h/LICENSE &
+$CURL $GHBASEURL/ginsweater/gif-h/master/gif.h -o gif-h/gif.h &
+$CURL $GHBASEURL/ginsweater/gif-h/master/LICENSE -o gif-h/LICENSE &
 
