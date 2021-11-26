@@ -28,7 +28,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			}
 			ImGui::SetNextWindowPos(ImVec2(10, ImGui::GetIO().DisplaySize.y - 32 - 10));
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-			ImGui::Begin("##LogoWindow", NULL, ImVec2(0, 0), 0.f, ImGuiSystem::MinimalWindow);
+			ImGui::Begin("##LogoWindow", NULL, ImGuiSystem::MinimalWindow);
 			ImFont* font = game.entities.get_system<ImGuiSystem>().getFont($id(logo-font));
 			ASSERT(font);
 			ImGui::PushFont(font);

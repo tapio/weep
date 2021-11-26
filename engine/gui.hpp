@@ -3,6 +3,10 @@
 #include "imgui/imgui.h"
 #include <unordered_map>
 
+namespace ImGui {
+	inline void SetNextWindowPosCenter() { SetNextWindowPos({0, 0}, 0, {0.5f, 0.5f}); }
+};
+
 class ImGuiSystem : public System
 {
 public:
