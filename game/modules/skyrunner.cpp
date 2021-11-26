@@ -150,7 +150,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			Transform& transform = pl.get<Transform>();
 			vec3 curPos = transform.position;
 			if (curPos.y < -3) {
-				transform.rotation = quat();
+				transform.rotation = quat_identity;
 				transform.setPosition(startPos);
 				gameTime = 0;
 				waitTime = 0;

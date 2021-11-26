@@ -4,7 +4,6 @@
 #include <string>
 #include <cstdarg>
 #include <json11/json11.hpp>
-#define GLM_FORCE_RADIANS
 #define GLM_FORCE_CXX11
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -34,6 +33,9 @@ typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef uint64_t uint64;
 typedef int64_t int64;
+
+#define quat_identity quat(1.f, 0.f, 0.f, 0.f)
+
 
 string vlformat(const char* format, va_list vl);
 

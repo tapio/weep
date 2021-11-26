@@ -5,7 +5,7 @@
 struct Transform
 {
 	vec3 position = vec3();
-	quat rotation = quat();
+	quat rotation = quat_identity;
 	vec3 scale = vec3(1, 1, 1);
 	mat4 matrix = mat4();
 	bool dirty = false;

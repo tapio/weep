@@ -13,7 +13,7 @@ PhysicsSystem::PhysicsSystem()
 	broadphase = new btDbvtBroadphase();
 	solver = new btSequentialImpulseConstraintSolver();
 	dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
-	dynamicsWorld->setGravity(btVector3(0, -9.81, 0));
+	dynamicsWorld->setGravity(btVector3(0, -9.81f, 0));
 }
 
 PhysicsSystem::~PhysicsSystem()

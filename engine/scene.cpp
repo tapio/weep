@@ -278,7 +278,7 @@ void SceneLoader::load(const string& path, Resources& resources)
 		cameraEnt.add<Camera>();
 		Camera& camera = cameraEnt.get<Camera>();
 		float ar = Engine::width() / (float)Engine::height();
-		camera.makePerspective(45, ar, 0.1, 1000);
+		camera.makePerspective(45.f, ar, 0.1f, 1000.f);
 		if (cameraEnt.has<Transform>()) {
 			Transform& trans = cameraEnt.get<Transform>();
 			camera.updateViewMatrix(trans.position, trans.rotation);

@@ -42,7 +42,7 @@ void Controller::update(float dt)
 			jumpDelay = 0.250f;
 		}
 
-		rotation = quat();
+		rotation = quat_identity;
 		rotation = glm::rotate(rotation, glm::radians(angles.y), vec3(0, 1, 0));
 		rotation = glm::rotate(rotation, glm::radians(angles.x), vec3(1, 0, 0));
 	}
