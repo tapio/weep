@@ -1605,7 +1605,9 @@ errno_t strcpy_s(char* dest, r_size_t dmax, const char* src)
     return RCNEGATE(ESNOSPC);
 }
 
-#if !(defined(RMT_PLATFORM_LINUX) && RMT_USE_POSIX_THREADNAMES)
+// BEGIN MODIFICATION
+//#if !(defined(RMT_PLATFORM_LINUX) && RMT_USE_POSIX_THREADNAMES)
+// END MODIFICATION
 
 /* very simple integer to hex */
 static const char* hex_encoding_table = "0123456789ABCDEF";
@@ -1664,7 +1666,9 @@ static const char* itoa_s(rmtS32 value)
     return temp_dest + pos + 1;
 }
 
-#endif
+// BEGIN MODIFICATION
+//#endif
+// END MODIFICATION
 
 /*
 ------------------------------------------------------------------------------------------------------------------------
@@ -1815,12 +1819,12 @@ DWORD_PTR GetThreadStartAddress(rmtThreadHandle thread_handle)
 
     return 0;
 }
- 
+
 const char* GetStartAddressModuleName(DWORD_PTR start_address)
 {
     BOOL success;
     MODULEENTRY32 module_entry;
- 
+
     // Snapshot the modules
     HANDLE handle = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, 0);
     if (handle == INVALID_HANDLE_VALUE)
@@ -1853,7 +1857,7 @@ const char* GetStartAddressModuleName(DWORD_PTR start_address)
 
         success = Module32Next(handle, &module_entry);
     }
- 
+
     CloseHandle(handle);
 
     return NULL;
@@ -4872,7 +4876,7 @@ typedef struct ThreadProfiler
     rmtU64 registerBackup0;                                                                         // 0
     rmtU64 registerBackup1;                                                                         // 8
     rmtU64 registerBackup2;                                                                         // 16
-    
+
     // Used to schedule callbacks taking into account some threads may be sleeping
     rmtS32 nbSamplesWithoutCallback;                                                                // 24
 
@@ -5062,11 +5066,11 @@ typedef struct ThreadProfilers
 
     // Queue between clients and main remotery thread
     rmtMessageQueue* mqToRmtThread;
-    
+
     // On x64 machines this points to the sample function
     void* compiledSampleFn;
     rmtU32 compiledSampleFnSize;
-    
+
     // Used to store thread profilers bound to an OS thread
     rmtTLS threadProfilerTlsHandle;
 
@@ -5169,7 +5173,7 @@ static void ThreadProfilers_Destructor(ThreadProfilers* thread_profilers)
     }
 #endif
 #endif
-    
+
     mtxDelete(&thread_profilers->threadProfilerMutex);
 }
 
@@ -5310,7 +5314,7 @@ static rmtError GatherThreadsLoop(rmtThread* thread)
     rmtU32 sleep_time = 100;
 
     assert(thread_profilers != NULL);
-    
+
     rmt_SetCurrentThreadName("RemoteryGatherThreads");
 
     while (thread->request_exit == RMT_FALSE)
@@ -5568,7 +5572,7 @@ static rmtError CheckForStallingSamples(SampleTree* stalling_sample_tree, Thread
             {
                 return error;
             }
-            
+
             // Close all samples from the deepest open sample, right back to the root
             CloseOpenSamples(stalling_sample_tree->root, sample_time_us, 1);
         }
@@ -6057,7 +6061,7 @@ static rmtBool GetCUDASampleTimes(Sample* root_sample, Sample* sample);
 static rmtError Remotery_SendSampleTreeMessage(Remotery* rmt, Message* message)
 {
     rmtError error = RMT_ERROR_NONE;
-    
+
     Msg_SampleTree* sample_tree;
     Sample* sample;
     Buffer* bin_buf;
@@ -6486,7 +6490,7 @@ static rmtError Remotery_Constructor(Remotery* rmt)
     New_0(StringTable, rmt->string_table);
     if (error != RMT_ERROR_NONE)
         return error;
-    
+
     if (g_Settings.logPath != NULL)
     {
         // Get current date/time
@@ -6515,7 +6519,7 @@ static rmtError Remotery_Constructor(Remotery* rmt)
 
         // Open and assume any failure simply sets NULL and the file isn't written
         rmt->logfile = rmtOpenFile(filename, "w");
-        
+
         // Write the header
         if (rmt->logfile != NULL)
         {
@@ -6569,7 +6573,7 @@ static void Remotery_Destructor(Remotery* rmt)
     }
 
     Delete(ThreadProfilers, rmt->threadProfilers);
-    
+
 #if RMT_USE_OPENGL
     Delete(OpenGL, rmt->opengl);
 #endif
@@ -6718,7 +6722,7 @@ static void SetDebuggerThreadName(const char* name)
 {
 #ifdef RMT_PLATFORM_WINDOWS
     THREADNAME_INFO info;
-    
+
     // See if SetThreadDescription is available in this version of Windows
     // Introduced in Windows 10 build 1607
     HMODULE kernel32 = GetModuleHandleA("Kernel32.dll");
