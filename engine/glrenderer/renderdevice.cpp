@@ -717,6 +717,7 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 	m_commonBlock.uniforms.fogDensity = m_env->fogDensity;
 	m_commonBlock.uniforms.near = camera.near;
 	m_commonBlock.uniforms.far = camera.far;
+	m_commonBlock.uniforms.dt = Engine::deltaTime();
 
 	uint numLights = std::min((int)lights.size(), MAX_LIGHTS);
 	m_commonBlock.uniforms.numLights = numLights;

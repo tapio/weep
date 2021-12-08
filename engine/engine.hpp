@@ -20,6 +20,7 @@ public:
 
 	static int width();
 	static int height();
+	static float deltaTime(); // Seconds
 
 	void grabMouse(bool grab);
 

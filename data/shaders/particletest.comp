@@ -15,7 +15,6 @@ layout(std430, binding = 31) buffer velocityBuffer
 
 void main()
 {
-	float dt = 1.0 / 60.0;
 	uint index = gl_GlobalInvocationID.x;
 	pos[index] = pos[index] + vel[index] * dt;
 }

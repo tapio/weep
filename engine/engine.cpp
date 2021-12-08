@@ -194,6 +194,12 @@ int Engine::height()
 	return s_singleton->m_height;
 }
 
+float Engine::deltaTime()
+{
+	ASSERT(s_singleton);
+	return s_singleton->dt;
+}
+
 void Engine::grabMouse(bool grab)
 {
 	SDL_SetRelativeMouseMode(grab ? SDL_TRUE : SDL_FALSE);
