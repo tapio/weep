@@ -2,39 +2,51 @@
 #include "common.hpp"
 #include "../../data/shaders/uniforms.glsl"
 
-
-// Uniform Buffer Object
-template<typename T>
-struct UBO
+// Generic Buffer Object
+struct BufferObjectBase
 {
-	UBO() {}
-	~UBO();
+	BufferObjectBase() {}
+	virtual ~BufferObjectBase() { destroy(); }
 
-	NONCOPYABLE(UBO);
+	NONCOPYABLE(BufferObjectBase);
 
-	void create();
-	void upload();
+protected:
+	void create(uint type, uint binding, uint size, const void* data);
+	void upload(uint type, uint size, const void* data);
+
+public:
 	void destroy();
 
 	uint id = 0;
+};
+
+
+// Uniform Buffer Object
+template<typename T>
+struct UBO : public BufferObjectBase
+{
+	UBO() {}
+
+	NONCOPYABLE(UBO);
+
+	void create() { BufferObjectBase::create(/*GL_UNIFORM_BUFFER*/ 0x8A11, uniforms.binding, sizeof(uniforms), &uniforms); }
+	void upload() { BufferObjectBase::upload(/*GL_UNIFORM_BUFFER*/ 0x8A11, sizeof(uniforms), &uniforms); }
+
 	T uniforms = T();
 };
 
 
 // Shader Storage Buffer Object
 template<typename T>
-struct SSBO
+struct SSBO : public BufferObjectBase
 {
 	SSBO(uint binding): binding(binding) {}
-	~SSBO();
 
 	NONCOPYABLE(SSBO);
 
-	void create();
-	void upload();
-	void destroy();
+	void create() { BufferObjectBase::create(/*GL_SHADER_STORAGE_BUFFER*/ 0x90D2, binding, sizeof(T) * buffer.size(), buffer.data()); }
+	void upload() { BufferObjectBase::upload(/*GL_SHADER_STORAGE_BUFFER*/ 0x90D2, sizeof(T) * buffer.size(), buffer.data()); }
 
-	uint id = 0;
 	uint binding = 0;
 	std::vector<T> buffer;
 };
