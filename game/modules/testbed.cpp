@@ -20,7 +20,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 		}
 		case $id(UPDATE):
 		{
-#ifndef _WIN32 // TODO: Crashes with MinGW build
+#if EMBED_MODULES || !defined(_WIN32) // Crashes with non-embedded Windows build...
 			int lightIndex = 0;
 			game.entities.for_each<Light>([&](Entity e, Light& light) {
 				/**/ if (lightIndex == 0) light.position.x = 5.f * glm::sin(Engine::timems() / 800.f);

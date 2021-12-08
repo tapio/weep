@@ -88,7 +88,11 @@ struct id
 	T(const T&) = delete; \
 	T& operator=(const T&) = delete
 
-#if defined(EMBED_MODULES)
+
+#ifndef EMBED_MODULES
+#define EMBED_MODULES 0
+#endif
+#if EMBED_MODULES
 #define EXPORT
 #elif defined(_WIN32)
 #define EXPORT extern "C" __declspec(dllexport)

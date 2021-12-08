@@ -141,7 +141,7 @@ set(GAME_MAIN "game/main.cpp")
 list(REMOVE_ITEM GAME_SOURCES "${PROJECT_SOURCE_DIR}/${GAME_MAIN}")
 
 if(EMBED_MODULES)
-	add_definitions(-DEMBED_MODULES)
+	add_definitions(-DEMBED_MODULES=1)
 endif()
 
 add_library(engine STATIC ${ENGINE_SOURCES})
