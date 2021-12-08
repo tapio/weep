@@ -170,11 +170,19 @@
 			"frag": "shaders/core.frag"
 		}
 	},
-	"particletest": {
+	"particles_simulate": {
 		"version": "430",
 		"defines": [],
 		"shaders": {
 			"comp": "shaders/particletest.comp"
+		}
+	},
+	"particles_draw": {
+		"version": "430",
+		"defines": [],
+		"shaders" : {
+			"vert": "shaders/particletest.vert",
+			"frag": "shaders/core.frag"
 		}
 	}
 }

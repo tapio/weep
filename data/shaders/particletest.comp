@@ -1,15 +1,21 @@
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
-layout(std430, binding = 0) buffer positionsBuffer
+layout(std430, binding = 30) buffer positionBuffer
 {
-    vec3 pos[];
+	vec3 pos[];
+};
+
+layout(std430, binding = 31) buffer velocityBuffer
+{
+	vec3 vel[];
 };
 
 //layout(rgba32f, binding = 0) uniform image2D img_output;
 
 void main()
 {
+	float dt = 1.0 / 60.0;
 	uint index = gl_GlobalInvocationID.x;
-	pos[index] = vec3(index, 0.0, 0.0);
+	pos[index] = pos[index] + vel[index] * dt;
 }

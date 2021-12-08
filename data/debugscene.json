@@ -181,6 +181,15 @@
 		"position": [ -12, 0, -4 ]
 	},
 
+	{
+		"name": "particletest",
+		"material": {
+			"shaderName": "particles_draw",
+			"diffuse": 1.0
+		},
+		"geometry": "debug/cube.obj",
+		"position": [ 0, 1, -4 ]
+	},
 
 	{
 		"material": {

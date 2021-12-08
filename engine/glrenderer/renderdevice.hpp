@@ -53,6 +53,8 @@ public:
 		int maxSamples = 0;
 		int maxSamplers = 0;
 		int maxArrayTextureLayers = 0;
+		int maxUniformBufferBindings = 0;
+		int maxShaderStorageBufferBindings = 0;
 		ivec3 maxComputeWorkGroupCount = {0, 0, 0};
 		ivec3 maxComputeWorkGroupSize = {0, 0, 0};
 		int maxComputeWorkGroupInvocations = 0;
