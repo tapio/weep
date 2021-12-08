@@ -26,7 +26,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 
 			posBuffer.buffer.resize(NumParticles);
 			for (vec3& pos : posBuffer.buffer)
-				pos = glm::linearRand(vec3(-1,-1,-1), vec3(1,1,1));
+				pos = glm::linearRand(vec3(-1,-1,-1), vec3(1,1,1)) * 0.5f;
 			posBuffer.create();
 			posBuffer.upload();
 
