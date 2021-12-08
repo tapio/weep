@@ -22,7 +22,7 @@ struct ShaderProgram
 	bool link();
 	bool has(ShaderType type) const;
 	void use() const;
-	void compute(uint x_size, uint y_size, uint z_size) const;
+	void compute(uint x_size, uint y_size = 1, uint z_size = 1) const;
 	void destroy();
 
 	uint id = 0;

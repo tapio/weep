@@ -46,10 +46,13 @@ public:
 		bool tessellationShaders = false;
 		bool cubeFboAttachment = false;
 		bool gles = false;
-		float maxAnisotropy;
-		int maxSamples;
-		int maxSamplers;
-		int maxArrayTextureLayers;
+		float maxAnisotropy = 0;
+		int maxSamples = 0;
+		int maxSamplers = 0;
+		int maxArrayTextureLayers = 0;
+		ivec3 maxComputeWorkGroupCount = {0, 0, 0};
+		ivec3 maxComputeWorkGroupSize = {0, 0, 0};
+		int maxComputeWorkGroupInvocations = 0;
 	} caps;
 
 	struct Stats

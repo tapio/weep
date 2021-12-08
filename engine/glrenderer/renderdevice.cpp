@@ -102,7 +102,17 @@ RenderDevice::RenderDevice(Resources& resources)
 	glGetIntegerv(GL_MAX_COLOR_TEXTURE_SAMPLES, &caps.maxSamples);
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &caps.maxSamplers);
 	glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &caps.maxArrayTextureLayers);
-	//logDebug("%.1f %d %d %d", caps.maxAnisotropy, caps.maxSamples, caps.maxSamplers, caps.maxArrayTextureLayers);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &caps.maxComputeWorkGroupCount.x);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &caps.maxComputeWorkGroupCount.y);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &caps.maxComputeWorkGroupCount.z);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &caps.maxComputeWorkGroupSize.x);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &caps.maxComputeWorkGroupSize.y);
+	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &caps.maxComputeWorkGroupSize.z);
+	glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &caps.maxComputeWorkGroupInvocations);
+	logInfo("Max Aniso: %.1f, Max MSAA: %d, Max Samplers: %d, Max Array Texture Layers: %d", caps.maxAnisotropy, caps.maxSamples, caps.maxSamplers, caps.maxArrayTextureLayers);
+	logInfo("Compute limits: count %d %d %d; size %d %d %d; invocations %d",
+		caps.maxComputeWorkGroupCount.x, caps.maxComputeWorkGroupCount.y, caps.maxComputeWorkGroupCount.z,
+		caps.maxComputeWorkGroupSize.x, caps.maxComputeWorkGroupSize.y, caps.maxComputeWorkGroupSize.z, caps.maxComputeWorkGroupInvocations);
 	if (!caps.geometryShaders)
 		logDebug("No geometry shader support.");
 	if (!caps.tessellationShaders)
