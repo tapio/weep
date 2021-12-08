@@ -90,6 +90,8 @@ RenderDevice::RenderDevice(Resources& resources)
 			caps.geometryShaders = true;
 		if (strstr(ext, "tessellation_shader") != 0)
 			caps.tessellationShaders = true;
+		if (strstr(ext, "compute_shader") != 0)
+			caps.computeShaders = true;
 		//logDebug("%s", ext);
 	}
 
@@ -110,13 +112,15 @@ RenderDevice::RenderDevice(Resources& resources)
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &caps.maxComputeWorkGroupSize.z);
 	glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &caps.maxComputeWorkGroupInvocations);
 	logInfo("Max Aniso: %.1f, Max MSAA: %d, Max Samplers: %d, Max Array Texture Layers: %d", caps.maxAnisotropy, caps.maxSamples, caps.maxSamplers, caps.maxArrayTextureLayers);
-	logInfo("Compute limits: count %d %d %d; size %d %d %d; invocations %d",
+	if (!caps.geometryShaders)
+		logInfo("No geometry shader support.");
+	if (!caps.tessellationShaders)
+		logInfo("No tessellation shader support.");
+	if (!caps.computeShaders)
+		logInfo("No compute shader support.");
+	else logInfo("Compute limits: count %d %d %d; size %d %d %d; invocations %d",
 		caps.maxComputeWorkGroupCount.x, caps.maxComputeWorkGroupCount.y, caps.maxComputeWorkGroupCount.z,
 		caps.maxComputeWorkGroupSize.x, caps.maxComputeWorkGroupSize.y, caps.maxComputeWorkGroupSize.z, caps.maxComputeWorkGroupInvocations);
-	if (!caps.geometryShaders)
-		logDebug("No geometry shader support.");
-	if (!caps.tessellationShaders)
-		logDebug("No tessellation shader support.");
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glViewport(0, 0, Engine::width(), Engine::height());
@@ -256,6 +260,10 @@ void RenderDevice::loadShaders()
 		}
 		else if (!caps.tessellationShaders && (shaderFiles["tesc"].is_string() || shaderFiles["tese"].is_string())) {
 			logWarning("Skipping unsupported tessellation shader %s", it.first.c_str());
+			continue;
+		}
+		else if (!caps.computeShaders && shaderFiles["comp"].is_string()) {
+			logWarning("Skipping unsupported compute shader %s", it.first.c_str());
 			continue;
 		}
 
@@ -580,6 +588,18 @@ void RenderDevice::useProgram(const ShaderProgram& program)
 		glUseProgram(m_program);
 		++stats.programs;
 	}
+}
+
+void RenderDevice::useProgram(uint nameHash)
+{
+	// TODO: Handle not found
+	useProgram(m_shaders[m_shaderNames[nameHash]]);
+}
+
+const ShaderProgram& RenderDevice::getProgram(uint nameHash)
+{
+	// TODO: Handle not found, make const
+	return m_shaders[m_shaderNames[nameHash]];
 }
 
 void RenderDevice::drawSetup(const Transform& transform, const BoneAnimation* animation)

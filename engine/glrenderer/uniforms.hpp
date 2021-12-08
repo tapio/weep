@@ -5,12 +5,12 @@
 // Generic Buffer Object
 struct BufferObjectBase
 {
-	BufferObjectBase() {}
 	virtual ~BufferObjectBase() { destroy(); }
 
 	NONCOPYABLE(BufferObjectBase);
 
 protected:
+	BufferObjectBase() {}
 	void create(uint type, uint binding, uint size, const void* data);
 	void upload(uint type, uint size, const void* data);
 

@@ -169,5 +169,12 @@
 			"tese": "shaders/terrain.tese",
 			"frag": "shaders/core.frag"
 		}
+	},
+	"particletest": {
+		"version": "430",
+		"defines": [],
+		"shaders": {
+			"comp": "shaders/particletest.comp"
+		}
 	}
 }

@@ -40,10 +40,13 @@ public:
 	void toggleWireframe();
 
 	void useProgram(const ShaderProgram& program);
+	void useProgram(uint nameHash);
+	const ShaderProgram& getProgram(uint nameHash);
 
 	struct Caps {
 		bool geometryShaders = false;
 		bool tessellationShaders = false;
+		bool computeShaders = false;
 		bool cubeFboAttachment = false;
 		bool gles = false;
 		float maxAnisotropy = 0;
