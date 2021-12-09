@@ -90,6 +90,7 @@ int main(int argc, char* argv[])
 	SDL_Event e;
 	while (running) {
 		BEGIN_CPU_SAMPLE(MainLoop)
+		BEGIN_GPU_SAMPLE(GPUFrame)
 		RenderSystem& renderer = game.entities.get_system<RenderSystem>();
 		PhysicsSystem& physics = game.entities.get_system<PhysicsSystem>();
 		AudioSystem& audio = game.entities.get_system<AudioSystem>();
@@ -267,6 +268,7 @@ int main(int argc, char* argv[])
 			init(game);
 			game.reload = false;
 		}
+		END_GPU_SAMPLE()
 		END_CPU_SAMPLE()
 	}
 
