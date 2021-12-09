@@ -191,7 +191,7 @@
 			"drawReflection" : false
 		},
 		"geometry": "debug/cube.obj",
-		"position": [ 0, 1, -4 ]
+		"position": [ 2, 1, -4 ]
 	},
 
 	{
