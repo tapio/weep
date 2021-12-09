@@ -186,7 +186,9 @@
 		"material": {
 			"shaderName": "particles_draw",
 			"diffuse": 1.0,
-			"emissive": 1.0
+			"emissive": 1.0,
+			"castShadow": false,
+			"drawReflection" : false
 		},
 		"geometry": "debug/cube.obj",
 		"position": [ 0, 1, -4 ]
