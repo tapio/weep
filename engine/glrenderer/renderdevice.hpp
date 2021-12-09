@@ -1,6 +1,6 @@
 #pragma once
 #include "common.hpp"
-#include "uniforms.hpp"
+#include "buffers.hpp"
 #include "shader.hpp"
 #include "components.hpp"
 #include "texture.hpp"

@@ -1,4 +1,4 @@
-#include "uniforms.hpp"
+#include "buffers.hpp"
 #include "glutil.hpp"
 
 void BufferObjectBase::create(uint type, uint binding, uint size, const void* data)
