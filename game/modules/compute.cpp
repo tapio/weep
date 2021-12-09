@@ -40,9 +40,25 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			particleGeo.batches.push_back({});
 			Batch& batch = particleGeo.batches.back();
 			batch.name = "ParticleBatch";
-			batch.positions.resize(NumParticles * 3);
-			for (vec3& pos : batch.positions)
-				pos = glm::linearRand(vec3(-1,-1,-1), vec3(1,1,1)) * 0.1f;
+			batch.positions.resize(NumParticles * 4);
+			// Particle size applied in shader
+			for (uint i = 0; i < batch.positions.size(); i += 4) {
+				batch.positions[i+0] = {-0.5f, -0.5f, 0.f};
+				batch.positions[i+1] = {-0.5f,  0.5f, 0.f};
+				batch.positions[i+2] = { 0.5f,  0.5f, 0.f};
+				batch.positions[i+3] = { 0.5f, -0.5f, 0.f};
+			}
+			batch.indices.resize(NumParticles * 6);
+			for (uint i = 0; i < batch.indices.size(); i += 6) {
+				uint base = i / 6 * 4;
+				batch.indices[i+0] = base + 0;
+				batch.indices[i+1] = base + 2;
+				batch.indices[i+2] = base + 1;
+				batch.indices[i+3] = base + 0;
+				batch.indices[i+4] = base + 3;
+				batch.indices[i+5] = base + 2;
+			}
+
 			batch.setupAttributes();
 			particleGeo.calculateBoundingBox();
 
