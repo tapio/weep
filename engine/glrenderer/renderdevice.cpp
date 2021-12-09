@@ -540,7 +540,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 	// Other techs are always auto generated
 	{
 		// Simpler reflection shader
-		if (caps.geometryShaders) {
+		if (caps.geometryShaders && (material.flags & Material::DRAW_REFLECTION)) {
 			tag &= ~(USE_SHADOW_MAP | USE_AO_MAP | USE_REFLECTION_MAP | USE_PARALLAX_MAP | USE_ENV_MAP | USE_TESSELLATION);
 			material.shaderId[TECH_REFLECTION] = generateShader(tag | USE_CUBE_RENDER);
 			ASSERT(material.shaderId[TECH_REFLECTION] >= 0 && "Reflection shader generating failed");
@@ -678,6 +678,7 @@ void RenderDevice::renderShadow(Model& model, Transform& transform, BoneAnimatio
 		if (!(mat.flags & Material::CAST_SHADOW))
 			continue;
 
+		ASSERT(mat.shaderId[m_tech] >= 0);
 		useProgram(m_shaders[mat.shaderId[m_tech]]);
 
 		if (mat.flags & Material::ALPHA_TEST) {
@@ -752,6 +753,7 @@ void RenderDevice::render(Model& model, Transform& transform, BoneAnimation* ani
 	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (m_shadowProj[0] * (m_shadowView[0] * transform.matrix));
 	drawSetup(transform, animation);
 
+	bool refl = m_tech == TECH_REFLECTION;
 	uint envTex = m_tech == TECH_COLOR ? m_reflectionFbo.tex[0] : m_skyboxMat.tex[Material::ENV_MAP];
 	glActiveTexture(GL_TEXTURE0 + BINDING_ENV_MAP);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, envTex);
@@ -761,8 +763,10 @@ void RenderDevice::render(Model& model, Transform& transform, BoneAnimation* ani
 
 		ASSERT(batch.materialIndex < model.materials.size());
 		Material& mat = model.materials[batch.materialIndex];
-		ASSERT(mat.shaderId[m_tech] >= 0);
+		if (refl && !(mat.flags & Material::DRAW_REFLECTION))
+			continue;
 
+		ASSERT(mat.shaderId[m_tech] >= 0);
 		useProgram(m_shaders[mat.shaderId[m_tech]]);
 
 		m_materialBlock.uniforms.ambient = mat.ambient;

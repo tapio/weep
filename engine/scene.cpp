@@ -126,6 +126,7 @@ namespace {
 		setFlag(material.flags, Material::RECEIVE_SHADOW, def["receiveShadow"]);
 		setFlag(material.flags, Material::ANIMATED, def["animated"]);
 		setFlag(material.flags, Material::ALPHA_TEST, def["alphaTest"]);
+		setFlag(material.flags, Material::DRAW_REFLECTION, def["drawReflection"]);
 		setColor(material.ambient, def["ambient"]);
 		setColor(material.diffuse, def["diffuse"]);
 		setColor(material.specular, def["specular"]);

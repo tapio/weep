@@ -80,6 +80,7 @@ Each object (entity) can have the following properties (most are optional):
 	* _"tessellate"_: bool, activate tessellation (default: false)
 	* _"castShadow"_: bool, enable shadow casting (default: true)
 	* _"receiveShadow"_: bool, enable shadow receiving (default: true)
+	* _"drawReflection"_: bool, enable drawing in reflection probes (default: true)
 	* _"animated"_: bool, needed for animated objects (default: false)
 	* _"alphaTest"_: bool, activate alpha testing (default: false)
 	* _"ambient"_: color

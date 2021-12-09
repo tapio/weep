@@ -44,9 +44,10 @@ struct Material
 		CAST_SHADOW = 1 << 2,
 		RECEIVE_SHADOW = 1 << 3,
 		ANIMATED = 1 << 4,
-		ALPHA_TEST = 1 << 5
+		ALPHA_TEST = 1 << 5,
+		DRAW_REFLECTION = 1 << 6,
 	};
-	uint flags = DIRTY_MAPS | CAST_SHADOW | RECEIVE_SHADOW;
+	uint flags = DIRTY_MAPS | CAST_SHADOW | RECEIVE_SHADOW | DRAW_REFLECTION;
 
 	int shaderId[NUM_TECHNIQUES] = { -1, -1, -1, -1 }; // Automatic
 	string shaderName = "";
