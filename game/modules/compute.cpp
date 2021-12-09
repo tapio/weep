@@ -58,7 +58,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			RenderSystem& renderer = game.entities.get_system<RenderSystem>();
 			const ShaderProgram& compShader = renderer.device().getProgram($id(particles_simulate));
 			compShader.use();
-			compShader.compute(posBuffer.buffer.size());
+			compShader.compute(NumParticles);
 
 			break;
 		}
