@@ -11,10 +11,11 @@
 
 #include <glm/gtc/random.hpp>
 
-static SSBO<vec3> posBuffer(30);
-static SSBO<vec3> velBuffer(31);
-static Geometry particleGeo;
 constexpr uint NumParticles = 1024 * 64;
+static SSBO<vec3> posBuffer(BINDING_SSBO_POSITION, NumParticles);
+static SSBO<vec3> velBuffer(BINDING_SSBO_VELOCITY, NumParticles);
+static SSBO<float> lifeBuffer(BINDING_SSBO_LIFE, NumParticles);
+static Geometry particleGeo;
 
 EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 {
@@ -24,17 +25,17 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 		{
 			game.engine.moduleInit();
 
-			posBuffer.buffer.resize(NumParticles);
 			for (vec3& pos : posBuffer.buffer)
 				pos = glm::linearRand(vec3(-1,-1,-1), vec3(1,1,1)) * 0.5f;
 			posBuffer.create();
-			posBuffer.upload();
 
-			velBuffer.buffer.resize(NumParticles);
 			for (vec3& vel : velBuffer.buffer)
 				vel = glm::normalize(glm::linearRand(vec3(-1,-1,-1), vec3(1,1,1))) * 0.1f;
 			velBuffer.create();
-			velBuffer.upload();
+
+			for (float& life : lifeBuffer.buffer)
+				life = glm::linearRand(0.0f, 5.0f);
+			lifeBuffer.create();
 
 			particleGeo.batches.push_back({});
 			Batch& batch = particleGeo.batches.back();

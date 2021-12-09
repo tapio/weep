@@ -179,7 +179,9 @@
 	},
 	"particles_draw": {
 		"version": "430",
-		"defines": [],
+		"defines": [
+			"USE_VERTEX_COLOR"
+		],
 		"shaders" : {
 			"vert": "shaders/particletest.vert",
 			"frag": "shaders/core.frag"

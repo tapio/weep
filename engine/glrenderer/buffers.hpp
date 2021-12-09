@@ -40,7 +40,7 @@ struct UBO : public BufferObjectBase
 template<typename T>
 struct SSBO : public BufferObjectBase
 {
-	SSBO(uint binding): binding(binding) {}
+	SSBO(uint binding, uint size = 0): binding(binding) { buffer.resize(size); }
 
 	NONCOPYABLE(SSBO);
 

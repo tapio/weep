@@ -87,6 +87,10 @@ UBO_PREFIX(UniformPostProcessBlock, 6)
 #define BINDING_SHADOW_MAP 16
 #define BINDING_SHADOW_CUBE 17
 
+#define BINDING_SSBO_START 30
+#define BINDING_SSBO_POSITION 30
+#define BINDING_SSBO_VELOCITY 31
+#define BINDING_SSBO_LIFE 32
 
 #ifndef __cplusplus
 
