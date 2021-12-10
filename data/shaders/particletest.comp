@@ -34,6 +34,8 @@ const float MaxLife = 5.0;
 
 void main()
 {
+	if (dt <= 0.0)
+		return;
 	uint index = gl_GlobalInvocationID.x;
 	if (life[index].x <= 0.0) {
 		float seed = float(index) * dt + sin(time);
