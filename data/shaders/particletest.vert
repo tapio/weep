@@ -20,7 +20,7 @@ layout(std430, binding = BINDING_SSBO_LIFE) buffer LifeBuffer
 void main()
 {
 	uint particleId = gl_VertexID / 4;
-	vec3 particlePos = pos[particleId];
+	vec4 particlePos = vec4(pos[particleId], 1.0);
 	float particleSize = 0.05f;
 
 	// Billboard shenanigans
@@ -36,17 +36,21 @@ void main()
 	modelView[2][2] = 1.0; //modelMatrix[2][2];
 
 	// Transform particle pos to view space
-	vec4 p = modelViewMatrix * vec4(particlePos, 1.0);
+	vec4 posViewSpace = modelViewMatrix * particlePos;
 	// Add vertex offsets that are transformed with a matrix with rotation removed
-	p += modelView * vec4(position * particleSize, 1.0);
+	posViewSpace += modelView * vec4(position * particleSize, 1.0);
 
 	outData.normal = mat3(normalMatrix) * vec3(0, 0, 1); // TODO
-	outData.position = p.xyz;
+	outData.position = posViewSpace.xyz;
 	outData.texcoord = vec2(0.0, 0.0) * material.uvRepeat + material.uvOffset; // TODO
 
-	gl_Position = projectionMatrix * p;
+	gl_Position = projectionMatrix * posViewSpace;
 
 #ifdef USE_VERTEX_COLOR
 	outData.color = mix(vec4(1.0, 0.0, 0.0, 1.0), vec4(0.0, 0.0, 1.0, 1.0), sin(life[particleId]));
+#endif
+#ifdef USE_SHADOW_MAP
+	outData.worldPosition = (modelMatrix * particlePos).xyz; // Approx, ignores billboard verts
+	outData.shadowcoord = shadowMatrix * particlePos; // Approx, ignores billboard verts
 #endif
 }
