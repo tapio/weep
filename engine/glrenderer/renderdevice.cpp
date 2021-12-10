@@ -719,6 +719,7 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 	m_commonBlock.uniforms.near = camera.near;
 	m_commonBlock.uniforms.far = camera.far;
 	m_commonBlock.uniforms.dt = Engine::deltaTime();
+	m_commonBlock.uniforms.time = Engine::timems() / 1000.f;
 
 	uint numLights = std::min((int)lights.size(), MAX_LIGHTS);
 	m_commonBlock.uniforms.numLights = numLights;

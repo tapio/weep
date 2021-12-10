@@ -14,14 +14,14 @@ layout(std430, binding = BINDING_SSBO_POSITION) buffer positionBuffer
 
 layout(std430, binding = BINDING_SSBO_LIFE) buffer LifeBuffer
 {
-	float life[];
+	vec2 life[];
 };
 
 void main()
 {
 	uint particleId = gl_VertexID / 4;
 	vec4 particlePos = vec4(pos[particleId], 1.0);
-	float particleSize = 0.05f;
+	float particleSize = 0.01f;
 
 	// Billboard shenanigans
 	mat4 modelView = modelViewMatrix;
@@ -47,7 +47,8 @@ void main()
 	gl_Position = projectionMatrix * posViewSpace;
 
 #ifdef USE_VERTEX_COLOR
-	outData.color = mix(vec4(1.0, 0.0, 0.0, 1.0), vec4(0.0, 0.0, 1.0, 1.0), sin(life[particleId]));
+	float phase = 1.0 - life[particleId].x / life[particleId].y;
+	outData.color = mix(vec4(0.75, 0.0, 0.0, 1.0), vec4(1.0, 0.5, 0.0, 1.0), phase);
 #endif
 #ifdef USE_SHADOW_MAP
 	outData.worldPosition = (modelMatrix * particlePos).xyz; // Approx, ignores billboard verts

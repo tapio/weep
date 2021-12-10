@@ -29,7 +29,7 @@ UBO_PREFIX(UniformCommonBlock, 0)
 	vec3 sunPosition; int skyType;
 	vec3 sunColor; float bloomThreshold;
 	vec3 fogColor; float fogDensity;
-	float near; float far; float dt; float pad1;
+	float near; float far; float dt; float time;
 };
 
 UBO_PREFIX(UniformObjectBlock, 1)

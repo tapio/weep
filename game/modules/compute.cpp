@@ -11,10 +11,10 @@
 
 #include <glm/gtc/random.hpp>
 
-constexpr uint NumParticles = 1024 * 64;
+constexpr uint NumParticles = 1024 * 1024;
 static SSBO<vec3> posBuffer(BINDING_SSBO_POSITION, NumParticles);
 static SSBO<vec3> velBuffer(BINDING_SSBO_VELOCITY, NumParticles);
-static SSBO<float> lifeBuffer(BINDING_SSBO_LIFE, NumParticles);
+static SSBO<vec2> lifeBuffer(BINDING_SSBO_LIFE, NumParticles);
 static Geometry particleGeo;
 
 EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
@@ -25,16 +25,16 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 		{
 			game.engine.moduleInit();
 
-			for (vec3& pos : posBuffer.buffer)
-				pos = glm::linearRand(vec3(-1,-1,-1), vec3(1,1,1)) * 0.5f;
+			//for (vec3& pos : posBuffer.buffer)
+			//	pos = glm::linearRand(vec3(-1,-1,-1), vec3(1,1,1)) * 0.5f;
 			posBuffer.create();
 
-			for (vec3& vel : velBuffer.buffer)
-				vel = glm::normalize(glm::linearRand(vec3(-1,-1,-1), vec3(1,1,1))) * 0.1f;
+			//for (vec3& vel : velBuffer.buffer)
+			//	vel = glm::normalize(glm::linearRand(vec3(-1,-1,-1), vec3(1,1,1))) * 0.1f;
 			velBuffer.create();
 
-			for (float& life : lifeBuffer.buffer)
-				life = glm::linearRand(0.0f, 5.0f);
+			for (vec2& life : lifeBuffer.buffer)
+				life = vec2(0.01f, 0.0f); //glm::linearRand(0.0f, 5.0f);
 			lifeBuffer.create();
 
 			particleGeo.batches.push_back({});
