@@ -104,6 +104,9 @@ struct id
 #define MODULE_FUNC_NAME ModuleFunc
 #endif
 
+#define COMBINE1(X,Y) X##Y
+#define COMBINE(X,Y) COMBINE1(X,Y)
+
 //#define USE_PROFILER 1 // From CMake
 #ifdef USE_PROFILER
 	#define RMT_USE_OPENGL 1
@@ -115,6 +118,10 @@ struct id
 	#define END_GPU_SAMPLE() rmt_EndOpenGLSample();
 	#define SCOPED_GPU_SAMPLE(name) rmt_ScopedOpenGLSample(name);
 	#define PROFILER_LOG(text) rmt_LogText(text);
+	#define BEGIN_GPU_SAMPLE_STRING(nameStr) \
+		RMT_OPTIONAL(RMT_USE_OPENGL, { _rmt_BeginOpenGLSample((nameStr), nullptr); }) // Hash cache disabled as would need unique variables for all different strings
+	#define SCOPED_GPU_SAMPLE_STRING(nameStr) \
+		BEGIN_GPU_SAMPLE_STRING(nameStr) RMT_OPTIONAL(RMT_USE_OPENGL, rmt_EndOpenGLSampleOnScopeExit rmt_ScopedOpenGLSample##__LINE__);
 #else
 	#define BEGIN_CPU_SAMPLE(name)
 	#define END_CPU_SAMPLE()

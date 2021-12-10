@@ -8,6 +8,17 @@
 #include <algorithm>
 #include <glm/gtx/component_wise.hpp>
 
+#define USE_GRANULAR_GPU_PROFILER 0
+#if defined(USE_PROFILER) && USE_GRANULAR_GPU_PROFILER
+#define BEGIN_ENTITY_GPU_SAMPLE(prefix, ent) \
+	if (ent.has<DebugInfo>()) BEGIN_GPU_SAMPLE_STRING((prefix + (" " + ent.get<DebugInfo>().name)).c_str()) \
+	else BEGIN_GPU_SAMPLE_STRING(prefix)
+#define END_ENTITY_GPU_SAMPLE() END_GPU_SAMPLE()
+#else
+#define BEGIN_ENTITY_GPU_SAMPLE(...)
+#define END_ENTITY_GPU_SAMPLE()
+#endif
+
 class Frustum
 {
 public:
@@ -153,10 +164,13 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	sun.target = camPos;
 	m_device->setupShadowPass(sun, 0);
 	if (settings.shadows) {
-		entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
+		entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 			// TODO: Shadow frustum culling
-			if (!model.materials.empty() && model.geometry /* && frustum.visible(transform, model) */)
+			if (!model.materials.empty() && model.geometry /* && frustum.visible(transform, model) */) {
+				BEGIN_ENTITY_GPU_SAMPLE("Sun shadow", e)
 				m_device->renderShadow(model, transform);
+				END_ENTITY_GPU_SAMPLE()
+			}
 		});
 	}
 
@@ -171,8 +185,11 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 					if (model.materials.empty() || !model.geometry)
 						return;
 					float maxDist = model.bounds.radius * glm::compMax(transform.scale) + light.distance;
-					if (glm::distance2(light.position, transform.position) < maxDist * maxDist)
+					if (glm::distance2(light.position, transform.position) < maxDist * maxDist) {
+						BEGIN_ENTITY_GPU_SAMPLE("Cube shadow", e)
 						m_device->renderShadow(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
+						END_ENTITY_GPU_SAMPLE()
+					}
 				});
 			}
 		}
@@ -191,8 +208,11 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		m_device->setupRenderPass(reflCam, lights, TECH_REFLECTION);
 		entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 			float maxDist = model.bounds.radius * glm::compMax(transform.scale) + reflCam.far;
-			if (!model.materials.empty() && model.geometry && glm::distance2(reflCamPos, transform.position) < maxDist * maxDist)
+			if (!model.materials.empty() && model.geometry && glm::distance2(reflCamPos, transform.position) < maxDist * maxDist) {
+				BEGIN_ENTITY_GPU_SAMPLE("Reflection", e)
 				m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
+				END_ENTITY_GPU_SAMPLE()
+			}
 		});
 		m_device->renderSkybox();
 	}
@@ -204,10 +224,15 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	BEGIN_GPU_SAMPLE(ScenePass)
 	m_device->setupRenderPass(camera, lights, TECH_COLOR);
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
-		if (!model.materials.empty() && model.geometry && frustum.visible(transform, model))
+		if (!model.materials.empty() && model.geometry && frustum.visible(transform, model)) {
+			BEGIN_ENTITY_GPU_SAMPLE("Render", e)
 			m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
+			END_ENTITY_GPU_SAMPLE()
+		}
 	});
+	BEGIN_GPU_SAMPLE(Skybox)
 	m_device->renderSkybox();
+	END_GPU_SAMPLE()
 	END_GPU_SAMPLE()
 	END_MEASURE(sceneMs)
 
