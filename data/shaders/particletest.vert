@@ -1,5 +1,6 @@
 
 layout(location = ATTR_POSITION) in vec3 position;
+layout(location = ATTR_TEXCOORD) in vec2 texcoord;
 
 #ifdef USE_VERTEX_COLOR
 layout(location = ATTR_COLOR) in vec4 color;
@@ -40,9 +41,9 @@ void main()
 	// Add vertex offsets that are transformed with a matrix with rotation removed
 	posViewSpace += modelView * vec4(position * particleSize, 1.0);
 
-	outData.normal = mat3(normalMatrix) * vec3(0, 0, 1); // TODO
+	outData.normal = vec3(0, 0, 1);
 	outData.position = posViewSpace.xyz;
-	outData.texcoord = vec2(0.0, 0.0) * material.uvRepeat + material.uvOffset; // TODO
+	outData.texcoord = texcoord * material.uvRepeat + material.uvOffset;
 
 	gl_Position = projectionMatrix * posViewSpace;
 

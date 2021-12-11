@@ -122,6 +122,13 @@ Geometry::Geometry(uint numParticleQuads)
 		batch.positions[i+2] = { 0.5f,  0.5f, 0.f};
 		batch.positions[i+3] = { 0.5f, -0.5f, 0.f};
 	}
+	batch.texcoords.resize(numParticleQuads * 4);
+	for (uint i = 0; i < batch.texcoords.size(); i += 4) {
+		batch.texcoords[i+0] = { 0.f, 1.f };
+		batch.texcoords[i+1] = { 0.f, 0.f };
+		batch.texcoords[i+2] = { 1.f, 0.f };
+		batch.texcoords[i+3] = { 1.f, 1.f };
+	}
 	batch.indices.resize(numParticleQuads * 6);
 	for (uint i = 0; i < batch.indices.size(); i += 6) {
 		uint base = i / 6 * 4;
