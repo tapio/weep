@@ -26,14 +26,14 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			game.engine.moduleInit();
 
 			Entity particleSystem = game.entities.get_entity_by_tag("particletest");
-			if (particleSystem.has<Model>()) {
+			if (particleSystem.is_alive() && particleSystem.has<Model>()) {
 				// TODO: Woah, this could be simpler...
 				NumParticles = particleSystem.get<Model>().lods[0].geometry->batches[0].numVertices / 4;
-			}
 
-			posBuffer.create(NumParticles);
-			velBuffer.create(NumParticles);
-			lifeBuffer.create(NumParticles);
+				posBuffer.create(NumParticles);
+				velBuffer.create(NumParticles);
+				lifeBuffer.create(NumParticles);
+			}
 
 			break;
 		}
