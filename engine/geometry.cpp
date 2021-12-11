@@ -110,6 +110,36 @@ Geometry::Geometry(const Image& heightmap)
 	batch.setupAttributes();
 }
 
+Geometry::Geometry(uint numParticleQuads)
+{
+	batches.push_back({});
+	Batch& batch = batches.back();
+	batch.name = "ParticleBatch";
+	batch.positions.resize(numParticleQuads * 4);
+	for (uint i = 0; i < batch.positions.size(); i += 4) {
+		batch.positions[i+0] = {-0.5f, -0.5f, 0.f};
+		batch.positions[i+1] = {-0.5f,  0.5f, 0.f};
+		batch.positions[i+2] = { 0.5f,  0.5f, 0.f};
+		batch.positions[i+3] = { 0.5f, -0.5f, 0.f};
+	}
+	batch.indices.resize(numParticleQuads * 6);
+	for (uint i = 0; i < batch.indices.size(); i += 6) {
+		uint base = i / 6 * 4;
+		batch.indices[i+0] = base + 0;
+		batch.indices[i+1] = base + 2;
+		batch.indices[i+2] = base + 1;
+		batch.indices[i+3] = base + 0;
+		batch.indices[i+4] = base + 3;
+		batch.indices[i+5] = base + 2;
+	}
+
+	batch.setupAttributes();
+
+	// TODO: What should this be...?
+	bounds.min = { -10, -10, -10 };
+	bounds.max = { 10, 10, 10 };
+}
+
 Geometry::~Geometry()
 {
 	if (collisionMesh)

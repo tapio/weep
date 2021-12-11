@@ -44,13 +44,26 @@ struct SSBO : public BufferObjectBase
 
 	NONCOPYABLE(SSBO);
 
-	void create() { BufferObjectBase::create(/*GL_SHADER_STORAGE_BUFFER*/ 0x90D2, binding, sizeof(T) * buffer.size(), buffer.data()); }
+	void create(bool preserveData = false) {
+		BufferObjectBase::create(/*GL_SHADER_STORAGE_BUFFER*/ 0x90D2, binding, sizeof(T) * buffer.size(), buffer.data());
+		if (!preserveData)
+			releaseCPUMem();
+	}
+
+	void create(uint newSize, bool preserveData = false) {
+		buffer.resize(newSize);
+		create(preserveData);
+	}
+
 	void upload(bool preserveData = false) {
 		BufferObjectBase::upload(/*GL_SHADER_STORAGE_BUFFER*/ 0x90D2, sizeof(T) * buffer.size(), buffer.data());
-		if (!preserveData) {
-			buffer.clear();
-			buffer.shrink_to_fit();
-		}
+		if (!preserveData)
+			releaseCPUMem();
+	}
+
+	void releaseCPUMem() {
+		buffer.clear();
+		buffer.shrink_to_fit();
 	}
 
 	uint binding = 0;

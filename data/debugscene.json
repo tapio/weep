@@ -190,7 +190,9 @@
 			"castShadow": false,
 			"drawReflection" : false
 		},
-		"geometry": "debug/cube.obj",
+		"geometry": {
+			"particles": 1000000
+		},
 		"position": [ 2, 1, -4 ]
 	},
 

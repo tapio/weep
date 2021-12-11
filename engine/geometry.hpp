@@ -53,6 +53,7 @@ struct Geometry
 	Geometry() {}
 	Geometry(const string& path);
 	Geometry(const Image& heightmap);
+	Geometry(uint numParticleQuads);
 	~Geometry();
 
 	void calculateBoundingSphere();

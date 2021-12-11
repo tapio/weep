@@ -185,6 +185,11 @@ namespace {
 					model.lods[i].distSq *= model.lods[i].distSq;
 					++i;
 				}
+			} else if (defGeom.is_object()) {
+				if (defGeom["particles"].is_number()) {
+					// TODO: This will leak as nothing will delete it...
+					model.lods[0].geometry = new Geometry((uint)defGeom["particles"].number_value());
+				} else ASSERT(!"Unknown geometry definition");
 			} else ASSERT(!"Unknown geometry definition");
 			model.geometry = model.lods[0].geometry;
 		}
