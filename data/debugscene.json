@@ -1,5 +1,6 @@
 {
 	"include": [ "debugprefabs.json" ],
+	"modules": [ "compute" ],
 	"environment": {
 		"sunColor": [ 0.3, 0.3, 0.3 ],
 		"sunPosition": [ 4, 2, 4 ],
