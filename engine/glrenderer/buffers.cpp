@@ -9,6 +9,11 @@ void BufferObjectBase::create(uint type, uint binding, uint size, const void* da
 	glBufferData(type, size, (const GLvoid*)data, GL_DYNAMIC_DRAW);
 }
 
+void BufferObjectBase::bindBase(uint type, uint binding)
+{
+	glBindBufferBase(type, binding, id);
+}
+
 void BufferObjectBase::upload(uint type, uint size, const void* data)
 {
 	glBindBuffer(type, id);

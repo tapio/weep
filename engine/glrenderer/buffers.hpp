@@ -12,6 +12,7 @@ struct BufferObjectBase
 protected:
 	BufferObjectBase() {}
 	void create(uint type, uint binding, uint size, const void* data);
+	void bindBase(uint type, uint binding);
 	void upload(uint type, uint size, const void* data);
 
 public:
@@ -30,6 +31,7 @@ struct UBO : public BufferObjectBase
 	NONCOPYABLE(UBO);
 
 	void create() { BufferObjectBase::create(/*GL_UNIFORM_BUFFER*/ 0x8A11, uniforms.binding, sizeof(uniforms), &uniforms); }
+	void bindBase() { BufferObjectBase::bindBase(/*GL_UNIFORM_BUFFER*/ 0x8A11, uniforms.binding); }
 	void upload() { BufferObjectBase::upload(/*GL_UNIFORM_BUFFER*/ 0x8A11, sizeof(uniforms), &uniforms); }
 
 	T uniforms = T();
@@ -51,9 +53,15 @@ struct SSBO : public BufferObjectBase
 	}
 
 	void create(uint newSize, bool preserveData = false) {
-		buffer.resize(newSize);
-		create(preserveData);
+		if (buffer.empty() && !preserveData) {
+			BufferObjectBase::create(/*GL_SHADER_STORAGE_BUFFER*/ 0x90D2, binding, sizeof(T) * newSize, nullptr);
+		} else {
+			buffer.resize(newSize);
+			create(preserveData);
+		}
 	}
+
+	void bindBase() { BufferObjectBase::bindBase(/*GL_SHADER_STORAGE_BUFFER*/ 0x90D2, binding); }
 
 	void upload(bool preserveData = false) {
 		BufferObjectBase::upload(/*GL_SHADER_STORAGE_BUFFER*/ 0x90D2, sizeof(T) * buffer.size(), buffer.data());

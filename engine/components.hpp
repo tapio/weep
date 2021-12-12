@@ -71,6 +71,12 @@ struct Particles
 	uint count = 0;
 	uint computeId = 0;
 	Material material;
+
+	struct ParticleBuffer {
+		uint binding = 0;
+		uint buffer = 0;
+	};
+	std::vector<ParticleBuffer> buffers;
 };
 
 struct GroundTracker

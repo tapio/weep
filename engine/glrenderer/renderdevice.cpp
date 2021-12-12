@@ -150,6 +150,7 @@ RenderDevice::RenderDevice(Resources& resources)
 	glEnableVertexAttribArray(ATTR_TEXCOORD);
 	glVertexAttribPointer(ATTR_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glDisableVertexAttribArray(ATTR_NORMAL);
+	glBindVertexArray(0);
 
 	// Create placeholder texture
 	Image temp;
@@ -237,7 +238,7 @@ void RenderDevice::resizeRenderTargets()
 	m_reflectionFbo.create();
 }
 
-void RenderDevice::resizeParticleBuffers(uint size)
+void RenderDevice::resizeParticleRenderBuffers(uint size)
 {
 	if (m_particleBufferSize >= size)
 		return;
@@ -502,6 +503,28 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 		GPUGeometry& mesh = m_geometries.back();
 		uploadBatch(batch, mesh);
 	}
+	return true;
+}
+
+bool RenderDevice::uploadParticleBuffers(Particles& particles)
+{
+	resizeParticleRenderBuffers(particles.count);
+	ASSERT(particles.buffers.empty());
+	// TODO: This should actually reflect what buffers are needed, for now just create constant ones
+	auto addBuffer = [&](uint components) {
+		Particles::ParticleBuffer buf;
+		buf.binding = BINDING_SSBO_START + particles.buffers.size();
+		glGenBuffers(1, &buf.buffer);
+		ASSERT(buf.buffer);
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, buf.buffer);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buf.binding, buf.buffer);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, particles.count * sizeof(float) * components, nullptr, GL_DYNAMIC_DRAW);
+		particles.buffers.emplace_back(buf);
+	};
+	addBuffer(3); // vec3 pos
+	addBuffer(3); // vec3 vel
+	addBuffer(2); // vec2 life
+	// TODO: Need to destroy these too somewhere, use the m_geometries approach
 	return true;
 }
 
@@ -831,9 +854,12 @@ void RenderDevice::render(Particles& particles, Transform& transform)
 {
 	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (m_shadowProj[0] * (m_shadowView[0] * transform.matrix));
 	ASSERT(particles.count);
-	resizeParticleBuffers(particles.count);
+	resizeParticleRenderBuffers(particles.count);
 	drawSetup(transform);
 	useMaterial(particles.material);
+	for (auto& buf : particles.buffers) {
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buf.binding, buf.buffer);
+	}
 	ASSERT(m_particleBuffer.vao);
 	ASSERT(m_particleBuffer.vbo);
 	ASSERT(m_particleBuffer.ebo);
@@ -842,6 +868,16 @@ void RenderDevice::render(Particles& particles, Transform& transform)
 	glBindVertexArray(0);
 	stats.triangles += particles.count * 2; // Two tris per particles
 	++stats.drawCalls;
+}
+
+void RenderDevice::computeParticles(Particles& particles)
+{
+	const ShaderProgram& compShader = getProgram(particles.computeId);
+	compShader.use();
+	for (auto& buf : particles.buffers) {
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buf.binding, buf.buffer);
+	}
+	compShader.compute(particles.count / PARTICLE_GROUP_SIZE);
 }
 
 void RenderDevice::drawBatch(const Batch& batch, bool tessellate)

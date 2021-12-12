@@ -211,7 +211,7 @@
 		},
 		"particles": {
 			"count": 10000,
-			"XXXcompute": "particles_simulate"
+			"compute": "particles_simulate"
 		},
 		"position": [ 3, 1, -2 ]
 	},

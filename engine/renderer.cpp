@@ -155,6 +155,11 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		}
 	});
 	entities.for_each<Particles>([&](Entity, Particles& particles) {
+		// Upload particle buffers
+		if (particles.buffers.empty()) {
+			m_device->uploadParticleBuffers(particles);
+			++uploadCount;
+		}
 		// Upload particle materials
 		auto& mat = particles.material;
 		if (mat.shaderId[0] < 0 || (mat.flags & Material::DIRTY_MAPS)) {
@@ -176,9 +181,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 			return;
 		// TODO: Culling
 		BEGIN_ENTITY_GPU_SAMPLE("Compute", e)
-		const ShaderProgram& compShader = m_device->getProgram(particles.computeId);
-		compShader.use();
-		compShader.compute(particles.count / PARTICLE_GROUP_SIZE);
+		m_device->computeParticles(particles);
 		END_ENTITY_GPU_SAMPLE()
 	});
 	END_GPU_SAMPLE()

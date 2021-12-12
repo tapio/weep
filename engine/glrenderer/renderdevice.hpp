@@ -25,8 +25,11 @@ public:
 	void setEnvironment(Environment* env);
 	void loadShaders();
 	bool uploadGeometry(Geometry& geometry);
+	bool uploadParticleBuffers(Particles& particles);
 	bool uploadMaterial(Material& material);
 	void destroyGeometry(Geometry& geometry);
+
+	void computeParticles(Particles& particles);
 
 	void setupShadowPass(const Light& light, uint index);
 	void renderShadow(Model& model, Transform& transform, BoneAnimation* animation = nullptr);
@@ -37,7 +40,7 @@ public:
 	void renderSkybox();
 	void postRender();
 
-	void resizeParticleBuffers(uint size);
+	void resizeParticleRenderBuffers(uint size);
 	void resizeRenderTargets();
 	void toggleWireframe();
 
