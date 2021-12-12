@@ -240,12 +240,12 @@ void RenderDevice::resizeRenderTargets()
 
 void RenderDevice::resizeParticleRenderBuffers(uint size)
 {
-	if (m_particleBufferSize >= size)
+	if (m_particleRenderBufferSize >= size)
 		return;
-	destroyGeometry(m_particleBuffer);
-	m_particleBufferSize = size;
+	destroyGeometry(m_particleRenderBuffer);
+	m_particleRenderBufferSize = size;
 	Geometry particleBuffer(size);
-	uploadBatch(particleBuffer.batches.front(), m_particleBuffer);
+	uploadBatch(particleBuffer.batches.front(), m_particleRenderBuffer);
 }
 
 void RenderDevice::loadShaders()
@@ -407,9 +407,15 @@ RenderDevice::~RenderDevice()
 	m_textures.clear();
 	destroyGeometry(m_fullscreenQuad);
 	destroyGeometry(m_skyboxCube);
-	destroyGeometry(m_particleBuffer);
+	destroyGeometry(m_particleRenderBuffer);
 	for (auto& g : m_geometries)
 		destroyGeometry(g);
+	for (auto& pb : m_particleBuffers) {
+		for (auto& b : pb) {
+			glDeleteBuffers(1, &b.buffer);
+			b.buffer = 0;
+		}
+	}
 }
 
 void RenderDevice::setEnvironment(Environment* env)
@@ -509,23 +515,35 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 bool RenderDevice::uploadParticleBuffers(Particles& particles)
 {
 	resizeParticleRenderBuffers(particles.count);
-	ASSERT(particles.buffers.empty());
+	ASSERT(particles.renderId < 0);
 	// TODO: This should actually reflect what buffers are needed, for now just create constant ones
+	std::vector<ParticleBuffer> buffers;
 	auto addBuffer = [&](uint components) {
-		Particles::ParticleBuffer buf;
-		buf.binding = BINDING_SSBO_START + particles.buffers.size();
+		ParticleBuffer buf;
+		buf.binding = BINDING_SSBO_START + buffers.size();
 		glGenBuffers(1, &buf.buffer);
 		ASSERT(buf.buffer);
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, buf.buffer);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buf.binding, buf.buffer);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, particles.count * sizeof(float) * components, nullptr, GL_DYNAMIC_DRAW);
-		particles.buffers.emplace_back(buf);
+		buffers.emplace_back(std::move(buf));
 	};
 	addBuffer(3); // vec3 pos
 	addBuffer(3); // vec3 vel
 	addBuffer(2); // vec2 life
-	// TODO: Need to destroy these too somewhere, use the m_geometries approach
+
+	particles.renderId = m_particleBuffers.size();
+	m_particleBuffers.emplace_back(std::move(buffers));
 	return true;
+}
+
+void RenderDevice::bindParticleBuffers(Particles& particles)
+{
+	ASSERT(particles.renderId >= 0);
+	auto& buffers = m_particleBuffers[particles.renderId];
+	for (auto& buf : buffers) {
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buf.binding, buf.buffer);
+	}
 }
 
 bool RenderDevice::uploadMaterial(Material& material)
@@ -850,20 +868,18 @@ void RenderDevice::render(Model& model, Transform& transform, BoneAnimation* ani
 	glBindVertexArray(0);
 }
 
-void RenderDevice::render(Particles& particles, Transform& transform)
+void RenderDevice::renderParticles(Particles& particles, Transform& transform)
 {
 	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (m_shadowProj[0] * (m_shadowView[0] * transform.matrix));
 	ASSERT(particles.count);
 	resizeParticleRenderBuffers(particles.count);
 	drawSetup(transform);
 	useMaterial(particles.material);
-	for (auto& buf : particles.buffers) {
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buf.binding, buf.buffer);
-	}
-	ASSERT(m_particleBuffer.vao);
-	ASSERT(m_particleBuffer.vbo);
-	ASSERT(m_particleBuffer.ebo);
-	glBindVertexArray(m_particleBuffer.vao);
+	bindParticleBuffers(particles);
+	ASSERT(m_particleRenderBuffer.vao);
+	ASSERT(m_particleRenderBuffer.vbo);
+	ASSERT(m_particleRenderBuffer.ebo);
+	glBindVertexArray(m_particleRenderBuffer.vao);
 	glDrawElements(GL_TRIANGLES, particles.count * 6, GL_UNSIGNED_INT, 0); // 2 tris == 6 indices == 1 particle
 	glBindVertexArray(0);
 	stats.triangles += particles.count * 2; // Two tris per particles
@@ -874,9 +890,7 @@ void RenderDevice::computeParticles(Particles& particles)
 {
 	const ShaderProgram& compShader = getProgram(particles.computeId);
 	compShader.use();
-	for (auto& buf : particles.buffers) {
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, buf.binding, buf.buffer);
-	}
+	bindParticleBuffers(particles);
 	compShader.compute(particles.count / PARTICLE_GROUP_SIZE);
 }
 

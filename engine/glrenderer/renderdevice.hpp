@@ -25,18 +25,19 @@ public:
 	void setEnvironment(Environment* env);
 	void loadShaders();
 	bool uploadGeometry(Geometry& geometry);
-	bool uploadParticleBuffers(Particles& particles);
 	bool uploadMaterial(Material& material);
 	void destroyGeometry(Geometry& geometry);
 
+	bool uploadParticleBuffers(Particles& particles);
+	void bindParticleBuffers(Particles& particles);
 	void computeParticles(Particles& particles);
+	void renderParticles(Particles& particles, Transform& transform);
 
 	void setupShadowPass(const Light& light, uint index);
 	void renderShadow(Model& model, Transform& transform, BoneAnimation* animation = nullptr);
 
 	void setupRenderPass(const Camera& camera, const std::vector<Light>& lights, Technique tech = TECH_COLOR);
 	void render(Model& model, Transform& transform, BoneAnimation* animation = nullptr);
-	void render(Particles& particles, Transform& transform);
 	void renderSkybox();
 	void postRender();
 
@@ -94,6 +95,11 @@ private:
 	void uploadBatch(const Batch& batch, GPUGeometry& outGeom);
 	void destroyGeometry(GPUGeometry& geometry);
 
+	struct ParticleBuffer {
+		uint binding = 0;
+		uint buffer = 0;
+	};
+
 	int generateShader(uint tags);
 	void setupCubeMatrices(mat4 proj, vec3 pos);
 	void drawSetup(const Transform& transform, const BoneAnimation* animation = nullptr);
@@ -108,8 +114,8 @@ private:
 
 	GPUGeometry m_fullscreenQuad;
 	GPUGeometry m_skyboxCube;
-	GPUGeometry m_particleBuffer;
-	uint m_particleBufferSize = 0;
+	GPUGeometry m_particleRenderBuffer;
+	uint m_particleRenderBufferSize = 0;
 	Material m_skyboxMat;
 	Texture m_placeholderTex;
 
@@ -131,6 +137,7 @@ private:
 	std::unordered_map<uint, int> m_shaderTags;
 	std::map<void*, Texture> m_textures;
 	std::vector<GPUGeometry> m_geometries;
+	std::vector<std::vector<ParticleBuffer>> m_particleBuffers;
 	Environment* m_env = nullptr;
 	Resources& m_resources;
 };

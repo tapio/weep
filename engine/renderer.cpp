@@ -156,7 +156,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	});
 	entities.for_each<Particles>([&](Entity, Particles& particles) {
 		// Upload particle buffers
-		if (particles.buffers.empty()) {
+		if (particles.renderId < 0) {
 			m_device->uploadParticleBuffers(particles);
 			++uploadCount;
 		}
@@ -276,7 +276,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		// TODO: Particle culling
 		//if (frustum.visible(transform, particles.bounds)) {
 			BEGIN_ENTITY_GPU_SAMPLE("Render", e)
-			m_device->render(particles, transform);
+			m_device->renderParticles(particles, transform);
 			END_ENTITY_GPU_SAMPLE()
 		//}
 	});
