@@ -23,6 +23,7 @@ struct Material
 	float parallax = 0.f;
 	vec2 uvOffset = vec2(0, 0);
 	vec2 uvRepeat = vec2(1, 1);
+	vec2 particleSize = vec2(0.01f, 0.01f);
 
 	enum MapTypes {
 		DIFFUSE_MAP,

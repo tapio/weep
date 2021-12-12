@@ -22,7 +22,6 @@ void main()
 {
 	uint particleId = gl_VertexID / 4;
 	vec4 particlePos = vec4(pos[particleId], 1.0);
-	float particleSize = 0.01f;
 
 	// Billboard shenanigans
 	mat4 modelView = modelViewMatrix;
@@ -39,7 +38,7 @@ void main()
 	// Transform particle pos to view space
 	vec4 posViewSpace = modelViewMatrix * particlePos;
 	// Add vertex offsets that are transformed with a matrix with rotation removed
-	posViewSpace += modelView * vec4(position * particleSize, 1.0);
+	posViewSpace += modelView * vec4(position * vec3(material.particleSize, 0.0), 1.0);
 
 	outData.normal = vec3(0, 0, 1);
 	outData.position = posViewSpace.xyz;

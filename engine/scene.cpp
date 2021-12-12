@@ -139,6 +139,8 @@ namespace {
 			material.uvOffset = toVec2(def["uvOffset"]);
 		if (!def["uvRepeat"].is_null())
 			material.uvRepeat = toVec2(def["uvRepeat"]);
+		if (!def["particleSize"].is_null())
+			material.particleSize = toVec2(def["particleSize"]);
 
 		if (!def["diffuseMap"].is_null()) {
 			material.map[Material::DIFFUSE_MAP] = resources.getImageAsync(resolvePath(pathContext, def["diffuseMap"].string_value()));

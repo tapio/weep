@@ -92,6 +92,7 @@ Each object (entity) can have the following properties (most are optional):
 	* _"parallax"_: float (default: 0), needed to enable parallax mapping
 	* _"uvOffset"_: vec2
 	* _"uvRepeat"_: vec2
+	* _"particleSize"_: vec2 (default: 0.01), size of quads when material is used with particles
 	* _"diffuseMap"_: string
 	* _"specularMap"_: string
 	* _"emissionMap"_: string

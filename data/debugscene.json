@@ -205,7 +205,8 @@
 			"drawReflection" : false,
 			"diffuseMap": "debug/uvtestgrid.png",
 			"emissionMap": "debug/uvtestgrid.png",
-			"alphaTest": false
+			"alphaTest": false,
+			"particleSize": 0.05
 		},
 		"geometry": {
 			"particles": 100000

@@ -631,6 +631,7 @@ void RenderDevice::useMaterial(Material& mat)
 	m_materialBlock.uniforms.emissive = mat.emissive;
 	m_materialBlock.uniforms.uvOffset = mat.uvOffset;
 	m_materialBlock.uniforms.uvRepeat = mat.uvRepeat;
+	m_materialBlock.uniforms.particleSize = mat.particleSize;
 	m_materialBlock.upload();
 
 	for (uint i = 0; i < Material::ENV_MAP; ++i) {
