@@ -239,7 +239,7 @@ void RenderDevice::resizeRenderTargets()
 
 void RenderDevice::resizeParticleBuffers(uint size)
 {
-	if (m_particleBufferSize == size)
+	if (m_particleBufferSize >= size)
 		return;
 	destroyGeometry(m_particleBuffer);
 	m_particleBufferSize = size;
@@ -403,9 +403,10 @@ int RenderDevice::generateShader(uint tags)
 
 RenderDevice::~RenderDevice()
 {
-	glDeleteBuffers(1, &m_fullscreenQuad.vbo);
-	glDeleteVertexArrays(1, &m_fullscreenQuad.vao);
 	m_textures.clear();
+	destroyGeometry(m_fullscreenQuad);
+	destroyGeometry(m_skyboxCube);
+	destroyGeometry(m_particleBuffer);
 	for (auto& g : m_geometries)
 		destroyGeometry(g);
 }
@@ -608,12 +609,14 @@ void RenderDevice::useProgram(const ShaderProgram& program)
 void RenderDevice::useProgram(uint nameHash)
 {
 	// TODO: Handle not found
+	ASSERT(m_shaderNames.count(nameHash));
 	useProgram(m_shaders[m_shaderNames[nameHash]]);
 }
 
 const ShaderProgram& RenderDevice::getProgram(uint nameHash)
 {
 	// TODO: Handle not found, make const
+	ASSERT(m_shaderNames.count(nameHash));
 	return m_shaders[m_shaderNames[nameHash]];
 }
 
@@ -662,8 +665,10 @@ void RenderDevice::drawSetup(const Transform& transform, const BoneAnimation* an
 	uint envTex = 0;
 	switch (m_tech) {
 		case TECH_COLOR: envTex = m_reflectionFbo.tex[0]; break;
-		case TECH_REFLECTION: envTex = m_skyboxMat.tex[Material::ENV_MAP]; break;
-		default: envTex = m_skyboxMat.tex[Material::ENV_MAP]; break;
+		case TECH_REFLECTION:
+		case TECH_COMPUTE:
+			envTex = m_skyboxMat.tex[Material::ENV_MAP]; break;
+		default: break;
 	}
 	if (envTex) {
 		glActiveTexture(GL_TEXTURE0 + BINDING_ENV_MAP);
@@ -825,14 +830,17 @@ void RenderDevice::render(Model& model, Transform& transform, BoneAnimation* ani
 void RenderDevice::render(Particles& particles, Transform& transform)
 {
 	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (m_shadowProj[0] * (m_shadowView[0] * transform.matrix));
-	resizeParticleBuffers(particles.numParticles);
+	ASSERT(particles.count);
+	resizeParticleBuffers(particles.count);
 	drawSetup(transform);
 	useMaterial(particles.material);
 	ASSERT(m_particleBuffer.vao);
+	ASSERT(m_particleBuffer.vbo);
+	ASSERT(m_particleBuffer.ebo);
 	glBindVertexArray(m_particleBuffer.vao);
-	glDrawElements(GL_TRIANGLES, particles.numParticles * 6, GL_UNSIGNED_INT, 0); // 2 tris = 6 indices = 1 particle
+	glDrawElements(GL_TRIANGLES, particles.count * 6, GL_UNSIGNED_INT, 0); // 2 tris == 6 indices == 1 particle
 	glBindVertexArray(0);
-	stats.triangles += particles.numParticles * 2; // Two tris per particles
+	stats.triangles += particles.count * 2; // Two tris per particles
 	++stats.drawCalls;
 }
 

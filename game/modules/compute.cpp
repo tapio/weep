@@ -15,8 +15,6 @@ static SSBO<vec3> posBuffer(BINDING_SSBO_POSITION);
 static SSBO<vec3> velBuffer(BINDING_SSBO_VELOCITY);
 static SSBO<vec2> lifeBuffer(BINDING_SSBO_LIFE);
 
-static uint NumParticles = 0;
-
 EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 {
 	Game& game = *static_cast<Game*>(param);
@@ -26,26 +24,18 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			game.engine.moduleInit();
 
 			Entity particleSystem = game.entities.get_entity_by_tag("particletest");
-			if (particleSystem.is_alive() && particleSystem.has<Model>()) {
-				// TODO: Woah, this could be simpler...
-				NumParticles = particleSystem.get<Model>().lods[0].geometry->batches[0].numVertices / 4;
-
-				posBuffer.create(NumParticles);
-				velBuffer.create(NumParticles);
-				lifeBuffer.create(NumParticles);
+			if (particleSystem.is_alive() && particleSystem.has<Particles>()) {
+				// TODO: Move buffers to rendersystem
+				uint numParticles = particleSystem.get<Particles>().count;
+				posBuffer.create(numParticles);
+				velBuffer.create(numParticles);
+				lifeBuffer.create(numParticles);
 			}
 
 			break;
 		}
 		case $id(UPDATE):
 		{
-			RenderSystem& renderer = game.entities.get_system<RenderSystem>();
-			const ShaderProgram& compShader = renderer.device().getProgram($id(particles_simulate));
-			BEGIN_GPU_SAMPLE(ParticleCompute)
-			compShader.use();
-			compShader.compute(NumParticles / PARTICLE_GROUP_SIZE);
-			END_GPU_SAMPLE()
-
 			break;
 		}
 	}

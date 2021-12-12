@@ -68,7 +68,8 @@ struct Model
 
 struct Particles
 {
-	uint numParticles = 0;
+	uint count = 0;
+	uint computeId = 0;
 	Material material;
 };
 

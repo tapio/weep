@@ -191,8 +191,9 @@
 			"castShadow": false,
 			"drawReflection" : false
 		},
-		"geometry": {
-			"particles": 1000000
+		"particles": {
+			"count": 1000000,
+			"compute": "particles_simulate"
 		},
 		"position": [ 2, 1, -4 ]
 	},{
@@ -208,8 +209,9 @@
 			"alphaTest": false,
 			"particleSize": 0.05
 		},
-		"geometry": {
-			"particles": 100000
+		"particles": {
+			"count": 10000,
+			"XXXcompute": "particles_simulate"
 		},
 		"position": [ 3, 1, -2 ]
 	},

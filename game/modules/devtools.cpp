@@ -76,7 +76,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 					ImGui::Text("Audio:        %.3fms", audioTimeMs);
 					ImGui::Text("Module upd:   %.3fms", moduleTimeMs);
 					ImGui::Text("CPU Render:   %.3fms", renderTimeMs);*/
-					if (ImGui::TreeNode("Render times")) {
+					if (ImGui::TreeNode("Render times (CPU)")) {
 						ImGui::Text("Prerender:    %.3fms", stats.times.prerender);
 						ImGui::Text("Upload:       %.3fms", stats.times.upload);
 						ImGui::Text("Compute:      %.3fms", stats.times.compute);

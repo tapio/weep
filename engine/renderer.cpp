@@ -97,6 +97,9 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 			: model.getLod2(glm::distance2(camPos, transform.position));
 		#endif
 	});
+	entities.for_each<Particles, Transform>([&](Entity, Particles& particles, Transform& transform) {
+		transform.updateMatrix();
+	});
 
 	if (settings.dynamicReflections) {
 		entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
@@ -151,6 +154,14 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 			}
 		}
 	});
+	entities.for_each<Particles>([&](Entity, Particles& particles) {
+		// Upload particle materials
+		auto& mat = particles.material;
+		if (mat.shaderId[0] < 0 || (mat.flags & Material::DIRTY_MAPS)) {
+			m_device->uploadMaterial(mat);
+			++uploadCount;
+		}
+	});
 	END_GPU_SAMPLE()
 	END_MEASURE(uploadMs)
 	if (uploadCount > 0)
@@ -161,11 +172,13 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	BEGIN_GPU_SAMPLE(ComputePass)
 	m_device->setupRenderPass(camera, lights, TECH_COMPUTE);
 	entities.for_each<Particles, Transform>([&](Entity e, Particles& particles, Transform& transform) {
+		if (!particles.computeId || particles.count == 0)
+			return;
 		// TODO: Culling
 		BEGIN_ENTITY_GPU_SAMPLE("Compute", e)
-		const ShaderProgram& compShader = m_device->getProgram($id(particles_simulate)); // TODO: From material
+		const ShaderProgram& compShader = m_device->getProgram(particles.computeId);
 		compShader.use();
-		compShader.compute(particles.numParticles / PARTICLE_GROUP_SIZE);
+		compShader.compute(particles.count / PARTICLE_GROUP_SIZE);
 		END_ENTITY_GPU_SAMPLE()
 	});
 	END_GPU_SAMPLE()
@@ -245,17 +258,18 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 			END_ENTITY_GPU_SAMPLE()
 		}
 	});
-	BEGIN_GPU_SAMPLE(Skybox)
-	m_device->renderSkybox();
-	END_GPU_SAMPLE()
 	END_GPU_SAMPLE()
 	END_MEASURE(sceneMs)
 
 	// Particle render pass
 	START_MEASURE(particlesMs)
-	BEGIN_GPU_SAMPLE(ParticleRenderPass)
-	//m_device->setupRenderPass(camera, lights, TECH_COLOR);
+	BEGIN_GPU_SAMPLE(ParticleRender)
+	//BEGIN_GPU_SAMPLE(ShaderStorageBarrier)
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	//END_GPU_SAMPLE()
 	entities.for_each<Particles, Transform>([&](Entity e, Particles& particles, Transform& transform) {
+		if (particles.count == 0)
+			return;
 		// TODO: Particle culling
 		//if (frustum.visible(transform, particles.bounds)) {
 			BEGIN_ENTITY_GPU_SAMPLE("Render", e)
@@ -265,6 +279,10 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	});
 	END_GPU_SAMPLE()
 	END_MEASURE(particlesMs)
+
+	BEGIN_GPU_SAMPLE(Skybox)
+	m_device->renderSkybox();
+	END_GPU_SAMPLE()
 
 	START_MEASURE(postprocessMs)
 	BEGIN_GPU_SAMPLE(Postprocess)

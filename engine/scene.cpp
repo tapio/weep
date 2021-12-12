@@ -118,6 +118,11 @@ namespace {
 			dst = src.string_value();
 	}
 
+	void setHash(uint& dst, const Json& src) {
+		if (src.is_string())
+			dst = id::hash(src.string_value().c_str());
+	}
+
 	Material& parseMaterial(Material& material, const Json& def, Resources& resources, const string& pathContext) {
 		ASSERT(def.is_object());
 		setString(material.shaderName, def["shaderName"]);
@@ -298,7 +303,7 @@ void SceneLoader::load(const string& path, Resources& resources)
 	resources.startAsyncLoading();
 
 	uint t1 = Engine::timems();
-	logDebug("Loaded scene %s in %dms with %d models, %d bodies, %d lights, %d prefabs", path.c_str(), t1 - t0, numModels, numBodies, numLights, prefabs.size());
+	logDebug("Loaded scene %s in %dms with %d models, %d bodies, %d lights, %d particles, %d prefabs", path.c_str(), t1 - t0, numModels, numBodies, numLights, numParticles, prefabs.size());
 }
 
 void SceneLoader::load_internal(const string& path, Resources& resources)
@@ -453,6 +458,7 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 		numLights++;
 	}
 
+	// Parse model
 	if (!def["geometry"].is_null()) {
 		Model model;
 		parseModel(model, def, resources, pathContext);
@@ -465,6 +471,20 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 	if (entity.has<Model>() && entity.has<Transform>()) {
 		Model& model = entity.get<Model>();
 		model.bounds = model.lods[0].geometry->bounds;
+	}
+
+	// Parse particles
+	const Json& particleDef = def["particles"];
+	if (!particleDef.is_null()) {
+		Particles particles;
+		setNumber(particles.count, particleDef["count"]);
+		setHash(particles.computeId, particleDef["compute"]);
+		const Json& materialDef = def["material"]; // Not embedded in particleDef
+		if (materialDef.is_object()) {
+			parseMaterial(particles.material, materialDef, resources, pathContext);
+		}
+		entity.add(particles);
+		numParticles++;
 	}
 
 	// Parse body (needs to be after geometry, transform, bounds...)
