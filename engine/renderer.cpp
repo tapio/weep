@@ -28,8 +28,8 @@ public:
 		m_center = position + dir * m_radius;
 	}
 
-	bool visible(const Transform& transform, const Model& model) const {
-		float maxDist = model.bounds.radius * glm::compMax(transform.scale) + m_radius;
+	bool visible(const Transform& transform, const Bounds& bounds) const {
+		float maxDist = bounds.radius * glm::compMax(transform.scale) + m_radius;
 		return glm::distance2(m_center, transform.position) < maxDist * maxDist;
 	}
 
@@ -101,7 +101,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	if (settings.dynamicReflections) {
 		entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
 			// Figure out candidates for reflection location
-			if (frustum.visible(transform, model)) {
+			if (frustum.visible(transform, model.bounds)) {
 				float reflectivity = 0.f;
 				for (auto& mat : model.materials)
 					if (mat.reflectivity > reflectivity)
@@ -155,6 +155,21 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	END_MEASURE(uploadMs)
 	if (uploadCount > 0)
 		logDebug("Async GPU upload operations count %d in %.1fms (cpu)", uploadCount, uploadMs);
+
+	// Compute / particle sim pass
+	START_MEASURE(computeMs)
+	BEGIN_GPU_SAMPLE(ComputePass)
+	m_device->setupRenderPass(camera, lights, TECH_COMPUTE);
+	entities.for_each<Particles, Transform>([&](Entity e, Particles& particles, Transform& transform) {
+		// TODO: Culling
+		BEGIN_ENTITY_GPU_SAMPLE("Compute", e)
+		const ShaderProgram& compShader = m_device->getProgram($id(particles_simulate)); // TODO: From material
+		compShader.use();
+		compShader.compute(particles.numParticles / PARTICLE_GROUP_SIZE);
+		END_ENTITY_GPU_SAMPLE()
+	});
+	END_GPU_SAMPLE()
+	END_MEASURE(computeMs)
 
 	START_MEASURE(shadowMs)
 	BEGIN_GPU_SAMPLE(ShadowPass)
@@ -224,7 +239,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	BEGIN_GPU_SAMPLE(ScenePass)
 	m_device->setupRenderPass(camera, lights, TECH_COLOR);
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
-		if (!model.materials.empty() && model.geometry && frustum.visible(transform, model)) {
+		if (!model.materials.empty() && model.geometry && frustum.visible(transform, model.bounds)) {
 			BEGIN_ENTITY_GPU_SAMPLE("Render", e)
 			m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
 			END_ENTITY_GPU_SAMPLE()
@@ -236,6 +251,21 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	END_GPU_SAMPLE()
 	END_MEASURE(sceneMs)
 
+	// Particle render pass
+	START_MEASURE(particlesMs)
+	BEGIN_GPU_SAMPLE(ParticleRenderPass)
+	//m_device->setupRenderPass(camera, lights, TECH_COLOR);
+	entities.for_each<Particles, Transform>([&](Entity e, Particles& particles, Transform& transform) {
+		// TODO: Particle culling
+		//if (frustum.visible(transform, particles.bounds)) {
+			BEGIN_ENTITY_GPU_SAMPLE("Render", e)
+			m_device->render(particles, transform);
+			END_ENTITY_GPU_SAMPLE()
+		//}
+	});
+	END_GPU_SAMPLE()
+	END_MEASURE(particlesMs)
+
 	START_MEASURE(postprocessMs)
 	BEGIN_GPU_SAMPLE(Postprocess)
 	m_device->postRender();
@@ -245,8 +275,10 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	RenderDevice::Stats& stats = m_device->stats;
 	stats.times.prerender = prerenderMs;
 	stats.times.upload = uploadMs;
+	stats.times.compute = computeMs;
 	stats.times.shadow = shadowMs;
 	stats.times.reflection = reflectionMs;
 	stats.times.scene = sceneMs;
+	stats.times.particles = particlesMs;
 	stats.times.postprocess = postprocessMs;
 }

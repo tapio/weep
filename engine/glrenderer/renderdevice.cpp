@@ -237,6 +237,16 @@ void RenderDevice::resizeRenderTargets()
 	m_reflectionFbo.create();
 }
 
+void RenderDevice::resizeParticleBuffers(uint size)
+{
+	if (m_particleBufferSize == size)
+		return;
+	destroyGeometry(m_particleBuffer);
+	m_particleBufferSize = size;
+	Geometry particleBuffer(size);
+	uploadBatch(particleBuffer.batches.front(), m_particleBuffer);
+}
+
 void RenderDevice::loadShaders()
 {
 	uint t0 = Engine::timems();
@@ -450,6 +460,33 @@ void RenderDevice::destroyGeometry(Geometry& geometry)
 	}
 }
 
+void RenderDevice::uploadBatch(const Batch& batch, GPUGeometry& outGeom)
+{
+	if (!outGeom.vao) glGenVertexArrays(1, &outGeom.vao);
+	if (!outGeom.vbo) glGenBuffers(1, &outGeom.vbo);
+	if (!outGeom.ebo && !batch.indices.empty()) glGenBuffers(1, &outGeom.ebo);
+	ASSERT(outGeom.vao && outGeom.vbo);
+	glBindVertexArray(outGeom.vao);
+	glBindBuffer(GL_ARRAY_BUFFER, outGeom.vbo);
+	glBufferData(GL_ARRAY_BUFFER, batch.vertexData.size(), &batch.vertexData.front(), GL_STATIC_DRAW);
+	// Setup attributes
+	for (int i = 0; i < ATTR_MAX; ++i) {
+		const Batch::Attribute& attr = batch.attributes[i];
+		if (attr.components) {
+			glEnableVertexAttribArray(i);
+			glVertexAttribPointer(i, attr.components, attr.type, attr.normalized ? GL_TRUE : GL_FALSE, batch.vertexSize, (GLvoid*)(uintptr_t)attr.offset);
+		} else {
+			glDisableVertexAttribArray(i);
+		}
+	}
+	// Elements
+	if (outGeom.ebo) {
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, outGeom.ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, batch.indices.size() * sizeof(uint), &batch.indices.front(), GL_STATIC_DRAW);
+	}
+	glBindVertexArray(0);
+}
+
 bool RenderDevice::uploadGeometry(Geometry& geometry)
 {
 	if (geometry.batches.empty()) {
@@ -461,34 +498,9 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 		ASSERT(batch.renderId == -1);
 		batch.renderId = m_geometries.size();
 		m_geometries.emplace_back();
-		GPUGeometry& model = m_geometries.back();
-
-		if (!model.vao) glGenVertexArrays(1, &model.vao);
-		if (!model.vbo) glGenBuffers(1, &model.vbo);
-		if (!model.ebo && !batch.indices.empty()) glGenBuffers(1, &model.ebo);
-		ASSERT(model.vao && model.vbo);
-		glBindVertexArray(model.vao);
-		glBindBuffer(GL_ARRAY_BUFFER, model.vbo);
-		glBufferData(GL_ARRAY_BUFFER, batch.vertexData.size(), &batch.vertexData.front(), GL_STATIC_DRAW);
-		// Setup attributes
-		for (int i = 0; i < ATTR_MAX; ++i) {
-			Batch::Attribute& attr = batch.attributes[i];
-			if (attr.components) {
-				glEnableVertexAttribArray(i);
-				glVertexAttribPointer(i, attr.components, attr.type, attr.normalized ? GL_TRUE : GL_FALSE, batch.vertexSize, (GLvoid*)(uintptr_t)attr.offset);
-			} else {
-				glDisableVertexAttribArray(i);
-			}
-		}
-		// Elements
-		if (model.ebo) {
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, model.ebo);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, batch.indices.size() * sizeof(uint), &batch.indices.front(), GL_STATIC_DRAW);
-		}
+		GPUGeometry& mesh = m_geometries.back();
+		uploadBatch(batch, mesh);
 	}
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
 	return true;
 }
 
@@ -605,6 +617,31 @@ const ShaderProgram& RenderDevice::getProgram(uint nameHash)
 	return m_shaders[m_shaderNames[nameHash]];
 }
 
+void RenderDevice::useMaterial(Material& mat)
+{
+	ASSERT(mat.shaderId[m_tech] >= 0);
+	useProgram(m_shaders[mat.shaderId[m_tech]]);
+
+	m_materialBlock.uniforms.ambient = mat.ambient;
+	m_materialBlock.uniforms.diffuse = mat.diffuse;
+	m_materialBlock.uniforms.specular = mat.specular;
+	m_materialBlock.uniforms.shininess = mat.shininess;
+	m_materialBlock.uniforms.reflectivity = mat.reflectivity;
+	m_materialBlock.uniforms.parallax = mat.parallax;
+	m_materialBlock.uniforms.emissive = mat.emissive;
+	m_materialBlock.uniforms.uvOffset = mat.uvOffset;
+	m_materialBlock.uniforms.uvRepeat = mat.uvRepeat;
+	m_materialBlock.upload();
+
+	for (uint i = 0; i < Material::ENV_MAP; ++i) {
+		uint tex = mat.tex[i];
+		if (!tex) continue;
+		glActiveTexture(GL_TEXTURE0 + BINDING_MATERIAL_MAP_START + i);
+		glBindTexture(GL_TEXTURE_2D, tex);
+		//glUniform1i(i, i);
+	}
+}
+
 void RenderDevice::drawSetup(const Transform& transform, const BoneAnimation* animation)
 {
 	m_objectBlock.uniforms.modelMatrix = transform.matrix;
@@ -619,6 +656,17 @@ void RenderDevice::drawSetup(const Transform& transform, const BoneAnimation* an
 		uint numBones = std::min((uint)animation->bones.size(), (uint)MAX_BONES);
 		memcpy(&m_skinningBlock.uniforms.boneMatrices[0], &animation->bones[0], numBones * sizeof(mat3x4));
 		m_skinningBlock.upload();
+	}
+
+	uint envTex = 0;
+	switch (m_tech) {
+		case TECH_COLOR: envTex = m_reflectionFbo.tex[0]; break;
+		case TECH_REFLECTION: envTex = m_skyboxMat.tex[Material::ENV_MAP]; break;
+		default: envTex = m_skyboxMat.tex[Material::ENV_MAP]; break;
+	}
+	if (envTex) {
+		glActiveTexture(GL_TEXTURE0 + BINDING_ENV_MAP);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, envTex);
 	}
 }
 
@@ -694,15 +742,17 @@ void RenderDevice::renderShadow(Model& model, Transform& transform, BoneAnimatio
 void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light>& lights, Technique tech)
 {
 	ASSERT(m_env);
-	FBO* fbo;
-	if (tech == TECH_REFLECTION) fbo = &m_reflectionFbo;
-	else if (m_msaaFbo.valid()) fbo = &m_msaaFbo;
-	else fbo = &m_fbo;
-	fbo->bind();
-	glViewport(0, 0, fbo->width, fbo->height);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glCullFace(GL_BACK);
 	m_tech = tech;
+	if (tech != TECH_COMPUTE) {
+		FBO* fbo;
+		if (tech == TECH_REFLECTION) fbo = &m_reflectionFbo;
+		else if (m_msaaFbo.valid()) fbo = &m_msaaFbo;
+		else fbo = &m_fbo;
+		fbo->bind();
+		glViewport(0, 0, fbo->width, fbo->height);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glCullFace(GL_BACK);
+	}
 	m_program = 0;
 	glUseProgram(0);
 	m_commonBlock.uniforms.projectionMatrix = camera.projection;
@@ -739,14 +789,16 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 	if (tech == TECH_REFLECTION)
 		setupCubeMatrices(m_commonBlock.uniforms.projectionMatrix, camera.position());
 
-	// Shadow map textures
-	for (uint i = 0; i < countof(m_shadowFbo); ++i) {
-		glActiveTexture(GL_TEXTURE0 + BINDING_SHADOW_MAP + i);
-		glBindTexture(m_shadowFbo[i].cube ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, m_shadowFbo[i].tex[0]);
-	}
+	if (tech != TECH_COMPUTE) {
+		// Shadow map textures
+		for (uint i = 0; i < countof(m_shadowFbo); ++i) {
+			glActiveTexture(GL_TEXTURE0 + BINDING_SHADOW_MAP + i);
+			glBindTexture(m_shadowFbo[i].cube ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, m_shadowFbo[i].tex[0]);
+		}
 
-	if (m_wireframe)
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		if (m_wireframe)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	}
 }
 
 void RenderDevice::render(Model& model, Transform& transform, BoneAnimation* animation)
@@ -755,10 +807,6 @@ void RenderDevice::render(Model& model, Transform& transform, BoneAnimation* ani
 	drawSetup(transform, animation);
 
 	bool refl = m_tech == TECH_REFLECTION;
-	uint envTex = m_tech == TECH_COLOR ? m_reflectionFbo.tex[0] : m_skyboxMat.tex[Material::ENV_MAP];
-	glActiveTexture(GL_TEXTURE0 + BINDING_ENV_MAP);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, envTex);
-
 	Geometry& geom = *model.geometry;
 	for (auto& batch : geom.batches) {
 
@@ -767,33 +815,25 @@ void RenderDevice::render(Model& model, Transform& transform, BoneAnimation* ani
 		if (refl && !(mat.flags & Material::DRAW_REFLECTION))
 			continue;
 
-		ASSERT(mat.shaderId[m_tech] >= 0);
-		useProgram(m_shaders[mat.shaderId[m_tech]]);
-
-		m_materialBlock.uniforms.ambient = mat.ambient;
-		m_materialBlock.uniforms.diffuse = mat.diffuse;
-		m_materialBlock.uniforms.specular = mat.specular;
-		m_materialBlock.uniforms.shininess = mat.shininess;
-		m_materialBlock.uniforms.reflectivity = mat.reflectivity;
-		m_materialBlock.uniforms.parallax = mat.parallax;
-		m_materialBlock.uniforms.emissive = mat.emissive;
-		m_materialBlock.uniforms.uvOffset = mat.uvOffset;
-		m_materialBlock.uniforms.uvRepeat = mat.uvRepeat;
-		m_materialBlock.upload();
-
-		for (uint i = 0; i < Material::ENV_MAP; ++i) {
-			uint tex = mat.tex[i];
-			if (!tex) continue;
-			glActiveTexture(GL_TEXTURE0 + BINDING_MATERIAL_MAP_START + i);
-			glBindTexture(GL_TEXTURE_2D, tex);
-			//glUniform1i(i, i);
-		}
-
+		useMaterial(mat);
 		drawBatch(batch, m_tech == TECH_COLOR && (mat.flags & Material::TESSELLATE));
 	}
 	glBindVertexArray(0);
 }
 
+void RenderDevice::render(Particles& particles, Transform& transform)
+{
+	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (m_shadowProj[0] * (m_shadowView[0] * transform.matrix));
+	resizeParticleBuffers(particles.numParticles);
+	drawSetup(transform);
+	useMaterial(particles.material);
+	ASSERT(m_particleBuffer.vao);
+	glBindVertexArray(m_particleBuffer.vao);
+	glDrawElements(GL_TRIANGLES, particles.numParticles * 6, GL_UNSIGNED_INT, 0); // 2 tris = 6 indices = 1 particle
+	glBindVertexArray(0);
+	stats.triangles += particles.numParticles * 2; // Two tris per particles
+	++stats.drawCalls;
+}
 
 void RenderDevice::drawBatch(const Batch& batch, bool tessellate)
 {

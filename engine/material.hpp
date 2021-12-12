@@ -8,6 +8,7 @@ enum Technique {
 	TECH_REFLECTION,
 	TECH_DEPTH,
 	TECH_DEPTH_CUBE,
+	TECH_COMPUTE,
 	NUM_TECHNIQUES
 };
 
@@ -49,6 +50,6 @@ struct Material
 	};
 	uint flags = DIRTY_MAPS | CAST_SHADOW | RECEIVE_SHADOW | DRAW_REFLECTION;
 
-	int shaderId[NUM_TECHNIQUES] = { -1, -1, -1, -1 }; // Automatic
+	int shaderId[NUM_TECHNIQUES] = { -1, -1, -1, -1, -1 }; // Automatic
 	string shaderName = "";
 };

@@ -33,12 +33,15 @@ public:
 
 	void setupRenderPass(const Camera& camera, const std::vector<Light>& lights, Technique tech = TECH_COLOR);
 	void render(Model& model, Transform& transform, BoneAnimation* animation = nullptr);
+	void render(Particles& particles, Transform& transform);
 	void renderSkybox();
 	void postRender();
 
+	void resizeParticleBuffers(uint size);
 	void resizeRenderTargets();
 	void toggleWireframe();
 
+	void useMaterial(Material& material);
 	void useProgram(const ShaderProgram& program);
 	void useProgram(uint nameHash);
 	const ShaderProgram& getProgram(uint nameHash);
@@ -69,9 +72,11 @@ public:
 		struct {
 			float prerender = 0.f;
 			float upload = 0.f;
+			float compute = 0.f;
 			float shadow = 0.f;
 			float reflection = 0.f;
 			float scene = 0.f;
+			float particles = 0.f;
 			float postprocess = 0.f;
 		} times;
 	} stats;
@@ -83,6 +88,7 @@ private:
 		uint vbo = 0;
 		uint ebo = 0;
 	};
+	void uploadBatch(const Batch& batch, GPUGeometry& outGeom);
 	void destroyGeometry(GPUGeometry& geometry);
 
 	int generateShader(uint tags);
@@ -99,6 +105,8 @@ private:
 
 	GPUGeometry m_fullscreenQuad;
 	GPUGeometry m_skyboxCube;
+	GPUGeometry m_particleBuffer;
+	uint m_particleBufferSize = 0;
 	Material m_skyboxMat;
 	Texture m_placeholderTex;
 

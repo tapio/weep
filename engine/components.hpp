@@ -66,6 +66,12 @@ struct Model
 	std::vector<Material> materials;
 };
 
+struct Particles
+{
+	uint numParticles = 0;
+	Material material;
+};
+
 struct GroundTracker
 {
 	bool onGround = false;

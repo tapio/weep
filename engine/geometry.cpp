@@ -145,6 +145,7 @@ Geometry::Geometry(uint numParticleQuads)
 	// TODO: What should this be...?
 	bounds.min = { -10, -10, -10 };
 	bounds.max = { 10, 10, 10 };
+	bounds.radius = 10;
 }
 
 Geometry::~Geometry()
