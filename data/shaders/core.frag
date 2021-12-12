@@ -219,13 +219,13 @@ void main()
 #ifdef USE_DIFFUSE_MAP
 	vec4 diffuseTex = texture(diffuseMap, texcoord);
 	ambientComp *= diffuseTex.rgb;
-#ifdef USE_ALPHA_TEST
-	if (diffuseTex.a < 0.9)
-		discard;
-#endif
-#ifdef USE_ALPHA_BLEND
-	alpha = diffuseTex.a;
-#endif
+	#ifdef USE_ALPHA_TEST
+		if (diffuseTex.a < 0.9)
+			discard;
+	#endif
+	#ifdef USE_ALPHA_BLEND
+		alpha = diffuseTex.a;
+	#endif
 #else // USE_DIFFUSE_MAP
 	vec4 diffuseTex = vec4(1.0);
 #endif
@@ -246,7 +246,8 @@ void main()
 #endif
 
 #ifdef USE_EMISSION_MAP
-	emissionComp *= texture(emissionMap, texcoord).rgb;
+	vec4 emissionTex = texture(emissionMap, texcoord);
+	emissionComp *= emissionTex.rgb;
 #endif
 
 	float sunAmount = 0.0;

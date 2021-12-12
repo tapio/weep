@@ -177,10 +177,24 @@
 			"comp": "shaders/particletest.comp"
 		}
 	},
-	"particles_draw": {
+	"particles_simple": {
 		"version": "430",
 		"defines": [
 			"USE_VERTEX_COLOR"
+		],
+		"shaders" : {
+			"vert": "shaders/particletest.vert",
+			"frag": "shaders/core.frag"
+		}
+	},
+	"particles_textured": {
+		"version": "430",
+		"defines": [
+			"XXX_USE_VERTEX_COLOR",
+			"USE_DIFFUSE",
+			"USE_DIFFUSE_MAP",
+			"USE_EMISSION_MAP",
+			"XXX_USE_ALPHA_TEST"
 		],
 		"shaders" : {
 			"vert": "shaders/particletest.vert",

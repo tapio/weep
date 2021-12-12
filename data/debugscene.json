@@ -185,7 +185,7 @@
 	{
 		"name": "particletest",
 		"material": {
-			"shaderName": "particles_draw",
+			"shaderName": "particles_simple",
 			"diffuse": 1.0,
 			"emissive": 1.0,
 			"castShadow": false,
@@ -195,6 +195,22 @@
 			"particles": 1000000
 		},
 		"position": [ 2, 1, -4 ]
+	},{
+		"name": "particletest2",
+		"material": {
+			"shaderName": "particles_textured",
+			"diffuse": 1.0,
+			"emissive": 1.0,
+			"castShadow": false,
+			"drawReflection" : false,
+			"diffuseMap": "debug/uvtestgrid.png",
+			"emissionMap": "debug/uvtestgrid.png",
+			"alphaTest": false
+		},
+		"geometry": {
+			"particles": 100000
+		},
+		"position": [ 3, 1, -2 ]
 	},
 
 	{
