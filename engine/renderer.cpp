@@ -264,6 +264,12 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	END_GPU_SAMPLE()
 	END_MEASURE(sceneMs)
 
+	// Skybox before transparent pass
+	BEGIN_GPU_SAMPLE(Skybox)
+	m_device->renderSkybox();
+	END_GPU_SAMPLE()
+
+	// TODO: Separate opaque/alphaTest and transparent particles. Also add transparent pass for models.
 	// Particle render pass
 	START_MEASURE(particlesMs)
 	BEGIN_GPU_SAMPLE(ParticleRender)
@@ -280,12 +286,10 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 			END_ENTITY_GPU_SAMPLE()
 		//}
 	});
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
 	END_GPU_SAMPLE()
 	END_MEASURE(particlesMs)
-
-	BEGIN_GPU_SAMPLE(Skybox)
-	m_device->renderSkybox();
-	END_GPU_SAMPLE()
 
 	START_MEASURE(postprocessMs)
 	BEGIN_GPU_SAMPLE(Postprocess)

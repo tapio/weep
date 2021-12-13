@@ -180,7 +180,8 @@
 	"particles_simple": {
 		"version": "430",
 		"defines": [
-			"USE_VERTEX_COLOR"
+			"USE_VERTEX_COLOR",
+			"USE_VERTEX_COLOR_GRADIENT"
 		],
 		"shaders" : {
 			"vert": "shaders/particletest.vert",
@@ -194,7 +195,7 @@
 			"USE_DIFFUSE",
 			"USE_DIFFUSE_MAP",
 			"USE_EMISSION_MAP",
-			"USE_ALPHA_TEST"
+			"USE_ALPHA_BLEND"
 		],
 		"shaders" : {
 			"vert": "shaders/particletest.vert",

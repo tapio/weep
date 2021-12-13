@@ -49,7 +49,11 @@ void main()
 	gl_Position = projectionMatrix * posViewSpace;
 
 #ifdef USE_VERTEX_COLOR
-	outData.color = mix(vec4(0.75, 0.0, 0.0, 1.0), vec4(1.0, 0.5, 0.0, 1.0), phase);
+	#ifdef USE_VERTEX_COLOR_GRADIENT
+	outData.color = mix(vec4(material.ambient, phaseCurve), vec4(material.diffuse, phaseCurve), phase);
+	#else
+	outData.color = vec4(1.0, 1.0, 1.0, phaseCurve);
+	#endif
 #endif
 #ifdef USE_SHADOW_MAP
 	outData.worldPosition = (modelMatrix * particlePos).xyz; // Approx, ignores billboard verts

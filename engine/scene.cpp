@@ -138,6 +138,7 @@ namespace {
 		setNumber(material.shininess, def["shininess"]);
 		setNumber(material.reflectivity, def["reflectivity"]);
 		setNumber(material.parallax, def["parallax"]);
+		setEnum(material.blendFunc, def["blendFunc"]);
 		setNumber(material.alphaTest, def["alphaTest"]);
 		if (def["alphaTest"].is_bool() && def["alphaTest"].bool_value())
 			material.alphaTest = 0.9f; // Backwards compat

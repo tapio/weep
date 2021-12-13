@@ -559,6 +559,8 @@ bool RenderDevice::uploadMaterial(Material& material)
 		tag |= USE_ANIMATION;
 	if (material.alphaTest > 0.f)
 		tag |= USE_ALPHA_TEST;
+	if (material.blendFunc != Material::BLEND_NONE)
+		tag |= USE_ALPHA_BLEND;
 	if (material.map[Material::DIFFUSE_MAP])
 		tag |= USE_DIFFUSE_MAP | USE_DIFFUSE;
 	if (material.map[Material::NORMAL_MAP])
@@ -801,6 +803,9 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 		glViewport(0, 0, fbo->width, fbo->height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glCullFace(GL_BACK);
+		// Fail-safes
+		glDisable(GL_BLEND);
+		glDepthMask(GL_TRUE);
 	}
 	m_program = 0;
 	glUseProgram(0);
@@ -818,7 +823,7 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 	m_commonBlock.uniforms.near = camera.near;
 	m_commonBlock.uniforms.far = camera.far;
 	m_commonBlock.uniforms.dt = Engine::deltaTime();
-	m_commonBlock.uniforms.time = Engine::timems() / 1000.f;
+	m_commonBlock.uniforms.time = Engine::timems() / 1000.f; // TODO: * Engine::timeMult
 
 	uint numLights = std::min((int)lights.size(), MAX_LIGHTS);
 	m_commonBlock.uniforms.numLights = numLights;
@@ -877,6 +882,22 @@ void RenderDevice::renderParticles(Particles& particles, Transform& transform)
 	resizeParticleRenderBuffers(particles.count);
 	drawSetup(transform);
 	useMaterial(particles.material);
+
+	// TODO: Move to use material, but be smart with calls, maybe TECH_TRANSPARENT?
+	if (particles.material.blendFunc == Material::BLEND_NONE) {
+		glDisable(GL_BLEND);
+		glDepthMask(GL_TRUE);
+	} else {
+		glEnable(GL_BLEND);
+		glDepthMask(GL_FALSE);
+		switch (particles.material.blendFunc) {
+			case Material::BLEND_NONE: break;
+			case Material::BLEND_ALPHA:    glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glBlendEquationi(0, GL_FUNC_ADD); break;
+			case Material::BLEND_ADD:      glBlendFunci(0, GL_SRC_ALPHA, GL_ONE); glBlendEquationi(0, GL_FUNC_ADD); break;
+			case Material::BLEND_SUBTRACT: glBlendFunci(0, GL_SRC_ALPHA, GL_ONE); glBlendEquationi(0, GL_FUNC_REVERSE_SUBTRACT); break;
+		}
+	}
+
 	bindParticleBuffers(particles);
 	ASSERT(m_particleRenderBuffer.vao);
 	ASSERT(m_particleRenderBuffer.vbo);
@@ -983,8 +1004,10 @@ void RenderDevice::renderSkybox()
 		setupCubeMatrices(m_commonBlock.uniforms.projectionMatrix, vec3(0, 0, 0));
 	} else {
 		// Remove translation
-		m_commonBlock.uniforms.viewMatrix = glm::mat4(glm::mat3(m_commonBlock.uniforms.viewMatrix));
+		glm::mat4 viewMatBackup = m_commonBlock.uniforms.viewMatrix;
+		m_commonBlock.uniforms.viewMatrix = glm::mat4(glm::mat3(viewMatBackup));
 		m_commonBlock.upload();
+		m_commonBlock.uniforms.viewMatrix = viewMatBackup;
 	}
 	glBindVertexArray(m_skyboxCube.vao);
 	glActiveTexture(GL_TEXTURE0 + BINDING_ENV_MAP);
@@ -994,6 +1017,9 @@ void RenderDevice::renderSkybox()
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glDepthFunc(GL_LESS);
+	if (m_tech != TECH_REFLECTION) {
+		m_commonBlock.upload(); // Restore viewMatrix
+	}
 	++stats.drawCalls;
 	stats.triangles += 36;
 }
