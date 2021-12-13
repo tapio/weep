@@ -495,6 +495,8 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 		setVec2(particles.lifeTimeMinMax, particleDef["lifeTime"]);
 		setVec2(particles.speedMinMax, particleDef["speed"]);
 		setNumber(particles.directionality, particleDef["directionality"]);
+		setNumber(particles.randomRotation, particleDef["randomRotation"]);
+		setBool(particles.emit, particleDef["emit"]);
 		setBool(particles.localSpace, particleDef["localSpace"]);
 
 		const Json& materialDef = def["material"]; // Not embedded in particleDef

@@ -74,11 +74,13 @@ struct Particles
 	Bounds bounds;
 	Material material;
 
+	bool emit = true;
+	bool localSpace = false;
+	float directionality = 0.f;
+	float randomRotation = 0.f;
 	vec2 emitRadiusMinMax = vec2(0.f, 0.f);
 	vec2 lifeTimeMinMax = vec2(0.f, 1.f);
 	vec2 speedMinMax = vec2(0.1f, 1.f);
-	float directionality = 0.f;
-	bool localSpace = false;
 };
 
 struct GroundTracker

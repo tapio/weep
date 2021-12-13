@@ -41,8 +41,9 @@ UBO_PREFIX(UniformObjectBlock, 1)
 };
 
 UBO_PREFIX(UniformParticleBlock, 2)
+	float emit; float localSpace; float directionality; float randomRotation;
 	vec2 emitRadiusMinMax; vec2 lifeTimeMinMax;
-	vec2 speedMinMax; float directionality; float localSpace;
+	vec2 speedMinMax; vec2 pad1;
 UBO_SUFFIX(particle)
 
 UBO_PREFIX(UniformMaterialBlock, 3)
@@ -98,6 +99,7 @@ UBO_PREFIX(UniformPostProcessBlock, 7)
 #define BINDING_SSBO_POSITION 30
 #define BINDING_SSBO_VELOCITY 31
 #define BINDING_SSBO_LIFE 32
+#define BINDING_SSBO_EXTRA 33
 
 #ifndef __cplusplus
 

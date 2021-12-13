@@ -532,6 +532,7 @@ bool RenderDevice::uploadParticleBuffers(Particles& particles)
 	addBuffer(3); // vec3 pos
 	addBuffer(3); // vec3 vel
 	addBuffer(2); // vec2 life
+	addBuffer(1); // vec1 extra
 
 	particles.renderId = m_particleBuffers.size();
 	m_particleBuffers.emplace_back(std::move(buffers));
@@ -906,10 +907,12 @@ void RenderDevice::computeParticles(Particles& particles, Transform& transform)
 
 	drawSetup(transform);
 
+	m_particleBlock.uniforms.emit = particles.emit ? 1.f : 0.f;
 	m_particleBlock.uniforms.emitRadiusMinMax = particles.emitRadiusMinMax;
 	m_particleBlock.uniforms.lifeTimeMinMax = particles.lifeTimeMinMax;
 	m_particleBlock.uniforms.speedMinMax = particles.speedMinMax;
 	m_particleBlock.uniforms.directionality = particles.directionality;
+	m_particleBlock.uniforms.randomRotation = particles.randomRotation;
 	m_particleBlock.uniforms.localSpace = particles.localSpace ? 1.f : 0.f;
 	m_particleBlock.upload();
 

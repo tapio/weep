@@ -18,6 +18,18 @@ layout(std430, binding = BINDING_SSBO_LIFE) buffer LifeBuffer
 	vec2 life[];
 };
 
+layout(std430, binding = BINDING_SSBO_EXTRA) buffer ExtraBuffer
+{
+	float rot[];
+};
+
+vec2 rotate2d(vec2 v, float a) {
+	float s = sin(a);
+	float c = cos(a);
+	mat2 m = mat2(c, -s, s, c);
+	return m * v;
+}
+
 void main()
 {
 	uint particleId = gl_VertexID / 4;
@@ -25,6 +37,11 @@ void main()
 	float phase = 1.0 - life[particleId].x / life[particleId].y;
 	float phaseCurve = sqrt(sin(PI * phase)); // Inverted U
 	vec4 localVertexPos = vec4(position * vec3(material.particleSize * phaseCurve, 0.0), 1.0);
+
+	float rot = rot[particleId];
+	if (rot != 0.0) {
+		localVertexPos.xy = rotate2d(localVertexPos.xy, rot);
+	}
 
 	// Billboard shenanigans
 	mat4 modelView = modelViewMatrix;

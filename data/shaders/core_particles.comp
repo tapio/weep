@@ -16,6 +16,12 @@ layout(std430, binding = BINDING_SSBO_LIFE) buffer LifeBuffer
 	vec2 life[];
 };
 
+layout(std430, binding = BINDING_SSBO_EXTRA) buffer ExtraBuffer
+{
+	float rot[];
+};
+
+
 float rand(vec2 seed) {
 	return fract(sin(dot(seed, vec2(12.9898, 78.233))) * 43758.5453);
 }
@@ -39,10 +45,22 @@ void main()
 	if (dt <= 0.0)
 		return;
 	uint index = gl_GlobalInvocationID.x;
-	if (life[index].x <= 0.0) {
+
+	if (life[index].x > 0.0) {
+		life[index].x = max(life[index].x - dt, 0.0);
+		pos[index] += vel[index] * dt;
+		//vec3 acc = -normalize(pos[index]) * (G / length(pos[index]));
+		//vel[index] += acc * dt;
+	} else if (particle.emit > 0.01) {
 		float seed = float(index) / float(gl_NumWorkGroups.x) * dt + sin(time) + 0.17231;
 		life[index].x = max(randRange(particle.lifeTimeMinMax.x, particle.lifeTimeMinMax.y, vec2(seed, 3.4)), 0.01);
 		life[index].y = life[index].x; // Original max life
+		if (particle.randomRotation > 0.01) {
+			float halfRange = particle.randomRotation * 3.141592;
+			rot[index] = randRange(-halfRange, halfRange, vec2(seed, 7.13));
+		} else {
+			rot[index] = 0.0;
+		}
 		// Pick position inside a sphere
 		float radius = mix(particle.emitRadiusMinMax.x, particle.emitRadiusMinMax.y, rand(vec2(seed, 1.267)));
 		pos[index] = randDir(seed) * radius;
@@ -52,18 +70,13 @@ void main()
 		vec3 dir = normalize(mix(naturalDir, forward, particle.directionality));
 		vel[index] = dir * randRange(particle.speedMinMax.x, particle.speedMinMax.y, vec2(seed, 3.4));
 		// World space conversion at the end
-		if (particle.localSpace < 0.5) {
+		if (particle.localSpace < 0.01) {
 			pos[index] = (modelMatrix * vec4(pos[index], 1.0)).xyz;
 			vel[index] = (modelMatrix * vec4(vel[index], 0.0)).xyz;
 		}
 
 		// Orbit test: Try to find velocity somewhat perpendicular to the center
 		//vel[index] = cross(-dir, randDir(seed * 0.345)) * 0.5 + dir * 0.5;
-
-	} else {
-		life[index].x = max(life[index].x - dt, 0.0);
-		pos[index] += vel[index] * dt;
-		//vec3 acc = -normalize(pos[index]) * (G / length(pos[index]));
-		//vel[index] += acc * dt;
 	}
+
 }
