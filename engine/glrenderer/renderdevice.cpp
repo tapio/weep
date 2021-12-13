@@ -685,6 +685,13 @@ void RenderDevice::useMaterial(Material& mat)
 		m_materialBlock.uniforms.reflectivity = mat.reflectivity;
 		m_materialBlock.uniforms.parallax = mat.parallax;
 		m_materialBlock.uniforms.emissive = mat.emissive;
+
+		switch (mat.blendFunc) {
+			case Material::BLEND_NONE: break;
+			case Material::BLEND_ALPHA:    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glBlendEquation(GL_FUNC_ADD); break;
+			case Material::BLEND_ADD:      glBlendFunc(GL_SRC_ALPHA, GL_ONE); glBlendEquation(GL_FUNC_ADD); break;
+			case Material::BLEND_SUBTRACT: glBlendFunc(GL_SRC_ALPHA, GL_ONE); glBlendEquation(GL_FUNC_REVERSE_SUBTRACT); break;
+		}
 	} else if (mat.alphaTest > 0.f) {
 		// Alpha test needs diffuse map to test against, even with depth-only pass
 		glActiveTexture(GL_TEXTURE0 + BINDING_DIFFUSE_MAP);
@@ -882,22 +889,6 @@ void RenderDevice::renderParticles(Particles& particles, Transform& transform)
 	resizeParticleRenderBuffers(particles.count);
 	drawSetup(transform);
 	useMaterial(particles.material);
-
-	// TODO: Move to use material, but be smart with calls, maybe TECH_TRANSPARENT?
-	if (particles.material.blendFunc == Material::BLEND_NONE) {
-		glDisable(GL_BLEND);
-		glDepthMask(GL_TRUE);
-	} else {
-		glEnable(GL_BLEND);
-		glDepthMask(GL_FALSE);
-		switch (particles.material.blendFunc) {
-			case Material::BLEND_NONE: break;
-			case Material::BLEND_ALPHA:    glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); glBlendEquationi(0, GL_FUNC_ADD); break;
-			case Material::BLEND_ADD:      glBlendFunci(0, GL_SRC_ALPHA, GL_ONE); glBlendEquationi(0, GL_FUNC_ADD); break;
-			case Material::BLEND_SUBTRACT: glBlendFunci(0, GL_SRC_ALPHA, GL_ONE); glBlendEquationi(0, GL_FUNC_REVERSE_SUBTRACT); break;
-		}
-	}
-
 	bindParticleBuffers(particles);
 	ASSERT(m_particleRenderBuffer.vao);
 	ASSERT(m_particleRenderBuffer.vbo);

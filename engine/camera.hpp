@@ -35,6 +35,7 @@ struct Camera
 	}
 
 	vec3 position() const { return -view[3] * view; }
+	vec3 forward() const { return vec4(0, 0, -1, 0) * view; }
 
 	mat4 projection = mat4();
 	mat4 view = mat4();

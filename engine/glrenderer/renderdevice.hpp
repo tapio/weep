@@ -79,8 +79,8 @@ public:
 			float compute = 0.f;
 			float shadow = 0.f;
 			float reflection = 0.f;
-			float scene = 0.f;
-			float particles = 0.f;
+			float opaque = 0.f;
+			float transparent = 0.f;
 			float postprocess = 0.f;
 		} times;
 	} stats;

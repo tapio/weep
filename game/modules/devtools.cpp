@@ -82,8 +82,8 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 						ImGui::Text("Compute:      %.3fms", stats.times.compute);
 						ImGui::Text("Shadow:       %.3fms", stats.times.shadow);
 						ImGui::Text("Reflection:   %.3fms", stats.times.reflection);
-						ImGui::Text("Scene:        %.3fms", stats.times.scene);
-						ImGui::Text("Particles:    %.3fms", stats.times.particles);
+						ImGui::Text("Opaque Scene: %.3fms", stats.times.opaque);
+						ImGui::Text("Transparent:  %.3fms", stats.times.transparent);
 						ImGui::Text("Postprocess:  %.3fms", stats.times.postprocess);
 						ImGui::TreePop();
 					}

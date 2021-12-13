@@ -65,6 +65,9 @@ void RenderSystem::toggleWireframe()
 	m_device->toggleWireframe();
 }
 
+static inline bool useTransparentPass(Model& model) { return !model.materials.empty() && model.materials[0].blendFunc != Material::BLEND_NONE; }
+static inline bool useTransparentPass(Particles& particles) { return particles.material.blendFunc != Material::BLEND_NONE; }
+
 void RenderSystem::render(Entities& entities, Camera& camera, const Transform& camTransform)
 {
 	m_device->stats = RenderDevice::Stats();
@@ -83,10 +86,29 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	START_MEASURE(prerenderMs)
 	vec3 camPos = camTransform.position;
 	quat camRot = camTransform.rotation;
+	vec3 camDir = camRot * vec3(0, 0, -1);
 	camera.updateViewMatrix(camPos, camRot);
 	Frustum frustum(camera, camPos, camRot);
 
-	entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
+	auto calcSignedDepth = [camPos, camDir](vec3 pos) {
+		float depth = glm::distance2(camPos, pos);
+		if (glm::dot(camDir, pos - camPos) < 0.f)
+			return -depth;
+		return depth;
+	};
+
+	struct SortedDrawCall {
+		SortedDrawCall(Entity e, Transform* trans, float prio): priority(prio), entity(e), transform(trans) { }
+		float priority = 0.f;
+		Entity entity;
+		Transform* transform  = nullptr;
+		Model* model = nullptr;
+		Particles* particles = nullptr;
+	};
+	static std::vector<SortedDrawCall> sortedDrawCalls;
+	sortedDrawCalls.clear();
+
+	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 		// Update transform
 		transform.updateMatrix();
 		// Update LOD
@@ -96,9 +118,20 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		model.geometry = settings.forceLod >= 0 ? model.lods[settings.forceLod].geometry
 			: model.getLod2(glm::distance2(camPos, transform.position));
 		#endif
+		if (useTransparentPass(model) && !model.materials.empty() && model.geometry && frustum.visible(transform, model.bounds)) {
+			sortedDrawCalls.emplace_back(e, &transform, calcSignedDepth(transform.position));
+			sortedDrawCalls.back().model = &model;
+		}
 	});
-	entities.for_each<Particles, Transform>([&](Entity, Particles& particles, Transform& transform) {
+	entities.for_each<Particles, Transform>([&](Entity e, Particles& particles, Transform& transform) {
 		transform.updateMatrix();
+		if (useTransparentPass(particles) && particles.count) { // TODO: Particle culling
+			sortedDrawCalls.emplace_back(e, &transform, calcSignedDepth(transform.position));
+			sortedDrawCalls.back().particles = &particles;
+		}
+	});
+	std::sort(sortedDrawCalls.begin(), sortedDrawCalls.end(), [](const SortedDrawCall& a, const SortedDrawCall& b) {
+		return a.priority > b.priority; // Depth sorting works the other way around
 	});
 
 	if (settings.dynamicReflections) {
@@ -250,46 +283,61 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	END_GPU_SAMPLE()
 	END_MEASURE(reflectionMs)
 
-	// Scene color pass
-	START_MEASURE(sceneMs)
-	BEGIN_GPU_SAMPLE(ScenePass)
+	// Scene opaque color pass
+	START_MEASURE(opaqueMs)
+	BEGIN_GPU_SAMPLE(OpaqueGeometry)
 	m_device->setupRenderPass(camera, lights, TECH_COLOR);
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
-		if (!model.materials.empty() && model.geometry && frustum.visible(transform, model.bounds)) {
+		if (!model.materials.empty() && model.geometry && frustum.visible(transform, model.bounds) && !useTransparentPass(model)) {
 			BEGIN_ENTITY_GPU_SAMPLE("Render", e)
 			m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
 			END_ENTITY_GPU_SAMPLE()
 		}
 	});
 	END_GPU_SAMPLE()
-	END_MEASURE(sceneMs)
+	//BEGIN_GPU_SAMPLE(ShaderStorageBarrier)
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	//END_GPU_SAMPLE()
+	BEGIN_GPU_SAMPLE(OpaqueParticles)
+	entities.for_each<Particles, Transform>([&](Entity e, Particles& particles, Transform& transform) {
+		if (particles.count == 0)
+			return;
+		// TODO: Particle culling
+		if (/*frustum.visible(transform, particles.bounds) && */ !useTransparentPass(particles)) {
+			BEGIN_ENTITY_GPU_SAMPLE("RenderParticles", e)
+			m_device->renderParticles(particles, transform);
+			END_ENTITY_GPU_SAMPLE()
+		}
+	});
+	END_GPU_SAMPLE()
+	END_MEASURE(opaqueMs)
 
 	// Skybox before transparent pass
 	BEGIN_GPU_SAMPLE(Skybox)
 	m_device->renderSkybox();
 	END_GPU_SAMPLE()
 
-	// TODO: Separate opaque/alphaTest and transparent particles. Also add transparent pass for models.
-	// Particle render pass
-	START_MEASURE(particlesMs)
-	BEGIN_GPU_SAMPLE(ParticleRender)
-	//BEGIN_GPU_SAMPLE(ShaderStorageBarrier)
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-	//END_GPU_SAMPLE()
-	entities.for_each<Particles, Transform>([&](Entity e, Particles& particles, Transform& transform) {
-		if (particles.count == 0)
-			return;
-		// TODO: Particle culling
-		//if (frustum.visible(transform, particles.bounds)) {
-			BEGIN_ENTITY_GPU_SAMPLE("Render", e)
-			m_device->renderParticles(particles, transform);
+	// Transparent render pass
+	START_MEASURE(transparentMs)
+	BEGIN_GPU_SAMPLE(TransparentPass)
+	glDepthMask(GL_FALSE);
+	glEnable(GL_BLEND);
+	for (const SortedDrawCall& cmd : sortedDrawCalls) {
+		// Pre culled and checked, can just render away!
+		if (cmd.model) {
+			BEGIN_ENTITY_GPU_SAMPLE("Render", cmd.entity)
+			m_device->render(*cmd.model, *cmd.transform, cmd.entity.has<BoneAnimation>() ? &cmd.entity.get<BoneAnimation>() : nullptr);
 			END_ENTITY_GPU_SAMPLE()
-		//}
-	});
+		} else if (cmd.particles) {
+			BEGIN_ENTITY_GPU_SAMPLE("RenderParticles", cmd.entity)
+			m_device->renderParticles(*cmd.particles, *cmd.transform);
+			END_ENTITY_GPU_SAMPLE()
+		}
+	};
 	glDepthMask(GL_TRUE);
 	glDisable(GL_BLEND);
 	END_GPU_SAMPLE()
-	END_MEASURE(particlesMs)
+	END_MEASURE(transparentMs)
 
 	START_MEASURE(postprocessMs)
 	BEGIN_GPU_SAMPLE(Postprocess)
@@ -303,7 +351,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	stats.times.compute = computeMs;
 	stats.times.shadow = shadowMs;
 	stats.times.reflection = reflectionMs;
-	stats.times.scene = sceneMs;
-	stats.times.particles = particlesMs;
+	stats.times.opaque = opaqueMs;
+	stats.times.transparent = transparentMs;
 	stats.times.postprocess = postprocessMs;
 }
