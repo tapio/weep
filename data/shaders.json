@@ -190,7 +190,7 @@
 	"particles_textured": {
 		"version": "430",
 		"defines": [
-			"XXX_USE_VERTEX_COLOR",
+			"USE_VERTEX_COLOR",
 			"USE_DIFFUSE",
 			"USE_DIFFUSE_MAP",
 			"USE_EMISSION_MAP",
