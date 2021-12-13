@@ -100,6 +100,16 @@ Each object (entity) can have the following properties (most are optional):
 	* _"heightMap"_: string, needed to enable parallax mapping
 	* _"aoMap"_: string
 	* _"reflectionMap"_: string
+* _"particles"_: particle emitter configuration object
+	* _"count"_: int, maximum amount of particles
+	* _"compute"_: string, name of the compute shader to use for simulating the particles
+	* _"emit"_: bool, can be used for disabling new particle emission by setting to false (default: true)
+	* _"localSpace"_: bool, if false, will simulate in world space, i.e. emitted particles will not follow emitter transform (default: false)
+	* _"directionality"_: float, from 0 to 1, 0 means emit omni directionally, 1 means only emit to entity forward direction (default: 0)
+	* _"randomRotation"_: float, from 0 to 1, how much random (view space billboard) rotation is applied to the particle quad
+	* _"emitRadiusMinMax"_: vec2, min and max value for emission sphere radius
+	* _"lifeTimeMinMax"_: = vec2, min and max life time for newly emitted particles 
+	* _"speedMinMax"_: = vec2, min and max speed for newly emitted particles
 * _"body"_: physics body configuration object
 	* _"mass"_: float, use 0 or leave out for static objects
 	* _"shape"_: string: "box", "sphere", "cylinder", "capsule", "trimesh"

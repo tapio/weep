@@ -34,6 +34,7 @@ Most are quite unpolished...
 	- #define based uber shader
 	- Automatic shader permutation generation based on material properties
 	- Automatic shader reload on file change
+* Compute shader based GPU particle system
 * Mesh loading from Wavefront .obj, Inter-Quake Model .iqm and heightmap images
 * Basic skeletal animation (GPU skinning)
 * Entity-component based architecture

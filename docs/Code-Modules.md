@@ -7,6 +7,10 @@ A module must export the following function:
 
 	EXPORT void ModuleFunc(uint msg, void* param);
 
+However, to support embedded modules, it should be written as follows:
+
+	EXPORT void MODULE_FUNC_NAME(uint msg, void* param);
+
 The engine uses this function to communicate with the module. The msg param is a compile time hash (e.g. `$id(INIT)`) which identifies what the module is expected to do, and the void* param is interpreted depending on the message. Modules can also send custom messages to each other through the ModuleSystem's `call` function. Handling messages is optional and unknown messages should be ignored.
 
 Messages that the engine sends automatically to all active modules:
@@ -21,3 +25,17 @@ Messages that the engine sends automatically to all active modules:
 * **DEINIT**, param: Game*
 	* Sent when the module is unloaded
 
+
+Embedded Modules
+----------------
+
+Due to various difficulties with DLL boundaries, the modules don't always work well. Also, using a debugger is somewhat easier with just one binary.
+As such, Weep also supports building modules inside the executable, in which case they cannot be hotloaded, but the API and usage from code is identical.
+
+To support this, main.cpp needs to know about and register the embedded modules, which is done by two lines of macros:
+
+	DECLARE_MODULE_FUNC(mymodulename);
+
+	REGISTER_MODULE_FUNC(modules, mymodulename);
+
+See main.cpp for more details.
