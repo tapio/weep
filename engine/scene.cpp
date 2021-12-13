@@ -416,6 +416,8 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 			info.name = def["prefab"].string_value() + "#";
 		else if (def["geometry"].is_string())
 			info.name = def["geometry"].string_value() + "#";
+		else if (def["particles"].is_object())
+			info.name = "particles#";
 		else info.name = "object#";
 		info.name += std::to_string(debugId++);
 		entity.tag(info.name);

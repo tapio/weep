@@ -182,7 +182,6 @@
 	},
 
 	{
-		"name": "particletest",
 		"material": {
 			"shaderName": "particles_simple",
 			"diffuse": 1.0,
@@ -196,7 +195,6 @@
 		},
 		"position": [ 2, 1, -4 ]
 	},{
-		"name": "particletest2",
 		"material": {
 			"shaderName": "particles_textured",
 			"diffuse": 1.0,
