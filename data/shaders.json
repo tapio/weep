@@ -174,7 +174,7 @@
 		"version": "430",
 		"defines": [],
 		"shaders": {
-			"comp": "shaders/particletest.comp"
+			"comp": "shaders/core_particles.comp"
 		}
 	},
 	"particles_simple": {
@@ -184,7 +184,7 @@
 			"USE_VERTEX_COLOR_GRADIENT"
 		],
 		"shaders" : {
-			"vert": "shaders/particletest.vert",
+			"vert": "shaders/core_particles.vert",
 			"frag": "shaders/core.frag"
 		}
 	},
@@ -199,7 +199,7 @@
 			"USE_LOCAL_SPACE"
 		],
 		"shaders" : {
-			"vert": "shaders/particletest.vert",
+			"vert": "shaders/core_particles.vert",
 			"frag": "shaders/core.frag"
 		}
 	}
