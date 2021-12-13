@@ -214,7 +214,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 			return;
 		// TODO: Culling
 		BEGIN_ENTITY_GPU_SAMPLE("Compute", e)
-		m_device->computeParticles(particles);
+		m_device->computeParticles(particles, transform);
 		END_ENTITY_GPU_SAMPLE()
 	});
 	END_GPU_SAMPLE()

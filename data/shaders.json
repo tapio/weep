@@ -195,7 +195,8 @@
 			"USE_DIFFUSE",
 			"USE_DIFFUSE_MAP",
 			"USE_EMISSION_MAP",
-			"USE_ALPHA_BLEND"
+			"USE_ALPHA_BLEND",
+			"USE_LOCAL_SPACE"
 		],
 		"shaders" : {
 			"vert": "shaders/particletest.vert",

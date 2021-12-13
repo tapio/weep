@@ -169,6 +169,7 @@ RenderDevice::RenderDevice(Resources& resources)
 	logDebug("Creating uniform blocks...");
 	m_commonBlock.create();
 	m_objectBlock.create();
+	m_particleBlock.create();
 	m_materialBlock.create();
 	m_lightBlock.create();
 	m_cubeMatrixBlock.create();
@@ -724,9 +725,7 @@ void RenderDevice::drawSetup(const Transform& transform, const BoneAnimation* an
 	uint envTex = 0;
 	switch (m_tech) {
 		case TECH_COLOR: envTex = m_reflectionFbo.tex[0]; break;
-		case TECH_REFLECTION:
-		case TECH_COMPUTE:
-			envTex = m_skyboxMat.tex[Material::ENV_MAP]; break;
+		case TECH_REFLECTION: envTex = m_skyboxMat.tex[Material::ENV_MAP]; break;
 		default: break;
 	}
 	if (envTex) {
@@ -900,10 +899,20 @@ void RenderDevice::renderParticles(Particles& particles, Transform& transform)
 	++stats.drawCalls;
 }
 
-void RenderDevice::computeParticles(Particles& particles)
+void RenderDevice::computeParticles(Particles& particles, Transform& transform)
 {
 	const ShaderProgram& compShader = getProgram(particles.computeId);
 	compShader.use();
+
+	drawSetup(transform);
+
+	m_particleBlock.uniforms.emitRadiusMinMax = particles.emitRadiusMinMax;
+	m_particleBlock.uniforms.lifeTimeMinMax = particles.lifeTimeMinMax;
+	m_particleBlock.uniforms.speedMinMax = particles.speedMinMax;
+	m_particleBlock.uniforms.directionality = particles.directionality;
+	m_particleBlock.uniforms.localSpace = particles.localSpace ? 1.f : 0.f;
+	m_particleBlock.upload();
+
 	bindParticleBuffers(particles);
 	compShader.compute(particles.count / PARTICLE_GROUP_SIZE);
 }

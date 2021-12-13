@@ -30,7 +30,7 @@ public:
 
 	bool uploadParticleBuffers(Particles& particles);
 	void bindParticleBuffers(Particles& particles);
-	void computeParticles(Particles& particles);
+	void computeParticles(Particles& particles, Transform& transform);
 	void renderParticles(Particles& particles, Transform& transform);
 
 	void setupShadowPass(const Light& light, uint index);
@@ -127,6 +127,7 @@ private:
 	bool m_wireframe = false;
 	UBO<UniformCommonBlock> m_commonBlock;
 	UBO<UniformObjectBlock> m_objectBlock;
+	UBO<UniformParticleBlock> m_particleBlock;
 	UBO<UniformMaterialBlock> m_materialBlock;
 	UBO<UniformLightBlock> m_lightBlock;
 	UBO<UniformCubeMatrixBlock> m_cubeMatrixBlock;

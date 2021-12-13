@@ -103,6 +103,16 @@ namespace {
 		}
 	}
 
+	void setBool(bool& dst, const Json& src) {
+		if (src.is_bool())
+			dst = src.bool_value();
+	}
+
+	void setVec2(vec2& dst, const Json& src) {
+		if (!src.is_null())
+			dst = toVec2(src);
+	}
+
 	void setVec3(vec3& dst, const Json& src) {
 		if (!src.is_null())
 			dst = toVec3(src);
@@ -143,12 +153,9 @@ namespace {
 		if (def["alphaTest"].is_bool() && def["alphaTest"].bool_value())
 			material.alphaTest = 0.9f; // Backwards compat
 
-		if (!def["uvOffset"].is_null())
-			material.uvOffset = toVec2(def["uvOffset"]);
-		if (!def["uvRepeat"].is_null())
-			material.uvRepeat = toVec2(def["uvRepeat"]);
-		if (!def["particleSize"].is_null())
-			material.particleSize = toVec2(def["particleSize"]);
+		setVec2(material.uvOffset, def["uvOffset"]);
+		setVec2(material.uvRepeat, def["uvRepeat"]);
+		setVec2(material.particleSize, def["particleSize"]);
 
 		if (!def["diffuseMap"].is_null()) {
 			material.map[Material::DIFFUSE_MAP] = resources.getImageAsync(resolvePath(pathContext, def["diffuseMap"].string_value()));
@@ -484,6 +491,12 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 		Particles particles;
 		setNumber(particles.count, particleDef["count"]);
 		setHash(particles.computeId, particleDef["compute"]);
+		setVec2(particles.emitRadiusMinMax, particleDef["emitRadius"]);
+		setVec2(particles.lifeTimeMinMax, particleDef["lifeTime"]);
+		setVec2(particles.speedMinMax, particleDef["speed"]);
+		setNumber(particles.directionality, particleDef["directionality"]);
+		setBool(particles.localSpace, particleDef["localSpace"]);
+
 		const Json& materialDef = def["material"]; // Not embedded in particleDef
 		if (materialDef.is_object()) {
 			parseMaterial(particles.material, materialDef, resources, pathContext);

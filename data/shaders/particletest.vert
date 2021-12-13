@@ -24,6 +24,7 @@ void main()
 	vec4 particlePos = vec4(pos[particleId], 1.0);
 	float phase = 1.0 - life[particleId].x / life[particleId].y;
 	float phaseCurve = sqrt(sin(PI * phase)); // Inverted U
+	vec4 localVertexPos = vec4(position * vec3(material.particleSize * phaseCurve, 0.0), 1.0);
 
 	// Billboard shenanigans
 	mat4 modelView = modelViewMatrix;
@@ -37,10 +38,31 @@ void main()
 	modelView[2][1] = 0.0;
 	modelView[2][2] = 1.0; //modelMatrix[2][2];
 
-	// Transform particle pos to view space
+#ifdef USE_LOCAL_SPACE
+
+	// Transform particle pos (from local space) to view space
 	vec4 posViewSpace = modelViewMatrix * particlePos;
 	// Add vertex offsets that are transformed with a matrix with rotation removed
-	posViewSpace += modelView * vec4(position * vec3(material.particleSize * phaseCurve, 0.0), 1.0);
+	posViewSpace += modelView * localVertexPos;
+
+	#ifdef USE_SHADOW_MAP
+	outData.worldPosition = (modelMatrix * particlePos).xyz; // Approx, ignores billboard verts
+	outData.shadowcoord = shadowMatrix * particlePos; // Approx, ignores billboard verts
+	#endif
+
+#else // USE_LOCAL_SPACE
+
+	// Transform particle pos (already in world space) to view space
+	vec4 posViewSpace = viewMatrix * particlePos;
+	// Add vertex offsets that are transformed with a matrix with rotation removed
+	posViewSpace += modelView * localVertexPos;
+
+	#ifdef USE_SHADOW_MAP
+	outData.worldPosition = particlePos.xyz; // Approx, ignores billboard verts
+	outData.shadowcoord = shadowMatrix * particlePos; // TODO: This is wrong, pos is in wrong space
+	#endif
+
+#endif // USE_LOCAL_SPACE
 
 	outData.normal = vec3(0, 0, 1);
 	outData.position = posViewSpace.xyz;
@@ -54,9 +76,5 @@ void main()
 	#else
 	outData.color = vec4(1.0, 1.0, 1.0, phaseCurve);
 	#endif
-#endif
-#ifdef USE_SHADOW_MAP
-	outData.worldPosition = (modelMatrix * particlePos).xyz; // Approx, ignores billboard verts
-	outData.shadowcoord = shadowMatrix * particlePos; // Approx, ignores billboard verts
 #endif
 }

@@ -40,7 +40,12 @@ UBO_PREFIX(UniformObjectBlock, 1)
 	mat4 normalMatrix; // Problems with alignment if sent as mat3
 };
 
-UBO_PREFIX(UniformMaterialBlock, 2)
+UBO_PREFIX(UniformParticleBlock, 2)
+	vec2 emitRadiusMinMax; vec2 lifeTimeMinMax;
+	vec2 speedMinMax; float directionality; float localSpace;
+UBO_SUFFIX(particle)
+
+UBO_PREFIX(UniformMaterialBlock, 3)
 	vec3 ambient; float alphaTest;
 	vec3 diffuse; float reflectivity;
 	vec3 specular; float shininess;
@@ -56,19 +61,19 @@ struct UniformLightData {
 	vec4 params;
 };
 
-UBO_PREFIX(UniformLightBlock, 3)
+UBO_PREFIX(UniformLightBlock, 4)
 	UniformLightData lights[MAX_LIGHTS];
 };
 
-UBO_PREFIX(UniformCubeMatrixBlock, 4)
+UBO_PREFIX(UniformCubeMatrixBlock, 5)
 	mat4 cubeMatrices[6];
 };
 
-UBO_PREFIX(UniformSkinningBlock, 5)
+UBO_PREFIX(UniformSkinningBlock, 6)
 	mat3x4 boneMatrices[MAX_BONES];
 };
 
-UBO_PREFIX(UniformPostProcessBlock, 6)
+UBO_PREFIX(UniformPostProcessBlock, 7)
 	int tonemap; float exposure; float saturation; int postAA;
 	vec3 vignette; float sepia;
 	float scanlines; float chromaticAberration; float padding1; float padding2;

@@ -33,6 +33,19 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 					e.get<Model>().materials[0].emissive = light.color * 1.f;
 				lightIndex++;
 			});
+
+			int particleIndex = 0;
+			game.entities.for_each<Particles, Transform>([&](Entity e, Particles& particles, Transform& transform) {
+				float time = Engine::timems() * game.engine.timeMult;
+				/**/ if (particleIndex == 0) {
+					transform.position.y = 1.f + glm::sin(time / 1000.f); transform.dirty = true;
+					transform.setRotation(glm::rotate(transform.rotation, game.engine.dt * 3.14f * 0.5f, vec3(0, 1, 0)));
+				} else if (particleIndex == 1) {
+					particles.directionality = 0.5f + 0.25f * (glm::sin(time / 2000.f) + 1.f);
+					transform.setRotation(glm::rotate(quat_identity, glm::sin(time / 4000.f), vec3(1, 0, 0)));
+				}
+				particleIndex++;
+			});
 #endif
 			break;
 		}
