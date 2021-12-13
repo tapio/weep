@@ -203,7 +203,7 @@
 			"count": 1000000,
 			"compute": "particles_simulate"
 		},
-		"position": [ 2, 1, -4 ]
+		"position": [ 2, 0.75, -4 ]
 	},{
 		"material": {
 			"shaderName": "particles_textured",
@@ -220,7 +220,7 @@
 			"count": 10000,
 			"compute": "particles_simulate"
 		},
-		"position": [ 3, 1, -2 ]
+		"position": [ 3, 0.5, -2 ]
 	},
 
 	{
