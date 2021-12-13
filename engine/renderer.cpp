@@ -125,7 +125,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	});
 	entities.for_each<Particles, Transform>([&](Entity e, Particles& particles, Transform& transform) {
 		transform.updateMatrix();
-		if (useTransparentPass(particles) && particles.count) { // TODO: Particle culling
+		if (useTransparentPass(particles) && particles.count && frustum.visible(transform, particles.bounds)) {
 			sortedDrawCalls.emplace_back(e, &transform, calcSignedDepth(transform.position));
 			sortedDrawCalls.back().particles = &particles;
 		}
@@ -302,8 +302,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	entities.for_each<Particles, Transform>([&](Entity e, Particles& particles, Transform& transform) {
 		if (particles.count == 0)
 			return;
-		// TODO: Particle culling
-		if (/*frustum.visible(transform, particles.bounds) && */ !useTransparentPass(particles)) {
+		if (frustum.visible(transform, particles.bounds) && !useTransparentPass(particles)) {
 			BEGIN_ENTITY_GPU_SAMPLE("RenderParticles", e)
 			m_device->renderParticles(particles, transform);
 			END_ENTITY_GPU_SAMPLE()

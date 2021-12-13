@@ -71,6 +71,7 @@ struct Particles
 	uint count = 0;
 	uint computeId = 0;
 	int renderId = -1;
+	Bounds bounds;
 	Material material;
 };
 

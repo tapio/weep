@@ -488,6 +488,7 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 		if (materialDef.is_object()) {
 			parseMaterial(particles.material, materialDef, resources, pathContext);
 		}
+		particles.bounds.radius = 10.f; // TODO: Auto-compute this from GPU
 		entity.add(particles);
 		numParticles++;
 	}
