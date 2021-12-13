@@ -73,7 +73,7 @@ static void spawnAsteroid() {
 	model.bounds.max = model.lods[0].geometry->bounds.max * trans.scale;
 	model.bounds.radius = model.lods[0].geometry->bounds.radius * glm::compMax(trans.scale);
 	Material material;
-	material.flags |= Material::ALPHA_TEST;
+	material.alphaTest = 0.9f;
 	material.ambient = vec3(1);
 	const char* asteroidImg = s_asteroids[glm::linearRand<int>(0, countof(s_asteroids)-1)];
 	material.map[Material::DIFFUSE_MAP] = s_game->resources.getImage(asteroidImg);
@@ -97,7 +97,7 @@ static void spawnLaser(vec2 pos, float angle, float speed) {
 	model.bounds.max = model.lods[0].geometry->bounds.max * trans.scale;
 	model.bounds.radius = model.lods[0].geometry->bounds.radius * glm::compMax(trans.scale);
 	Material material;
-	material.flags |= Material::ALPHA_TEST;
+	material.alphaTest = 0.9f;
 	material.ambient = vec3(0.01f);
 	material.emissive = vec3(0.75f);
 	material.map[Material::DIFFUSE_MAP] = s_game->resources.getImage("sprites/space-shooter/Lasers/laserBlue01.png");

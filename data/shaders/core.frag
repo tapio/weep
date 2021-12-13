@@ -4,12 +4,6 @@ VERTEX_DATA(in, inData);
 layout(location = 0) out vec4 fragment;
 layout(location = 1) out vec4 brightFragment;
 
-#ifdef GL_ES
-	#define CONST
-#else
-	#define CONST const
-#endif
-
 #if defined(USE_NORMAL_MAP) || defined(USE_PARALLAX_MAP)
 // http://www.thetenthplanet.de/archives/1180
 mat3 cotangent_frame(vec3 N, vec3 p, vec2 uv)
@@ -220,7 +214,7 @@ void main()
 	vec4 diffuseTex = texture(diffuseMap, texcoord);
 	ambientComp *= diffuseTex.rgb;
 	#ifdef USE_ALPHA_TEST
-		if (diffuseTex.a < 0.9)
+		if (diffuseTex.a < material.alphaTest)
 			discard;
 	#endif
 	#ifdef USE_ALPHA_BLEND

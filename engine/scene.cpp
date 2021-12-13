@@ -130,7 +130,6 @@ namespace {
 		setFlag(material.flags, Material::CAST_SHADOW, def["castShadow"]);
 		setFlag(material.flags, Material::RECEIVE_SHADOW, def["receiveShadow"]);
 		setFlag(material.flags, Material::ANIMATED, def["animated"]);
-		setFlag(material.flags, Material::ALPHA_TEST, def["alphaTest"]);
 		setFlag(material.flags, Material::DRAW_REFLECTION, def["drawReflection"]);
 		setColor(material.ambient, def["ambient"]);
 		setColor(material.diffuse, def["diffuse"]);
@@ -139,6 +138,9 @@ namespace {
 		setNumber(material.shininess, def["shininess"]);
 		setNumber(material.reflectivity, def["reflectivity"]);
 		setNumber(material.parallax, def["parallax"]);
+		setNumber(material.alphaTest, def["alphaTest"]);
+		if (def["alphaTest"].is_bool() && def["alphaTest"].bool_value())
+			material.alphaTest = 0.9f; // Backwards compat
 
 		if (!def["uvOffset"].is_null())
 			material.uvOffset = toVec2(def["uvOffset"]);

@@ -82,7 +82,7 @@ Each object (entity) can have the following properties (most are optional):
 	* _"receiveShadow"_: bool, enable shadow receiving (default: true)
 	* _"drawReflection"_: bool, enable drawing in reflection probes (default: true)
 	* _"animated"_: bool, needed for animated objects (default: false)
-	* _"alphaTest"_: bool, activate alpha testing (default: false)
+	* _"alphaTest"_: float, activate alpha testing with given threshold, i.e. larger or equal values pass (default: 0)
 	* _"ambient"_: color
 	* _"diffuse"_: color
 	* _"specular"_: color

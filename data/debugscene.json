@@ -204,10 +204,10 @@
 			"emissive": 1.0,
 			"castShadow": false,
 			"drawReflection" : false,
-			"diffuseMap": "debug/uvtestgrid.png",
-			"emissionMap": "debug/uvtestgrid.png",
-			"alphaTest": false,
-			"particleSize": 0.05
+			"diffuseMap": "debug/circle.png",
+			"emissionMap": "debug/circle.png",
+			"alphaTest": 0.3,
+			"particleSize": 0.1
 		},
 		"particles": {
 			"count": 10000,

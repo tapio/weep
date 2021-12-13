@@ -4,12 +4,6 @@ layout(vertices = 3) out;
 VERTEX_DATA(in, inData[]);
 VERTEX_DATA(out, outData[]);
 
-#ifdef GL_ES
-	#define CONST
-#else
-	#define CONST const
-#endif
-
 #define ID gl_InvocationID
 
 vec2 project(vec3 p)

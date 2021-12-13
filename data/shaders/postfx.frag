@@ -9,12 +9,6 @@ layout(binding = 22) uniform sampler2D depthMap;
 
 layout(location = 0) out vec4 fragment;
 
-#ifdef GL_ES
-	#define CONST
-#else
-	#define CONST const
-#endif
-
 #define gamma(x) pow((x), vec3(1.0 / 2.2));
 
 // http://filmicgames.com/archives/75

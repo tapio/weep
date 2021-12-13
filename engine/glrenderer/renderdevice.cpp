@@ -557,7 +557,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 		tag |= USE_SHADOW_MAP;
 	if (material.flags & Material::ANIMATED)
 		tag |= USE_ANIMATION;
-	if (material.flags & Material::ALPHA_TEST)
+	if (material.alphaTest > 0.f)
 		tag |= USE_ALPHA_TEST;
 	if (material.map[Material::DIFFUSE_MAP])
 		tag |= USE_DIFFUSE_MAP | USE_DIFFUSE;
@@ -604,7 +604,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 		tag = USE_DEPTH;
 		if (material.flags & Material::ANIMATED)
 			tag |= USE_ANIMATION;
-		if (material.flags & Material::ALPHA_TEST)
+		if (material.alphaTest > 0.f)
 			tag |= USE_ALPHA_TEST | USE_DIFFUSE_MAP;
 		material.shaderId[TECH_DEPTH] = generateShader(tag);
 		ASSERT(material.shaderId[TECH_DEPTH] >= 0 && "Depth shader generating failed");
@@ -666,25 +666,34 @@ void RenderDevice::useMaterial(Material& mat)
 	ASSERT(mat.shaderId[m_tech] >= 0);
 	useProgram(m_shaders[mat.shaderId[m_tech]]);
 
-	m_materialBlock.uniforms.ambient = mat.ambient;
-	m_materialBlock.uniforms.diffuse = mat.diffuse;
-	m_materialBlock.uniforms.specular = mat.specular;
-	m_materialBlock.uniforms.shininess = mat.shininess;
-	m_materialBlock.uniforms.reflectivity = mat.reflectivity;
-	m_materialBlock.uniforms.parallax = mat.parallax;
-	m_materialBlock.uniforms.emissive = mat.emissive;
+	// We don't need everything when only rendering depth
+	if (m_tech != TECH_DEPTH || m_tech != TECH_DEPTH_CUBE) {
+		for (uint i = 0; i < Material::ENV_MAP; ++i) {
+			uint tex = mat.tex[i];
+			if (!tex) continue;
+			glActiveTexture(GL_TEXTURE0 + BINDING_MATERIAL_MAP_START + i);
+			glBindTexture(GL_TEXTURE_2D, tex);
+			//glUniform1i(i, i);
+		}
+
+		m_materialBlock.uniforms.ambient = mat.ambient;
+		m_materialBlock.uniforms.diffuse = mat.diffuse;
+		m_materialBlock.uniforms.specular = mat.specular;
+		m_materialBlock.uniforms.shininess = mat.shininess;
+		m_materialBlock.uniforms.reflectivity = mat.reflectivity;
+		m_materialBlock.uniforms.parallax = mat.parallax;
+		m_materialBlock.uniforms.emissive = mat.emissive;
+	} else if (mat.alphaTest > 0.f) {
+		// Alpha test needs diffuse map to test against, even with depth-only pass
+		glActiveTexture(GL_TEXTURE0 + BINDING_DIFFUSE_MAP);
+		glBindTexture(GL_TEXTURE_2D, mat.tex[Material::DIFFUSE_MAP]);
+	}
+
+	m_materialBlock.uniforms.alphaTest = mat.alphaTest;
 	m_materialBlock.uniforms.uvOffset = mat.uvOffset;
 	m_materialBlock.uniforms.uvRepeat = mat.uvRepeat;
 	m_materialBlock.uniforms.particleSize = mat.particleSize;
 	m_materialBlock.upload();
-
-	for (uint i = 0; i < Material::ENV_MAP; ++i) {
-		uint tex = mat.tex[i];
-		if (!tex) continue;
-		glActiveTexture(GL_TEXTURE0 + BINDING_MATERIAL_MAP_START + i);
-		glBindTexture(GL_TEXTURE_2D, tex);
-		//glUniform1i(i, i);
-	}
 }
 
 void RenderDevice::drawSetup(const Transform& transform, const BoneAnimation* animation)
@@ -773,14 +782,7 @@ void RenderDevice::renderShadow(Model& model, Transform& transform, BoneAnimatio
 		if (!(mat.flags & Material::CAST_SHADOW))
 			continue;
 
-		ASSERT(mat.shaderId[m_tech] >= 0);
-		useProgram(m_shaders[mat.shaderId[m_tech]]);
-
-		if (mat.flags & Material::ALPHA_TEST) {
-			glActiveTexture(GL_TEXTURE0 + BINDING_DIFFUSE_MAP);
-			glBindTexture(GL_TEXTURE_2D, mat.tex[Material::DIFFUSE_MAP]);
-		}
-
+		useMaterial(mat);
 		drawBatch(batch);
 	}
 	glBindVertexArray(0);

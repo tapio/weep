@@ -13,8 +13,9 @@ in VertexData {
 void main()
 {
 #ifdef USE_ALPHA_TEST
+	CONST float alphaTestFudgeForClearerShadows = 0.8;
 	vec4 diffuseTex = texture(diffuseMap, inData.texcoord);
-	if (diffuseTex.a < 0.8)
+	if (diffuseTex.a < material.alphaTest * alphaTestFudgeForClearerShadows)
 		discard;
 #endif
 #ifdef USE_DEPTH_CUBE

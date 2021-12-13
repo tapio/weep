@@ -41,7 +41,7 @@ UBO_PREFIX(UniformObjectBlock, 1)
 };
 
 UBO_PREFIX(UniformMaterialBlock, 2)
-	vec3 ambient; float pad1;
+	vec3 ambient; float alphaTest;
 	vec3 diffuse; float reflectivity;
 	vec3 specular; float shininess;
 	vec3 emissive; float parallax;
@@ -95,6 +95,12 @@ UBO_PREFIX(UniformPostProcessBlock, 6)
 #define BINDING_SSBO_LIFE 32
 
 #ifndef __cplusplus
+
+#ifdef GL_ES
+	#define CONST
+#else
+	#define CONST const
+#endif
 
 #define PI 3.14159265
 #define saturate(x) clamp(x, 0.0, 1.0)
