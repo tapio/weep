@@ -20,13 +20,15 @@ public:
 
 	static int width();
 	static int height();
-	static float deltaTime(); // Seconds
+	static float deltaTime(); // Seconds, scaled by time multiplier
+
+	static uint timems(); // Unscaled, advances constantly not just per frame
 
 	void grabMouse(bool grab);
 
-	static uint timems();
-
 	float dt = 0.f;
+	float dtUnadjusted = 0.f;
+	float timeMult = 1.f;
 	struct SDL_Window* window = nullptr;
 	void* glContext = nullptr;
 

@@ -197,7 +197,7 @@ int main(int argc, char* argv[])
 
 		// Physics
 		BEGIN_CPU_SAMPLE(physTime)
-		physics.step(game.entities, game.engine.dt);
+		physics.step(game.entities, game.engine.dt, game.engine.timeMult >= 1.f); // Use variable time step with time dilation...
 		END_CPU_SAMPLE()
 
 		if (cameraEnt.has<btRigidBody>()) {

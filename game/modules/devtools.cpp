@@ -68,7 +68,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 				Transform& cameraTrans = cameraEnt.get<Transform>();
 
 				ImGui::Text("Right mouse button to toggle mouse grab.");
-				ImGui::Text("FPS: %d (%.3fms)", int(1.0 / game.engine.dt), game.engine.dt * 1000.f);
+				ImGui::Text("FPS: %d (%.3fms)", int(1.0 / game.engine.dtUnadjusted), game.engine.dtUnadjusted * 1000.f);
 				if (ImGui::CollapsingHeader("Stats")) {
 					const RenderDevice::Stats& stats = renderer.device().stats;
 					/*ImGui::Text("Physics:      %.3fms", physTimeMs);
@@ -123,6 +123,12 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 					ImGui::SliderFloat("Jump force", &controller.jumpForce, 0.0f, 10000.0f, "%.1f");
 				}
 				if (ImGui::CollapsingHeader("Settings")) {
+					static int timeMult = 0;
+					constexpr float TimeMults[] = { 0.f, 0.1f, 0.25f, 0.5f, 1.f, 1.5f, 2.f, 3.f, 4.f };
+					std::string timeLabel = timeMult ? std::to_string(TimeMults[timeMult + 4]) + "x" : "None";
+					if (ImGui::SliderInt("Time Dilation", &timeMult, -4, 4, timeLabel.c_str(), ImGuiSliderFlags_AlwaysClamp)) {
+						game.engine.timeMult = TimeMults[timeMult + 4];
+					}
 					modules.call($id(settings), $id(DRAW_SETTINGS_MENU), &game);
 				}
 				if (ImGui::CollapsingHeader("Environment")) {

@@ -138,7 +138,8 @@ void Engine::swap()
 	if (m_threadpool.size() != threads)
 		m_threadpool.resize(threads);
 	Uint64 curTime = SDL_GetPerformanceCounter();
-	dt = (curTime - m_prevTime) / (float)SDL_GetPerformanceFrequency();
+	dtUnadjusted = (curTime - m_prevTime) / (float)SDL_GetPerformanceFrequency();
+	dt = timeMult * dtUnadjusted;
 	m_prevTime = curTime;
 }
 

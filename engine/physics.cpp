@@ -51,7 +51,7 @@ void PhysicsSystem::reset()
 	collisionShapes.clear();
 }
 
-void PhysicsSystem::step(Entities& entities, float dt)
+void PhysicsSystem::step(Entities& entities, float dt, bool fixedStep)
 {
 	// Update manual transform changes to physics
 	entities.for_each<btRigidBody, Transform>([](Entity, btRigidBody& body, Transform& transform) {
@@ -66,7 +66,8 @@ void PhysicsSystem::step(Entities& entities, float dt)
 
 	// Simulate
 	ASSERT(dynamicsWorld);
-	dynamicsWorld->stepSimulation(dt);
+	int maxSteps = fixedStep ? 5 : 0;
+	dynamicsWorld->stepSimulation(dt, maxSteps);
 
 	// Sync physics results to entity transforms
 	entities.for_each<btRigidBody, Transform>([](Entity, btRigidBody& body, Transform& transform) {

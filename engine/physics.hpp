@@ -14,7 +14,7 @@ public:
 	bool add(Entity entity);
 	void destroy(Entity entity) override;
 
-	void step(Entities& entities, float dt);
+	void step(Entities& entities, float dt, bool fixedStep);
 
 	bool testGroundHit(btRigidBody& body);
 
