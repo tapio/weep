@@ -22,6 +22,8 @@ void main()
 {
 	uint particleId = gl_VertexID / 4;
 	vec4 particlePos = vec4(pos[particleId], 1.0);
+	float phase = 1.0 - life[particleId].x / life[particleId].y;
+	float phaseCurve = sqrt(sin(PI * phase)); // Inverted U
 
 	// Billboard shenanigans
 	mat4 modelView = modelViewMatrix;
@@ -38,7 +40,7 @@ void main()
 	// Transform particle pos to view space
 	vec4 posViewSpace = modelViewMatrix * particlePos;
 	// Add vertex offsets that are transformed with a matrix with rotation removed
-	posViewSpace += modelView * vec4(position * vec3(material.particleSize, 0.0), 1.0);
+	posViewSpace += modelView * vec4(position * vec3(material.particleSize * phaseCurve, 0.0), 1.0);
 
 	outData.normal = vec3(0, 0, 1);
 	outData.position = posViewSpace.xyz;
@@ -47,7 +49,6 @@ void main()
 	gl_Position = projectionMatrix * posViewSpace;
 
 #ifdef USE_VERTEX_COLOR
-	float phase = 1.0 - life[particleId].x / life[particleId].y;
 	outData.color = mix(vec4(0.75, 0.0, 0.0, 1.0), vec4(1.0, 0.5, 0.0, 1.0), phase);
 #endif
 #ifdef USE_SHADOW_MAP
