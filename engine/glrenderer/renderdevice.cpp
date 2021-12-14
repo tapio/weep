@@ -134,10 +134,10 @@ RenderDevice::RenderDevice(Resources& resources)
 
 	GLfloat quadVertices[] = {
 		// Positions        // Texture Coords
-		-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+		-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
 		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-		1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+		 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
 	};
 	// Setup plane VAO
 	glGenVertexArrays(1, &m_fullscreenQuad.vao);
@@ -152,9 +152,26 @@ RenderDevice::RenderDevice(Resources& resources)
 	glDisableVertexAttribArray(ATTR_NORMAL);
 	glBindVertexArray(0);
 
-	// TODO: Do a raw one
-	Geometry particleBuffer(1);
-	uploadBatch(particleBuffer.batches.front(), m_particleRenderBuffer);
+	// Particle quad data
+	GLfloat particleQuadVertices[] = {
+		// Positions        // Texture Coords
+		-0.5f,  0.5f, 0.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
+		 0.5f,  0.5f, 0.0f, 1.0f, 0.0f,
+		 0.5f, -0.5f, 0.0f, 1.0f, 1.0f,
+	};
+	// Setup particle VAO
+	glGenVertexArrays(1, &m_particleRenderBuffer.vao);
+	glGenBuffers(1, &m_particleRenderBuffer.vbo);
+	glBindVertexArray(m_particleRenderBuffer.vao);
+	glBindBuffer(GL_ARRAY_BUFFER, m_particleRenderBuffer.vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(particleQuadVertices), &particleQuadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(ATTR_POSITION);
+	glVertexAttribPointer(ATTR_POSITION, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(ATTR_TEXCOORD);
+	glVertexAttribPointer(ATTR_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glDisableVertexAttribArray(ATTR_NORMAL);
+	glBindVertexArray(0);
 
 	// Create placeholder texture
 	Image temp;
@@ -884,9 +901,8 @@ void RenderDevice::renderParticles(Particles& particles, Transform& transform)
 	bindParticleBuffers(particles);
 	ASSERT(m_particleRenderBuffer.vao);
 	ASSERT(m_particleRenderBuffer.vbo);
-	ASSERT(m_particleRenderBuffer.ebo);
 	glBindVertexArray(m_particleRenderBuffer.vao);
-	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, particles.count);
+	glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, particles.count);
 	glBindVertexArray(0);
 	stats.triangles += particles.count * 2; // Two tris per particles
 	++stats.drawCalls;
