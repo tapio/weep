@@ -86,52 +86,65 @@ namespace {
 		return toVec3(color);
 	}
 
-	template<typename T> void setNumber(T& dst, const Json& src) {
+	template<typename T> inline void setNumber(T& dst, const Json& src) {
 		if (src.is_number())
 			dst = (T)src.number_value();
 	}
 
-	template<typename T> void setEnum(T& dst, const Json& src) {
+	template<typename T> inline void setEnum(T& dst, const Json& src) {
 		if (src.is_number())
 			dst = (T)(int)src.number_value();
 	}
 
-	template<typename T> void setFlag(T& dst, uint flag, const Json& src) {
+	template<typename T> inline void setFlag(T& dst, uint flag, const Json& src) {
 		if (src.is_bool()) {
 			if (src.bool_value()) dst |= flag;
 			else dst &= ~flag;
 		}
 	}
 
-	void setBool(bool& dst, const Json& src) {
+	inline void setBool(bool& dst, const Json& src) {
 		if (src.is_bool())
 			dst = src.bool_value();
 	}
 
-	void setVec2(vec2& dst, const Json& src) {
+	inline void setVec2(vec2& dst, const Json& src) {
 		if (!src.is_null())
 			dst = toVec2(src);
 	}
 
-	void setVec3(vec3& dst, const Json& src) {
+	inline void setVec3(vec3& dst, const Json& src) {
 		if (!src.is_null())
 			dst = toVec3(src);
 	}
 
-	void setColor(vec3& dst, const Json& src) {
+	inline void setQuat(quat& dst, const Json& src) {
+		if (src.is_array()) {
+			if (src.array_items().size() == 4)
+				dst = quat(src[3].number_value(), src[0].number_value(), src[1].number_value(), src[2].number_value());
+			else dst = quat(toVec3(src));
+		}
+	}
+
+	inline void setColor(vec3& dst, const Json& src) {
 		if (!src.is_null())
 			dst = colorToVec3(src);
 	}
 
-	void setString(string& dst, const Json& src) {
+	inline void setString(string& dst, const Json& src) {
 		if (src.is_string())
 			dst = src.string_value();
 	}
 
-	void setHash(uint& dst, const Json& src) {
+	inline void setHash(uint& dst, const Json& src) {
 		if (src.is_string())
 			dst = id::hash(src.string_value().c_str());
 	}
+
+	template<typename T> inline void set(T& var, const Json& src);
+	template<> inline void set<float>(float& dst, const Json& src) { setNumber(dst, src); }
+	template<> inline void set<vec3>(vec3& dst, const Json& src) { setVec3(dst, src); }
+	template<> inline void set<quat>(quat& dst, const Json& src) { setQuat(dst, src); }
 
 	Material& parseMaterial(Material& material, const Json& def, Resources& resources, const string& pathContext) {
 		ASSERT(def.is_object());
@@ -274,6 +287,21 @@ namespace {
 		setColor(env.fogColor, def["fogColor"]);
 		setNumber(env.fogDensity, def["fogDensity"]);
 		return env;
+	}
+
+	template<typename T>
+	void parsePropertyAnimationTrack(PropertyAnimation& dest, const Json& trackDef) {
+		PropertyAnimation::Track<T> track(0, {});
+		setHash(track.id, trackDef["id"]);
+		for (const auto& keyframeDef : trackDef["keyframes"].array_items()) {
+			if (keyframeDef.is_array() && keyframeDef.array_items().size() >= 2) {
+				PropertyAnimation::Keyframe<T> keyframe;
+				setNumber(keyframe.time, keyframeDef.array_items()[0]);
+				set(keyframe.value, keyframeDef.array_items()[1]);
+				track.keyframes.emplace_back(keyframe);
+			}
+		}
+		dest.addTrack(track);
 	}
 }
 
@@ -438,12 +466,7 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 		Transform transform;
 		setVec3(transform.position, def["position"]);
 		setVec3(transform.scale, def["scale"]);
-		if (!def["rotation"].is_null()) {
-			const Json& rot = def["rotation"];
-			if (rot.is_array() && rot.array_items().size() == 4)
-				transform.rotation = quat(rot[3].number_value(), rot[0].number_value(), rot[1].number_value(), rot[2].number_value());
-			else transform.rotation = quat(toVec3(rot));
-		}
+		setQuat(transform.rotation, def["rotation"]);
 		entity.add(transform);
 	}
 
@@ -589,6 +612,33 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 		const Json& animDef = def["animation"];
 		BoneAnimation anim;
 		setNumber(anim.speed, animDef["speed"]);
+		entity.add(anim);
+		if (animDef["play"].is_bool() && animDef["play"].bool_value())
+			world->get_system<AnimationSystem>().play(entity);
+		else world->get_system<AnimationSystem>().stop(entity);
+	}
+
+	if (def["propertyAnimation"].is_object()) {
+		const Json& animDef = def["propertyAnimation"];
+		PropertyAnimation anim;
+		setEnum(anim.mode, animDef["mode"]);
+		setNumber(anim.speed, animDef["speed"]);
+
+		const Json& tracksDef = animDef["tracks"];
+		if (tracksDef.is_array()) {
+			for (const auto& trackDef : tracksDef.array_items()) {
+				if (trackDef["type"].is_string()) {
+					const std::string& trackType = trackDef["type"].string_value();
+					if (trackType == "float") {
+						parsePropertyAnimationTrack<float>(anim, trackDef);
+					} else if (trackType == "vec3") {
+						parsePropertyAnimationTrack<vec3>(anim, trackDef);
+					} else if (trackType == "quat") {
+						parsePropertyAnimationTrack<quat>(anim, trackDef);
+					} else logError("Invalid property animation track type \"%s\"", trackType.c_str());
+				}
+			}
+		}
 		entity.add(anim);
 		if (animDef["play"].is_bool() && animDef["play"].bool_value())
 			world->get_system<AnimationSystem>().play(entity);

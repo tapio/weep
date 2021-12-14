@@ -207,6 +207,18 @@
 			"compute": "particles_simulate",
 			"directionality": 0.5
 		},
+		"propertyAnimation": {
+			"play": true,
+			"mode": "loop",
+			"tracks": [{
+				"id": "rotation",
+				"type": "quat",
+				"keyframes": [
+					[ 0, [0, 0, 0] ],
+					[ 4, [0, 6.283185, 0] ]
+				]
+			}]
+		},
 		"position": [ 2, 0.75, -4 ]
 	},{
 		"name": "particletest2",

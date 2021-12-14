@@ -28,15 +28,55 @@ struct Bounds
 	float radius = INFINITY;
 };
 
+enum class AnimationState : uint {
+	STOPPED, PLAYING, PAUSED
+};
+
+enum class AnimationMode : uint {
+	ONCE, LOOP, PINGPONG
+};
+
 struct BoneAnimation
 {
 	std::vector<mat3x4> bones;
-	enum State {
-		STOPPED, PLAYING, PAUSED
-	} state = STOPPED;
+ 	AnimationState state = AnimationState::STOPPED;
 	uint animation = 0;
 	float time = 0.f;
 	float speed = 1.f;
+};
+
+struct PropertyAnimation
+{
+	template<typename T>
+	struct Keyframe
+	{
+		float time = 0.f;
+		T value = {};
+	};
+
+	template<typename T>
+	struct Track
+	{
+		Track(uint id, const std::vector<Keyframe<T>>& keyframes): id(id), keyframes(keyframes) {}
+		T currentValue = {};
+		uint id = 0;
+		std::vector<Keyframe<T>> keyframes;
+		float length() const { return keyframes.empty() ? 0.f : keyframes.back().time; }
+	};
+
+	template<typename T> Track<T>& addTrack(const Track<T>& track);
+	template<> Track<float>& addTrack(const Track<float>& track) { floatTracks.emplace_back(track); return floatTracks.back(); }
+	template<> Track<vec3>& addTrack(const Track<vec3>& track) { vec3Tracks.emplace_back(track); return vec3Tracks.back(); }
+	template<> Track<quat>& addTrack(const Track<quat>& track) { quatTracks.emplace_back(track); return quatTracks.back(); }
+
+	AnimationState state = AnimationState::STOPPED;
+	AnimationMode mode = AnimationMode::LOOP;
+	float time = 0.f;
+	float speed = 1.f;
+	float length = 0.f;
+	std::vector<Track<float>> floatTracks;
+	std::vector<Track<vec3>> vec3Tracks;
+	std::vector<Track<quat>> quatTracks;
 };
 
 struct Geometry;
