@@ -101,6 +101,8 @@ void Engine::init(const string& configPath)
 
 #ifdef USE_PROFILER
 	rmt_Settings()->enableThreadSampler = RMT_FALSE; // TODO: Investigate assert on exit with this enabled
+	rmt_Settings()->reuse_open_port = RMT_TRUE;
+	rmt_Settings()->limit_connections_to_localhost = RMT_TRUE;
 	rmtError rmtErr = rmt_CreateGlobalInstance(&m_remotery);
 	if (rmtErr != RMT_ERROR_NONE)
 		logError("Failed to initialize Remotery profiler (code %d)", rmtErr);
