@@ -289,6 +289,11 @@ namespace {
 		return env;
 	}
 
+	template<typename T> void addTrack(PropertyAnimation& dest, const PropertyAnimation::Track<T>& track);
+	template<> void addTrack(PropertyAnimation& dest, const PropertyAnimation::Track<float>& track) { dest.floatTracks.emplace_back(track); }
+	template<> void addTrack(PropertyAnimation& dest, const PropertyAnimation::Track<vec3>& track) { dest.vec3Tracks.emplace_back(track); }
+	template<> void addTrack(PropertyAnimation& dest, const PropertyAnimation::Track<quat>& track) { dest.quatTracks.emplace_back(track); }
+
 	template<typename T>
 	void parsePropertyAnimationTrack(PropertyAnimation& dest, const Json& trackDef) {
 		PropertyAnimation::Track<T> track(0, {});
@@ -301,7 +306,7 @@ namespace {
 				track.keyframes.emplace_back(keyframe);
 			}
 		}
-		dest.addTrack(track);
+		addTrack(dest, track);
 	}
 }
 

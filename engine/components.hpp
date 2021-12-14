@@ -64,11 +64,6 @@ struct PropertyAnimation
 		float length() const { return keyframes.empty() ? 0.f : keyframes.back().time; }
 	};
 
-	template<typename T> Track<T>& addTrack(const Track<T>& track);
-	template<> Track<float>& addTrack(const Track<float>& track) { floatTracks.emplace_back(track); return floatTracks.back(); }
-	template<> Track<vec3>& addTrack(const Track<vec3>& track) { vec3Tracks.emplace_back(track); return vec3Tracks.back(); }
-	template<> Track<quat>& addTrack(const Track<quat>& track) { quatTracks.emplace_back(track); return quatTracks.back(); }
-
 	AnimationState state = AnimationState::STOPPED;
 	AnimationMode mode = AnimationMode::LOOP;
 	float time = 0.f;
