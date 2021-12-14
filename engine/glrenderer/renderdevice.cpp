@@ -152,6 +152,10 @@ RenderDevice::RenderDevice(Resources& resources)
 	glDisableVertexAttribArray(ATTR_NORMAL);
 	glBindVertexArray(0);
 
+	// TODO: Do a raw one
+	Geometry particleBuffer(1);
+	uploadBatch(particleBuffer.batches.front(), m_particleRenderBuffer);
+
 	// Create placeholder texture
 	Image temp;
 	temp.width = 1;
@@ -237,16 +241,6 @@ void RenderDevice::resizeRenderTargets()
 	m_reflectionFbo.depthAttachment = 1;
 	m_reflectionFbo.cube = true;
 	m_reflectionFbo.create();
-}
-
-void RenderDevice::resizeParticleRenderBuffers(uint size)
-{
-	if (m_particleRenderBufferSize >= size)
-		return;
-	destroyGeometry(m_particleRenderBuffer);
-	m_particleRenderBufferSize = size;
-	Geometry particleBuffer(size);
-	uploadBatch(particleBuffer.batches.front(), m_particleRenderBuffer);
 }
 
 void RenderDevice::loadShaders()
@@ -515,7 +509,6 @@ bool RenderDevice::uploadGeometry(Geometry& geometry)
 
 bool RenderDevice::uploadParticleBuffers(Particles& particles)
 {
-	resizeParticleRenderBuffers(particles.count);
 	ASSERT(particles.renderId < 0);
 	// TODO: This should actually reflect what buffers are needed, for now just create constant ones
 	std::vector<ParticleBuffer> buffers;
@@ -886,7 +879,6 @@ void RenderDevice::renderParticles(Particles& particles, Transform& transform)
 {
 	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (m_shadowProj[0] * (m_shadowView[0] * transform.matrix));
 	ASSERT(particles.count);
-	resizeParticleRenderBuffers(particles.count);
 	drawSetup(transform);
 	useMaterial(particles.material);
 	bindParticleBuffers(particles);
@@ -894,7 +886,7 @@ void RenderDevice::renderParticles(Particles& particles, Transform& transform)
 	ASSERT(m_particleRenderBuffer.vbo);
 	ASSERT(m_particleRenderBuffer.ebo);
 	glBindVertexArray(m_particleRenderBuffer.vao);
-	glDrawElements(GL_TRIANGLES, particles.count * 6, GL_UNSIGNED_INT, 0); // 2 tris == 6 indices == 1 particle
+	glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0, particles.count);
 	glBindVertexArray(0);
 	stats.triangles += particles.count * 2; // Two tris per particles
 	++stats.drawCalls;

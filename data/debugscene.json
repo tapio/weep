@@ -21,7 +21,7 @@
 			"noSleep": true
 		},
 		"scale": [ 0.4, 1, 0.4 ],
-		"position": [ 0, 0.5, 0 ]
+		"position": [ 2.5, 0.5, 2 ]
 	},{
 		"prefab": "plane",
 		"material": { "uvRepeat": 20 },

@@ -32,7 +32,7 @@ vec2 rotate2d(vec2 v, float a) {
 
 void main()
 {
-	uint particleId = gl_VertexID / 4;
+	uint particleId = gl_InstanceID;
 	vec4 particlePos = vec4(pos[particleId], 1.0);
 	float phase = 1.0 - life[particleId].x / life[particleId].y;
 	float phaseCurve = sqrt(sin(PI * phase)); // Inverted U

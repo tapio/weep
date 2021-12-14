@@ -41,7 +41,6 @@ public:
 	void renderSkybox();
 	void postRender();
 
-	void resizeParticleRenderBuffers(uint size);
 	void resizeRenderTargets();
 	void toggleWireframe();
 
@@ -115,7 +114,6 @@ private:
 	GPUGeometry m_fullscreenQuad;
 	GPUGeometry m_skyboxCube;
 	GPUGeometry m_particleRenderBuffer;
-	uint m_particleRenderBufferSize = 0;
 	Material m_skyboxMat;
 	Texture m_placeholderTex;
 
