@@ -43,8 +43,8 @@ void Controller::update(float dt)
 		}
 
 		rotation = quat_identity;
-		rotation = glm::rotate(rotation, glm::radians(angles.y), vec3(0, 1, 0));
-		rotation = glm::rotate(rotation, glm::radians(angles.x), vec3(1, 0, 0));
+		rotation = glm::rotate(rotation, glm::radians(angles.y), up_axis);
+		rotation = glm::rotate(rotation, glm::radians(angles.x), right_axis);
 	}
 
 	if (dot(input, input) > 0.001 || jump) {

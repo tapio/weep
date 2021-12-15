@@ -24,7 +24,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 				anim.mode = AnimationMode::LOOP;
 				std::vector<PropertyAnimation::Keyframe<quat>> keyframes {
 					{ 0.f, quat_identity },
-					{ 4.0f, glm::rotate(quat_identity, 2 * 3.14159265f, vec3(0, 1, 0)) },
+					{ 4.0f, glm::rotate(quat_identity, 2 * 3.14159265f, up_axis) },
 				};
 				anim.quatTracks.emplace_back($id(rotation), keyframes);
 				ent.add(anim);
@@ -53,10 +53,10 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 				float time = Engine::timems() * game.engine.timeMult;
 				/**/ if (particleIndex == 0) {
 					//transform.position.y = 1.f + glm::sin(time / 1000.f); transform.dirty = true;
-					//transform.setRotation(glm::rotate(transform.rotation, game.engine.dt * 3.14f * 0.5f, vec3(0, 1, 0)));
+					//transform.setRotation(glm::rotate(transform.rotation, game.engine.dt * 3.14f * 0.5f, up_axis));
 				} else if (particleIndex == 1) {
 					particles.directionality = 0.5f + 0.25f * (glm::sin(time / 2000.f) + 1.f);
-					transform.setRotation(glm::rotate(quat_identity, glm::sin(time / 4000.f), vec3(1, 0, 0)));
+					transform.setRotation(glm::rotate(quat_identity, glm::sin(time / 4000.f), right_axis));
 				}
 				particleIndex++;
 			});

@@ -24,7 +24,7 @@ class Frustum
 public:
 	Frustum(const Camera& camera, vec3 position, quat rotation) {
 		m_radius = camera.far * 0.5f;
-		vec3 dir = rotation * vec3(0, 0, -1);
+		vec3 dir = rotation * forward_axis;
 		m_center = position + dir * m_radius;
 	}
 
@@ -101,7 +101,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	START_MEASURE(prerenderMs)
 	vec3 camPos = camTransform.position;
 	quat camRot = camTransform.rotation;
-	vec3 camDir = camRot * vec3(0, 0, -1);
+	vec3 camDir = camRot * forward_axis;
 	camera.updateViewMatrix(camPos, camRot);
 	Frustum frustum(camera, camPos, camRot);
 

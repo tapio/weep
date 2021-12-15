@@ -92,7 +92,7 @@ Geometry::Geometry(const Image& heightmap)
 			int vert = j * wpoints + i;
 			positions[vert] = vec3(x, y, z);
 			texcoords[vert] = vec2((float)i / heightmap.width, (float)j / heightmap.height);
-			normals[vert] = vec3(0, 1, 0);
+			normals[vert] = up_axis;
 			// Indexed faces
 			if (i == heightmap.width-1 || j == heightmap.height-1)
 				continue;

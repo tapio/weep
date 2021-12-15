@@ -339,7 +339,7 @@ void SceneLoader::load(const string& path, Resources& resources)
 			Transform& trans = cameraEnt.get<Transform>();
 			camera.updateViewMatrix(trans.position, trans.rotation);
 		} else {
-			camera.view = glm::lookAt(vec3(0, 0, 1), vec3(0, 0, 0), vec3(0, 1, 0));
+			camera.view = glm::lookAt(/*eye_pos*/ -forward_axis, /*target*/ vec3(0, 0, 0), up_axis);
 		}
 	}
 

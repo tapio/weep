@@ -13,7 +13,7 @@
 #include <glm/gtc/random.hpp>
 #include <SDL_events.h>
 
-static vec3 startPos = vec3(0, 1, 0);
+static vec3 startPos = up_axis;
 static vec3 goalPos = vec3(INFINITY, INFINITY, INFINITY);
 static float gameTime = 0;
 static float waitTime = 0;
@@ -219,7 +219,7 @@ static void generateLevel1(Game& game, vec3 pos)
 	}
 	Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
 	e.get<Transform>().setPosition(pos);
-	goalPos = pos + vec3(0, 1, 0);
+	goalPos = pos + up_axis;
 	game.resources.startAsyncLoading();
 }
 
@@ -253,7 +253,7 @@ static void generateLevel2(Game& game, vec3 pos)
 	}
 	Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
 	e.get<Transform>().setPosition(pos);
-	goalPos = pos + vec3(0, 1, 0);
+	goalPos = pos + up_axis;
 	game.resources.startAsyncLoading();
 }
 
@@ -287,6 +287,6 @@ static void generateLevel3(Game& game, vec3 pos)
 	}
 	Entity e = loader.instantiate(loader.prefabs["goalblock"], game.resources);
 	e.get<Transform>().setPosition(pos);
-	goalPos = pos + vec3(0, 1, 0);
+	goalPos = pos + up_axis;
 	game.resources.startAsyncLoading();
 }

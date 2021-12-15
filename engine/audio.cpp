@@ -24,8 +24,8 @@ void AudioSystem::reset()
 
 void AudioSystem::update(Entities& entities, const Transform& listener)
 {
-	vec3 forward = glm::rotate(listener.rotation, vec3(0, 0, -1));
-	vec3 up = glm::rotate(listener.rotation, vec3(0, 1, 0));
+	vec3 forward = glm::rotate(listener.rotation, forward_axis);
+	vec3 up = glm::rotate(listener.rotation, up_axis);
 	soloud->set3dListenerPosition(listener.position.x, listener.position.y, listener.position.z);
 	soloud->set3dListenerAt(forward.x, forward.y, forward.z);
 	soloud->set3dListenerUp(up.x, up.y, up.z);

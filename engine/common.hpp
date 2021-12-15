@@ -41,7 +41,10 @@ typedef uint64_t uint64;
 typedef int64_t int64;
 
 #define quat_identity quat(1.f, 0.f, 0.f, 0.f)
-
+#define forward_axis vec3(0, 0, -1)
+#define up_axis vec3(0, 1, 0)
+#define left_axis vec3(-1, 0, 0)
+#define right_axis vec3(1, 0, 0)
 
 string vlformat(const char* format, va_list vl);
 

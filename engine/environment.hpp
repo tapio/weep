@@ -25,7 +25,7 @@ struct Environment
 		SKY_COUNT
 	} skyType = SKY_PROCEDURAL;
 
-	vec3 sunPosition = vec3(0, 1, 0);
+	vec3 sunPosition = up_axis;
 	vec3 sunColor = vec3(0, 0, 0);
 
 	vec3 fogColor = vec3(0.5, 0.5, 0.5);
