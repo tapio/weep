@@ -544,9 +544,23 @@ bool RenderDevice::uploadParticleBuffers(Particles& particles)
 	addBuffer(2); // vec2 life
 	addBuffer(1); // vec1 extra
 
+	// TODO: Find an empty slot if something has been destroyed already
 	particles.renderId = m_particleBuffers.size();
 	m_particleBuffers.emplace_back(std::move(buffers));
 	return true;
+}
+
+void RenderDevice::destroyParticles(Particles& particles)
+{
+	ASSERT(particles.renderId >= 0);
+	if (particles.renderId < 0)
+		return;
+	auto& buffers = m_particleBuffers[particles.renderId];
+	for (auto& buf : buffers) {
+		glDeleteBuffers(1, &buf.buffer);
+	}
+	buffers.clear();
+	particles.renderId = -1;
 }
 
 void RenderDevice::bindParticleBuffers(Particles& particles)

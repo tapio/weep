@@ -58,6 +58,21 @@ void RenderSystem::reset(Entities& entities)
 		for (int i = 0; i < Model::MAX_LODS && model.lods[i].geometry; ++i)
 			m_device->destroyGeometry(*model.lods[i].geometry);
 	});
+	entities.for_each<Particles>([this](Entity, Particles& particles) {
+		m_device->destroyParticles(particles);
+	});
+}
+
+void RenderSystem::destroy(Entity entity)
+{
+	if (entity.has<Model>()) {
+		Model& model = entity.get<Model>();
+		for (int i = 0; i < Model::MAX_LODS && model.lods[i].geometry; ++i)
+			m_device->destroyGeometry(*model.lods[i].geometry);
+	}
+	if (entity.has<Particles>()) {
+		m_device->destroyParticles(entity.get<Particles>());
+	}
 }
 
 void RenderSystem::toggleWireframe()

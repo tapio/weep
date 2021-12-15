@@ -32,6 +32,7 @@ public:
 	void bindParticleBuffers(Particles& particles);
 	void computeParticles(Particles& particles, Transform& transform);
 	void renderParticles(Particles& particles, Transform& transform);
+	void destroyParticles(Particles& particles);
 
 	void setupShadowPass(const Light& light, uint index);
 	void renderShadow(Model& model, Transform& transform, BoneAnimation* animation = nullptr);

@@ -16,6 +16,7 @@ public:
 
 	void render(Entities& entities, Camera& camera, const Transform& camTransform);
 	void reset(Entities& entities);
+	void destroy(Entity entity) override;
 
 	Environment& env() { return m_env; }
 
