@@ -237,12 +237,12 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 
 	START_MEASURE(shadowMs)
 	BEGIN_GPU_SAMPLE(ShadowPass)
-	Light sun;
-	sun.type = Light::DIRECTIONAL_LIGHT;
-	sun.position = camPos + normalize(m_env.sunPosition) * 10.f;
-	sun.target = camPos;
-	m_device->setupShadowPass(sun, 0);
 	if (settings.shadows) {
+		Light sun;
+		sun.type = Light::DIRECTIONAL_LIGHT;
+		sun.position = camPos + normalize(m_env.sunPosition) * 10.f;
+		sun.target = camPos;
+		m_device->setupShadowPass(sun, 0);
 		entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 			// TODO: Shadow frustum culling
 			if (!model.materials.empty() && model.geometry /* && frustum.visible(transform, model) */) {
