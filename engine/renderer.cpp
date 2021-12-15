@@ -297,12 +297,14 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		reflCam.updateViewMatrix(reflCamPos);
 		m_device->setupRenderPass(reflCam, lights, TECH_REFLECTION);
 		entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
+			if (model.materials.empty() || !model.geometry)
+				return;
 			float maxDist = model.bounds.radius * glm::compMax(transform.scale) + reflCam.far;
-			if (!model.materials.empty() && model.geometry && glm::distance2(reflCamPos, transform.position) < maxDist * maxDist) {
-				BEGIN_ENTITY_GPU_SAMPLE("Reflection", e)
-				m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
-				END_ENTITY_GPU_SAMPLE()
-			}
+			if (glm::distance2(reflCamPos, transform.position) >= maxDist * maxDist)
+				return;
+			BEGIN_ENTITY_GPU_SAMPLE("Reflection", e)
+			m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
+			END_ENTITY_GPU_SAMPLE()
 		});
 		m_device->renderSkybox();
 	}
