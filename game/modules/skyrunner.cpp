@@ -161,7 +161,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			if (glm::distance2(curPos, goalPos) < 1.1f || levelComplete) {
 				levelComplete = true;
 				ImGui::SetNextWindowPosCenter(ImGuiCond_Always);
-				ImGui::Begin("", NULL, ImGuiSystem::MinimalWindow);
+				ImGui::Begin("##goal", NULL, ImGuiSystem::MinimalWindow);
 				ImGui::Text("Good Job! %.2f s", gameTime);
 				ImGui::End();
 				if (waitTime >= 3) {
