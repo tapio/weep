@@ -785,14 +785,14 @@ void RenderDevice::setupShadowPass(const Light& light, uint index)
 	if (light.type == Light::POINT_LIGHT) {
 		m_tech = TECH_DEPTH_CUBE;
 		float aspect = (float)m_shadowFbo[index].width / (float)m_shadowFbo[index].height;
-		near = 0.2f; far = light.distance;
+		near = 0.2f; far = light.shadowDistance > 0.f ? light.shadowDistance : light.distance;
 		m_shadowProj[index] = glm::perspective(glm::radians(90.0f), aspect, near, far);
 		setupCubeMatrices(m_shadowProj[index], light.position);
 	} else if (light.type == Light::DIRECTIONAL_LIGHT) {
 		m_tech = TECH_DEPTH;
 		// TODO: Configure
 		float size = 20.f;
-		near = 1.f; far = 50.f;
+		near = 1.f; far = light.shadowDistance > 0.f ? light.shadowDistance : (length(light.target - light.position) * 1.5f);
 		m_shadowProj[index] = glm::ortho(-size, size, -size, size, near, far);
 		m_shadowView[index] = glm::lookAt(light.position, light.target, vec3(0, 1, 0));
 	} else ASSERT(!"Unsupported light type for shadow pass");

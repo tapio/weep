@@ -165,6 +165,7 @@ struct Light
 	vec3 direction = vec3();
 	vec3 target = vec3();
 	float distance = 1.0f;
+	float shadowDistance = -1.f;
 	float decay = 1.0f;
 	float priority = 0.f;
 };

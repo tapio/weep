@@ -22,15 +22,18 @@
 class Frustum
 {
 public:
-	Frustum(const Camera& camera, vec3 position, quat rotation) {
-		m_radius = camera.far * 0.5f;
-		vec3 dir = rotation * forward_axis;
-		m_center = position + dir * m_radius;
+	Frustum(vec3 position, vec3 dir, float far) {
+		m_radius = far * 0.5f;
+		m_center = position + normalize(dir) * m_radius;
 	}
 
-	bool visible(const Transform& transform, const Bounds& bounds) const {
-		float maxDist = bounds.radius * glm::compMax(transform.scale) + m_radius;
-		return glm::distance2(m_center, transform.position) < maxDist * maxDist;
+	inline bool visible(const Transform& transform, const Bounds& bounds) const {
+		return visible(transform.position, bounds.radius * glm::compMax(transform.scale));
+	}
+
+	inline bool visible(vec3 position, float radius) const {
+		float maxDist = radius + m_radius;
+		return glm::distance2(m_center, position) < maxDist * maxDist;
 	}
 
 private:
@@ -95,15 +98,17 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	}
 
 	struct ReflectionProbe { float priority; vec3 pos; };
-	std::vector<ReflectionProbe> reflectionProbes;
-	std::vector<Light> lights;
+	static std::vector<ReflectionProbe> reflectionProbes;
+	static std::vector<Light> lights;
+	reflectionProbes.clear();
+	lights.clear();
 
 	START_MEASURE(prerenderMs)
 	vec3 camPos = camTransform.position;
 	quat camRot = camTransform.rotation;
 	vec3 camDir = camRot * forward_axis;
 	camera.updateViewMatrix(camPos, camRot);
-	Frustum frustum(camera, camPos, camRot);
+	Frustum frustum(camPos, camDir, camera.far);
 
 	auto calcSignedDepth = [camPos, camDir](vec3 pos) {
 		float depth = glm::distance2(camPos, pos);
@@ -170,8 +175,12 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	}
 
 	// TODO: Better prioritizing
-	vec3 lightTarget = camPos + camRot * vec3(0, 0, -2);
+	vec3 lightTarget = camPos + camRot * (forward_axis * 2.0f);
 	entities.for_each<Light>([&](Entity, Light& light) {
+		if (light.type == Light::POINT_LIGHT) {
+			if (!frustum.visible(light.position, light.distance))
+				return;
+		}
 		light.priority = glm::distance2(lightTarget, light.position);
 		lights.push_back(light);
 	});
@@ -242,10 +251,11 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		sun.type = Light::DIRECTIONAL_LIGHT;
 		sun.position = camPos + normalize(m_env.sunPosition) * 10.f;
 		sun.target = camPos;
+		sun.shadowDistance = 50.f;
 		m_device->setupShadowPass(sun, 0);
+		Frustum sunShadowFrustum(sun.position, sun.target - sun.position, sun.shadowDistance);
 		entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
-			// TODO: Shadow frustum culling
-			if (!model.materials.empty() && model.geometry /* && frustum.visible(transform, model) */) {
+			if (!model.materials.empty() && model.geometry && sunShadowFrustum.visible(transform, model.bounds)) {
 				BEGIN_ENTITY_GPU_SAMPLE("Sun shadow", e)
 				m_device->renderShadow(model, transform);
 				END_ENTITY_GPU_SAMPLE()
@@ -254,23 +264,24 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	}
 
 	// TODO: Account for non-point lights
-	if (cubeShadows) {
-		uint numCubeShadows = std::min((uint)lights.size(), (uint)MAX_SHADOW_CUBES);
-		for (uint i = 0; i < numCubeShadows; ++i) {
+	if (cubeShadows && settings.shadows) {
+		uint usedCubeShadows = 0;
+		for (uint i = 0; i < lights.size() && usedCubeShadows < MAX_SHADOW_CUBES; ++i) {
 			Light& light = lights[i];
+			if (light.shadowDistance == 0.f)
+				continue;
 			m_device->setupShadowPass(light, 1+i);
-			if (settings.shadows) {
-				entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
-					if (model.materials.empty() || !model.geometry)
-						return;
-					float maxDist = model.bounds.radius * glm::compMax(transform.scale) + light.distance;
-					if (glm::distance2(light.position, transform.position) < maxDist * maxDist) {
-						BEGIN_ENTITY_GPU_SAMPLE("Cube shadow", e)
-						m_device->renderShadow(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
-						END_ENTITY_GPU_SAMPLE()
-					}
-				});
-			}
+			entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
+				if (model.materials.empty() || !model.geometry)
+					return;
+				float maxDist = model.bounds.radius * glm::compMax(transform.scale) + light.distance;
+				if (glm::distance2(light.position, transform.position) < maxDist * maxDist) {
+					BEGIN_ENTITY_GPU_SAMPLE("Cube shadow", e)
+					m_device->renderShadow(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
+					END_ENTITY_GPU_SAMPLE()
+				}
+			});
+			++usedCubeShadows;
 		}
 	}
 	END_GPU_SAMPLE()
