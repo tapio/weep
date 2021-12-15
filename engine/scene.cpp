@@ -598,9 +598,10 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 			info.m_linearSleepingThreshold = 0.f;
 			info.m_angularSleepingThreshold = 0.f;
 		}
-		entity.add<btRigidBody>(info);
+		RigidBody& rb = entity.add<RigidBody>();
+		rb.body = new btRigidBody(info);
 		numBodies++;
-		btRigidBody& body = entity.get<btRigidBody>();
+		btRigidBody& body = *rb.body;
 		if (!bodyDef["angularFactor"].is_null())
 			body.setAngularFactor(convert(toVec3(bodyDef["angularFactor"])));
 		if (!bodyDef["linearFactor"].is_null())
@@ -651,12 +652,12 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 	}
 
 	if (def["trackGround"].bool_value()) {
-		ASSERT(entity.has<btRigidBody>());
+		ASSERT(entity.has<RigidBody>());
 		entity.add<GroundTracker>();
 	}
 
 	if (def["trackContacts"].bool_value()) {
-		ASSERT(entity.has<btRigidBody>());
+		ASSERT(entity.has<RigidBody>());
 		entity.add<ContactTracker>();
 	}
 

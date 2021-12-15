@@ -118,6 +118,11 @@ struct Particles
 	vec2 speedMinMax = vec2(0.1f, 1.f);
 };
 
+struct RigidBody
+{
+	class btRigidBody* body = nullptr;
+};
+
 struct GroundTracker
 {
 	bool onGround = false;

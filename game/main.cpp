@@ -58,8 +58,8 @@ void init(Game& game)
 	ASSERT(cameraEnt.is_alive());
 	Transform& camTrans = cameraEnt.get<Transform>();
 	cameraEnt.add<Controller>(camTrans.position, camTrans.rotation);
-	if (cameraEnt.has<btRigidBody>())
-		cameraEnt.get<Controller>().body = &cameraEnt.get<btRigidBody>();
+	if (cameraEnt.has<RigidBody>())
+		cameraEnt.get<Controller>().body = cameraEnt.get<RigidBody>().body;
 	modules.call($id(INIT), &game);
 }
 
@@ -200,8 +200,8 @@ int main(int argc, char* argv[])
 		physics.step(game.entities, game.engine.dt, game.engine.timeMult >= 1.f); // Use variable time step with time dilation...
 		END_CPU_SAMPLE()
 
-		if (cameraEnt.has<btRigidBody>()) {
-			//btRigidBody& body = cameraEnt.get<btRigidBody>();
+		if (cameraEnt.has<RigidBody>()) {
+			//btRigidBody& body = *cameraEnt.get<RigidBody>().body;
 			//camera.position = convert(body.getCenterOfMassPosition());
 			if (cameraEnt.has<GroundTracker>())
 				controller.onGround = cameraEnt.get<GroundTracker>().onGround;

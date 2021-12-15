@@ -35,21 +35,21 @@ static void begin(int dir) {
 	if (ball.is_alive()) {
 		Transform& trans = ball.get<Transform>();
 		trans.setPosition(vec3(0));
-		btRigidBody& body = ball.get<btRigidBody>();
+		btRigidBody& body = *ball.get<RigidBody>().body;
 		body.setLinearVelocity(btVector3(10 * dir, 0, glm::linearRand(-6, 6)));
 	}
 	Entity paddle1 = s_game->entities.get_entity_by_tag("paddle1");
 	if (paddle1.is_alive()) {
 		Transform& trans = paddle1.get<Transform>();
 		trans.setPosition(vec3(-10, 0, 0));
-		btRigidBody& body = paddle1.get<btRigidBody>();
+		btRigidBody& body = *paddle1.get<RigidBody>().body;
 		body.setLinearVelocity(btVector3(0, 0, 0));
 	}
 	Entity paddle2 = s_game->entities.get_entity_by_tag("paddle2");
 	if (paddle2.is_alive()) {
 		Transform& trans = paddle2.get<Transform>();
 		trans.setPosition(vec3(10, 0, 0));
-		btRigidBody& body = paddle2.get<btRigidBody>();
+		btRigidBody& body = *paddle2.get<RigidBody>().body;
 		body.setLinearVelocity(btVector3(0, 0, 0));
 	}
 }
@@ -68,7 +68,7 @@ static void steer(const string& paddleName, int dir) {
 	const float paddleVel = 12.f;
 	Entity paddle = s_game->entities.get_entity_by_tag(paddleName);
 	if (paddle.is_alive()) {
-		btRigidBody& body = paddle.get<btRigidBody>();
+		btRigidBody& body = *paddle.get<RigidBody>().body;
 		body.setLinearVelocity(btVector3(0, 0, dir * paddleVel));
 	}
 }
@@ -126,7 +126,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			Entity ball = s_game->entities.get_entity_by_tag("ball");
 			if (ball.is_alive() && s_winner < 0) {
 				// Ensure the ball keeps moving
-				btRigidBody& body = ball.get<btRigidBody>();
+				btRigidBody& body = *ball.get<RigidBody>().body;
 				btVector3 vel = body.getLinearVelocity();
 				float vel2 = vel.length2();
 				if (vel2 > 0.f && vel2 < s_ballMinVel * s_ballMinVel) {

@@ -60,7 +60,7 @@ static void startNextLevel(Game& game)
 	Transform& cameraTrans = cameraEnt.get<Transform>();
 	cameraEnt.add<Controller>(cameraTrans.position, cameraTrans.rotation);
 	Controller& controller = cameraEnt.get<Controller>();
-	controller.body = &cameraEnt.get<btRigidBody>();
+	controller.body = cameraEnt.get<RigidBody>().body;
 	controller.fast = 1.f;
 
 	levelStarted = true;
@@ -140,7 +140,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 				return;
 			}
 			Entity pl = game.entities.get_entity_by_tag("camera");
-			if (!pl.is_alive() || !pl.has<btRigidBody>())
+			if (!pl.is_alive() || !pl.has<RigidBody>())
 				return;
 
 			if (!levelComplete)

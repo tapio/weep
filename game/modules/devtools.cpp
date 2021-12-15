@@ -111,8 +111,8 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 				if (ImGui::CollapsingHeader("Camera")) {
 					ImGui::Text("Position: %.1f %.1f %.1f", cameraTrans.position.x, cameraTrans.position.y, cameraTrans.position.z);
 					if (ImGui::Checkbox("Fly", &controller.fly)) {
-						if (cameraEnt.has<btRigidBody>()) {
-							btRigidBody& body = cameraEnt.get<btRigidBody>();
+						if (cameraEnt.has<RigidBody>()) {
+							btRigidBody& body = *cameraEnt.get<RigidBody>().body;
 							body.setGravity(controller.fly ? btVector3(0, 0, 0) : physics.dynamicsWorld->getGravity());
 						}
 					}
@@ -229,8 +229,8 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 							trans.position = pos;
 							trans.rotation = cameraTrans.rotation;
 						}
-						if (e.has<btRigidBody>()) {
-							btRigidBody& body = e.get<btRigidBody>();
+						if (e.has<RigidBody>()) {
+							btRigidBody& body = *e.get<RigidBody>().body;
 							btTransform trans(convert(cameraTrans.rotation), convert(pos));
 							body.setWorldTransform(trans);
 							body.setLinearVelocity(convert(vel));

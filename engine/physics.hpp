@@ -4,6 +4,8 @@
 #include "bullet/btBulletDynamicsCommon.h"
 #include "bullet/BulletCollision/Gimpact/btGImpactShape.h"
 
+struct RigidBody;
+
 class PhysicsSystem : public System
 {
 public:
@@ -17,7 +19,7 @@ public:
 	void step(Entities& entities, float dt, bool fixedStep);
 
 	Entity rayCast(Entities& entities, vec3 from, vec3 to);
-	bool testGroundHit(btRigidBody& body);
+	bool testGroundHit(RigidBody& body);
 
 	btAlignedObjectArray<btCollisionShape*> collisionShapes;
 	btBroadphaseInterface* broadphase;

@@ -54,10 +54,10 @@ void PhysicsSystem::reset()
 void PhysicsSystem::step(Entities& entities, float dt, bool fixedStep)
 {
 	// Update manual transform changes to physics
-	entities.for_each<btRigidBody, Transform>([](Entity, btRigidBody& body, Transform& transform) {
+	entities.for_each<RigidBody, Transform>([](Entity, RigidBody& body, Transform& transform) {
 		if (transform.dirty) {
 			btTransform trans(convert(transform.rotation), convert(transform.position));
-			body.setCenterOfMassTransform(trans);
+			body.body->setCenterOfMassTransform(trans);
 		}
 	});
 	entities.for_each<ContactTracker>([&](Entity, ContactTracker& tracker) {
@@ -70,8 +70,8 @@ void PhysicsSystem::step(Entities& entities, float dt, bool fixedStep)
 	dynamicsWorld->stepSimulation(dt, maxSteps);
 
 	// Sync physics results to entity transforms
-	entities.for_each<btRigidBody, Transform>([](Entity, btRigidBody& body, Transform& transform) {
-		const btTransform& trans = body.getCenterOfMassTransform();
+	entities.for_each<RigidBody, Transform>([](Entity, RigidBody& body, Transform& transform) {
+		const btTransform& trans = body.body->getCenterOfMassTransform();
 		transform.position = convert(trans.getOrigin());
 		transform.rotation = convert(trans.getRotation());
 	});
@@ -104,7 +104,7 @@ void PhysicsSystem::step(Entities& entities, float dt, bool fixedStep)
 	}
 
 	// GroundTracker
-	entities.for_each<GroundTracker, btRigidBody>([&](Entity, GroundTracker& tracker, btRigidBody& body) {
+	entities.for_each<GroundTracker, RigidBody>([&](Entity, GroundTracker& tracker, RigidBody& body) {
 		tracker.onGround = testGroundHit(body);
 	});
 }
@@ -121,8 +121,9 @@ Entity PhysicsSystem::rayCast(Entities& entities, vec3 from_, vec3 to_)
 	return {};
 }
 
-bool PhysicsSystem::testGroundHit(btRigidBody& body)
+bool PhysicsSystem::testGroundHit(RigidBody& rb)
 {
+	btRigidBody& body = *rb.body;
 	btVector3 from = body.getCenterOfMassPosition();
 	btVector3 to(from.x(), from.y() - 10.0, from.z());
 	btCollisionWorld::ClosestRayResultCallback res(from, to);
@@ -138,23 +139,29 @@ bool PhysicsSystem::testGroundHit(btRigidBody& body)
 
 bool PhysicsSystem::add(Entity entity)
 {
-	if (!entity.has<btRigidBody>()) return false;
-	btRigidBody& body = entity.get<btRigidBody>();
+	if (!entity.has<RigidBody>()) return false;
+	RigidBody& rb = entity.get<RigidBody>();
+	ASSERT(rb.body);
+	btRigidBody& body = *rb.body;
 	ASSERT(!body.isInWorld());
 	collisionShapes.push_back(body.getCollisionShape());
-	dynamicsWorld->addRigidBody(&body);
+	dynamicsWorld->addRigidBody(rb.body);
 	return true;
 }
 
 void PhysicsSystem::destroy(Entity entity)
 {
-	if (!entity.has<btRigidBody>()) return;
-	btRigidBody& body = entity.get<btRigidBody>();
+	if (!entity.has<RigidBody>()) return;
+	RigidBody& rb = entity.get<RigidBody>();
+	btRigidBody& body = *rb.body;
 	ASSERT(body.isInWorld());
 	if (body.getMotionState())
 		delete body.getMotionState();
-	dynamicsWorld->removeRigidBody(&body);
+	dynamicsWorld->removeRigidBody(rb.body);
 	ASSERT(body.getCollisionShape());
 	collisionShapes.remove(body.getCollisionShape());
 	delete body.getCollisionShape();
+	delete rb.body;
+	rb.body = nullptr;
+
 }
