@@ -109,6 +109,18 @@ void PhysicsSystem::step(Entities& entities, float dt, bool fixedStep)
 	});
 }
 
+Entity PhysicsSystem::rayCast(Entities& entities, vec3 from_, vec3 to_)
+{
+	btVector3 from = convert(from_);
+	btVector3 to = convert(to_);
+	btCollisionWorld::ClosestRayResultCallback res(from, to);
+	dynamicsWorld->rayTest(from, to, res);
+	if (res.hasHit()) {
+		return Entity(res.m_collisionObject->getUserIndex(), &entities);
+	}
+	return {};
+}
+
 bool PhysicsSystem::testGroundHit(btRigidBody& body)
 {
 	btVector3 from = body.getCenterOfMassPosition();

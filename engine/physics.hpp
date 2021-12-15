@@ -16,6 +16,7 @@ public:
 
 	void step(Entities& entities, float dt, bool fixedStep);
 
+	Entity rayCast(Entities& entities, vec3 from, vec3 to);
 	bool testGroundHit(btRigidBody& body);
 
 	btAlignedObjectArray<btCollisionShape*> collisionShapes;

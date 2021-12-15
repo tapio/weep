@@ -236,6 +236,13 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 							body.setLinearVelocity(convert(vel));
 						}
 					}
+					if (ImGui::Button("Delete Pointed Physics Object")) {
+						vec3 rayStart = cameraTrans.position;
+						vec3 rayEnd = rayStart +  + glm::rotate(cameraTrans.rotation, vec3(0, 0, -100));
+						Entity toDelete = game.entities.get_system<PhysicsSystem>().rayCast(game.entities, rayStart, rayEnd);
+						if (toDelete.is_alive())
+							toDelete.kill();
+					}
 					ImGui::SliderInt("Force LOD", &renderer.settings.forceLod, -1, Model::MAX_LODS - 1);
 				}
 				if (ImGui::CollapsingHeader("Entities")) {
