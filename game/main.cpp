@@ -30,6 +30,9 @@ DECLARE_MODULE_FUNC(skyrunner);
 DECLARE_MODULE_FUNC(testbed);
 #endif
 
+static Controller s_controllerBackup;
+static Transform s_camTransBackup;
+
 void init(Game& game)
 {
 	game.entities = Entities();
@@ -57,9 +60,18 @@ void init(Game& game)
 	Entity cameraEnt = game.entities.get_entity_by_tag("camera");
 	ASSERT(cameraEnt.is_alive());
 	Transform& camTrans = cameraEnt.get<Transform>();
-	cameraEnt.add<Controller>(camTrans.position, camTrans.rotation);
+	Controller& controller = cameraEnt.add<Controller>(camTrans.position, camTrans.rotation);
 	if (cameraEnt.has<RigidBody>())
-		cameraEnt.get<Controller>().body = cameraEnt.get<RigidBody>().body;
+		controller.body = cameraEnt.get<RigidBody>().body;
+	if (game.restoreCam) {
+		game.restoreCam = false;
+		controller.position = s_controllerBackup.position;
+		controller.rotation = s_controllerBackup.rotation;
+		controller.angles = s_controllerBackup.angles;
+		camTrans.position = s_camTransBackup.position;
+		camTrans.rotation = s_camTransBackup.rotation;
+		camTrans.dirty = true;
+	}
 	modules.call($id(INIT), &game);
 }
 
@@ -258,6 +270,10 @@ int main(int argc, char* argv[])
 		modules.call($id(devtools), $id(FRAME_END), &game);
 
 		if (game.reload) {
+			if (game.restoreCam) {
+				s_controllerBackup = controller;
+				s_camTransBackup = cameraTrans;
+			}
 			modules.call($id(DEINIT), &game);
 			renderer.reset(game.entities);
 			physics.reset();

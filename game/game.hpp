@@ -12,4 +12,5 @@ struct Game {
 	SceneLoader scene = {};
 	string scenePath = "testscene.json";
 	bool reload = false;
+	bool restoreCam = false; // Must be initially false, set to true with "reload" when desired
 };
