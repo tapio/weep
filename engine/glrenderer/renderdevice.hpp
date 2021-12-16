@@ -37,8 +37,8 @@ public:
 	void setupShadowPass(const Light& light, uint index);
 	void renderShadow(Model& model, Transform& transform, BoneAnimation* animation = nullptr);
 
-	void setupRenderPass(const Camera& camera, const std::vector<Light>& lights, Technique tech = TECH_COLOR);
-	void render(Model& model, Transform& transform, BoneAnimation* animation = nullptr);
+	void setupRenderPass(const Camera& camera, const std::vector<Light>& lights, Technique tech = TECH_COLOR, int fboIndex = 0);
+	void render(Model& model, Transform& transform, BoneAnimation* animation = nullptr, int reflectionIndex = 0);
 	void renderSkybox();
 	void postRender();
 
@@ -106,7 +106,7 @@ private:
 
 	int generateShader(uint tags);
 	void setupCubeMatrices(mat4 proj, vec3 pos);
-	void drawSetup(const Transform& transform, const BoneAnimation* animation = nullptr);
+	void drawSetup(const Transform& transform, const BoneAnimation* animation = nullptr, int reflectionIndex = 0);
 	void drawBatch(const Batch& batch, bool tessellate = false);
 	void renderFullscreenQuad();
 
@@ -114,7 +114,7 @@ private:
 	FBO m_fbo = { "fbo_master" };
 	FBO m_pingPongFbo[2] = { {"fbo_pingpong_a"}, {"fbo_pingpong_b"} };
 	FBO m_shadowFbo[MAX_SHADOWS];
-	FBO m_reflectionFbo = { "fbo_reflection" };
+	FBO m_reflectionFbo[MAX_REFLECTIONS];
 
 	GPUGeometry m_fullscreenQuad;
 	GPUGeometry m_skyboxCube;

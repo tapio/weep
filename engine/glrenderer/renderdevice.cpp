@@ -213,8 +213,9 @@ void RenderDevice::resizeRenderTargets()
 	for (uint i = 0; i < countof(m_shadowFbo); ++i)
 		if (m_shadowFbo[i].valid())
 			m_shadowFbo[i].destroy();
-	if (m_reflectionFbo.valid())
-		m_reflectionFbo.destroy();
+	for (uint i = 0; i < countof(m_reflectionFbo); ++i)
+		if (m_reflectionFbo[i].valid())
+			m_reflectionFbo[i].destroy();
 	// Set up floating point framebuffer to render HDR scene to
 	int samples = Engine::settings["renderer"]["msaa"].number_value();
 	if (caps.gles && samples > 1) {
@@ -254,12 +255,14 @@ void RenderDevice::resizeRenderTargets()
 		m_shadowFbo[i].cube = true;
 		m_shadowFbo[i].create();
 	}
-	m_reflectionFbo.width = Engine::settings["renderer"]["reflectionCubeSize"].number_value();
-	m_reflectionFbo.height = m_reflectionFbo.width;
-	m_reflectionFbo.numTextures = 2;
-	m_reflectionFbo.depthAttachment = 1;
-	m_reflectionFbo.cube = true;
-	m_reflectionFbo.create();
+	for (uint i = 0; i < countof(m_reflectionFbo); ++i) {
+		m_reflectionFbo[i].width = Engine::settings["renderer"]["reflectionCubeSize"].number_value();
+		m_reflectionFbo[i].height = m_reflectionFbo[i].width;
+		m_reflectionFbo[i].numTextures = 2;
+		m_reflectionFbo[i].depthAttachment = 1;
+		m_reflectionFbo[i].cube = true;
+		m_reflectionFbo[i].create();
+	}
 }
 
 void RenderDevice::loadShaders()
@@ -733,7 +736,7 @@ void RenderDevice::useMaterial(Material& mat)
 	m_materialBlock.upload();
 }
 
-void RenderDevice::drawSetup(const Transform& transform, const BoneAnimation* animation)
+void RenderDevice::drawSetup(const Transform& transform, const BoneAnimation* animation, int reflectionIndex)
 {
 	m_objectBlock.uniforms.modelMatrix = transform.matrix;
 	mat4 modelView = m_commonBlock.uniforms.viewMatrix * m_objectBlock.uniforms.modelMatrix;
@@ -756,7 +759,7 @@ void RenderDevice::drawSetup(const Transform& transform, const BoneAnimation* an
 
 	uint envTex = 0;
 	switch (m_tech) {
-		case TECH_COLOR: envTex = m_reflectionFbo.tex[0]; break;
+		case TECH_COLOR: envTex = m_reflectionFbo[reflectionIndex].tex[0]; break;
 		case TECH_REFLECTION: envTex = m_skyboxMat.tex[Material::ENV_MAP]; break;
 		default: break;
 	}
@@ -835,13 +838,13 @@ void RenderDevice::renderShadow(Model& model, Transform& transform, BoneAnimatio
 	glBindVertexArray(0);
 }
 
-void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light>& lights, Technique tech)
+void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light>& lights, Technique tech, int fboIndex)
 {
 	ASSERT(m_env);
 	m_tech = tech;
 	if (tech != TECH_COMPUTE) {
 		FBO* fbo;
-		if (tech == TECH_REFLECTION) fbo = &m_reflectionFbo;
+		if (tech == TECH_REFLECTION) fbo = &m_reflectionFbo[fboIndex];
 		else if (m_msaaFbo.valid()) fbo = &m_msaaFbo;
 		else fbo = &m_fbo;
 		fbo->bind();
@@ -911,9 +914,9 @@ void RenderDevice::endTransparency()
 	glDisable(GL_BLEND);
 }
 
-void RenderDevice::render(Model& model, Transform& transform, BoneAnimation* animation)
+void RenderDevice::render(Model& model, Transform& transform, BoneAnimation* animation, int reflectionIndex)
 {
-	drawSetup(transform, animation);
+	drawSetup(transform, animation, reflectionIndex);
 
 	bool refl = m_tech == TECH_REFLECTION;
 	Geometry& geom = *model.geometry;
@@ -1060,7 +1063,7 @@ void RenderDevice::renderSkybox()
 	glBindVertexArray(m_skyboxCube.vao);
 	glActiveTexture(GL_TEXTURE0 + BINDING_ENV_MAP);
 	if (DEBUG_REFLECTION && m_tech == TECH_COLOR)
-		glBindTexture(GL_TEXTURE_CUBE_MAP, m_reflectionFbo.tex[0]);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_reflectionFbo[0].tex[0]);
 	else glBindTexture(GL_TEXTURE_CUBE_MAP, m_skyboxMat.tex[Material::ENV_MAP]);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);

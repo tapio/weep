@@ -97,7 +97,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		settings.dynamicReflections = false;
 	}
 
-	struct ReflectionProbe { float priority; vec3 pos; };
+	struct ReflectionProbe { vec3 pos; float priority; };
 	static std::vector<ReflectionProbe> reflectionProbes;
 	static std::vector<Light> lights;
 	reflectionProbes.clear();
@@ -165,13 +165,16 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 				if (reflectivity > 0.01f) {
 					float priority = glm::distance2(camPos, transform.position);
 					priority *= 1.1f - reflectivity;
-					reflectionProbes.push_back({ priority, transform.position });
+					reflectionProbes.push_back({ transform.position, priority });
 				}
 			}
 		});
 		std::sort(reflectionProbes.begin(), reflectionProbes.end(), [](const ReflectionProbe& a, const ReflectionProbe& b) {
 			return a.priority < b.priority;
 		});
+		// TODO: Prune ones that are too close to picked ones
+		if (reflectionProbes.size() > MAX_REFLECTIONS)
+			reflectionProbes.resize(MAX_REFLECTIONS);
 	}
 
 	// Inject sun light source
@@ -280,6 +283,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 			Light& light = lights[i];
 			if (light.type == Light::POINT_LIGHT || light.shadowDistance == 0.f)
 				continue;
+			BEGIN_GPU_SAMPLE(ShadowMap)
 			light.shadowIndex = shadowIndex;
 			m_device->setupShadowPass(light, shadowIndex);
 			Frustum shadowFrustum(light.position, light.direction, light.shadowDistance >= 0.f ? light.shadowDistance : light.distance);
@@ -290,6 +294,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 					END_ENTITY_GPU_SAMPLE()
 				}
 			});
+			END_GPU_SAMPLE()
 			++usedShadowMaps;
 			++shadowIndex;
 		}
@@ -302,6 +307,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 				Light& light = lights[i];
 				if (light.type != Light::POINT_LIGHT || light.shadowDistance == 0.f)
 					continue;
+				BEGIN_GPU_SAMPLE(ShadowCube)
 				light.shadowIndex = shadowIndex;
 				m_device->setupShadowPass(light, shadowIndex);
 				entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
@@ -314,6 +320,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 						END_ENTITY_GPU_SAMPLE()
 					}
 				});
+				END_GPU_SAMPLE()
 				++usedCubeShadows;
 				++shadowIndex;
 			}
@@ -328,20 +335,26 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	if (settings.dynamicReflections) {
 		Camera reflCam;
 		reflCam.makePerspective(glm::radians(90.0f), 1.f, 0.1f, 50.f);
-		vec3 reflCamPos = reflectionProbes.empty() ? camPos : reflectionProbes.front().pos;
-		reflCam.updateViewMatrix(reflCamPos);
-		m_device->setupRenderPass(reflCam, lights, TECH_REFLECTION);
-		entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
-			if (model.materials.empty() || !model.geometry)
-				return;
-			float maxDist = model.bounds.radius * glm::compMax(transform.scale) + reflCam.far;
-			if (glm::distance2(reflCamPos, transform.position) >= maxDist * maxDist)
-				return;
-			BEGIN_ENTITY_GPU_SAMPLE("Reflection", e)
-			m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
-			END_ENTITY_GPU_SAMPLE()
-		});
-		m_device->renderSkybox();
+		for (int i = 0; i < reflectionProbes.size(); ++i) { // Already resized to MAX_REFLECTIONS
+			BEGIN_GPU_SAMPLE(ReflectionProbe)
+			vec3 reflCamPos = reflectionProbes[i].pos;
+			reflCam.updateViewMatrix(reflCamPos);
+			m_device->setupRenderPass(reflCam, lights, TECH_REFLECTION, i);
+			entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
+				if (model.materials.empty() || !model.geometry)
+					return;
+				float maxDist = model.bounds.radius * glm::compMax(transform.scale) + reflCam.far;
+				if (glm::distance2(reflCamPos, transform.position) >= maxDist * maxDist)
+					return;
+				BEGIN_ENTITY_GPU_SAMPLE("Reflection", e)
+				m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
+				END_ENTITY_GPU_SAMPLE()
+			});
+			BEGIN_GPU_SAMPLE(ReflectionSkybox)
+			m_device->renderSkybox();
+			END_GPU_SAMPLE()
+			END_GPU_SAMPLE()
+		}
 	}
 	END_GPU_SAMPLE()
 	END_MEASURE(reflectionMs)
@@ -352,8 +365,20 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	m_device->setupRenderPass(camera, lights, TECH_COLOR);
 	entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 		if (!model.materials.empty() && model.geometry && frustum.visible(transform, model.bounds) && !useTransparentPass(model)) {
+			// Pick best reflection map
+			int reflectionIndex = 0;
+			if (reflectionProbes.size() > 1) {
+				float bestDist = 1e6;
+				for (int i = 0; i < reflectionProbes.size(); ++i) {
+					float dist = glm::distance2(transform.position, reflectionProbes[i].pos);
+					if (dist < bestDist) {
+						bestDist = dist;
+						reflectionIndex = i;
+					}
+				}
+			}
 			BEGIN_ENTITY_GPU_SAMPLE("Render", e)
-			m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
+			m_device->render(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr, reflectionIndex);
 			END_ENTITY_GPU_SAMPLE()
 		}
 	});
