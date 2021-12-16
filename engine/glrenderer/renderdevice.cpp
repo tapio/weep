@@ -104,6 +104,7 @@ RenderDevice::RenderDevice(Resources& resources)
 	glGetIntegerv(GL_MAX_COLOR_TEXTURE_SAMPLES, &caps.maxSamples);
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &caps.maxSamplers);
 	glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &caps.maxArrayTextureLayers);
+	glGetIntegerv(GL_MAX_VARYING_VECTORS, &caps.maxVaryingVectors);
 	glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &caps.maxUniformBufferBindings);
 	glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, &caps.maxShaderStorageBufferBindings);
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &caps.maxComputeWorkGroupCount.x);
@@ -114,7 +115,7 @@ RenderDevice::RenderDevice(Resources& resources)
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &caps.maxComputeWorkGroupSize.z);
 	glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &caps.maxComputeWorkGroupInvocations);
 	logInfo("Max Aniso: %.1f, Max MSAA: %d, Max Samplers: %d, Max Array Texture Layers: %d", caps.maxAnisotropy, caps.maxSamples, caps.maxSamplers, caps.maxArrayTextureLayers);
-	logInfo("Max UBO: %d, Max SSBO: %d", caps.maxUniformBufferBindings, caps.maxShaderStorageBufferBindings);
+	logInfo("Max UBO: %d, Max SSBO: %d, Max varying vecs: %d", caps.maxUniformBufferBindings, caps.maxShaderStorageBufferBindings, caps.maxVaryingVectors);
 	if (!caps.geometryShaders)
 		logInfo("No geometry shader support.");
 	if (!caps.tessellationShaders)
