@@ -16,7 +16,7 @@ public:
 	float speed = 2.0f;
 	float fast = 4.0f;
 
-	float jumpDelay = 0;
+	bool jumped = false;
 	float moveForce = 3000.f;
 	float brakeForce = 1000.f;
 	float jumpForce = 500.f;

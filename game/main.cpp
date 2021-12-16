@@ -61,8 +61,11 @@ void init(Game& game)
 	ASSERT(cameraEnt.is_alive());
 	Transform& camTrans = cameraEnt.get<Transform>();
 	Controller& controller = cameraEnt.add<Controller>(camTrans.position, camTrans.rotation);
-	if (cameraEnt.has<RigidBody>())
+	if (cameraEnt.has<RigidBody>()) {
 		controller.body = cameraEnt.get<RigidBody>().body;
+		if (!cameraEnt.has<GroundTracker>())
+			cameraEnt.add<GroundTracker>();
+	}
 	if (game.restoreCam) {
 		game.restoreCam = false;
 		controller.position = s_controllerBackup.position;

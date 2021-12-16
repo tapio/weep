@@ -13,9 +13,6 @@ void Controller::update(float dt)
 	vec3 input(0);
 	float jump = 0;
 
-	if (jumpDelay > 0)
-		jumpDelay -= dt;
-
 	if (enabled) {
 		const unsigned char* keys = SDL_GetKeyboardState(NULL);
 
@@ -37,9 +34,15 @@ void Controller::update(float dt)
 		if (keys[SDL_SCANCODE_LSHIFT] || keys[SDL_SCANCODE_RSHIFT])
 			input *= fast;
 
-		if (keys[SDL_SCANCODE_SPACE] && onGround && jumpDelay <= 0) {
+		if (jumped && body) {
+			vec3 vel = convert(body->getLinearVelocity());
+			if (glm::dot(vel, up_axis) < 0) // Restore jump if apex reached
+				jumped = false;
+		}
+
+		if (keys[SDL_SCANCODE_SPACE] && onGround && body && !jumped) {
+			jumped = true;
 			jump = 1.f;
-			jumpDelay = 0.250f;
 		}
 
 		rotation = quat_identity;
