@@ -2,7 +2,7 @@ in VertexData {
 	vec2 texcoord;
 } inData;
 
-layout(binding = 20) uniform sampler2D image;
+layout(binding = BINDING_SCENE_COLOR) uniform sampler2D image;
 
 layout(location = 0) out vec4 fragment;
 

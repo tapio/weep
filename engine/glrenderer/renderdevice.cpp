@@ -1087,7 +1087,7 @@ void RenderDevice::postRender()
 		// Blur bloom texture
 		uint amount = (uint)m_env->bloomIntensity;
 		glUseProgram(m_shaders[m_shaderNames[$id(hblur)]].id);
-		glActiveTexture(GL_TEXTURE20);
+		glActiveTexture(GL_TEXTURE0 + BINDING_SCENE_COLOR);
 		for (uint i = 0; i < amount; i++)
 		{
 			m_pingPongFbo[pingpong].bind();
@@ -1115,11 +1115,11 @@ void RenderDevice::postRender()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glUseProgram(m_shaders[m_shaderNames[$id(postfx)]].id);
 	++stats.programs;
-	glActiveTexture(GL_TEXTURE20);
+	glActiveTexture(GL_TEXTURE0 + BINDING_SCENE_COLOR);
 	glBindTexture(GL_TEXTURE_2D, m_fbo.tex[0]);
-	glActiveTexture(GL_TEXTURE21);
+	glActiveTexture(GL_TEXTURE0 + BINDING_SCENE_BLOOM);
 	glBindTexture(GL_TEXTURE_2D, m_pingPongFbo[!pingpong].tex[0]);
-	glActiveTexture(GL_TEXTURE22);
+	glActiveTexture(GL_TEXTURE0 + BINDING_SCENE_DEPTH);
 	glBindTexture(GL_TEXTURE_2D, m_fbo.tex[2]);
 	renderFullscreenQuad();
 

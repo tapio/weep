@@ -3,9 +3,9 @@ in VertexData {
 	vec2 texcoord;
 } inData;
 
-layout(binding = 20) uniform sampler2D sceneMap;
-layout(binding = 21) uniform sampler2D bloomMap;
-layout(binding = 22) uniform sampler2D depthMap;
+layout(binding = BINDING_SCENE_COLOR) uniform sampler2D sceneMap;
+layout(binding = BINDING_SCENE_BLOOM) uniform sampler2D bloomMap;
+layout(binding = BINDING_SCENE_DEPTH) uniform sampler2D depthMap;
 
 layout(location = 0) out vec4 fragment;
 
