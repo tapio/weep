@@ -64,7 +64,8 @@ void main()
 
 	#ifdef USE_SHADOW_MAP
 	outData.worldPosition = (modelMatrix * particlePos).xyz; // Approx, ignores billboard verts
-	outData.shadowcoord = shadowMatrix * particlePos; // Approx, ignores billboard verts
+	for (int i = 0; i < MAX_SHADOW_MAPS; ++i)
+		outData.shadowcoords[i] = shadowMatrices[i] * particlePos; // Approx, ignores billboard verts
 	#endif
 
 #else // USE_LOCAL_SPACE
@@ -76,7 +77,8 @@ void main()
 
 	#ifdef USE_SHADOW_MAP
 	outData.worldPosition = particlePos.xyz; // Approx, ignores billboard verts
-	outData.shadowcoord = shadowMatrix * particlePos; // TODO: This is wrong, pos is in wrong space
+	for (int i = 0; i < MAX_SHADOW_MAPS; ++i)
+		outData.shadowcoords[i] = shadowMatrices[i] * particlePos; // TODO: This is wrong, pos is in wrong space
 	#endif
 
 #endif // USE_LOCAL_SPACE

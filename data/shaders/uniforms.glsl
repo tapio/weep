@@ -1,6 +1,6 @@
 
 #define MAX_LIGHTS 4
-#define MAX_SHADOW_MAPS 2
+#define MAX_SHADOW_MAPS 4
 #define MAX_SHADOW_CUBES 3
 #define MAX_SHADOWS (MAX_SHADOW_MAPS + MAX_SHADOW_CUBES)
 #define MAX_BONES 80
@@ -36,8 +36,8 @@ UBO_PREFIX(UniformObjectBlock, 1)
 	mat4 modelMatrix;
 	mat4 modelViewMatrix;
 	mat4 modelViewProjMatrix;
-	mat4 shadowMatrix;
 	mat4 normalMatrix; // Problems with alignment if sent as mat3
+	mat4 shadowMatrices[MAX_SHADOW_MAPS];
 };
 
 UBO_PREFIX(UniformParticleBlock, 2)
@@ -93,7 +93,7 @@ UBO_PREFIX(UniformPostProcessBlock, 7)
 #define BINDING_REFLECTION_MAP 14
 #define BINDING_ENV_MAP 15
 #define BINDING_SHADOW_MAP 16
-#define BINDING_SHADOW_CUBE 18
+#define BINDING_SHADOW_CUBE 20
 #ifdef __cplusplus
 static_assert(BINDING_SHADOW_CUBE == (BINDING_SHADOW_MAP + MAX_SHADOW_MAPS), "BINDING_SHADOW_CUBE should be exactly BINDING_SHADOW_MAP + MAX_SHADOW_MAPS");
 #endif
@@ -129,7 +129,7 @@ static_assert(BINDING_SHADOW_CUBE == (BINDING_SHADOW_MAP + MAX_SHADOW_MAPS), "BI
 #define ATTR_BONE_WEIGHT 6
 
 #ifdef USE_SHADOW_MAP
-#define SHADOW_VARYINGS vec4 shadowcoord; vec3 worldPosition;
+#define SHADOW_VARYINGS vec4 shadowcoords[MAX_SHADOW_MAPS]; vec3 worldPosition;
 #else
 #define SHADOW_VARYINGS
 #endif

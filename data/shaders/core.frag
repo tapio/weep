@@ -122,10 +122,10 @@ float random(vec3 seed, int i) {
 
 // http://learnopengl.com/#!Advanced-Lighting/Shadows/Shadow-Mapping
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
-float shadow_mapping(int shadowMapIndex)
+float shadow_mapping(int shadowMapIndex, bool perspective)
 {
-	vec4 pos = inData.shadowcoord;
-	vec3 projCoords = pos.xyz / pos.w;
+	vec4 pos = inData.shadowcoords[shadowMapIndex];
+	vec3 projCoords = pos.xyz / mix(1.0, pos.w, perspective);
 
 	if (projCoords.z > 1.0)
 		return 0.0;
@@ -253,7 +253,7 @@ void main()
 		sunAmount = max(dot(viewDir, -sunDir), 0.0);
 
 #ifdef USE_SHADOW_MAP
-		float visibility = max(1.0 - shadow_mapping(0), shadowDarkness);
+		float visibility = max(1.0 - shadow_mapping(0, false), shadowDarkness);
 #else
 		float visibility = 1.0;
 #endif
@@ -306,14 +306,12 @@ void main()
 			if (theta <= outerCutOff)
 				continue;
 			float epsilon = innerCutOff - outerCutOff;
-			if (epsilon != 0.f) {
+			if (epsilon != 0.f)
 				attenuation *= saturate((theta - outerCutOff) / epsilon);
-			}
 
-			// TODO: Spot shadow
 			#ifdef USE_SHADOW_MAP
-			//if (light.shadowIndex >= 0)
-			//	visibility = max(1.0 - shadow_mapping(i), shadowDarkness);
+			if (light.shadowIndex >= 0)
+				visibility = max(1.0 - shadow_mapping(light.shadowIndex, true), shadowDarkness); // TODO: Harmozine param to shadow_mapping / shadow_mapping_cube
 			#endif
 		// Point light
 		} else {

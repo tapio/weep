@@ -64,11 +64,11 @@
 		"light": {
 			"type": "spot",
 			"color": 10,
-			"distance": 10,
+			"distance": 5,
 			"decay": 2,
 			"spotAngles": [10, 20]
 		},
-		"position": [ 2.5, 1, -1 ],
+		"position": [ 4, 0.5, -5 ],
 		"rotation": [ -1.1, 0, 0 ],
 		"propertyAnimation": {
 			"play": true,

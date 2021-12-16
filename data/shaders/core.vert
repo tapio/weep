@@ -44,7 +44,8 @@ void main()
 #endif
 #ifdef USE_SHADOW_MAP
 	outData.worldPosition = (modelMatrix * pos).xyz;
-	outData.shadowcoord = shadowMatrix * pos;
+	for (int i = 0; i < MAX_SHADOW_MAPS; ++i)
+		outData.shadowcoords[i] = shadowMatrices[i] * pos;
 #endif
 }
 

@@ -740,6 +740,11 @@ void RenderDevice::drawSetup(const Transform& transform, const BoneAnimation* an
 	m_objectBlock.uniforms.modelViewMatrix = modelView;
 	m_objectBlock.uniforms.modelViewProjMatrix = m_commonBlock.uniforms.projectionMatrix * modelView;
 	m_objectBlock.uniforms.normalMatrix = glm::inverseTranspose(modelView);
+	if (m_tech == TECH_COLOR) {
+		for (int i = 0; i < MAX_SHADOW_MAPS; ++i) {
+			m_objectBlock.uniforms.shadowMatrices[i] = s_shadowBiasMatrix * (m_shadowProj[i] * (m_shadowView[i] * transform.matrix));
+		}
+	}
 	m_objectBlock.upload();
 
 	if (animation && !animation->bones.empty()) {
@@ -795,7 +800,7 @@ void RenderDevice::setupShadowPass(const Light& light, uint index)
 		m_tech = TECH_DEPTH;
 		float aspect = (float)shadowFBO.width / (float)shadowFBO.height;
 		near = 0.2f; far = light.shadowDistance >= 0.f ? light.shadowDistance : light.distance;
-		m_shadowProj[index] = glm::perspective(glm::radians(light.spotAngles.y), aspect, near, far);
+		m_shadowProj[index] = glm::perspective(glm::radians(light.spotAngles.y * 2), aspect, near, far);
 		m_shadowView[index] = glm::lookAt(light.position, light.position + light.direction, up_axis);
 	} else if (light.type == Light::DIRECTIONAL_LIGHT) {
 		m_tech = TECH_DEPTH;
@@ -908,7 +913,6 @@ void RenderDevice::endTransparency()
 
 void RenderDevice::render(Model& model, Transform& transform, BoneAnimation* animation)
 {
-	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (m_shadowProj[0] * (m_shadowView[0] * transform.matrix));
 	drawSetup(transform, animation);
 
 	bool refl = m_tech == TECH_REFLECTION;
@@ -928,7 +932,6 @@ void RenderDevice::render(Model& model, Transform& transform, BoneAnimation* ani
 
 void RenderDevice::renderParticles(Particles& particles, Transform& transform)
 {
-	m_objectBlock.uniforms.shadowMatrix = s_shadowBiasMatrix * (m_shadowProj[0] * (m_shadowView[0] * transform.matrix));
 	ASSERT(particles.count);
 	drawSetup(transform);
 	useMaterial(particles.material);

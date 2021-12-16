@@ -24,7 +24,7 @@ Most are quite unpolished...
 * OpenGL 4 forward renderer
 	- One directional sun light with shadow mapping
 	- Multiple point lights with omnidirectional shadow maps
-	- Multiple spot lights (currently shadowless)
+	- Multiple spot lights with shadow maps
 	- HDR with multiple tonemap functions
 	- Bloom / glow
 	- Diffuse / normal / specular / emission / height / AO map support

@@ -174,7 +174,8 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		});
 	}
 
-	vec3 lightTarget = camPos + camRot * (forward_axis * 2.0f);
+	// Update and prioritize lights
+	vec3 lightPrioTarget = camPos + camRot * (forward_axis * 2.0f);
 	entities.for_each<Light, Transform>([&](Entity, Light& light, Transform& transform) {
 		light.position = transform.position;
 		light.shadowIndex = -1;
@@ -188,7 +189,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 			light.direction = transform.forward();
 		}
 		// TODO: Better prioritizing
-		light.priority = glm::distance2(lightTarget, light.position);
+		light.priority = glm::distance2(lightPrioTarget, light.position);
 		lights.push_back(light);
 	});
 	std::sort(lights.begin(), lights.end(), [](const Light& a, const Light& b) {
@@ -280,8 +281,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 			Light& light = lights[i];
 			if (light.type != Light::SPOT_LIGHT || light.shadowDistance == 0.f)
 				continue;
-			// TODO: Spot light shadows disabled until shader implementation
-			//light.shadowIndex = shadowIndex;
+			light.shadowIndex = shadowIndex;
 			m_device->setupShadowPass(light, shadowIndex);
 			Frustum spotShadowFrustum(light.position, light.direction, light.shadowDistance >= 0.f ? light.shadowDistance : light.distance);
 			entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {

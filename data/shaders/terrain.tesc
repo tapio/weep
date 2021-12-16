@@ -13,7 +13,8 @@ void main()
 	outData[ID].texcoord = inData[ID].texcoord;
 	outData[ID].normal = inData[ID].normal;
 #ifdef USE_SHADOW_MAP
-	outData[ID].shadowcoord = inData[ID].shadowcoord;
+	for (int i = 0; i < MAX_SHADOW_MAPS; ++i)
+		outData[ID].shadowcoords[i] = inData[ID].shadowcoords[i];
 	outData[ID].worldPosition = inData[ID].worldPosition;
 #endif
 #ifdef USE_VERTEX_COLOR

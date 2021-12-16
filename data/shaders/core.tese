@@ -33,7 +33,8 @@ void main()
 	outData.texcoord = interp2(inData[0].texcoord, inData[1].texcoord, inData[2].texcoord);
 	outData.normal = normalize(interp3(inData[0].normal, inData[1].normal, inData[2].normal));
 #ifdef USE_SHADOW_MAP
-	outData.shadowcoord = interp4(inData[0].shadowcoord, inData[1].shadowcoord, inData[2].shadowcoord);
+	for (int i = 0; i < MAX_SHADOW_MAPS; ++i)
+		outData.shadowcoords[i] = interp4(inData[0].shadowcoords[i], inData[1].shadowcoords[i], inData[2].shadowcoords[i]);
 	outData.worldPosition = interp3(inData[0].worldPosition, inData[1].worldPosition, inData[2].worldPosition);
 #endif
 #ifdef USE_VERTEX_COLOR
