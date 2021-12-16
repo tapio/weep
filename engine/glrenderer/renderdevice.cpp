@@ -186,6 +186,8 @@ RenderDevice::RenderDevice(Resources& resources)
 
 	for (uint i = 0; i < countof(m_shadowFbo); ++i)
 		m_shadowFbo[i].name = "fbo_shadow_" + std::to_string(i);
+	for (uint i = 0; i < countof(m_reflectionFbo); ++i)
+		m_reflectionFbo[i].name = "fbo_reflection_" + std::to_string(i);
 
 	resizeRenderTargets();
 
@@ -629,6 +631,7 @@ bool RenderDevice::uploadMaterial(Material& material)
 		// Simpler reflection shader
 		if (caps.geometryShaders && (material.flags & Material::DRAW_REFLECTION)) {
 			tag &= ~(USE_SHADOW_MAP | USE_AO_MAP | USE_REFLECTION_MAP | USE_PARALLAX_MAP | USE_ENV_MAP | USE_TESSELLATION);
+			//tag &= ~(USE_SHADOW_MAP | USE_AO_MAP | USE_PARALLAX_MAP | USE_TESSELLATION);
 			material.shaderId[TECH_REFLECTION] = generateShader(tag | USE_CUBE_RENDER);
 			ASSERT(material.shaderId[TECH_REFLECTION] >= 0 && "Reflection shader generating failed");
 		}

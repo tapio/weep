@@ -14,6 +14,9 @@
 		"name": "camera",
 		"triggerGroup": 0,
 		"geometry": "debug/cube.obj",
+		"material": {
+			"shaderName": "color_lit"
+		},
 		"body": {
 			"shape": "capsule",
 			"mass": 100,
@@ -136,6 +139,10 @@
 		"prefab": "cube_refl",
 		"position": [ 8, 0, -5 ],
 		"scale": 0.5
+	},{
+		"prefab": "cube_refl",
+		"position": [ 0, 3, -15 ],
+		"scale": [ 12, 8, 1 ]
 	},{
 		"prefab": "testcube",
 		"material": {

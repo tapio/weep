@@ -269,8 +269,9 @@ namespace {
 			env.skyType = Environment::SKY_SKYBOX;
 			for (int i = 0; i < 6; i++)
 				env.skybox[i] = resources.getImage(resolvePath(pathContext, def["skybox"][i].string_value()));
-		}
-		else env.skyType = Environment::SKY_PROCEDURAL;
+		} else if (def["skybox"].is_bool() && !def["skybox"].bool_value()) {
+			env.skyType = Environment::SKY_SKYBOX;
+		} else env.skyType = Environment::SKY_PROCEDURAL;
 		for (int i = 0; i < 6; i++)
 			if (env.skybox[i])
 				env.skybox[i]->sRGB = true;
