@@ -119,6 +119,10 @@ static_assert(BINDING_SHADOW_CUBE == (BINDING_SHADOW_MAP + MAX_SHADOW_MAPS), "BI
 #define PI 3.14159265
 #define saturate(x) clamp(x, 0.0, 1.0)
 
+// Keep Light::Type in sync!
+#define POINT_LIGHT 0
+#define DIRECTIONAL_LIGHT 1
+#define SPOT_LIGHT 2
 
 #define ATTR_POSITION 0
 #define ATTR_TEXCOORD 1

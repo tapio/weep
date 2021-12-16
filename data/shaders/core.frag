@@ -194,7 +194,7 @@ void main()
 	vec3 diffuseComp = vec3(0);
 	vec3 specularComp = vec3(0);
 	vec3 emissionComp = material.emissive;
-	float alpha = 1.f;
+	float alpha = 1.0;
 
 	vec3 viewDir = normalize(-inData.position);
 	vec3 normal = normalize(inData.normal);
@@ -247,88 +247,69 @@ void main()
 
 	float sunAmount = 0.0;
 #if defined(USE_DIFFUSE) || defined(USE_SPECULAR)
-
-	if (sunColor.r > 0.0 || sunColor.g > 0.0 || sunColor.b > 0.0) {
-		vec3 sunDir = normalize((viewMatrix * vec4(sunPosition, 0.0)).xyz);
-		sunAmount = max(dot(viewDir, -sunDir), 0.0);
-
-#ifdef USE_SHADOW_MAP
-		float visibility = max(1.0 - shadow_mapping(0, false), shadowDarkness);
-#else
-		float visibility = 1.0;
-#endif
-
-		// Sun diffuse
-#ifdef USE_DIFFUSE
-		float diff = max(dot(normal, sunDir), 0.0);
-		diffuseComp += visibility * diff * material.diffuse * sunColor * diffuseTex.rgb;
-#endif
-		// Sun specular
-#ifdef USE_SPECULAR
-#ifdef USE_PHONG
-		CONST float energy = (2.0 + material.shininess) / (2.0 * PI);
-		vec3 reflectDir = reflect(-sunDir, normal);
-		float spec = energy * pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-#else // Blinn-Phong
-		CONST float energy = (8.0 + material.shininess) / (8.0 * PI);
-		vec3 halfDir = normalize(sunDir + viewDir);
-		float spec = energy * pow(max(dot(normal, halfDir), 0.0), material.shininess);
-#endif
-		specularComp += visibility * spec * material.specular * sunColor * specularTex.rgb;
-#endif
-	}
-
 	// Point & spot lights
 	// TODO: Implement this more sanely
 	CONST int count = min(numLights, MAX_LIGHTS);
 	for (int i = 0; i < count; ++i)
 	{
 		UniformLightData light = lights[i];
-		vec3 lightPos = (viewMatrix * vec4(light.position, 1.0)).xyz;
 
-		// Attenuation
-		float distance = length(lightPos - inData.position);
-		if (distance >= light.params.x)
-			continue;
-
-		vec3 lightDir = normalize(lightPos - inData.position);
-
-		float attenuation = 1.0f;
+		float attenuation = 1.0;
 		float visibility = 1.0;
+		vec3 lightDir = vec3(0, 1, 0);
 
-		// Spot light
-		bool isSpotLight = light.type == 1;
-		if (isSpotLight) {
-			vec3 spotDir = normalize((viewMatrix * vec4(-light.direction, 0.0)).xyz);
-			float theta = dot(lightDir, spotDir);
-			float innerCutOff = light.params.z;
-			float outerCutOff = light.params.w;
-			if (theta <= outerCutOff)
+		if (light.type == DIRECTIONAL_LIGHT) {
+			lightDir = normalize((viewMatrix * vec4(-light.direction, 0.0)).xyz);
+
+			#ifdef USE_SHADOW_MAP
+			if (light.shadowIndex >= 0)
+				visibility = max(1.0 - shadow_mapping(0, false), shadowDarkness);
+			#endif
+		} else { // Spot & point
+			vec3 lightPos = (viewMatrix * vec4(light.position, 1.0)).xyz;
+
+			// Attenuation
+			float distance = length(lightPos - inData.position);
+			if (distance >= light.params.x)
 				continue;
-			float epsilon = innerCutOff - outerCutOff;
-			if (epsilon != 0.f)
-				attenuation *= saturate((theta - outerCutOff) / epsilon);
 
-			#ifdef USE_SHADOW_MAP
-			if (light.shadowIndex >= 0)
-				visibility = max(1.0 - shadow_mapping(light.shadowIndex, true), shadowDarkness); // TODO: Harmozine param to shadow_mapping / shadow_mapping_cube
-			#endif
-		// Point light
-		} else {
-			#ifdef USE_SHADOW_MAP
-			// Cube shadow
-			if (light.shadowIndex >= 0)
-				visibility = max(1.0 - shadow_mapping_cube(i), shadowDarkness);
-			#endif
+			lightDir = normalize(lightPos - inData.position);
+
+			// Spot light
+			if (light.type == SPOT_LIGHT) {
+				vec3 spotDir = normalize((viewMatrix * vec4(-light.direction, 0.0)).xyz);
+				float theta = dot(lightDir, spotDir);
+				float innerCutOff = light.params.z;
+				float outerCutOff = light.params.w;
+				if (theta <= outerCutOff)
+					continue;
+				float epsilon = innerCutOff - outerCutOff;
+				if (epsilon != 0.0)
+					attenuation *= saturate((theta - outerCutOff) / epsilon);
+
+				#ifdef USE_SHADOW_MAP
+				if (light.shadowIndex >= 0)
+					visibility = max(1.0 - shadow_mapping(light.shadowIndex, true), shadowDarkness); // TODO: Harmozine param to shadow_mapping / shadow_mapping_cube
+				#endif
+			// Point light
+			} else if (light.type == POINT_LIGHT) {
+				#ifdef USE_SHADOW_MAP
+				if (light.shadowIndex >= 0)
+					visibility = max(1.0 - shadow_mapping_cube(i), shadowDarkness);
+				#endif
+			}
+
+			// Distance attenuation
+			attenuation *= pow(saturate(1.0 - distance / light.params.x), light.params.y);
 		}
-
-		// Distance attenuation
-		attenuation *= pow(saturate(1.0 - distance / light.params.x), light.params.y);
 
 		// Diffuse
 #ifdef USE_DIFFUSE
 		float diff = max(dot(normal, lightDir), 0.0);
 		diffuseComp += visibility * attenuation * diff * material.diffuse * light.color * diffuseTex.rgb;
+
+		if (light.type == DIRECTIONAL_LIGHT)
+			sunAmount = max(sunAmount, diff);
 #endif
 
 		// Specular
@@ -379,7 +360,7 @@ void main()
 	fragment.rgb = mix(fragment.rgb, sunAffectedFogColor, fogAmount);
 #endif
 
-	if (bloomThreshold > 0.f) {
+	if (bloomThreshold > 0.0) {
 		float brightness = dot(fragment.rgb, vec3(0.2126, 0.7152, 0.0722));
 		brightFragment = (brightness > bloomThreshold || dot(emissionComp, emissionComp) > 0.0)
 			? vec4(fragment.rgb, 1.0) : vec4(0.0, 0.0, 0.0, 1.0);

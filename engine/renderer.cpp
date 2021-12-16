@@ -174,6 +174,19 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		});
 	}
 
+	// Inject sun light source
+	// TODO: Just pick an existing directional light if exists?
+	if (m_env.sunColor.r > 0.0 || m_env.sunColor.g > 0.0 || m_env.sunColor.b > 0.0) {
+		Light sun;
+		sun.type = Light::DIRECTIONAL_LIGHT;
+		sun.color = m_env.sunColor;
+		sun.position = camPos + normalize(m_env.sunPosition) * 10.f;
+		sun.direction = normalize(camPos - sun.position);
+		sun.shadowDistance = 50.f;
+		sun.priority = -10000; // Should always be first
+		lights.emplace_back(sun);
+	}
+
 	// Update and prioritize lights
 	vec3 lightPrioTarget = camPos + camRot * (forward_axis * 2.0f);
 	entities.for_each<Light, Transform>([&](Entity, Light& light, Transform& transform) {
@@ -188,8 +201,13 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 				return;
 			light.direction = transform.forward();
 		}
-		// TODO: Better prioritizing
-		light.priority = glm::distance2(lightPrioTarget, light.position);
+		if (light.type == Light::DIRECTIONAL_LIGHT) {
+			light.direction = transform.forward();
+			light.priority = -glm::dot(light.color, vec3(1)); // Dir lights prioritized before anything else, based on intensity
+		} else {
+			// TODO: Better prioritizing
+			light.priority = glm::distance2(lightPrioTarget, light.position);
+		}
 		lights.push_back(light);
 	});
 	std::sort(lights.begin(), lights.end(), [](const Light& a, const Light& b) {
@@ -256,37 +274,18 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	BEGIN_GPU_SAMPLE(ShadowPass)
 	int shadowIndex = 0;
 	if (settings.shadows) {
-		// Sun shadow
-		// TODO: Support generic directional lights
-		Light sun;
-		sun.type = Light::DIRECTIONAL_LIGHT;
-		sun.position = camPos + normalize(m_env.sunPosition) * 10.f;
-		sun.direction = normalize(camPos - sun.position);
-		sun.shadowDistance = 50.f;
-		sun.shadowIndex = shadowIndex;
-		m_device->setupShadowPass(sun, shadowIndex);
-		Frustum sunShadowFrustum(sun.position, sun.direction, sun.shadowDistance);
-		entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
-			if (!model.materials.empty() && model.geometry && sunShadowFrustum.visible(transform, model.bounds)) {
-				BEGIN_ENTITY_GPU_SAMPLE("Sun shadow", e)
-				m_device->renderShadow(model, transform);
-				END_ENTITY_GPU_SAMPLE()
-			}
-		});
-		++shadowIndex;
-
-		// Spot light shadows
-		uint usedShadowMaps = 1;
+		// Directional and spot light shadows
+		uint usedShadowMaps = 0;
 		for (uint i = 0; i < lights.size() && usedShadowMaps < MAX_SHADOW_MAPS; ++i) {
 			Light& light = lights[i];
-			if (light.type != Light::SPOT_LIGHT || light.shadowDistance == 0.f)
+			if (light.type == Light::POINT_LIGHT || light.shadowDistance == 0.f)
 				continue;
 			light.shadowIndex = shadowIndex;
 			m_device->setupShadowPass(light, shadowIndex);
-			Frustum spotShadowFrustum(light.position, light.direction, light.shadowDistance >= 0.f ? light.shadowDistance : light.distance);
+			Frustum shadowFrustum(light.position, light.direction, light.shadowDistance >= 0.f ? light.shadowDistance : light.distance);
 			entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
-				if (!model.materials.empty() && model.geometry && spotShadowFrustum.visible(transform, model.bounds)) {
-					BEGIN_ENTITY_GPU_SAMPLE("Spot shadow", e)
+				if (!model.materials.empty() && model.geometry && shadowFrustum.visible(transform, model.bounds)) {
+					BEGIN_ENTITY_GPU_SAMPLE("Shadow", e)
 					m_device->renderShadow(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
 					END_ENTITY_GPU_SAMPLE()
 				}
@@ -295,6 +294,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 			++shadowIndex;
 		}
 
+		// Point light shadows
 		if (cubeShadows) {
 			shadowIndex = MAX_SHADOW_MAPS; // Start from first shadow cubemap
 			uint usedCubeShadows = 0;

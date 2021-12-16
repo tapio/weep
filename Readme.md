@@ -22,9 +22,8 @@ This is a small personal mostly abandoned game engine. It's mainly a platform fo
 Most are quite unpolished...
 
 * OpenGL 4 forward renderer
-	- One directional sun light with shadow mapping
+	- Multiple directional and spot lights with shadow maps
 	- Multiple point lights with omnidirectional shadow maps
-	- Multiple spot lights with shadow maps
 	- HDR with multiple tonemap functions
 	- Bloom / glow
 	- Diffuse / normal / specular / emission / height / AO map support

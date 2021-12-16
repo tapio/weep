@@ -873,7 +873,7 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 	for (uint i = 0; i < numLights; i++) {
 		const Light& light = lights[i];
 		UniformLightData& uniLight = m_lightBlock.uniforms.lights[i];
-		uniLight.type = light.type == Light::SPOT_LIGHT ? 1 : 0;
+		uniLight.type = (int)light.type;
 		uniLight.shadowIndex = light.shadowIndex;
 		uniLight.color = light.color;
 		uniLight.position = light.position;

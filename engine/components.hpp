@@ -157,7 +157,7 @@ struct TriggerGroup
 
 struct Light
 {
-	enum Type {
+	enum Type { // Keep defines in uniforms.glsl in sync!
 		POINT_LIGHT,
 		DIRECTIONAL_LIGHT,
 		SPOT_LIGHT,
