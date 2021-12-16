@@ -10,9 +10,15 @@ struct Transform
 	mat4 matrix = mat4();
 	bool dirty = false;
 
-	vec3& setPosition(vec3 pos) { dirty = true; return position = pos; }
-	quat& setRotation(quat rot) { dirty = true; return rotation = rot; }
-	vec3& setScale(vec3 s)      { dirty = true; return scale = s; }
+	Transform& modify() { dirty = true; return *this; }
+
+	Transform& setPosition(vec3 pos) { dirty = true; position = pos; return *this; }
+	Transform& setRotation(quat rot) { dirty = true; rotation = rot; return *this; }
+	Transform& setScale(vec3 s)      { dirty = true; scale = s; return *this; }
+
+	Transform& translate(vec3 offset) { dirty = true; position += offset; return *this; }
+
+	vec3 forward() const { return rotation * forward_axis; }
 
 	void updateMatrix() {
 		matrix = glm::translate(mat4(1.f), position);
