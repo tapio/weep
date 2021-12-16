@@ -2,11 +2,18 @@ project(WeepEngine)
 cmake_minimum_required(VERSION 3.1)
 cmake_policy(VERSION 3.1)
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT WIN32)
+	set(EMBED_MODULES_DEFAULT OFF)
+else()
+	set(EMBED_MODULES_DEFAULT ON)
+endif()
+
 set(EXE_NAME "weep" CACHE STRING "Executable name")
 set(INSTALL_DIR "weep" CACHE STRING "Installation directory name")
 option(SHIPPING_BUILD "Remove debug stuff" OFF)
 option(USE_REMOTERY "Use Remotery profiler" ON)
 option(USE_GLES "Link against OpenGL ES" OFF)
+option(EMBED_MODULES "Embed plugin modules into the executable instead of using hotloadable DLLs" ${EMBED_MODULES_DEFAULT})
 
 # Avoid source tree pollution
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
@@ -19,19 +26,16 @@ if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
 endif()
 
+if(EMBED_MODULES)
+	message("Embedding plugin modules inside exe.")
+else()
+	message("Hot-loadable plugin modules enabled.")
+endif()
+
 if (MSVC)
 	# Too noisy type conversion warnings
 	add_compile_options(/wd4244)
 	add_compile_options(/wd4267)
-endif()
-
-# Plugin modules cause problems except with Clang on Linux, so embed them instead
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT WIN32)
-	set(EMBED_MODULES OFF)
-	message("Hot-loadable plugin modules enabled.")
-else()
-	set(EMBED_MODULES ON)
-	message("Embedding plugin modules inside exe.")
 endif()
 
 # Enable C++11 support and other compiler flags...
@@ -92,9 +96,6 @@ include_directories(SYSTEM third-party)
 include_directories(SYSTEM third-party/bullet)
 include_directories(SYSTEM third-party/soloud/include)
 
-if(SHIPPING_BUILD)
-	add_definitions(-DSHIPPING_BUILD)
-endif()
 add_definitions(-DGL_GLEXT_PROTOTYPES)
 # SoLoud
 add_definitions(-DWITH_NULL -DWITH_SDL2_STATIC)
@@ -140,12 +141,17 @@ endif()
 set(GAME_MAIN "game/main.cpp")
 list(REMOVE_ITEM GAME_SOURCES "${PROJECT_SOURCE_DIR}/${GAME_MAIN}")
 
-if(EMBED_MODULES)
-	add_definitions(-DEMBED_MODULES=1)
-endif()
-
 add_library(engine STATIC ${ENGINE_SOURCES})
 add_library(game STATIC ${GAME_SOURCES})
+
+macro(set_game_defs TARGET)
+	if(SHIPPING_BUILD)
+		target_compile_definitions(${TARGET} PRIVATE -DSHIPPING_BUILD=1)
+	endif()
+	if(EMBED_MODULES)
+		target_compile_definitions(${TARGET} PRIVATE -DEMBED_MODULES=1)
+	endif()
+endmacro()
 
 macro(set_props TARGET)
 	set_target_properties(${TARGET} PROPERTIES
@@ -164,6 +170,7 @@ endmacro()
 
 add_executable(${EXE_NAME} ${GAME_MAIN} ${SHADER_SOURCES} ${CONFIG_SOURCES})
 set_props(${EXE_NAME})
+set_game_defs(${EXE_NAME})
 set_target_properties(${EXE_NAME} PROPERTIES ENABLE_EXPORTS ON)
 set_target_properties(${EXE_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON) # CMake 3.4
 set_target_properties(${EXE_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
@@ -176,6 +183,7 @@ if (EMBED_MODULES)
 		get_filename_component(GAME_MODULE_NAME ${GAME_MODULE_FILE} NAME_WE)
 		add_library(${GAME_MODULE_NAME} STATIC ${GAME_MODULE_FILE})
 		target_compile_definitions(${GAME_MODULE_NAME} PRIVATE -DMODULE_FUNC_NAME=ModuleFunc_${GAME_MODULE_NAME})
+		set_game_defs(${GAME_MODULE_NAME})
 		list(APPEND EMBEDDED_LIBS ${GAME_MODULE_NAME})
 	endforeach()
 	target_link_libraries(${EXE_NAME} PRIVATE ${EMBEDDED_LIBS})
@@ -184,6 +192,7 @@ else()
 		get_filename_component(GAME_MODULE_NAME ${GAME_MODULE_FILE} NAME_WE)
 		add_library(${GAME_MODULE_NAME} MODULE ${GAME_MODULE_FILE})
 		set_props(${GAME_MODULE_NAME})
+		set_game_defs(${GAME_MODULE_NAME})
 		if(WIN32)
 			# TODO This is very suboptimal...
 			target_link_libraries(${GAME_MODULE_NAME} PRIVATE game engine ${DEPS} ${LIBS})
