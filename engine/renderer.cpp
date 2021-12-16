@@ -347,8 +347,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	// Transparent render pass
 	START_MEASURE(transparentMs)
 	BEGIN_GPU_SAMPLE(TransparentPass)
-	glDepthMask(GL_FALSE);
-	glEnable(GL_BLEND);
+	m_device->beginTransparency();
 	for (const SortedDrawCall& cmd : sortedDrawCalls) {
 		// Pre culled and checked, can just render away!
 		if (cmd.model) {
@@ -361,8 +360,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 			END_ENTITY_GPU_SAMPLE()
 		}
 	};
-	glDepthMask(GL_TRUE);
-	glDisable(GL_BLEND);
+	m_device->endTransparency();
 	END_GPU_SAMPLE()
 	END_MEASURE(transparentMs)
 

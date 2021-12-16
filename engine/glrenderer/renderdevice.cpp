@@ -129,6 +129,7 @@ RenderDevice::RenderDevice(Resources& resources)
 	glViewport(0, 0, Engine::width(), Engine::height());
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+	endTransparency();
 
 	loadShaders();
 
@@ -834,9 +835,6 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 		glViewport(0, 0, fbo->width, fbo->height);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glCullFace(GL_BACK);
-		// Fail-safes
-		glDisable(GL_BLEND);
-		glDepthMask(GL_TRUE);
 	}
 	m_program = 0;
 	glUseProgram(0);
@@ -859,14 +857,12 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 	uint numLights = std::min((int)lights.size(), MAX_LIGHTS);
 	m_commonBlock.uniforms.numLights = numLights;
 	stats.lights = numLights;
-	if (numLights) {
-		for (uint i = 0; i < numLights; i++) {
-			const Light& light = lights[i];
-			m_lightBlock.uniforms.lights[i].color = light.color;
-			m_lightBlock.uniforms.lights[i].position = light.position;
-			m_lightBlock.uniforms.lights[i].direction = light.direction;
-			m_lightBlock.uniforms.lights[i].params = vec4(light.distance, light.decay, 0.0f, 0.0f);
-		}
+	for (uint i = 0; i < numLights; i++) {
+		const Light& light = lights[i];
+		m_lightBlock.uniforms.lights[i].color = light.color;
+		m_lightBlock.uniforms.lights[i].position = light.position;
+		m_lightBlock.uniforms.lights[i].direction = light.direction;
+		m_lightBlock.uniforms.lights[i].params = vec4(light.distance, light.decay, 0.0f, 0.0f);
 	}
 	m_lightBlock.upload();
 	m_commonBlock.upload();
@@ -884,6 +880,19 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 		if (m_wireframe)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	}
+}
+
+
+void RenderDevice::beginTransparency()
+{
+	glDepthMask(GL_FALSE);
+	glEnable(GL_BLEND);
+}
+
+void RenderDevice::endTransparency()
+{
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
 }
 
 void RenderDevice::render(Model& model, Transform& transform, BoneAnimation* animation)

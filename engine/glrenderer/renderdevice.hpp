@@ -42,6 +42,9 @@ public:
 	void renderSkybox();
 	void postRender();
 
+	void beginTransparency();
+	void endTransparency();
+
 	void resizeRenderTargets();
 	void toggleWireframe();
 
