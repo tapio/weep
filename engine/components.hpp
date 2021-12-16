@@ -164,7 +164,7 @@ struct Light
 	} type = POINT_LIGHT;
 
 	vec3 color = vec3(1, 1, 1);
-	vec2 spotAngles = vec2(1.f, 1.f);
+	vec2 spotAngles = vec2(10.f, 20.f); // Degrees
 	float distance = 1.0f;
 	float shadowDistance = -1.f;
 	float decay = 1.0f;
@@ -176,6 +176,7 @@ private:
 
 	vec3 position = vec3();
 	vec3 direction = vec3();
+	int shadowIndex = -1;
 };
 
 

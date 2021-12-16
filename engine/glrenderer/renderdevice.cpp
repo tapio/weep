@@ -775,8 +775,9 @@ void RenderDevice::setupCubeMatrices(mat4 proj, vec3 pos)
 void RenderDevice::setupShadowPass(const Light& light, uint index)
 {
 	ASSERT(m_env);
-	m_shadowFbo[index].bind();
-	glViewport(0, 0, m_shadowFbo[index].width, m_shadowFbo[index].height);
+	const FBO& shadowFBO = m_shadowFbo[index];
+	shadowFBO.bind();
+	glViewport(0, 0, shadowFBO.width, shadowFBO.height);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glCullFace(GL_FRONT);
 	m_program = 0;
@@ -785,10 +786,16 @@ void RenderDevice::setupShadowPass(const Light& light, uint index)
 	float& far = m_commonBlock.uniforms.far;
 	if (light.type == Light::POINT_LIGHT) {
 		m_tech = TECH_DEPTH_CUBE;
-		float aspect = (float)m_shadowFbo[index].width / (float)m_shadowFbo[index].height;
-		near = 0.2f; far = light.shadowDistance > 0.f ? light.shadowDistance : light.distance;
+		float aspect = (float)shadowFBO.width / (float)shadowFBO.height;
+		near = 0.2f; far = light.shadowDistance >= 0.f ? light.shadowDistance : light.distance;
 		m_shadowProj[index] = glm::perspective(glm::radians(90.0f), aspect, near, far);
 		setupCubeMatrices(m_shadowProj[index], light.position);
+	} else if (light.type == Light::SPOT_LIGHT) {
+		m_tech = TECH_DEPTH;
+		float aspect = (float)shadowFBO.width / (float)shadowFBO.height;
+		near = 0.2f; far = light.shadowDistance >= 0.f ? light.shadowDistance : light.distance;
+		m_shadowProj[index] = glm::perspective(glm::radians(light.spotAngles.y), aspect, near, far);
+		m_shadowView[index] = glm::lookAt(light.position, light.position + light.direction, up_axis);
 	} else if (light.type == Light::DIRECTIONAL_LIGHT) {
 		m_tech = TECH_DEPTH;
 		// TODO: Configure
@@ -860,11 +867,12 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 	for (uint i = 0; i < numLights; i++) {
 		const Light& light = lights[i];
 		UniformLightData& uniLight = m_lightBlock.uniforms.lights[i];
-		uniLight.type = light.type == Light::SPOT_LIGHT ? 1.f : 0.f;
+		uniLight.type = light.type == Light::SPOT_LIGHT ? 1 : 0;
+		uniLight.shadowIndex = light.shadowIndex;
 		uniLight.color = light.color;
 		uniLight.position = light.position;
 		uniLight.direction = light.direction;
-		uniLight.params = vec4(light.distance, light.decay, light.spotAngles.x, light.spotAngles.y);
+		uniLight.params = vec4(light.distance, light.decay, glm::cos(glm::radians(light.spotAngles.x)), glm::cos(glm::radians(light.spotAngles.y)));
 	}
 	m_lightBlock.upload();
 	m_commonBlock.upload();

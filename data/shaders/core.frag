@@ -122,7 +122,7 @@ float random(vec3 seed, int i) {
 
 // http://learnopengl.com/#!Advanced-Lighting/Shadows/Shadow-Mapping
 // http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
-float shadow_mapping()
+float shadow_mapping(int shadowMapIndex)
 {
 	vec4 pos = inData.shadowcoord;
 	vec3 projCoords = pos.xyz / pos.w;
@@ -139,26 +139,27 @@ float shadow_mapping()
 #ifdef USE_PCF
 	float shadow = 0.0;
 	float pcfRadius = 0.75;
-	vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0));
+	vec2 texelSize = 1.0 / vec2(textureSize(shadowMap[shadowMapIndex], 0));
 	const int samples = 4;
 	for (int i = 0; i < samples; ++i) {
 		//int index = i;
 		int index = int(16.0 * random(gl_FragCoord.xyy, i)) % 16;
 		//int index = int(16.0 * random(floor(inData.worldPosition.xyz * 1000.0), i)) % 16;
-		float closestDepth = texture(shadowMap, projCoords.xy + poissonDisk[index] * texelSize * pcfRadius).r;
+		float closestDepth = texture(shadowMap[shadowMapIndex], projCoords.xy + poissonDisk[index] * texelSize * pcfRadius).r;
 		shadow += currentDepth > closestDepth ? 1.0 : 0.0;
 	}
 	return shadow / float(samples);
 #else
-	float closestDepth = texture(shadowMap, projCoords.xy).r;
+	float closestDepth = texture(shadowMap[shadowMapIndex], projCoords.xy).r;
 	return currentDepth > closestDepth ? 1.0 : 0.0;
 #endif
 }
 
 // http://learnopengl.com/#!Advanced-Lighting/Shadows/Point-Shadows
 // http://www.sunandblackcat.com/tipFullView.php?topicid=36
-float shadow_mapping_cube(in int lightIndex, in int shadowIndex)
+float shadow_mapping_cube(in int lightIndex)
 {
+	int shadowCubeIndex = lights[lightIndex].shadowIndex - MAX_SHADOW_MAPS; // Translate index to shadow cube array
 	vec3 fragToLight = inData.worldPosition - lights[lightIndex].position;
 	float far = lights[lightIndex].params.x;
 	const float bias = 0.005;
@@ -173,13 +174,13 @@ float shadow_mapping_cube(in int lightIndex, in int shadowIndex)
 		//int index = int(20.0 * random(gl_FragCoord.xyy, i)) % 20;
 		//int index = int(20.0 * random(floor(inData.worldPosition.xyz * 1000.0), i)) % 20;
 		vec3 uvw = fragToLight + gridSamplingDisk[index] * pcfRadius;
-		float closestDepth = texture(shadowCube[shadowIndex], uvw).r;
+		float closestDepth = texture(shadowCube[shadowCubeIndex], uvw).r;
 		closestDepth *= far;
 		shadow += currentDepth > closestDepth ? 1.0 : 0.0;
 	}
 	return shadow / float(samples);
 #else
-	float closestDepth = texture(shadowCube[shadowIndex], fragToLight).r;
+	float closestDepth = texture(shadowCube[shadowCubeIndex], fragToLight).r;
 	closestDepth *= far;
 	return currentDepth > closestDepth ? 1.0 : 0.0;
 #endif
@@ -252,7 +253,7 @@ void main()
 		sunAmount = max(dot(viewDir, -sunDir), 0.0);
 
 #ifdef USE_SHADOW_MAP
-		float visibility = max(1.0 - shadow_mapping(), shadowDarkness);
+		float visibility = max(1.0 - shadow_mapping(0), shadowDarkness);
 #else
 		float visibility = 1.0;
 #endif
@@ -277,7 +278,8 @@ void main()
 #endif
 	}
 
-	// Point lights
+	// Point & spot lights
+	// TODO: Implement this more sanely
 	CONST int count = min(numLights, MAX_LIGHTS);
 	for (int i = 0; i < count; ++i)
 	{
@@ -288,16 +290,42 @@ void main()
 		float distance = length(lightPos - inData.position);
 		if (distance >= light.params.x)
 			continue;
-		float attenuation = pow(saturate(1.0 - distance / light.params.x), light.params.y);
 
 		vec3 lightDir = normalize(lightPos - inData.position);
 
-		// Shadow
+		float attenuation = 1.0f;
 		float visibility = 1.0;
-#ifdef USE_SHADOW_MAP
-		if (i < MAX_SHADOW_CUBES)
-			visibility = max(1.0 - shadow_mapping_cube(i, i), shadowDarkness);
-#endif
+
+		// Spot light
+		bool isSpotLight = light.type == 1;
+		if (isSpotLight) {
+			vec3 spotDir = normalize((viewMatrix * vec4(-light.direction, 0.0)).xyz);
+			float theta = dot(lightDir, spotDir);
+			float innerCutOff = light.params.z;
+			float outerCutOff = light.params.w;
+			if (theta <= outerCutOff)
+				continue;
+			float epsilon = innerCutOff - outerCutOff;
+			if (epsilon != 0.f) {
+				attenuation *= saturate((theta - outerCutOff) / epsilon);
+			}
+
+			// TODO: Spot shadow
+			#ifdef USE_SHADOW_MAP
+			//if (light.shadowIndex >= 0)
+			//	visibility = max(1.0 - shadow_mapping(i), shadowDarkness);
+			#endif
+		// Point light
+		} else {
+			#ifdef USE_SHADOW_MAP
+			// Cube shadow
+			if (light.shadowIndex >= 0)
+				visibility = max(1.0 - shadow_mapping_cube(i), shadowDarkness);
+			#endif
+		}
+
+		// Distance attenuation
+		attenuation *= pow(saturate(1.0 - distance / light.params.x), light.params.y);
 
 		// Diffuse
 #ifdef USE_DIFFUSE

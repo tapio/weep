@@ -177,6 +177,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	vec3 lightTarget = camPos + camRot * (forward_axis * 2.0f);
 	entities.for_each<Light, Transform>([&](Entity, Light& light, Transform& transform) {
 		light.position = transform.position;
+		light.shadowIndex = -1;
 		if (light.type == Light::POINT_LIGHT) {
 			if (!frustum.visible(light.position, light.distance))
 				return;
@@ -252,14 +253,17 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 
 	START_MEASURE(shadowMs)
 	BEGIN_GPU_SAMPLE(ShadowPass)
-	// TODO: Spot light shadows
+	int shadowIndex = 0;
 	if (settings.shadows) {
+		// Sun shadow
+		// TODO: Support generic directional lights
 		Light sun;
 		sun.type = Light::DIRECTIONAL_LIGHT;
 		sun.position = camPos + normalize(m_env.sunPosition) * 10.f;
 		sun.direction = normalize(camPos - sun.position);
 		sun.shadowDistance = 50.f;
-		m_device->setupShadowPass(sun, 0);
+		sun.shadowIndex = shadowIndex;
+		m_device->setupShadowPass(sun, shadowIndex);
 		Frustum sunShadowFrustum(sun.position, sun.direction, sun.shadowDistance);
 		entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 			if (!model.materials.empty() && model.geometry && sunShadowFrustum.visible(transform, model.bounds)) {
@@ -268,26 +272,51 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 				END_ENTITY_GPU_SAMPLE()
 			}
 		});
-	}
+		++shadowIndex;
 
-	if (cubeShadows && settings.shadows) {
-		uint usedCubeShadows = 0;
-		for (uint i = 0; i < lights.size() && usedCubeShadows < MAX_SHADOW_CUBES; ++i) {
+		// Spot light shadows
+		uint usedShadowMaps = 1;
+		for (uint i = 0; i < lights.size() && usedShadowMaps < MAX_SHADOW_MAPS; ++i) {
 			Light& light = lights[i];
-			if (light.type != Light::POINT_LIGHT || light.shadowDistance == 0.f)
+			if (light.type != Light::SPOT_LIGHT || light.shadowDistance == 0.f)
 				continue;
-			m_device->setupShadowPass(light, 1+i);
+			// TODO: Spot light shadows disabled until shader implementation
+			//light.shadowIndex = shadowIndex;
+			m_device->setupShadowPass(light, shadowIndex);
+			Frustum spotShadowFrustum(light.position, light.direction, light.shadowDistance >= 0.f ? light.shadowDistance : light.distance);
 			entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
-				if (model.materials.empty() || !model.geometry)
-					return;
-				float maxDist = model.bounds.radius * glm::compMax(transform.scale) + light.distance;
-				if (glm::distance2(light.position, transform.position) < maxDist * maxDist) {
-					BEGIN_ENTITY_GPU_SAMPLE("Cube shadow", e)
+				if (!model.materials.empty() && model.geometry && spotShadowFrustum.visible(transform, model.bounds)) {
+					BEGIN_ENTITY_GPU_SAMPLE("Spot shadow", e)
 					m_device->renderShadow(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
 					END_ENTITY_GPU_SAMPLE()
 				}
 			});
-			++usedCubeShadows;
+			++usedShadowMaps;
+			++shadowIndex;
+		}
+
+		if (cubeShadows) {
+			shadowIndex = MAX_SHADOW_MAPS; // Start from first shadow cubemap
+			uint usedCubeShadows = 0;
+			for (uint i = 0; i < lights.size() && usedCubeShadows < MAX_SHADOW_CUBES; ++i) {
+				Light& light = lights[i];
+				if (light.type != Light::POINT_LIGHT || light.shadowDistance == 0.f)
+					continue;
+				light.shadowIndex = shadowIndex;
+				m_device->setupShadowPass(light, shadowIndex);
+				entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
+					if (model.materials.empty() || !model.geometry)
+						return;
+					float maxDist = model.bounds.radius * glm::compMax(transform.scale) + light.distance;
+					if (glm::distance2(light.position, transform.position) < maxDist * maxDist) {
+						BEGIN_ENTITY_GPU_SAMPLE("Cube shadow", e)
+						m_device->renderShadow(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
+						END_ENTITY_GPU_SAMPLE()
+					}
+				});
+				++usedCubeShadows;
+				++shadowIndex;
+			}
 		}
 	}
 	END_GPU_SAMPLE()

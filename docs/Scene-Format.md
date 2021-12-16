@@ -71,6 +71,7 @@ Each object (entity) can have the following properties (most are optional):
 	* _"distance"_: float
 	* _"shadowDistance"_: float, override shadow distance (defaults to light distance, use 0 to disable shadow)
 	* _"decay"_: float, exponential light decay (1 = linear, 2 = quadratic...)
+	* _"spotAngles"_: inner and outer spot light angle in degrees
 * _"geometry"_: one of:
 	1. string path to .png or .jpg image to create heightmap from
 	2. string path to .obj or .iqm mesh

@@ -9,7 +9,7 @@ struct FBO
 	NONCOPYABLE(FBO);
 
 	void create();
-	void bind();
+	void bind() const;
 	void destroy();
 	bool valid() const { return fbo > 0; }
 

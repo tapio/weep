@@ -1,6 +1,6 @@
 
 #define MAX_LIGHTS 4
-#define MAX_SHADOW_MAPS 1
+#define MAX_SHADOW_MAPS 2
 #define MAX_SHADOW_CUBES 3
 #define MAX_SHADOWS (MAX_SHADOW_MAPS + MAX_SHADOW_CUBES)
 #define MAX_BONES 80
@@ -56,8 +56,8 @@ UBO_PREFIX(UniformMaterialBlock, 3)
 UBO_SUFFIX(material)
 
 struct UniformLightData {
-	vec3 color; float type;
-	vec3 position; float pad2;
+	vec3 color; int type;
+	vec3 position; int shadowIndex;
 	vec3 direction; float pad3;
 	vec4 params;
 };
@@ -93,11 +93,14 @@ UBO_PREFIX(UniformPostProcessBlock, 7)
 #define BINDING_REFLECTION_MAP 14
 #define BINDING_ENV_MAP 15
 #define BINDING_SHADOW_MAP 16
-#define BINDING_SHADOW_CUBE 17
+#define BINDING_SHADOW_CUBE 18
+#ifdef __cplusplus
+static_assert(BINDING_SHADOW_CUBE == (BINDING_SHADOW_MAP + MAX_SHADOW_MAPS), "BINDING_SHADOW_CUBE should be exactly BINDING_SHADOW_MAP + MAX_SHADOW_MAPS");
+#endif
 
-#define BINDING_SCENE_COLOR 20
-#define BINDING_SCENE_BLOOM 21
-#define BINDING_SCENE_DEPTH 22
+#define BINDING_SCENE_COLOR 25
+#define BINDING_SCENE_BLOOM 26
+#define BINDING_SCENE_DEPTH 27
 
 #define BINDING_SSBO_START 30
 #define BINDING_SSBO_POSITION 30
@@ -182,7 +185,7 @@ layout(binding = BINDING_REFLECTION_MAP) uniform sampler2D reflectionMap;
 layout(binding = BINDING_ENV_MAP) uniform samplerCube envMap;
 #endif
 #ifdef USE_SHADOW_MAP
-layout(binding = BINDING_SHADOW_MAP) uniform sampler2D shadowMap;
+layout(binding = BINDING_SHADOW_MAP) uniform sampler2D shadowMap[MAX_SHADOW_MAPS];
 layout(binding = BINDING_SHADOW_CUBE) uniform samplerCube shadowCube[MAX_SHADOW_CUBES];
 #endif
 
