@@ -11,11 +11,14 @@
 #include "module.hpp"
 #include "../game.hpp"
 #include "../controller.hpp"
+#include "imgui/imgui_stdlib.h"
 
 static bool s_autoReloadModules = true;
 static bool s_autoReloadShaders = true;
+static bool s_autoReloadScene = true;
 static std::vector<string> s_shaderFiles;
 static std::vector<uint> s_shaderTimestamps;
+static uint s_sceneTimestamp = 0;
 
 #define Tooltip(...) if (ImGui::IsItemHovered()) ImGui::SetTooltip(__VA_ARGS__);
 
@@ -42,6 +45,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			game.engine.moduleInit();
 			ImGuiSystem& imgui = game.entities.get_system<ImGuiSystem>();
 			imgui.applyInternalState();
+			s_sceneTimestamp = timestamp(game.resources.findPath(game.scenePath));
 			s_shaderFiles = game.resources.listFiles("shaders/");
 			s_shaderTimestamps.resize(s_shaderFiles.size());
 			for (uint i = 0; i < s_shaderFiles.size(); ++i) {
@@ -183,10 +187,8 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 						reloadShaders(game);
 					ImGui::SameLine();
 					ImGui::Checkbox("Auto Reload##Shaders", &s_autoReloadShaders);
-					static char tempScenePath[128] = {0};
-					strncpy(tempScenePath, game.scenePath.c_str(), sizeof(tempScenePath)-1);
-					ImGui::InputText("##Scene Path", tempScenePath, sizeof(tempScenePath));
-					game.scenePath = tempScenePath;
+					ImGui::Checkbox("Auto Reload Scene", &s_autoReloadScene);
+					ImGui::InputText("##Scene Path", &game.scenePath);
 					ImGui::SameLine();
 					if (ImGui::Button("Load##ScenePath"))
 						game.reload = true;
@@ -280,6 +282,15 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 					sleep(100);
 					reloadShaders(game);
 					break;
+				}
+			}
+			if (s_autoReloadScene) {
+				uint ts = timestamp(game.resources.findPath(game.scenePath));
+				if (ts > s_sceneTimestamp) {
+					logDebug("Scene change detected, reloading...");
+					sleep(100);
+					s_sceneTimestamp = ts;
+					game.reload = true;
 				}
 			}
 		}
