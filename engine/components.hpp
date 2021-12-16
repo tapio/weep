@@ -179,6 +179,11 @@ private:
 	int shadowIndex = -1;
 };
 
+struct AudioSource
+{
+	uint event = 0;
+	uint handle = 0;
+};
 
 struct MoveSound
 {

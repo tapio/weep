@@ -15,8 +15,8 @@ public:
 	void update(Entities& entities, const Transform& listener);
 
 	void add(const string& name, const std::vector<char>& data);
-	void play(uint eventId);
-	void play(uint eventId, vec3 position);
+	uint play(uint eventId);
+	uint play(uint eventId, vec3 position);
 
 	std::unique_ptr<SoLoud::Soloud> soloud;
 
