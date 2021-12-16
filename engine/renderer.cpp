@@ -7,6 +7,7 @@
 #include "image.hpp"
 #include <algorithm>
 #include <glm/gtx/component_wise.hpp>
+#include <glm/gtx/intersect.hpp>
 
 #define USE_GRANULAR_GPU_PROFILER 0
 #if defined(USE_PROFILER) && USE_GRANULAR_GPU_PROFILER
@@ -163,9 +164,14 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 					if (mat.reflectivity > reflectivity)
 						reflectivity = mat.reflectivity;
 				if (reflectivity > 0.01f) {
-					float priority = glm::distance2(camPos, transform.position);
+					vec3 boundsMin = vec3(transform.matrix * vec4(model.bounds.min, 1.0));
+					vec3 boundsMax = vec3(transform.matrix * vec4(model.bounds.max, 1.0));
+					vec3 pos = glm::clamp(camPos, boundsMin, boundsMax);
+					float priority = glm::distance2(camPos, pos);
+					//float angleCos = glm::dot(camDir, normalize(pos - camPos));
+					//priority *= (angleCos > 0.f) ? angleCos : 1.f;
 					priority *= 1.1f - reflectivity;
-					reflectionProbes.push_back({ transform.position, priority });
+					reflectionProbes.push_back({ pos, priority });
 				}
 			}
 		});
