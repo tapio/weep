@@ -164,6 +164,7 @@ struct Light
 	vec3 position = vec3();
 	vec3 direction = vec3();
 	vec3 target = vec3();
+	vec2 spotAngles = vec2(1.f, 1.f);
 	float distance = 1.0f;
 	float shadowDistance = -1.f;
 	float decay = 1.0f;

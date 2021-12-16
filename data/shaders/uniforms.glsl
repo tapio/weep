@@ -56,7 +56,7 @@ UBO_PREFIX(UniformMaterialBlock, 3)
 UBO_SUFFIX(material)
 
 struct UniformLightData {
-	vec3 color; float pad1;
+	vec3 color; float type;
 	vec3 position; float pad2;
 	vec3 direction; float pad3;
 	vec4 params;

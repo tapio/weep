@@ -796,6 +796,7 @@ void RenderDevice::setupShadowPass(const Light& light, uint index)
 		near = 1.f; far = light.shadowDistance > 0.f ? light.shadowDistance : (length(light.target - light.position) * 1.5f);
 		m_shadowProj[index] = glm::ortho(-size, size, -size, size, near, far);
 		m_shadowView[index] = glm::lookAt(light.position, light.target, vec3(0, 1, 0));
+	 // TODO:Spot light shadows, probably perspective cam?
 	} else ASSERT(!"Unsupported light type for shadow pass");
 
 	m_commonBlock.uniforms.projectionMatrix = m_shadowProj[index];
@@ -859,10 +860,12 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 	stats.lights = numLights;
 	for (uint i = 0; i < numLights; i++) {
 		const Light& light = lights[i];
-		m_lightBlock.uniforms.lights[i].color = light.color;
-		m_lightBlock.uniforms.lights[i].position = light.position;
-		m_lightBlock.uniforms.lights[i].direction = light.direction;
-		m_lightBlock.uniforms.lights[i].params = vec4(light.distance, light.decay, 0.0f, 0.0f);
+		UniformLightData& uniLight = m_lightBlock.uniforms.lights[i];
+		uniLight.type = light.type == Light::SPOT_LIGHT ? 1.f : 0.f;
+		uniLight.color = light.color;
+		uniLight.position = light.position;
+		uniLight.direction = light.direction;
+		uniLight.params = vec4(light.distance, light.decay, light.spotAngles.x, light.spotAngles.y);
 	}
 	m_lightBlock.upload();
 	m_commonBlock.upload();

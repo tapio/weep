@@ -490,6 +490,7 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 		setColor(light.color, lightDef["color"]);
 		setVec3(light.position, def["position"]);
 		setVec3(light.direction, lightDef["direction"]);
+		setVec2(light.spotAngles, lightDef["spotAngles"]);
 		setNumber(light.distance, lightDef["distance"]);
 		setNumber(light.shadowDistance, lightDef["shadowDistance"]);
 		setNumber(light.decay, lightDef["decay"]);

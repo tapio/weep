@@ -177,7 +177,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	// TODO: Better prioritizing
 	vec3 lightTarget = camPos + camRot * (forward_axis * 2.0f);
 	entities.for_each<Light>([&](Entity, Light& light) {
-		if (light.type == Light::POINT_LIGHT) {
+		if (light.type == Light::POINT_LIGHT || light.type == Light::SPOT_LIGHT) { // TODO: Spot light could use better culling...
 			if (!frustum.visible(light.position, light.distance))
 				return;
 		}
@@ -246,6 +246,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 
 	START_MEASURE(shadowMs)
 	BEGIN_GPU_SAMPLE(ShadowPass)
+	// TODO: Spot light shadows
 	if (settings.shadows) {
 		Light sun;
 		sun.type = Light::DIRECTIONAL_LIGHT;
@@ -263,12 +264,11 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		});
 	}
 
-	// TODO: Account for non-point lights
 	if (cubeShadows && settings.shadows) {
 		uint usedCubeShadows = 0;
 		for (uint i = 0; i < lights.size() && usedCubeShadows < MAX_SHADOW_CUBES; ++i) {
 			Light& light = lights[i];
-			if (light.shadowDistance == 0.f)
+			if (light.type != Light::POINT_LIGHT || light.shadowDistance == 0.f)
 				continue;
 			m_device->setupShadowPass(light, 1+i);
 			entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
