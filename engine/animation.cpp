@@ -16,6 +16,9 @@ void AnimationSystem::reset()
 {
 }
 
+template<typename T> inline T interp(T a, T b, float alpha) { return glm::mix(a, b, alpha); }
+template<> inline quat interp(quat a, quat b, float alpha) { return glm::slerp(a, b, alpha); }
+
 template<typename T>
 static inline void lerpPropertyTrack(PropertyAnimation::Track<T>& track, float time) {
 	const auto& keyframes = track.keyframes;
@@ -35,7 +38,7 @@ static inline void lerpPropertyTrack(PropertyAnimation::Track<T>& track, float t
 	const auto& frame1 = keyframes[i];
 	const auto& frame2 = keyframes[i + 1];
 	float alpha = (time - frame1.time) / (frame2.time - frame1.time);
-	track.currentValue = glm::mix(frame1.value, frame2.value, alpha);
+	track.currentValue = interp(frame1.value, frame2.value, alpha);
 }
 
 static inline float calculateAnimLength(const PropertyAnimation anim) {
@@ -98,11 +101,11 @@ void AnimationSystem::update(Entities& entities, float dt)
 		}
 		if (anim.length <= 0.f)
 			anim.length = calculateAnimLength(anim);
-		if (anim.time >= anim.length) {
+		if (anim.time >= anim.length || anim.time < 0.f) {
 			switch (anim.mode) {
 				case AnimationMode::ONCE: stop(e); break;
 				case AnimationMode::LOOP: anim.time = 0.f; break;
-				case AnimationMode::PINGPONG: anim.time = anim.length; anim.speed *= -1.f; break;
+				case AnimationMode::PINGPONG: anim.speed *= -1.f; break;
 			}
 		}
 	});
