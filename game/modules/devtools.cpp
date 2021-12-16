@@ -20,6 +20,12 @@ static std::vector<string> s_shaderFiles;
 static std::vector<uint> s_shaderTimestamps;
 static uint s_sceneTimestamp = 0;
 
+static bool s_preserveCamOnReload = true;
+static bool s_useCamBackup = false;
+static Controller s_controllerBackup;
+static Transform s_cameraTransBackup;
+
+
 #define Tooltip(...) if (ImGui::IsItemHovered()) ImGui::SetTooltip(__VA_ARGS__);
 
 static void reloadShaders(Game& game)
@@ -52,6 +58,21 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 				s_shaderFiles[i] = game.resources.findPath("shaders/" + s_shaderFiles[i]);
 				s_shaderTimestamps[i] = timestamp(s_shaderFiles[i]);
 			}
+
+			if (s_preserveCamOnReload && s_useCamBackup) {
+				Entity cameraEnt = game.entities.get_entity_by_tag("camera");
+				if (cameraEnt.is_alive()) {
+					Controller& controller = cameraEnt.get<Controller>();
+					controller.position = s_controllerBackup.position;
+					controller.rotation = s_controllerBackup.rotation;
+					controller.angles = s_controllerBackup.angles;
+					Transform& cameraTrans = cameraEnt.get<Transform>();
+					cameraTrans.position = s_cameraTransBackup.position;
+					cameraTrans.rotation = s_cameraTransBackup.rotation;
+					cameraTrans.dirty = true;
+				}
+			}
+			s_useCamBackup = false;
 			break;
 		}
 		case $id(RELOAD_SHADERS):
@@ -188,6 +209,8 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 					ImGui::SameLine();
 					ImGui::Checkbox("Auto Reload##Shaders", &s_autoReloadShaders);
 					ImGui::Checkbox("Auto Reload Scene", &s_autoReloadScene);
+					ImGui::SameLine();
+					ImGui::Checkbox("Preserve Cam", &s_preserveCamOnReload);
 					ImGui::InputText("##Scene Path", &game.scenePath);
 					ImGui::SameLine();
 					if (ImGui::Button("Load##ScenePath"))
@@ -288,6 +311,16 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 				uint ts = timestamp(game.resources.findPath(game.scenePath));
 				if (ts > s_sceneTimestamp) {
 					logDebug("Scene change detected, reloading...");
+
+					if (s_preserveCamOnReload) {
+						Entity cameraEnt = game.entities.get_entity_by_tag("camera");
+						if (cameraEnt.is_alive()) {
+							s_controllerBackup = cameraEnt.get<Controller>();
+							s_cameraTransBackup = cameraEnt.get<Transform>();
+							s_useCamBackup = true;
+						}
+					}
+
 					sleep(100);
 					s_sceneTimestamp = ts;
 					game.reload = true;
