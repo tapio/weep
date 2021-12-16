@@ -152,13 +152,10 @@ struct TriggerGroup
 struct Light
 {
 	enum Type {
-		AMBIENT_LIGHT,
 		POINT_LIGHT,
 		DIRECTIONAL_LIGHT,
 		SPOT_LIGHT,
-		AREA_LIGHT,
-		HEMISPHERE_LIGHT
-	} type = AMBIENT_LIGHT;
+	} type = POINT_LIGHT;
 
 	vec3 color = vec3(1, 1, 1);
 	vec3 position = vec3();

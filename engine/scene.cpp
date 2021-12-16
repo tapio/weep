@@ -480,12 +480,9 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 	if (!lightDef.is_null()) {
 		Light light;
 		const string& lightType = lightDef["type"].string_value();
-		if (lightType == "ambient") light.type = Light::AMBIENT_LIGHT;
-		else if (lightType == "point") light.type = Light::POINT_LIGHT;
+		if (lightType == "point") light.type = Light::POINT_LIGHT;
 		else if (lightType == "directional") light.type = Light::DIRECTIONAL_LIGHT;
 		else if (lightType == "spot") light.type = Light::SPOT_LIGHT;
-		else if (lightType == "area") light.type = Light::AREA_LIGHT;
-		else if (lightType == "hemisphere") light.type = Light::HEMISPHERE_LIGHT;
 		else logError("Unknown light type \"%s\"", lightType.c_str());
 		setColor(light.color, lightDef["color"]);
 		setVec3(light.position, def["position"]);
