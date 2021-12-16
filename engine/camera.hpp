@@ -31,7 +31,7 @@ struct Camera
 	}
 
 	void updateViewMatrix(vec3 position) {
-		view = glm::translate(view, -position);
+		view = glm::translate(mat4(1.f), -position);
 	}
 
 	vec3 position() const { return -view[3] * view; }
