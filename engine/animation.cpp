@@ -101,11 +101,12 @@ void AnimationSystem::update(Entities& entities, float dt)
 		}
 		if (anim.length <= 0.f)
 			anim.length = calculateAnimLength(anim);
-		if (anim.time >= anim.length || anim.time < 0.f) {
+		bool atEnd = anim.time >= anim.length;
+		if (atEnd || anim.time < 0.f) {
 			switch (anim.mode) {
 				case AnimationMode::ONCE: stop(e); break;
-				case AnimationMode::LOOP: anim.time = 0.f; break;
-				case AnimationMode::PINGPONG: anim.speed *= -1.f; break;
+				case AnimationMode::LOOP: anim.time = atEnd ? 0.f : anim.length; break;
+				case AnimationMode::PINGPONG: anim.time = atEnd ? anim.length : 0.f; anim.speed *= -1.f; break;
 			}
 		}
 	});
