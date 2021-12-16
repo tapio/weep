@@ -36,13 +36,11 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 		{
 #if EMBED_MODULES || !defined(_WIN32) // Crashes with non-embedded Windows build...
 			int lightIndex = 0;
-			game.entities.for_each<Light>([&](Entity e, Light& light) {
+			game.entities.for_each<Light, Transform>([&](Entity e, Light& light, Transform& trans) {
 				float time = Engine::timems() * game.engine.timeMult;
-				/**/ if (lightIndex == 0) light.position.x = 5.f * glm::sin(time / 800.f);
-				else if (lightIndex == 1) light.position.x = 4.f * glm::sin(time / 500.f);
-				else if (lightIndex == 2) light.position.y = 1.f + 1.5f * glm::sin(time / 1000.f);
-				if (e.has<Transform>())
-					e.get<Transform>().position = light.position;
+				/**/ if (lightIndex == 0) trans.modify().position.x = 5.f * glm::sin(time / 800.f);
+				else if (lightIndex == 1) trans.modify().position.x = 4.f * glm::sin(time / 500.f);
+				else if (lightIndex == 2) trans.modify().position.y = 1.f + 1.5f * glm::sin(time / 1000.f);
 				if (e.has<Model>())
 					e.get<Model>().materials[0].emissive = light.color * 1.f;
 				lightIndex++;

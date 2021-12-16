@@ -174,13 +174,19 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		});
 	}
 
-	// TODO: Better prioritizing
 	vec3 lightTarget = camPos + camRot * (forward_axis * 2.0f);
-	entities.for_each<Light>([&](Entity, Light& light) {
-		if (light.type == Light::POINT_LIGHT || light.type == Light::SPOT_LIGHT) { // TODO: Spot light could use better culling...
+	entities.for_each<Light, Transform>([&](Entity, Light& light, Transform& transform) {
+		light.position = transform.position;
+		if (light.type == Light::POINT_LIGHT) {
 			if (!frustum.visible(light.position, light.distance))
 				return;
 		}
+		else if (light.type == Light::SPOT_LIGHT) {
+			if (!frustum.visible(light.position, light.distance)) // TODO: Spot light could use better culling...
+				return;
+			light.direction = transform.forward();
+		}
+		// TODO: Better prioritizing
 		light.priority = glm::distance2(lightTarget, light.position);
 		lights.push_back(light);
 	});
@@ -251,10 +257,10 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		Light sun;
 		sun.type = Light::DIRECTIONAL_LIGHT;
 		sun.position = camPos + normalize(m_env.sunPosition) * 10.f;
-		sun.target = camPos;
+		sun.direction = normalize(camPos - sun.position);
 		sun.shadowDistance = 50.f;
 		m_device->setupShadowPass(sun, 0);
-		Frustum sunShadowFrustum(sun.position, sun.target - sun.position, sun.shadowDistance);
+		Frustum sunShadowFrustum(sun.position, sun.direction, sun.shadowDistance);
 		entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 			if (!model.materials.empty() && model.geometry && sunShadowFrustum.visible(transform, model.bounds)) {
 				BEGIN_ENTITY_GPU_SAMPLE("Sun shadow", e)

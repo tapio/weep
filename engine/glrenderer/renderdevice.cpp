@@ -793,10 +793,9 @@ void RenderDevice::setupShadowPass(const Light& light, uint index)
 		m_tech = TECH_DEPTH;
 		// TODO: Configure
 		float size = 20.f;
-		near = 1.f; far = light.shadowDistance > 0.f ? light.shadowDistance : (length(light.target - light.position) * 1.5f);
+		near = 1.f; far = light.shadowDistance > 0.f ? light.shadowDistance : 50.f;
 		m_shadowProj[index] = glm::ortho(-size, size, -size, size, near, far);
-		m_shadowView[index] = glm::lookAt(light.position, light.target, vec3(0, 1, 0));
-	 // TODO:Spot light shadows, probably perspective cam?
+		m_shadowView[index] = glm::lookAt(light.position, light.position + light.direction, up_axis);
 	} else ASSERT(!"Unsupported light type for shadow pass");
 
 	m_commonBlock.uniforms.projectionMatrix = m_shadowProj[index];
