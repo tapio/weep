@@ -696,7 +696,7 @@ void RenderDevice::useMaterial(Material& mat)
 	useProgram(m_shaders[mat.shaderId[m_tech]]);
 
 	// We don't need everything when only rendering depth
-	if (m_tech != TECH_DEPTH || m_tech != TECH_DEPTH_CUBE) {
+	if (m_tech != TECH_DEPTH && m_tech != TECH_DEPTH_CUBE) {
 		for (uint i = 0; i < Material::ENV_MAP; ++i) {
 			uint tex = mat.tex[i];
 			if (!tex) continue;
