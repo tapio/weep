@@ -25,10 +25,9 @@ static CVar<bool> cvar_shadows("r.shadows", true);
 static CVar<bool> cvar_cubeShadows("r.cubeShadows", true);
 static CVar<bool> cvar_reflections("r.reflections", true);
 
-class Frustum
+struct NaiveFrustum
 {
-public:
-	Frustum(vec3 position, vec3 dir, float far) {
+	NaiveFrustum(vec3 position, vec3 dir, float far) {
 		m_radius = far * 0.5f;
 		m_center = position + normalize(dir) * m_radius;
 	}
@@ -114,7 +113,11 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	quat camRot = camTransform.rotation;
 	vec3 camDir = camRot * forward_axis;
 	camera.updateViewMatrix(camPos, camRot);
-	Frustum frustum(camPos, camDir, camera.far);
+	#if 1
+	Frustum frustum(camera);
+	#else
+	NaiveFrustum frustum(camPos, camDir, camera.far);
+	#endif
 
 	auto calcSignedDepth = [camPos, camDir](vec3 pos) {
 		float depth = glm::distance2(camPos, pos);
@@ -297,7 +300,8 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 			BEGIN_GPU_SAMPLE(ShadowMap)
 			light.shadowIndex = shadowIndex;
 			m_device->setupShadowPass(light, shadowIndex);
-			Frustum shadowFrustum(light.position, light.direction, light.shadowDistance >= 0.f ? light.shadowDistance : light.distance);
+			// TODO: Switch to using proper Frustum
+			NaiveFrustum shadowFrustum(light.position, light.direction, light.shadowDistance >= 0.f ? light.shadowDistance : light.distance);
 			entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 				if (!model.materials.empty() && model.geometry && shadowFrustum.visible(transform, model.bounds)) {
 					BEGIN_ENTITY_GPU_SAMPLE("Shadow", e)
