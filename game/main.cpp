@@ -89,6 +89,7 @@ int main(int argc, char* argv[])
 	game.engine.init(resources.findPath(args.arg<string>('c', "config", "settings.json")));
 	if (Engine::settings["moddir"].is_string())
 		resources.addPath(Engine::settings["moddir"].string_value());
+	game.engine.setIcon(resources.getImage("logo/weep-logo-32.png"));
 
 	if (argc > 1 && argv[argc-1][0] != '-')
 		game.scenePath = argv[argc-1];

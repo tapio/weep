@@ -1,5 +1,6 @@
 #include "engine.hpp"
 #include "utils.hpp"
+#include "image.hpp"
 
 #include <SDL.h>
 #ifdef _WIN32
@@ -179,6 +180,17 @@ void Engine::fullscreen(bool enable)
 bool Engine::fullscreen()
 {
 	return (SDL_GetWindowFlags(window) & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP)) != 0;
+}
+
+void Engine::setIcon(Image* image)
+{
+	if (!image) {
+		SDL_SetWindowIcon(window, nullptr);
+		return;
+	}
+	SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(image->data.data(), image->width, image->height, image->channels * 8, image->width * image->channels, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
+	SDL_SetWindowIcon(window, surface);
+	SDL_FreeSurface(surface);
 }
 
 uint Engine::timems()

@@ -17,6 +17,7 @@ public:
 	bool vsync();
 	void fullscreen(bool enable);
 	bool fullscreen();
+	void setIcon(struct Image* image);
 
 	static int width();
 	static int height();
