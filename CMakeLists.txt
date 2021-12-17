@@ -51,7 +51,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
 	endif()
 	if (USE_LIBCXX AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 		message("Using LLVM libc++")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} stdlib=libc++")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 	endif()
 else()
 	set(CMAKE_CXX_STANDARD 17)
