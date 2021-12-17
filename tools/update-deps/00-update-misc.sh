@@ -18,3 +18,6 @@ $CURL $GHBASEURL/nothings/stb/master/stb_image_write.h -o stb_image/stb_image_wr
 $CURL $GHBASEURL/ginsweater/gif-h/master/gif.h -o gif-h/gif.h &
 $CURL $GHBASEURL/ginsweater/gif-h/master/LICENSE -o gif-h/LICENSE &
 
+# magic_enum
+$CURL $GHBASEURL/Neargye/magic_enum/master/include/magic_enum.hpp -o magic_enum/magic_enum.hpp &
+$CURL $GHBASEURL/Neargye/magic_enum/master/LICENSE -o magic_enum/LICENSE &
