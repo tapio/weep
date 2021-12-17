@@ -20,7 +20,7 @@ struct Camera
 		this->far = far;
 	}
 
-	void makeOrtho(float left, float right, float top, float bottom, float near, float far)
+	void makeOrtho(float left, float right, float bottom, float top, float near, float far)
 	{
 		projection = glm::ortho(left, right, bottom, top, near, far);
 		this->near = near;
