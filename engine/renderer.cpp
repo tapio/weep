@@ -2,7 +2,6 @@
 #include "glrenderer/renderdevice.hpp"
 #include "components.hpp"
 #include "geometry.hpp"
-#include "camera.hpp"
 #include "scene.hpp"
 #include "image.hpp"
 #include <algorithm>
@@ -20,6 +19,11 @@
 #define END_ENTITY_GPU_SAMPLE()
 #endif
 
+#ifdef _WIN32
+// Windows defines these to nothing for some ancient compat reasons...
+#undef near
+#undef far
+#endif
 
 static CVar<bool> cvar_shadows("r.shadows", true);
 static CVar<bool> cvar_cubeShadows("r.cubeShadows", true);
@@ -30,9 +34,9 @@ static CVar<bool> cvar_freezeCullingFrustum("r.freezeCullingFrustum", false);
 
 struct NaiveFrustum
 {
-	NaiveFrustum(vec3 position, vec3 dir, float far) {
-		m_radius = far * 0.5f;
-		m_center = position + normalize(dir) * m_radius;
+	NaiveFrustum(const Camera& cam) {
+		m_radius = cam.far * 0.5f;
+		m_center = cam.position() + normalize(cam.forward()) * m_radius;
 	}
 
 	inline bool visible(const Transform& transform, const Bounds& bounds) const {
@@ -49,6 +53,8 @@ private:
 	vec3 m_center;
 };
 
+#define FrustumType Frustum
+//#define FrustumType NaiveFrustum
 
 
 RenderSystem::RenderSystem(Resources& resources)
@@ -116,17 +122,13 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	quat camRot = camTransform.rotation;
 	vec3 camDir = camRot * forward_axis;
 	camera.updateViewMatrix(camPos, camRot);
-	#if 1
 	#ifndef SHIPPING_BUILD
-	static Frustum frustum(camera);
+	static FrustumType frustum(camera);
 	if (!cvar_freezeCullingFrustum()) {
-		frustum = Frustum(camera);
+		frustum = FrustumType(camera);
 	}
 	#else
-	Frustum frustum(camera);
-	#endif
-	#else
-	NaiveFrustum frustum(camPos, camDir, camera.far);
+	FrustumType frustum(camera);
 	#endif
 
 	auto calcSignedDepth = [camPos, camDir](vec3 pos) {
@@ -310,8 +312,8 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 			BEGIN_GPU_SAMPLE(ShadowMap)
 			light.shadowIndex = shadowIndex;
 			m_device->setupShadowPass(light, shadowIndex);
-			// TODO: Switch to using proper Frustum
-			NaiveFrustum shadowFrustum(light.position, light.direction, light.shadowDistance >= 0.f ? light.shadowDistance : light.distance);
+			Camera shadowCam = getShadowCamera(light);
+			FrustumType shadowFrustum(shadowCam);
 			entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 				if (!model.materials.empty() && model.geometry && shadowFrustum.visible(transform, model.bounds)) {
 					BEGIN_ENTITY_GPU_SAMPLE("Shadow", e)
@@ -464,4 +466,24 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	stats.times.opaque = opaqueMs;
 	stats.times.transparent = transparentMs;
 	stats.times.postprocess = postprocessMs;
+}
+
+Camera RenderSystem::getShadowCamera(const Light& light) const {
+	Camera shadowCam;
+	float near = 0.2f;
+	float far = light.shadowDistance >= 0.f ? light.shadowDistance : light.distance;
+	if (light.type == Light::POINT_LIGHT) {
+		shadowCam.makePerspective(glm::radians(90.0f), 1.f, near, far);
+		shadowCam.updateViewMatrix(light.position);
+	} else if (light.type == Light::SPOT_LIGHT) {
+		shadowCam.makePerspective(glm::radians(light.spotAngles.y * 2), 1.f, near, far);
+		shadowCam.view = glm::lookAt(light.position, light.position + light.direction, up_axis);
+	} else if (light.type == Light::DIRECTIONAL_LIGHT) {
+		float size = 10.f; // TODO: Configure
+		near = 5.f;
+		far = light.shadowDistance > 0.f ? light.shadowDistance : 50.f;
+		shadowCam.makeOrtho(-size, size, -size, size, near, far);
+		shadowCam.view = glm::lookAt(light.position, light.position + light.direction, up_axis);
+	} else ASSERT(!"Unsupported light type for shadow camera");
+	return shadowCam;
 }

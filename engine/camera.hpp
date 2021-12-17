@@ -65,7 +65,7 @@ struct Frustum {
 		bool inFront(vec3 point, float radius = 0.f) const { return signedDistance(point) > -radius; }
 	};
 
-	Frustum(Camera& cam) {
+	Frustum(const Camera& cam) {
 		float halfVert = cam.far * tanf(cam.fovy * 0.5f);
 		float halfHoriz = halfVert * cam.aspect;
 

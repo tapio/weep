@@ -1,10 +1,10 @@
 #pragma once
 #include "common.hpp"
 #include "environment.hpp"
+#include "camera.hpp"
 
 class RenderDevice;
 class Resources;
-struct Camera;
 struct Transform;
 struct Model;
 
@@ -17,6 +17,8 @@ public:
 	void render(Entities& entities, Camera& camera, const Transform& camTransform);
 	void reset(Entities& entities);
 	void destroy(Entity entity) override;
+
+	Camera getShadowCamera(const Light& light) const;
 
 	Environment& env() { return m_env; }
 
