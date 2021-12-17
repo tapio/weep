@@ -24,6 +24,9 @@
 static CVar<bool> cvar_shadows("r.shadows", true);
 static CVar<bool> cvar_cubeShadows("r.cubeShadows", true);
 static CVar<bool> cvar_reflections("r.reflections", true);
+#ifndef SHIPPING_BUILD
+static CVar<bool> cvar_freezeCullingFrustum("r.freezeCullingFrustum", false);
+#endif
 
 struct NaiveFrustum
 {
@@ -114,7 +117,14 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	vec3 camDir = camRot * forward_axis;
 	camera.updateViewMatrix(camPos, camRot);
 	#if 1
+	#ifndef SHIPPING_BUILD
+	static Frustum frustum(camera);
+	if (!cvar_freezeCullingFrustum()) {
+		frustum = Frustum(camera);
+	}
+	#else
 	Frustum frustum(camera);
+	#endif
 	#else
 	NaiveFrustum frustum(camPos, camDir, camera.far);
 	#endif
