@@ -1,5 +1,6 @@
 #include "common.hpp"
 #include <iostream>
+#include <charconv>
 #include <SDL.h>
 
 #if !defined(_WIN32) && !defined(WIN32)
@@ -118,20 +119,34 @@ void panic(const char* format, ...)
 
 
 
-static std::unordered_map<std::string, bool*> s_cvars;
+static std::unordered_map<std::string, CVarBase*> s_cvars;
 
-void registerCVar(const string& name, bool* value)
+void CVarBase::registerCVar(const string& name, CVarBase* cvar)
 {
 	if (name.empty()) { logError("Registering empty cvar!"); return; }
-	if (!value) { logError("Registering nullptr cvar!"); return; }
+	if (!cvar) { logError("Registering nullptr cvar!"); return; }
 	if (s_cvars.count(name) > 0) { logWarning("Re-registering cvar %s", name.c_str()); }
-	s_cvars[name] = value;
+	s_cvars[name] = cvar;
 }
 
-bool* getCVar(const string& name)
+CVarBase* CVarBase::getCVar(const string& name)
 {
 	auto it = s_cvars.find(name);
 	if (it != s_cvars.end())
 		return it->second;
 	return nullptr;
+}
+
+bool CVarBase::tryParseFrom(const std::string& newValue)
+{
+	if (newValue.empty()) return false;
+	if (newValue == "true") { value = 1; return true; }
+	if (newValue == "false") { value = 0; return true; }
+	ValueType parsed = {};
+	const auto res = std::from_chars(newValue.data(), newValue.data() + newValue.size(), parsed);
+	if (res.ec == std::errc()) {
+		value = parsed;
+		return true;
+	}
+	return false;
 }

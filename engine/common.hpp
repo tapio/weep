@@ -54,14 +54,22 @@ void logWarning(const char* format, ...);
 void logError(const char* format, ...);
 void panic(const char* format, ...);
 
-void registerCVar(const string& name, bool* value);
-bool* getCVar(const string& name);
-
-struct CVar {
-	CVar(const std::string& name, bool defaultValue = false): value(defaultValue) { registerCVar(name, &value); }
-	bool operator()() const { return value; }
-	bool value;
+struct CVarBase {
+	bool tryParseFrom(const std::string& newValue);
+	typedef float ValueType;
+	ValueType value = 0;
+	static CVarBase* getCVar(const string& name);
+protected:
+	static void registerCVar(const string& name, struct CVarBase* cvar);
+	CVarBase(const std::string& name, ValueType defaultValue): value(defaultValue) { registerCVar(name, this); }
 };
+template<typename T>
+struct CVar: public CVarBase {
+	CVar(const std::string& name, T defaultValue = {}): CVarBase(name, (CVarBase::ValueType)defaultValue) { }
+	T operator()() const { return (T)value; }
+	void operator=(T v) { value = (CVarBase::ValueType)v; }
+};
+
 
 template <typename T, std::size_t N>
 constexpr std::size_t countof(T const (&)[N]) noexcept { return N; }

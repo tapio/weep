@@ -21,9 +21,9 @@
 #endif
 
 
-static CVar cvar_shadows("r.shadows", true);
-static CVar cvar_cubeShadows("r.cubeShadows", true);
-static CVar cvar_reflections("r.reflections", true);
+static CVar<bool> cvar_shadows("r.shadows", true);
+static CVar<bool> cvar_cubeShadows("r.cubeShadows", true);
+static CVar<bool> cvar_reflections("r.reflections", true);
 
 class Frustum
 {

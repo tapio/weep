@@ -12,6 +12,30 @@ static std::string s_buffer;
 static std::vector<std::string> s_history;
 static int s_historyIndex = -1;
 
+static int textEditCallback(ImGuiInputTextCallbackData* data)
+{
+	if (data->EventFlag == ImGuiInputTextFlags_CallbackHistory) {
+		if (data->EventKey == ImGuiKey_UpArrow) {
+			if (s_historyIndex >= 0)
+				--s_historyIndex;
+			data->DeleteChars(0, data->BufTextLen);
+			if (s_historyIndex >= 0 && s_historyIndex < s_history.size()) {
+				data->InsertChars(0, s_history[s_historyIndex].c_str());
+				data->SelectAll();
+			}
+		} else if (data->EventKey == ImGuiKey_DownArrow) {
+			if (s_historyIndex < (int)s_history.size())
+				++s_historyIndex;
+			data->DeleteChars(0, data->BufTextLen);
+			if (s_historyIndex >= 0 && s_historyIndex < s_history.size()) {
+				data->InsertChars(0, s_history[s_historyIndex].c_str());
+				data->SelectAll();
+			}
+		}
+	}
+	return 0;
+};
+
 EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 {
 	Game& game = *static_cast<Game*>(param);
@@ -40,12 +64,6 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			if (!s_consoleOpen)
 				break;
 
-			// TODO: Implement history with ImGuiInputTextFlags_CallbackHistory
-			if (!s_history.empty() && ImGui::IsKeyReleased(ImGuiKey_UpArrow)) {
-				s_historyIndex = (s_historyIndex + 1) % s_history.size();
-				s_buffer = s_historyIndex;
-			}
-
 			ImVec2 windowPos = ImGui::GetMainViewport()->Pos;
 			ImVec2 windowSize = ImGui::GetMainViewport()->Size;
 			ImGui::SetNextWindowPos(ImVec2(windowPos.x + 10, windowPos.y + windowSize.y - 16 - 10)); // TODO: Font height
@@ -53,20 +71,16 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(0, 0));
 			ImGui::Begin("##consolewindow", NULL, ImGuiSystem::MinimalWindow);
 			ImGui::SetKeyboardFocusHere();
-			if (ImGui::InputText("##console", &s_buffer, ImGuiInputTextFlags_EnterReturnsTrue)) {
+			if (ImGui::InputText("##console", &s_buffer, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackHistory, textEditCallback)) {
 				if (!s_buffer.empty()) {
 					std::istringstream ss(s_buffer);
 					std::string cmd, param;
 					ss >> cmd >> param;
 
-					if (bool* cvar = getCVar(cmd)) {
-						bool newValue = false;
-						bool ok = false;
-						if (param == "0" || param == "false") { newValue = false; ok = true; }
-						else if (param == "1" || param == "true") { newValue = true; ok = true; }
-						if (ok) {
-							*cvar = newValue;
-							logInfo("Set cvar %s to %d", cmd.c_str(), *cvar);
+					if (CVarBase* cvar = CVarBase::getCVar(cmd)) {
+						if (cvar->tryParseFrom(param)) {
+							logInfo("Set cvar %s to %g", cmd.c_str(), cvar->value);
+							s_consoleOpen = false;
 						} else {
 							logError("Could not parse parameter %s for cvar %s", param.c_str(), cmd.c_str());
 						}
@@ -75,10 +89,9 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 					}
 
 					s_history.push_back(s_buffer);
-					s_historyIndex = -1;
+					s_historyIndex = s_history.size();
 					s_buffer = "";
-				}
-				s_consoleOpen = false;
+				} else s_consoleOpen = false;
 			}
 			ImGui::End();
 			ImGui::PopStyleVar(2);
