@@ -28,15 +28,17 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			}
 			ImVec2 windowPos = ImGui::GetMainViewport()->Pos;
 			ImVec2 windowSize = ImGui::GetMainViewport()->Size;
-			ImGui::SetNextWindowPos(ImVec2(windowPos.x + 10, windowPos.y + windowSize.y - 32 - 10));
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+			const float pad = 2;
+			ImGui::SetNextWindowPos(ImVec2(windowPos.x + windowSize.x - 155, windowPos.y + windowSize.y - 32 - 10));
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(pad, pad));
 			ImGui::Begin("##LogoWindow", NULL, ImGuiSystem::MinimalWindow);
 			ImFont* font = game.entities.get_system<ImGuiSystem>().getFont($id(logo-font));
 			ASSERT(font);
 			ImGui::PushFont(font);
 			ImGui::Image(reinterpret_cast<ImTextureID>(logoTex.id), ImVec2(32, 32));
 			ImGui::SameLine();
-			ImGui::Text("Powered by\nWeepEngine");
+			ImGui::AlignTextToFramePadding();
+			ImGui::Text("Powered by  \nWeepEngine");
 			ImGui::PopFont();
 			ImGui::End();
 			ImGui::PopStyleVar();

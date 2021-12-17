@@ -179,3 +179,22 @@ void sleep(uint ms)
 	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 #endif
 }
+
+
+static std::unordered_map<std::string, bool*> s_cvars;
+
+void registerCVar(const string& name, bool* value)
+{
+	if (name.empty()) { logError("Registering empty cvar!"); return; }
+	if (!value) { logError("Registering nullptr cvar!"); return; }
+	if (s_cvars.count(name) > 0) { logWarning("Re-registering cvar %s", name.c_str()); }
+	s_cvars[name] = value;
+}
+
+bool* getCVar(const string& name)
+{
+	auto it = s_cvars.find(name);
+	if (it != s_cvars.end())
+		return it->second;
+	return nullptr;
+}

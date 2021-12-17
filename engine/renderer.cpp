@@ -20,6 +20,11 @@
 #define END_ENTITY_GPU_SAMPLE()
 #endif
 
+
+static CVar cvar_shadows("r.shadows", true);
+static CVar cvar_cubeShadows("r.cubeShadows", true);
+static CVar cvar_reflections("r.reflections", true);
+
 class Frustum
 {
 public:
@@ -91,7 +96,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 {
 	m_device->stats = RenderDevice::Stats();
 
-	bool cubeShadows = settings.shadows;
+	bool cubeShadows = settings.shadows && cvar_cubeShadows();
 	if (!m_device->caps.geometryShaders || !m_device->caps.cubeFboAttachment)
 	{
 		cubeShadows = false;
@@ -155,7 +160,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		return a.priority > b.priority; // Depth sorting works the other way around
 	});
 
-	if (settings.dynamicReflections) {
+	if (settings.dynamicReflections && cvar_reflections()) {
 		entities.for_each<Model, Transform>([&](Entity, Model& model, Transform& transform) {
 			// Figure out candidates for reflection location
 			if (frustum.visible(transform, model.bounds)) {
@@ -282,7 +287,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	START_MEASURE(shadowMs)
 	BEGIN_GPU_SAMPLE(ShadowPass)
 	int shadowIndex = 0;
-	if (settings.shadows) {
+	if (settings.shadows && cvar_shadows()) {
 		// Directional and spot light shadows
 		uint usedShadowMaps = 0;
 		for (uint i = 0; i < lights.size() && usedShadowMaps < MAX_SHADOW_MAPS; ++i) {
@@ -306,7 +311,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		}
 
 		// Point light shadows
-		if (cubeShadows) {
+		if (cubeShadows) { // All conditions applied to this bool already
 			shadowIndex = MAX_SHADOW_MAPS; // Start from first shadow cubemap
 			uint usedCubeShadows = 0;
 			for (uint i = 0; i < lights.size() && usedCubeShadows < MAX_SHADOW_CUBES; ++i) {

@@ -62,6 +62,15 @@ uint timestamp(const string& path);
 
 void sleep(uint ms);
 
+void registerCVar(const string& name, bool* value);
+bool* getCVar(const string& name);
+
+struct CVar {
+	CVar(const std::string& name, bool defaultValue = false): value(defaultValue) { registerCVar(name, &value); }
+	bool operator()() const { return value; }
+	bool value;
+};
+
 template <typename T, std::size_t N>
 constexpr std::size_t countof(T const (&)[N]) noexcept { return N; }
 

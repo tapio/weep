@@ -22,6 +22,7 @@
 #define DECLARE_MODULE_FUNC(name) void ModuleFunc_##name(uint msg, void* param)
 #define REGISTER_MODULE_FUNC(modules, name) modules.registerEmbeddedModule(#name, ModuleFunc_##name)
 DECLARE_MODULE_FUNC(asteroids);
+DECLARE_MODULE_FUNC(console);
 DECLARE_MODULE_FUNC(devtools);
 DECLARE_MODULE_FUNC(logo);
 DECLARE_MODULE_FUNC(pong);
@@ -45,6 +46,7 @@ void init(Game& game)
 #if EMBED_MODULES
 	REGISTER_MODULE_FUNC(modules, asteroids);
 	REGISTER_MODULE_FUNC(modules, devtools);
+	REGISTER_MODULE_FUNC(modules, console);
 	REGISTER_MODULE_FUNC(modules, logo);
 	REGISTER_MODULE_FUNC(modules, pong);
 	REGISTER_MODULE_FUNC(modules, settings);
