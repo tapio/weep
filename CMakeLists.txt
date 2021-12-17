@@ -13,6 +13,7 @@ set(INSTALL_DIR "weep" CACHE STRING "Installation directory name")
 option(SHIPPING_BUILD "Remove debug stuff" OFF)
 option(USE_REMOTERY "Use Remotery profiler" ON)
 option(USE_GLES "Link against OpenGL ES" OFF)
+option(USE_LIBCXX "Use LLVM libc++ with Clang" OFF)
 option(EMBED_MODULES "Embed plugin modules into the executable instead of using hotloadable DLLs" ${EMBED_MODULES_DEFAULT})
 
 # Avoid source tree pollution
@@ -47,6 +48,10 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--export-all-symbols")
 	else()
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
+	endif()
+	if (USE_LIBCXX AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+		message("Using LLVM libc++")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} stdlib=libc++")
 	endif()
 else()
 	set(CMAKE_CXX_STANDARD 17)
