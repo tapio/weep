@@ -796,29 +796,21 @@ void RenderDevice::setupShadowPass(const Camera& camera, const Light& light)
 	glCullFace(GL_FRONT);
 	m_program = 0;
 	glUseProgram(0);
-	float& near = m_commonBlock.uniforms.near;
-	float& far = m_commonBlock.uniforms.far;
+
 	if (light.type == Light::POINT_LIGHT) {
 		m_tech = TECH_DEPTH_CUBE;
-		float aspect = (float)shadowFBO.width / (float)shadowFBO.height;
-		near = 0.2f; far = light.shadowDistance >= 0.f ? light.shadowDistance : light.distance;
-		m_shadowProj[index] = glm::perspective(glm::radians(90.0f), aspect, near, far);
-		setupCubeMatrices(m_shadowProj[index], light.position);
+		setupCubeMatrices(camera.projection, light.position);
 	} else if (light.type == Light::SPOT_LIGHT) {
 		m_tech = TECH_DEPTH;
-		float aspect = (float)shadowFBO.width / (float)shadowFBO.height;
-		near = 0.2f; far = light.shadowDistance >= 0.f ? light.shadowDistance : light.distance;
-		m_shadowProj[index] = glm::perspective(glm::radians(light.spotAngles.y * 2), aspect, near, far);
-		m_shadowView[index] = glm::lookAt(light.position, light.position + light.direction, up_axis);
 	} else if (light.type == Light::DIRECTIONAL_LIGHT) {
 		m_tech = TECH_DEPTH;
-		// TODO: Configure
-		float size = 20.f;
-		near = 1.f; far = light.shadowDistance > 0.f ? light.shadowDistance : 50.f;
-		m_shadowProj[index] = glm::ortho(-size, size, -size, size, near, far);
-		m_shadowView[index] = glm::lookAt(light.position, light.position + light.direction, up_axis);
 	} else ASSERT(!"Unsupported light type for shadow pass");
 
+	m_shadowProj[index] = camera.projection;
+	m_shadowView[index] = camera.view;
+
+	m_commonBlock.uniforms.near = camera.near;
+	m_commonBlock.uniforms.far = camera.far;
 	m_commonBlock.uniforms.projectionMatrix = m_shadowProj[index];
 	m_commonBlock.uniforms.viewMatrix = m_shadowView[index];
 	m_commonBlock.uniforms.cameraPosition = light.position;
