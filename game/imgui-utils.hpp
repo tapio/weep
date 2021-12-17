@@ -65,11 +65,11 @@ inline float GetClampedAvailableWidth(float maxWidth) {
 }
 
 template<typename T>
-inline bool EnumWidget(const char* label, T* enumVar, float w = 200.f) {
+inline bool EnumWidget(const char* label, T* enumVar, float w = 0.f) {
 	const auto& opts = GetEnumOptions<T>();
-	ImGui::PushItemWidth(w);
+	if (w > 0.f) ImGui::PushItemWidth(w);
 	bool ret = ImGui::Combo(label, (int*)enumVar, opts);
-	ImGui::PopItemWidth();
+	if (w > 0.f) ImGui::PopItemWidth();
 	return ret;
 }
 

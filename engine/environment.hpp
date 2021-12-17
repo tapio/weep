@@ -15,14 +15,12 @@ struct Environment
 		TONEMAP_EXPOSURE,
 		TONEMAP_FILMIC,
 		TONEMAP_UNCHARTED2,
-		TONEMAP_ACES,
-		TONEMAP_COUNT
+		TONEMAP_ACES
 	} tonemap = TONEMAP_REINHARD;
 
 	enum SkyType {
 		SKY_SKYBOX,
-		SKY_PROCEDURAL,
-		SKY_COUNT
+		SKY_PROCEDURAL
 	} skyType = SKY_PROCEDURAL;
 
 	vec3 sunPosition = up_axis;

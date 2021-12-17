@@ -12,7 +12,7 @@
 #include "utils.hpp"
 #include "../game.hpp"
 #include "../controller.hpp"
-#include "imgui/imgui_stdlib.h"
+#include "../imgui-utils.hpp"
 
 using utils::timestamp;
 using utils::sleep;
@@ -143,7 +143,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 				}
 				if (ImGui::CollapsingHeader("Environment")) {
 					Environment& env = renderer.env();
-					ImGui::SliderInt("Tonemap", (int*)&env.tonemap, 0, Environment::TONEMAP_COUNT-1);
+					EnumWidget("Tonemap", &env.tonemap);
 					ImGui::SliderFloat("Exposure", &env.exposure, 0.0f, 10.0f);
 					ImGui::SliderFloat("Bloom Threshold", &env.bloomThreshold, 0.0f, 2.0f);
 					ImGui::SliderFloat("Bloom Intensity", &env.bloomIntensity, 1.0f, 10.0f, "%.0f");
@@ -153,7 +153,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 					ImGui::DragFloat3("Sun Pos", (float*)&env.sunPosition, 0.1f, -15.f, 15.f, "%.2f");
 					ImGui::ColorEdit3("Fog Color", (float*)&env.fogColor);
 					ImGui::SliderFloat("Fog Density", &env.fogDensity, 0.0f, 1.0f);
-					ImGui::SliderInt("Sky Type", (int*)&env.skyType, 0, Environment::SKY_COUNT-1);
+					EnumWidget("Sky Type", &env.skyType);
 					Tooltip("Skybox, Procedural");
 				}
 				if (ImGui::CollapsingHeader("Post Effects")) {

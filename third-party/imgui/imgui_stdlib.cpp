@@ -74,3 +74,25 @@ bool ImGui::InputTextWithHint(const char* label, const char* hint, std::string* 
     cb_user_data.ChainCallbackUserData = user_data;
     return InputTextWithHint(label, hint, (char*)str->c_str(), str->capacity() + 1, flags, InputTextCallback, &cb_user_data);
 }
+
+// BEGIN MODIFICATION
+static auto vector_getter = [](void* vec, int idx, const char** out_text)
+{
+    auto& vector = *static_cast<const std::vector<std::string>*>(vec);
+    if (idx < 0 || idx >= static_cast<int>(vector.size())) { return false; }
+    *out_text = vector.at(idx).c_str();
+    return true;
+};
+
+bool ImGui::Combo(const char* label, int* currIndex, const std::vector<std::string>& values)
+{
+    if (values.empty()) { return false; }
+    return Combo(label, currIndex, vector_getter, (void*)(&values), (int)values.size());
+}
+
+bool ImGui::ListBox(const char* label, int* currIndex, const std::vector<std::string>& values)
+{
+    if (values.empty()) { return false; }
+    return ListBox(label, currIndex, vector_getter, (void*)(&values), (int)values.size());
+}
+//END MODIFICATION
