@@ -12,6 +12,7 @@
 #include "environment.hpp"
 #include "gui.hpp"
 #include "module.hpp"
+#include "utils.hpp"
 #include "renderer.hpp"
 #include "glrenderer/renderdevice.hpp"
 #include <glm/gtx/component_wise.hpp>
@@ -19,6 +20,8 @@
 #ifndef SHIPPING_BUILD
 #define USE_DEBUG_NAMES
 #endif
+
+using utils::endsWith;
 
 namespace {
 

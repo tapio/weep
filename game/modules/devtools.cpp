@@ -9,9 +9,13 @@
 #include "audio.hpp"
 #include "gui.hpp"
 #include "module.hpp"
+#include "utils.hpp"
 #include "../game.hpp"
 #include "../controller.hpp"
 #include "imgui/imgui_stdlib.h"
+
+using utils::timestamp;
+using utils::sleep;
 
 static bool s_autoReloadModules = true;
 static bool s_autoReloadShaders = true;

@@ -1,5 +1,6 @@
 #include "shader.hpp"
 #include "glutil.hpp"
+#include "utils.hpp"
 
 //#define DUMP_SHADERS
 
@@ -29,7 +30,7 @@ bool ShaderProgram::compile(ShaderType type, const string& text, const std::stri
 #ifdef DUMP_SHADERS
 	constexpr const char* s_shaderTypeExtensions[] = { ".vert", ".frag", ".geom", ".tesc", ".tese", ".comp" };
 	static_assert(countof(s_shaderTypeExtensions) == countof(s_shaderTypes), "Array size mismatch");
-	writeFile("/tmp/" + name + s_shaderTypeExtensions[type], defines + text);
+	utils::writeFile("/tmp/" + name + s_shaderTypeExtensions[type], defines + text);
 #endif
 
 	GLsizei lengths[] = { (GLsizei)defines.length(), (GLsizei)text.length() };

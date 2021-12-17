@@ -8,17 +8,9 @@
 #include <sstream>
 #include <fstream>
 #include <cstring>
+#include "utils.hpp"
 
 namespace {
-	std::vector<std::string> split(const std::string &str, char delim) {
-		std::stringstream ss(str);
-		std::vector<std::string> elems;
-		std::string item;
-		while (std::getline(ss, item, delim))
-			elems.push_back(item);
-		return elems;
-	}
-
 	mat3x4 invert(mat3x4 mat) {
 		mat3 invrot(vec3(mat[0].x, mat[1].x, mat[2].x), vec3(mat[0].y, mat[1].y, mat[2].y), vec3(mat[0].z, mat[1].z, mat[2].z));
 		invrot[0] /= glm::length2(invrot[0]);
@@ -49,8 +41,8 @@ Geometry::Geometry(const string& path)
 {
 	START_MEASURE(geomLoadTimeMs);
 
-	if (endsWith(path, ".obj")) loadObj(path);
-	else if (endsWith(path, ".iqm")) loadIqm(path);
+	if (utils::endsWith(path, ".obj")) loadObj(path);
+	else if (utils::endsWith(path, ".iqm")) loadIqm(path);
 	else {
 		END_CPU_SAMPLE()
 		logError("Unsupported file format for geometry %s", path.c_str());
@@ -209,7 +201,7 @@ bool Geometry::loadObj(const string& path)
 					logError("Only triangle and quad faces are supported in %s:%d", path.c_str(), lineNumber);
 					break;
 				}
-				std::vector<std::string> indices = split(tempst, '/');
+				std::vector<std::string> indices = utils::split(tempst, "/");
 				if (indices.size() == 0 || indices.size() > 3) {
 					logError("Invalid face definition in %s:%d", path.c_str(), lineNumber);
 					continue;

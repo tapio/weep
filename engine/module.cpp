@@ -1,7 +1,10 @@
 #include "module.hpp"
+#include "utils.hpp"
 #include <chrono>
 #include <thread>
 #include <SDL_loadso.h>
+
+using namespace utils;
 
 static inline string getPath(const string& moduleName)
 {

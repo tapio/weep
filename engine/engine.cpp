@@ -1,4 +1,5 @@
 #include "engine.hpp"
+#include "utils.hpp"
 
 #include <SDL.h>
 #ifdef _WIN32
@@ -31,7 +32,7 @@ void Engine::init(const string& configPath)
 	m_prevTime = SDL_GetPerformanceCounter();
 
 	std::string err;
-	settings = Json::parse(readFile(configPath), err);
+	settings = Json::parse(utils::readFile(configPath), err);
 	if (!err.empty())
 		panic("Error reading config from \"%s\": %s", configPath.c_str(), err.c_str());
 

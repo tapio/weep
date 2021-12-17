@@ -1,16 +1,8 @@
 #include "common.hpp"
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <thread>
-#include <chrono>
 #include <SDL.h>
-#include <sys/stat.h>
 
-#if defined(_WIN32) || defined(WIN32)
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h> // Sleep()
-#else
+#if !defined(_WIN32) && !defined(WIN32)
 namespace unistd {
 #include <unistd.h> // isatty()
 }
@@ -124,61 +116,6 @@ void panic(const char* format, ...)
 	exit(EXIT_FAILURE);
 }
 
-string readFile(const string& path)
-{
-	std::ifstream f(path);
-	std::stringstream buffer;
-	buffer << f.rdbuf();
-	return buffer.str();
-}
-
-bool writeFile(const string& path, const string& contents)
-{
-	std::ofstream f(path);
-	f << contents;
-	return f.good();
-}
-
-string replace(string str, const string& search, const string& replace)
-{
-	for (size_t pos = 0, len = replace.length(); ; pos += len) {
-		pos = str.find(search, pos);
-		if (pos == string::npos) break;
-		str.replace(pos, search.length(), replace);
-	}
-	return str;
-}
-
-bool endsWith(const string& str, const string& ending)
-{
-	const int strLen = str.length(), endingLen = ending.length();
-	return strLen >= endingLen &&
-		str.compare(strLen - endingLen, endingLen, ending) == 0;
-}
-
-uint timestamp(const string& path)
-{
-#if defined(_MSC_VER) || defined(__MINGW32__)
-	struct _stat buf;
-	// TODO: Unicode
-	if (_stat(path.c_str(), &buf) == 0)
-		return buf.st_mtime;
-#else
-	struct stat buf;
-	if (stat(path.c_str(), &buf) == 0)
-		return buf.st_mtime;
-#endif
-	return 0;
-}
-
-void sleep(uint ms)
-{
-#if defined(_WIN32) || defined(WIN32)
-	Sleep(ms);
-#else
-	std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-#endif
-}
 
 
 static std::unordered_map<std::string, bool*> s_cvars;
