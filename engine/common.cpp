@@ -1,4 +1,5 @@
 #include "common.hpp"
+#include "utils.hpp"
 #include <iostream>
 #include <charconv>
 #include <SDL.h>
@@ -119,7 +120,7 @@ void panic(const char* format, ...)
 
 
 
-static std::unordered_map<std::string, CVarBase*> s_cvars;
+static std::unordered_map<string, CVarBase*> s_cvars;
 
 void CVarBase::registerCVar(const string& name, CVarBase* cvar)
 {
@@ -135,6 +136,17 @@ CVarBase* CVarBase::getCVar(const string& name)
 	if (it != s_cvars.end())
 		return it->second;
 	return nullptr;
+}
+
+std::vector<string> CVarBase::getMatchingCVarNames(const std::string& prefix)
+{
+	std::vector<string> res;
+	for (auto& it : s_cvars) {
+		const string& candidate = it.first;
+		if (utils::startsWith(candidate, prefix))
+			res.push_back(candidate);
+	}
+	return res;
 }
 
 bool CVarBase::tryParseFrom(const std::string& newValue)

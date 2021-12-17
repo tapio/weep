@@ -32,6 +32,40 @@ static int textEditCallback(ImGuiInputTextCallbackData* data)
 				data->SelectAll();
 			}
 		}
+	} else if (data->EventFlag == ImGuiInputTextFlags_CallbackCompletion) {
+		if (s_buffer.empty())
+			return 0;
+		auto candidates = CVarBase::getMatchingCVarNames(s_buffer);
+		if (candidates.empty())
+			return 0;
+		// Single match - replace
+		if (candidates.size() == 1) {
+			if (candidates.back() != s_buffer) {
+				data->DeleteChars(0, data->BufTextLen);
+				data->InsertChars(0, candidates.back().c_str());
+			}
+			return 0;
+		}
+		// Multiple matches - complete as much as we can
+		int matchLen = (int)s_buffer.size();
+		while (true) {
+			int c = 0;
+			bool allMatch = true;
+			for (int i = 0; i < candidates.size() && allMatch; i++) {
+				if (i == 0)
+					c = toupper(candidates[i][matchLen]);
+				else if (c == 0 || c != toupper(candidates[i][matchLen]))
+					allMatch = false;
+			}
+			if (!allMatch)
+				break;
+			matchLen++;
+		}
+		if (matchLen > 0) {
+			const char* selected = candidates.front().c_str();
+			data->DeleteChars(0, data->BufTextLen);
+			data->InsertChars(0, selected, selected + matchLen);
+		}
 	}
 	return 0;
 };
@@ -70,8 +104,9 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(0, 0));
 			ImGui::Begin("##consolewindow", NULL, ImGuiSystem::MinimalWindow);
+			constexpr int textInputFlags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackHistory | ImGuiInputTextFlags_CallbackCompletion;
 			ImGui::SetKeyboardFocusHere();
-			if (ImGui::InputText("##console", &s_buffer, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackHistory, textEditCallback)) {
+			if (ImGui::InputText("##console", &s_buffer, textInputFlags, textEditCallback)) {
 				if (!s_buffer.empty()) {
 					std::istringstream ss(s_buffer);
 					std::string cmd, param;

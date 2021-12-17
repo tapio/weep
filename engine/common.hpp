@@ -59,6 +59,7 @@ struct CVarBase {
 	typedef float ValueType;
 	ValueType value = 0;
 	static CVarBase* getCVar(const string& name);
+	static std::vector<string> getMatchingCVarNames(const std::string& prefix);
 protected:
 	static void registerCVar(const string& name, struct CVarBase* cvar);
 	CVarBase(const std::string& name, ValueType defaultValue): value(defaultValue) { registerCVar(name, this); }
