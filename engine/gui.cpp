@@ -31,10 +31,14 @@ ImGuiSystem::~ImGuiSystem()
 	ImGui::DestroyContext();
 }
 
-void ImGuiSystem::newFrame(SDL_Window* window)
+void ImGuiSystem::newFrame(bool enableMouse)
 {
+	ImGuiIO& io = ImGui::GetIO();
+	if (enableMouse) io.ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+	else io.ConfigFlags |= ImGuiConfigFlags_NoMouse;
+
 	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplSDL2_NewFrame(window);
+	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
 }
 

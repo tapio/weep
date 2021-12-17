@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 	GifMovie gif("movie.gif", game.engine.width(), game.engine.height(), 10, false);
 
 	bool running = true;
-	bool active = false;
+	bool gameControlsActive = false;
 	bool screenshot = false;
 	bool devtools = args.opt('d', "dev") || Engine::settings["devtools"].bool_value();
 	SDL_Event e;
@@ -119,8 +119,6 @@ int main(int argc, char* argv[])
 		Camera& camera = cameraEnt.get<Camera>();
 		Transform& cameraTrans = cameraEnt.get<Transform>();
 
-		imgui.newFrame(game.engine.window);
-
 		while (SDL_PollEvent(&e)) {
 			if (e.type == SDL_QUIT) {
 				running = false;
@@ -131,15 +129,15 @@ int main(int argc, char* argv[])
 				break;
 			}
 
-			if (!active && imgui.processEvent(&e))
+			if (!gameControlsActive && imgui.processEvent(&e))
 				continue;
 
 			if (e.type == SDL_KEYUP) {
 				SDL_Keysym keysym = e.key.keysym;
 
 				if (keysym.sym == SDLK_ESCAPE) {
-					if (active) {
-						active = false;
+					if (gameControlsActive) {
+						gameControlsActive = false;
 						game.engine.grabMouse(false);
 					} //else running = false;
 				}
@@ -184,16 +182,18 @@ int main(int argc, char* argv[])
 			}
 
 			if (e.type == SDL_MOUSEBUTTONDOWN && e.button.button == SDL_BUTTON_RIGHT) {
-				active = !active;
-				game.engine.grabMouse(active);
+				gameControlsActive = !gameControlsActive;
+				game.engine.grabMouse(gameControlsActive);
 			}
-			else if (e.type == SDL_MOUSEMOTION && active) {
+			else if (e.type == SDL_MOUSEMOTION && gameControlsActive) {
 				controller.angles.x += -0.05f * e.motion.yrel;
 				controller.angles.y += -0.05f * e.motion.xrel;
 			}
 
 			modules.call($id(INPUT), &e);
 		}
+
+		imgui.newFrame(!gameControlsActive); // Needs to be after input events, otherwise at least mouse wheel does not work
 
 		if (!imgui.usingKeyboard())
 			controller.update(game.engine.dt);

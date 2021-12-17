@@ -18,7 +18,7 @@ public:
 
 	NONCOPYABLE(ImGuiSystem);
 
-	void newFrame(SDL_Window* window);
+	void newFrame(bool enableMouse = true);
 	bool processEvent(union SDL_Event* event);
 	void render();
 	bool usingMouse() const;
