@@ -34,7 +34,7 @@ public:
 	void renderParticles(Particles& particles, Transform& transform);
 	void destroyParticles(Particles& particles);
 
-	void setupShadowPass(const Light& light, uint index);
+	void setupShadowPass(const Camera& camera, const Light& light);
 	void renderShadow(Model& model, Transform& transform, BoneAnimation* animation = nullptr);
 
 	void setupRenderPass(const Camera& camera, const std::vector<Light>& lights, Technique tech = TECH_COLOR, int fboIndex = 0);

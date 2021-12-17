@@ -311,9 +311,9 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 				continue;
 			BEGIN_GPU_SAMPLE(ShadowMap)
 			light.shadowIndex = shadowIndex;
-			m_device->setupShadowPass(light, shadowIndex);
 			Camera shadowCam = getShadowCamera(light);
 			FrustumType shadowFrustum(shadowCam);
+			m_device->setupShadowPass(shadowCam, light);
 			entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 				if (!model.materials.empty() && model.geometry && shadowFrustum.visible(transform, model.bounds)) {
 					BEGIN_ENTITY_GPU_SAMPLE("Shadow", e)
@@ -336,7 +336,8 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 					continue;
 				BEGIN_GPU_SAMPLE(ShadowCube)
 				light.shadowIndex = shadowIndex;
-				m_device->setupShadowPass(light, shadowIndex);
+				Camera shadowCam = getShadowCamera(light);
+				m_device->setupShadowPass(shadowCam, light);
 				entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 					if (model.materials.empty() || !model.geometry)
 						return;

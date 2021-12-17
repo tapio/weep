@@ -784,9 +784,11 @@ void RenderDevice::setupCubeMatrices(mat4 proj, vec3 pos)
 	m_cubeMatrixBlock.upload();
 }
 
-void RenderDevice::setupShadowPass(const Light& light, uint index)
+void RenderDevice::setupShadowPass(const Camera& camera, const Light& light)
 {
 	ASSERT(m_env);
+	ASSERT(light.shadowIndex >= 0);
+	uint index = light.shadowIndex;
 	const FBO& shadowFBO = m_shadowFbo[index];
 	shadowFBO.bind();
 	glViewport(0, 0, shadowFBO.width, shadowFBO.height);
