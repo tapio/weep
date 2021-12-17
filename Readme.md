@@ -62,7 +62,7 @@ Here's some things that need work. The list is by no means exhaustive.
 
 ## Dependencies
 
-You need CMake and C++11 capable compiler. Currently Clang works best as GCC breaks live reload of non-trivial code plugins. Visual Studio 2019 works too, but also has issues with plugin hotload stuff.
+You need CMake and C++17 capable compiler. Currently Clang works best as GCC breaks live reload of non-trivial code plugins. Visual Studio 2019 works too, but also has issues with plugin hotload stuff.
 
 A number of third-party libraries are included in the repository and built as a part of the build process (see "third-party" subfolder). In addition, you need SDL 2.0.2+ and OpenGL drivers installed. However, for Visual Studio x64 on Windows, SDL2 binaries and headers are provided in the repository.
 
