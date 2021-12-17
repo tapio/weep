@@ -1,7 +1,6 @@
 #include "common.hpp"
 #include "utils.hpp"
 #include <iostream>
-#include <charconv>
 #include <SDL.h>
 
 #if !defined(_WIN32) && !defined(WIN32)
@@ -154,11 +153,11 @@ bool CVarBase::tryParseFrom(const std::string& newValue)
 	if (newValue.empty()) return false;
 	if (newValue == "true") { value = 1; return true; }
 	if (newValue == "false") { value = 0; return true; }
-	ValueType parsed = {};
-	const auto res = std::from_chars(newValue.data(), newValue.data() + newValue.size(), parsed);
-	if (res.ec == std::errc()) {
+	// GCC lacks float std::from_chars even though it's C++17...
+	try {
+		ValueType parsed = std::stof(newValue);
 		value = parsed;
 		return true;
-	}
+	} catch (...) { }
 	return false;
 }
