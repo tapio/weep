@@ -18,15 +18,19 @@ struct Camera
 		this->aspect = aspect;
 		this->near = near;
 		this->far = far;
+		orthoSize = vec2(0, 0);
 	}
 
 	void makeOrtho(float left, float right, float bottom, float top, float near, float far)
 	{
+		orthoSize = vec2(right - left, top - bottom);
+		ASSERT(orthoSize.x > 0);
+		ASSERT(orthoSize.y > 0);
 		projection = glm::ortho(left, right, bottom, top, near, far);
 		this->near = near;
 		this->far = far;
 		fovy = 0;
-		aspect = (right - left) / (top - bottom);
+		aspect = orthoSize.x / orthoSize.y;
 	}
 
 	void updateViewMatrix(vec3 position, quat rotation) {
@@ -50,6 +54,7 @@ struct Camera
 	float far = 0;
 	float fovy = 0;
 	float aspect = 1.f;
+	vec2 orthoSize = vec2(0);
 };
 
 
@@ -66,9 +71,6 @@ struct Frustum {
 	};
 
 	Frustum(const Camera& cam) {
-		float halfVert = cam.far * tanf(cam.fovy * 0.5f);
-		float halfHoriz = halfVert * cam.aspect;
-
 		vec3 pos = cam.position();
 		vec3 forward = cam.forward();
 		vec3 forwardFar = cam.far * forward;
@@ -76,10 +78,20 @@ struct Frustum {
 		vec3 right = cam.right();
 		nearPlane = { pos + cam.near * forward, forward };
 		farPlane = { pos + forwardFar, -forward };
-		rightPlane = { pos, glm::cross(up, forwardFar + right * halfHoriz) };
-		leftPlane = { pos, glm::cross(forwardFar - right * halfHoriz, up) };
-		topPlane = { pos, glm::cross(right, forwardFar - up * halfVert) };
-		bottomPlane = { pos, glm::cross(forwardFar + up * halfVert, right) };
+		if (cam.fovy > 0) {
+			float halfVert = cam.far * tanf(cam.fovy * 0.5f);
+			float halfHoriz = halfVert * cam.aspect;
+			rightPlane = { pos, glm::cross(up, forwardFar + right * halfHoriz) };
+			leftPlane = { pos, glm::cross(forwardFar - right * halfHoriz, up) };
+			topPlane = { pos, glm::cross(right, forwardFar - up * halfVert) };
+			bottomPlane = { pos, glm::cross(forwardFar + up * halfVert, right) };
+		} else { // Orthographic
+			vec2 halfSize = cam.orthoSize * 0.5f;
+			rightPlane = { pos + right * halfSize.x, -right };
+			leftPlane = { pos - right * halfSize.x, right };
+			topPlane = { pos + up * halfSize.y, -up };
+			bottomPlane = { pos - up * halfSize.y, up };
+		}
 	}
 
 	bool visible(const Transform& transform, const Bounds& bounds) const {
