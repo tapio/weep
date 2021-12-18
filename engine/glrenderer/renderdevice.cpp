@@ -130,11 +130,12 @@ RenderDevice::RenderDevice(Resources& resources)
 	glViewport(0, 0, Engine::width(), Engine::height());
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
 	endTransparency();
 
 	loadShaders();
 
-	GLfloat quadVertices[] = {
+	constexpr GLfloat quadVertices[] = {
 		// Positions        // Texture Coords
 		-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
 		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
@@ -155,7 +156,7 @@ RenderDevice::RenderDevice(Resources& resources)
 	glBindVertexArray(0);
 
 	// Particle quad data
-	GLfloat particleQuadVertices[] = {
+	constexpr GLfloat particleQuadVertices[] = {
 		// Positions        // Texture Coords
 		-0.5f,  0.5f, 0.0f, 0.0f, 0.0f,
 		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
@@ -903,12 +904,14 @@ void RenderDevice::beginTransparency()
 {
 	glDepthMask(GL_FALSE);
 	glEnable(GL_BLEND);
+	glDisable(GL_CULL_FACE);
 }
 
 void RenderDevice::endTransparency()
 {
 	glDepthMask(GL_TRUE);
 	glDisable(GL_BLEND);
+	glEnable(GL_CULL_FACE);
 }
 
 void RenderDevice::render(Model& model, Transform& transform, BoneAnimation* animation, int reflectionIndex)
@@ -995,7 +998,7 @@ void RenderDevice::renderSkybox()
 	if (m_skyboxMat.shaderId[TECH_COLOR] == -1)
 		return;
 	if (!m_skyboxCube.vao) {
-		GLfloat skyboxVertices[] = {
+		constexpr GLfloat skyboxVertices[] = {
 			-1.0f, 1.0f, -1.0f,
 			-1.0f, -1.0f, -1.0f,
 			1.0f, -1.0f, -1.0f,
