@@ -13,6 +13,11 @@
 
 #define DEBUG_REFLECTION 0 // Draws dynamic cubemap to skybox
 
+// // MSAA and gldebug seem to need context/window creation support so probably tricky to make live-changable
+static CVar<int> cvar_shadowMapSize("r.shadowMapSize", 1024);
+static CVar<int> cvar_shadowCubeSize("r.shadowCubeSize", 1024);
+static CVar<int> cvar_reflectionCubeSize("r.reflectionCubeSize", 512);
+
 static GLenum s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
 
 static void debugCallback(GLenum /*source*/, GLenum type, GLuint id, GLenum severity, GLsizei /*length*/, const GLchar* msg, const void* /*data*/)
@@ -71,6 +76,10 @@ RenderDevice::RenderDevice(Resources& resources)
 	logInfo("OpenGL Vendor:   %s", glGetString(GL_VENDOR));
 	logInfo("OpenGL Version:  %s", glGetString(GL_VERSION));
 	logInfo("GLSL Version:    %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+	cvar_shadowMapSize.value = Engine::settings["renderer"]["shadowMapSize"].number_value();
+	cvar_shadowCubeSize.value = Engine::settings["renderer"]["shadowCubeSize"].number_value();
+	cvar_reflectionCubeSize.value = Engine::settings["renderer"]["reflectionCubeSize"].number_value();
 
 	if (Engine::settings["renderer"]["gldebug"].bool_value()) {
 		s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_NOTIFICATION;
@@ -245,21 +254,21 @@ void RenderDevice::resizeRenderTargets()
 		m_pingPongFbo[i].create();
 	}
 	for (uint i = 0; i < MAX_SHADOW_MAPS; ++i) {
-		m_shadowFbo[i].width = Engine::settings["renderer"]["shadowMapSize"].number_value();
+		m_shadowFbo[i].width = cvar_shadowMapSize();
 		m_shadowFbo[i].height = m_shadowFbo[i].width;
 		m_shadowFbo[i].depthAttachment = 0;
 		m_shadowFbo[i].cube = false;
 		m_shadowFbo[i].create();
 	}
 	for (uint i = MAX_SHADOW_MAPS; i < MAX_SHADOWS; ++i) {
-		m_shadowFbo[i].width = Engine::settings["renderer"]["shadowCubeSize"].number_value();
+		m_shadowFbo[i].width = cvar_shadowCubeSize();
 		m_shadowFbo[i].height = m_shadowFbo[i].width;
 		m_shadowFbo[i].depthAttachment = 0;
 		m_shadowFbo[i].cube = true;
 		m_shadowFbo[i].create();
 	}
 	for (uint i = 0; i < countof(m_reflectionFbo); ++i) {
-		m_reflectionFbo[i].width = Engine::settings["renderer"]["reflectionCubeSize"].number_value();
+		m_reflectionFbo[i].width = cvar_reflectionCubeSize();
 		m_reflectionFbo[i].height = m_reflectionFbo[i].width;
 		m_reflectionFbo[i].numTextures = 2;
 		m_reflectionFbo[i].depthAttachment = 1;
@@ -1150,4 +1159,14 @@ void RenderDevice::postRender()
 	renderFullscreenQuad();
 
 	glUseProgram(0);
+
+	// Detect changed buffer sizes
+	// TODO: Do smarter updates with only what's needed
+	if (MAX_SHADOW_MAPS > 0 && m_shadowFbo[0].width != cvar_shadowMapSize()) {
+		resizeRenderTargets();
+	} else if (MAX_SHADOW_CUBES > 0 && m_shadowFbo[MAX_SHADOW_MAPS].width != cvar_shadowCubeSize()) {
+		resizeRenderTargets();
+	} else if (MAX_REFLECTIONS > 0 && m_reflectionFbo[0].width != cvar_reflectionCubeSize()) {
+		resizeRenderTargets();
+	}
 }
