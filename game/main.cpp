@@ -142,16 +142,16 @@ int main(int argc, char* argv[])
 					} //else running = false;
 				}
 
-				if ((keysym.mod == KMOD_LALT || keysym.mod == KMOD_RALT) && keysym.sym == SDLK_RETURN) {
+				if (keysym.sym == SDLK_RETURN && (keysym.mod & (KMOD_LALT | KMOD_RALT))) {
 					game.engine.fullscreen(!game.engine.fullscreen());
 					renderer.device().resizeRenderTargets();
 					continue;
 				}
-				else if (keysym.mod == KMOD_LCTRL && keysym.sym == SDLK_r) {
+				else if (keysym.sym == SDLK_r && (keysym.mod & (KMOD_LCTRL|KMOD_LSHIFT)) == (KMOD_LCTRL|KMOD_LSHIFT)) {
 					modules.call($id(devtools), $id(RELOAD_SHADERS), &game);
 					continue;
 				}
-				else if (keysym.mod == (KMOD_LCTRL|KMOD_LSHIFT) && keysym.sym == SDLK_r) {
+				else if (keysym.sym == SDLK_r && (keysym.mod & KMOD_LCTRL)) {
 					game.reload = true;
 					continue;
 				}
