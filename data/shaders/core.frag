@@ -187,6 +187,36 @@ float shadow_mapping_cube(in int lightIndex)
 }
 #endif // USE_SHADOW_MAP
 
+#ifdef USE_PBR
+vec3 fresnelSchlick(float cosTheta, vec3 F0)
+{
+	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+float distributionGGX(float NdotH, float roughness)
+{
+	float alpha = roughness * roughness;
+	float alphaSqr = alpha * alpha;
+	float denom = NdotH * NdotH * (alphaSqr - 1.0) + 1.0;
+	return alphaSqr / (PI * denom * denom);
+}
+
+float geometrySchlickGGX(float NdotV, float roughness)
+{
+	float r = (roughness + 1.0);
+	float k = (r * r) / 8.0;
+	return NdotV / (NdotV * (1.0 - k) + k);
+}
+
+float geometrySmith(float NdotV, float NdotL, float roughness)
+{
+	float ggx1  = geometrySchlickGGX(NdotL, roughness);
+	float ggx2  = geometrySchlickGGX(NdotV, roughness);
+    return ggx1 * ggx2;
+}
+#endif // USE_PBR
+
+
 void main()
 {
 	// Accumulators
@@ -246,8 +276,11 @@ void main()
 #endif
 
 	float sunAmount = 0.0;
-#if defined(USE_DIFFUSE) || defined(USE_SPECULAR)
-	// Point & spot lights
+#ifdef USE_LIGHTING
+	vec3 albedoColor = material.diffuse * diffuseTex.rgb;
+	vec3 specularColor = material.specular * specularTex.rgb;
+	vec3 F0 = mix(vec3(0.04), albedoColor, material.metalness); // 0.04 is magic value for all dielectrics
+
 	// TODO: Implement this more sanely
 	CONST int count = min(numLights, MAX_LIGHTS);
 	for (int i = 0; i < count; ++i)
@@ -303,30 +336,51 @@ void main()
 			attenuation *= pow(saturate(1.0 - distance / light.params.x), light.params.y);
 		}
 
-		// Diffuse
-#ifdef USE_DIFFUSE
-		float diff = max(dot(normal, lightDir), 0.0);
-		diffuseComp += visibility * attenuation * diff * material.diffuse * light.color * diffuseTex.rgb;
+		vec3 halfDir = normalize(viewDir + lightDir);
+	    float NdotV = max(dot(normal, viewDir), 0.0);
+    	float NdotL = max(dot(normal, lightDir), 0.0);
+		float NdotH = max(dot(normal, halfDir), 0.0);
+		float HdotV = max(dot(halfDir, viewDir), 0.0);
 
 		if (light.type == DIRECTIONAL_LIGHT)
-			sunAmount = max(sunAmount, diff);
-#endif
+			sunAmount = max(sunAmount, NdotL);
 
-		// Specular
-#ifdef USE_SPECULAR
-#ifdef USE_PHONG
-		CONST float energy = (2.0 + material.shininess) / (2.0 * PI);
-		vec3 reflectDir = reflect(-lightDir, normal);
-		float spec = energy * pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-#else // Blinn-Phong
-		CONST float energy = (8.0 + material.shininess) / (8.0 * PI);
-		vec3 halfDir = normalize(lightDir + viewDir);
-		float spec = energy * pow(max(dot(normal, halfDir), 0.0), material.shininess);
-#endif
-		specularComp += visibility * attenuation * spec * material.specular * light.color * specularTex.rgb;
+#ifdef USE_PBR
+
+        float NDF = distributionGGX(NdotH, material.roughness);
+        float G = geometrySmith(NdotV, NdotL, material.roughness);
+        vec3 kS = fresnelSchlick(HdotV, F0);
+        vec3 kD = vec3(1.0) - kS;
+        kD *= 1.0 - material.metalness;
+
+		// Cook-Torrance
+        vec3 numerator = NDF * G * kS;
+        float denominator = 4.0 * NdotV * NdotL + 0.0001;
+        vec3 specular = numerator / denominator;
+
+		vec3 lightColor = (NdotL * visibility * attenuation) * light.color;
+
+        diffuseComp += lightColor * (kD * albedoColor / PI);
+		specularComp += lightColor * specular;
+
+#else
+
+		vec3 lightColor = (visibility * attenuation) * light.color;
+		diffuseComp += NdotL * lightColor * albedoColor;
+
+		#if USE_BLINN_PHONG
+			CONST float energy = (8.0 + material.shininess) / (8.0 * PI);
+			float spec = energy * pow(NdotH, material.shininess);
+			specularComp += spec * specularColor * lightColor;
+		#elif USE_PHONG
+			CONST float energy = (2.0 + material.shininess) / (2.0 * PI);
+			vec3 reflectDir = reflect(-lightDir, normal);
+			float spec = energy * pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+			specularComp += spec * specularColor * lightColor;
+		#endif
 #endif
 	}
-#endif // defined(USE_DIFFUSE) || defined(USE_SPECULAR)
+#endif // USE_LIGHTING
 
 #ifdef USE_ENV_MAP
 	vec3 worldNormal = normalize((vec4(normal, 0.0) * viewMatrix).xyz);

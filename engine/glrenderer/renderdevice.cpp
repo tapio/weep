@@ -46,8 +46,8 @@ static const string floatPrecisionString = "precision highp float;\n";
 
 enum ShaderFeature {
 	USE_FOG = 1 << 0,
-	USE_DIFFUSE = 1 << 1,
-	USE_SPECULAR = 1 << 2,
+	USE_LIGHTING = 1 << 1,
+	USE_BLINN_PHONG = 1 << 2,
 	USE_DIFFUSE_MAP = 1 << 3,
 	USE_SPECULAR_MAP = 1 << 4,
 	USE_NORMAL_MAP = 1 << 5,
@@ -66,7 +66,8 @@ enum ShaderFeature {
 	USE_CUBE_RENDER = 1 << 18,
 	USE_TANGENT = 1 << 19,
 	USE_VERTEX_COLOR = 1 << 20,
-	NUM_SHADER_FEATURES = 21
+	USE_PBR = 1 << 21,
+	NUM_SHADER_FEATURES = 22
 };
 
 RenderDevice::RenderDevice(Resources& resources)
@@ -379,8 +380,8 @@ int RenderDevice::generateShader(uint tags)
 
 #define HANDLE_FEATURE(x) if (tags & x) defineText += "#define " #x " 1\n";
 	HANDLE_FEATURE(USE_FOG)
-	HANDLE_FEATURE(USE_DIFFUSE)
-	HANDLE_FEATURE(USE_SPECULAR)
+	HANDLE_FEATURE(USE_LIGHTING)
+	HANDLE_FEATURE(USE_BLINN_PHONG)
 	HANDLE_FEATURE(USE_DIFFUSE_MAP)
 	HANDLE_FEATURE(USE_SPECULAR_MAP)
 	HANDLE_FEATURE(USE_NORMAL_MAP)
@@ -399,6 +400,7 @@ int RenderDevice::generateShader(uint tags)
 	HANDLE_FEATURE(USE_CUBE_RENDER)
 	HANDLE_FEATURE(USE_TANGENT)
 	HANDLE_FEATURE(USE_VERTEX_COLOR)
+	HANDLE_FEATURE(USE_PBR)
 #undef HANDLE_FEATURE
 
 	defineText += m_resources.getText("shaders/uniforms.glsl", Resources::USE_CACHE);
@@ -589,97 +591,104 @@ void RenderDevice::bindParticleBuffers(Particles& particles)
 	}
 }
 
-bool RenderDevice::uploadMaterial(Material& material)
+bool RenderDevice::uploadMaterial(Material& mat)
 {
-	uint tag = USE_FOG | USE_DIFFUSE;
-	if (material.shininess > 0.f)
-		tag |= USE_SPECULAR;
-	if (material.flags & Material::TESSELLATE && caps.tessellationShaders)
+	uint tag = USE_FOG;
+	bool autoLightModel = mat.lightingModel == Material::LIGHTING_MODEL_AUTO;
+	if (mat.lightingModel != Material::LIGHTING_MODEL_NONE)
+		tag |= USE_LIGHTING;
+	if (mat.flags & Material::TESSELLATE && caps.tessellationShaders)
 		tag |= USE_TESSELLATION;
-	if (material.flags & Material::RECEIVE_SHADOW)
+	if (mat.flags & Material::RECEIVE_SHADOW)
 		tag |= USE_SHADOW_MAP;
-	if (material.flags & Material::ANIMATED)
+	if (mat.flags & Material::ANIMATED)
 		tag |= USE_ANIMATION;
-	if (material.alphaTest > 0.f)
+	if (mat.alphaTest > 0.f)
 		tag |= USE_ALPHA_TEST;
-	if (material.blendFunc != Material::BLEND_NONE)
+	if (mat.blendFunc != Material::BLEND_NONE)
 		tag |= USE_ALPHA_BLEND;
-	if (material.map[Material::DIFFUSE_MAP])
-		tag |= USE_DIFFUSE_MAP | USE_DIFFUSE;
-	if (material.map[Material::NORMAL_MAP])
+	if (mat.map[Material::DIFFUSE_MAP])
+		tag |= USE_DIFFUSE_MAP | USE_LIGHTING;
+	if (mat.map[Material::NORMAL_MAP])
 		tag |= USE_NORMAL_MAP;
-	if (material.map[Material::SPECULAR_MAP])
-		tag |= USE_SPECULAR_MAP | USE_SPECULAR;
-	if (material.map[Material::HEIGHT_MAP] && material.parallax > 0.f)
+	if (mat.map[Material::SPECULAR_MAP])
+		tag |= USE_SPECULAR_MAP | USE_LIGHTING;
+	if (mat.map[Material::HEIGHT_MAP] && mat.parallax > 0.f)
 		tag |= USE_PARALLAX_MAP;
-	if (material.map[Material::EMISSION_MAP])
+	if (mat.map[Material::EMISSION_MAP])
 		tag |= USE_EMISSION_MAP;
-	if (material.map[Material::AO_MAP])
+	if (mat.map[Material::AO_MAP])
 		tag |= USE_AO_MAP;
-	if (material.map[Material::REFLECTION_MAP])
+	if (mat.map[Material::REFLECTION_MAP])
 		tag |= USE_REFLECTION_MAP;
-	if (material.reflectivity > 0.f)
+	if (mat.reflectivity > 0.f)
 		tag |= USE_ENV_MAP;
+	if (mat.lightingModel == Material::LIGHTING_MODEL_BLINN_PHONG || (autoLightModel && mat.shininess > 0.f))
+		tag |= USE_BLINN_PHONG;
+	// Check for PBR last as it is the default/"fallback" for auto lighting mode
+	bool lightingModeSelected = (tag & USE_BLINN_PHONG);
+	if (mat.lightingModel == Material::LIGHTING_MODEL_PBR || (autoLightModel && !lightingModeSelected))
+		tag |= USE_PBR;
 
-	if (!material.shaderName.empty()) {
-		auto it = m_shaderNames.find(id::hash(material.shaderName));
+	if (!mat.shaderName.empty()) {
+		auto it = m_shaderNames.find(id::hash(mat.shaderName));
 		if (it == m_shaderNames.end()) {
-			logError("Failed to find shader \"%s\"", material.shaderName.c_str());
+			logError("Failed to find shader \"%s\"", mat.shaderName.c_str());
 			it = m_shaderNames.find($id(missing));
 			if (it == m_shaderNames.end())
 				return false;
 		}
-		material.shaderId[TECH_COLOR] = it->second;
-		ASSERT(material.shaderId[TECH_COLOR]);
+		mat.shaderId[TECH_COLOR] = it->second;
+		ASSERT(mat.shaderId[TECH_COLOR]);
 	} else {
 		// Auto-generate shader
-		material.shaderId[TECH_COLOR] = generateShader(tag);
-		ASSERT(material.shaderId[TECH_COLOR] >= 0 && "Color shader generating failed");
+		mat.shaderId[TECH_COLOR] = generateShader(tag);
+		ASSERT(mat.shaderId[TECH_COLOR] >= 0 && "Color shader generating failed");
 	}
 	// Other techs are always auto generated
 	{
 		// Simpler reflection shader
-		if (caps.geometryShaders && (material.flags & Material::DRAW_REFLECTION)) {
+		if (caps.geometryShaders && (mat.flags & Material::DRAW_REFLECTION)) {
 			tag &= ~(USE_SHADOW_MAP | USE_AO_MAP | USE_REFLECTION_MAP | USE_PARALLAX_MAP | USE_ENV_MAP | USE_TESSELLATION);
 			//tag &= ~(USE_SHADOW_MAP | USE_AO_MAP | USE_PARALLAX_MAP | USE_TESSELLATION);
-			material.shaderId[TECH_REFLECTION] = generateShader(tag | USE_CUBE_RENDER);
-			ASSERT(material.shaderId[TECH_REFLECTION] >= 0 && "Reflection shader generating failed");
+			mat.shaderId[TECH_REFLECTION] = generateShader(tag | USE_CUBE_RENDER);
+			ASSERT(mat.shaderId[TECH_REFLECTION] >= 0 && "Reflection shader generating failed");
 		}
 
 		// Depth
 		tag = USE_DEPTH;
-		if (material.flags & Material::ANIMATED)
+		if (mat.flags & Material::ANIMATED)
 			tag |= USE_ANIMATION;
-		if (material.alphaTest > 0.f)
+		if (mat.alphaTest > 0.f)
 			tag |= USE_ALPHA_TEST | USE_DIFFUSE_MAP;
-		material.shaderId[TECH_DEPTH] = generateShader(tag);
-		ASSERT(material.shaderId[TECH_DEPTH] >= 0 && "Depth shader generating failed");
+		mat.shaderId[TECH_DEPTH] = generateShader(tag);
+		ASSERT(mat.shaderId[TECH_DEPTH] >= 0 && "Depth shader generating failed");
 		if (caps.geometryShaders) {
-			material.shaderId[TECH_DEPTH_CUBE] = generateShader(tag | USE_DEPTH_CUBE);
-			ASSERT(material.shaderId[TECH_DEPTH_CUBE] >= 0 && "Depth cube shader generating failed");
+			mat.shaderId[TECH_DEPTH_CUBE] = generateShader(tag | USE_DEPTH_CUBE);
+			ASSERT(mat.shaderId[TECH_DEPTH_CUBE] >= 0 && "Depth cube shader generating failed");
 		}
 	}
 
 	bool dirty = false;
-	for (uint i = 0; i < countof(material.map); ++i) {
-		bool goodTex = material.tex[i] && material.tex[i] != m_placeholderTex.id;
-		if (goodTex || !material.map[i])
+	for (uint i = 0; i < countof(mat.map); ++i) {
+		bool goodTex = mat.tex[i] && mat.tex[i] != m_placeholderTex.id;
+		if (goodTex || !mat.map[i])
 			continue;
-		if (!goodTex && material.map[i] && material.map[i]->data.empty()) {
-			material.tex[i] = m_placeholderTex.id;
+		if (!goodTex && mat.map[i] && mat.map[i]->data.empty()) {
+			mat.tex[i] = m_placeholderTex.id;
 			dirty = true;
 			continue;
 		}
-		Texture& tex = m_textures[material.map[i]];
+		Texture& tex = m_textures[mat.map[i]];
 		if (!tex.valid()) {
 			tex.anisotropy = caps.maxAnisotropy;
 			tex.create();
-			tex.upload(*material.map[i]);
+			tex.upload(*mat.map[i]);
 		}
-		material.tex[i] = tex.id;
+		mat.tex[i] = tex.id;
 	}
 	if (!dirty)
-		material.flags &= ~Material::DIRTY_MAPS;
+		mat.flags &= ~Material::DIRTY_MAPS;
 	return true;
 }
 

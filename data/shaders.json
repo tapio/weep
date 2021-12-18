@@ -96,8 +96,8 @@
 	"color_lit": {
 		"defines": [
 			"USE_FOG",
-			"USE_DIFFUSE",
-			"USE_SPECULAR",
+			"USE_LIGHTING",
+			"USE_BLINN_PHONG",
 			"USE_SHADOW_MAP"
 		],
 		"shaders" : {
@@ -107,7 +107,7 @@
 	},
 	"aodebug": {
 		"defines": [
-			"USE_DIFFUSE",
+			"USE_LIGHTING",
 			"USE_DIFFUSE_MAP",
 			"USE_AO_MAP"
 		],
@@ -128,8 +128,8 @@
 	"diffusemap": {
 		"defines": [
 			"USE_FOG",
-			"USE_DIFFUSE",
-			"USE_SPECULAR",
+			"USE_LIGHTING",
+			"USE_BLINN_PHONG",
 			"USE_DIFFUSE_MAP",
 			"USE_SHADOW_MAP"
 		],
@@ -141,8 +141,8 @@
 	"specularmap": {
 		"defines": [
 			"USE_FOG",
-			"USE_DIFFUSE",
-			"USE_SPECULAR",
+			"USE_LIGHTING",
+			"USE_BLINN_PHONG",
 			"USE_DIFFUSE_MAP",
 			"USE_SPECULAR_MAP",
 			"USE_SHADOW_MAP"
@@ -157,8 +157,8 @@
 		"defines": [
 			"USE_FOG",
 			"USE_TESSELLATION",
-			"USE_DIFFUSE",
-			"USE_SPECULAR",
+			"USE_LIGHTING",
+			"USE_BLINN_PHONG",
 			"USE_DIFFUSE_MAP",
 			"USE_HEIGHT_MAP",
 			"USE_SHADOW_MAP"
@@ -192,7 +192,7 @@
 		"version": "430",
 		"defines": [
 			"USE_VERTEX_COLOR",
-			"USE_DIFFUSE",
+			"USE_LIGHTING",
 			"USE_DIFFUSE_MAP",
 			"USE_EMISSION_MAP",
 			"USE_ALPHA_BLEND",

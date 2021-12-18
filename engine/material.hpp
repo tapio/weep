@@ -18,9 +18,9 @@ struct Material
 	vec3 diffuse = vec3(1, 1, 1);
 	vec3 specular = vec3(1, 1, 1);
 	vec3 emissive = vec3(0, 0, 0);
-	float metalness = 0.0f;
+	float metalness = 0.f;
 	float roughness = 0.5f;
-	float shininess = 32.0f;
+	float shininess = 0.f; // Blinn-Phong lighting model
 	float reflectivity = 0.f;
 	float parallax = 0.f;
 	float alphaTest = 0.f;
@@ -34,6 +34,14 @@ struct Material
 		BLEND_ADD,
 		BLEND_SUBTRACT
 	} blendFunc = BLEND_NONE;
+
+	enum LightingModel {
+		LIGHTING_MODEL_NONE,
+		LIGHTING_MODEL_AUTO, // Select based on other parameters
+		//LIGHTING_MODEL_PHONG,
+		LIGHTING_MODEL_BLINN_PHONG,
+		LIGHTING_MODEL_PBR
+	} lightingModel = LIGHTING_MODEL_AUTO;
 
 	enum MapTypes {
 		DIFFUSE_MAP,
