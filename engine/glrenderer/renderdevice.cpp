@@ -14,8 +14,8 @@
 #define DEBUG_REFLECTION 0 // Draws dynamic cubemap to skybox
 
 // // MSAA and gldebug seem to need context/window creation support so probably tricky to make live-changable
-static CVar<int> cvar_shadowMapSize("r.shadowMapSize", 1024);
-static CVar<int> cvar_shadowCubeSize("r.shadowCubeSize", 1024);
+static CVar<int> cvar_shadowMapSize("r.shadowMapSize", 2048);
+static CVar<int> cvar_shadowCubeSize("r.shadowCubeSize", 512);
 static CVar<int> cvar_reflectionCubeSize("r.reflectionCubeSize", 512);
 
 static GLenum s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
