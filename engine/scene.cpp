@@ -361,8 +361,10 @@ void SceneLoader::load_internal(const string& path, Resources& resources)
 	string pathContext = dirname(path);
 	std::string err;
 	Json jsonScene = Json::parse(resources.getText(path, Resources::NO_CACHE), err);
-	if (!err.empty())
-		panic("Failed to read scene %s: %s", path.c_str(), err.c_str());
+	if (!err.empty()) {
+		logError("Failed to read scene %s: %s", path.c_str(), err.c_str());
+		return;
+	}
 
 	if (jsonScene.is_object()) {
 		// Handle includes

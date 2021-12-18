@@ -61,7 +61,7 @@ void init(Game& game)
 	game.scene.load(game.scenePath, game.resources);
 	Entity cameraEnt = game.entities.get_entity_by_tag("camera");
 	ASSERT(cameraEnt.is_alive());
-	Transform& camTrans = cameraEnt.get<Transform>();
+	Transform& camTrans = cameraEnt.has<Transform>() ? cameraEnt.get<Transform>() : cameraEnt.add<Transform>();
 	Controller& controller = cameraEnt.add<Controller>(camTrans.position, camTrans.rotation);
 	if (cameraEnt.has<RigidBody>()) {
 		controller.body = cameraEnt.get<RigidBody>().body;
