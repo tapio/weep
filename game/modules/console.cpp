@@ -53,8 +53,8 @@ static int textEditCallback(ImGuiInputTextCallbackData* data)
 			bool allMatch = true;
 			for (int i = 0; i < candidates.size() && allMatch; i++) {
 				if (i == 0)
-					c = toupper(candidates[i][matchLen]);
-				else if (c == 0 || c != toupper(candidates[i][matchLen]))
+					c = tolower(candidates[i][matchLen]);
+				else if (c == 0 || c != tolower(candidates[i][matchLen]))
 					allMatch = false;
 			}
 			if (!allMatch)
@@ -114,12 +114,12 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 
 					if (CVarBase* cvar = CVarBase::getCVar(cmd)) {
 						if (param.empty()) {
-							logInfo("Value of cvar %s: %g", cmd.c_str(), cvar->value);
+							logInfo("Value of cvar %s: %g", cvar->name.c_str(), cvar->value);
 						} else if (cvar->tryParseFrom(param)) {
-							logInfo("Set cvar %s to %g", cmd.c_str(), cvar->value);
+							logInfo("Set cvar %s to %g", cvar->name.c_str(), cvar->value);
 							s_consoleOpen = false;
 						} else {
-							logError("Could not parse parameter %s for cvar %s", param.c_str(), cmd.c_str());
+							logError("Could not parse parameter %s for cvar %s", param.c_str(), cvar->name.c_str());
 						}
 					} else {
 						logError("Unknown cvar: %s", cmd.c_str());

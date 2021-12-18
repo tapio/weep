@@ -125,13 +125,14 @@ void CVarBase::registerCVar(const string& name, CVarBase* cvar)
 {
 	if (name.empty()) { logError("Registering empty cvar!"); return; }
 	if (!cvar) { logError("Registering nullptr cvar!"); return; }
-	if (s_cvars.count(name) > 0) { logWarning("Re-registering cvar %s", name.c_str()); }
-	s_cvars[name] = cvar;
+	string nameLower = utils::tolower(name);
+	if (s_cvars.count(nameLower) > 0) { logWarning("Re-registering cvar %s", name.c_str()); }
+	s_cvars[nameLower] = cvar;
 }
 
 CVarBase* CVarBase::getCVar(const string& name)
 {
-	auto it = s_cvars.find(name);
+	auto it = s_cvars.find(utils::tolower(name));
 	if (it != s_cvars.end())
 		return it->second;
 	return nullptr;
@@ -139,11 +140,11 @@ CVarBase* CVarBase::getCVar(const string& name)
 
 std::vector<string> CVarBase::getMatchingCVarNames(const std::string& prefix)
 {
+	string prefixLower = utils::tolower(prefix);
 	std::vector<string> res;
 	for (auto& it : s_cvars) {
-		const string& candidate = it.first;
-		if (utils::startsWith(candidate, prefix))
-			res.push_back(candidate);
+		if (utils::startsWith(it.first, prefixLower))
+			res.push_back(it.second->name);
 	}
 	return res;
 }

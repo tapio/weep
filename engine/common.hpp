@@ -58,11 +58,12 @@ struct CVarBase {
 	bool tryParseFrom(const std::string& newValue);
 	typedef float ValueType;
 	ValueType value = 0;
+	std::string name;
 	static CVarBase* getCVar(const string& name);
 	static std::vector<string> getMatchingCVarNames(const std::string& prefix);
 protected:
 	static void registerCVar(const string& name, struct CVarBase* cvar);
-	CVarBase(const std::string& name, ValueType defaultValue): value(defaultValue) { registerCVar(name, this); }
+	CVarBase(const std::string& name_, ValueType defaultValue): name(name_), value(defaultValue) { registerCVar(name_, this); }
 };
 template<typename T>
 struct CVar: public CVarBase {
