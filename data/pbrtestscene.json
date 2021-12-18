@@ -1,0 +1,215 @@
+{
+	"include": [ "debugprefabs.json" ],
+	"environment": {
+		"sunColor": [ 0.3, 0.3, 0.3 ],
+		"sunPosition": [ 1, 1, 1 ]
+	},
+	"prefabs": {
+		"matsphere": {
+			"material": {
+				"ambient": [ 0.01, 0.01, 0.01 ]
+			},
+			"geometry": [
+				{ "debug/sphere_hi.obj": 5.0 },
+				{ "debug/sphere.obj": 20.0 },
+				{ "debug/sphere_lo.obj": 1e999 }
+			],
+			"scale": 0.4
+		}
+	},
+	"objects": [
+	{
+		"name": "camera",
+		"geometry": "debug/cube.obj",
+		"body": {
+			"shape": "capsule",
+			"mass": 100,
+			"angularFactor": 0,
+			"noSleep": true,
+			"noGravity": true
+		},
+		"scale": [ 0.4, 1.5, 0.4 ],
+		"position": [0, 0.75, 0]
+	},{
+		"prefab": "plane",
+		"material": { "uvRepeat": 20 },
+		"position": [ 0, -0.5, 0 ],
+		"scale": [ 50, 0.01, 50 ],
+		"body": { "mass": 0, "shape": "box" }
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.00,
+			"roughness": 0.00
+		},
+		"position": [ 0, 0, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.25,
+			"roughness": 0.00
+		},
+		"position": [ 1, 0, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.50,
+			"roughness": 0.00
+		},
+		"position": [ 2, 0, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.75,
+			"roughness": 0.00
+		},
+		"position": [ 3, 0, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 1.00,
+			"roughness": 0.00
+		},
+		"position": [ 4, 0, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.00,
+			"roughness": 0.25
+		},
+		"position": [ 0, 1, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.25,
+			"roughness": 0.25
+		},
+		"position": [ 1, 1, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.50,
+			"roughness": 0.25
+		},
+		"position": [ 2, 1, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.75,
+			"roughness": 0.25
+		},
+		"position": [ 3, 1, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 1.00,
+			"roughness": 0.25
+		},
+		"position": [ 4, 1, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.00,
+			"roughness": 0.50
+		},
+		"position": [ 0, 2, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.25,
+			"roughness": 0.50
+		},
+		"position": [ 1, 2, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.50,
+			"roughness": 0.50
+		},
+		"position": [ 2, 2, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.75,
+			"roughness": 0.50
+		},
+		"position": [ 3, 2, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 1.00,
+			"roughness": 0.50
+		},
+		"position": [ 4, 2, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.00,
+			"roughness": 0.75
+		},
+		"position": [ 0, 3, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.25,
+			"roughness": 0.75
+		},
+		"position": [ 1, 3, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.50,
+			"roughness": 0.75
+		},
+		"position": [ 2, 3, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.75,
+			"roughness": 0.75
+		},
+		"position": [ 3, 3, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 1.00,
+			"roughness": 0.75
+		},
+		"position": [ 4, 3, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.00,
+			"roughness": 1.00
+		},
+		"position": [ 0, 4, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.25,
+			"roughness": 1.00
+		},
+		"position": [ 1, 4, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.50,
+			"roughness": 1.00
+		},
+		"position": [ 2, 4, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 0.75,
+			"roughness": 1.00
+		},
+		"position": [ 3, 4, -2 ]
+	},{
+		"prefab": "matsphere",
+		"material": {
+			"metalness": 1.00,
+			"roughness": 1.00
+		},
+		"position": [ 4, 4, -2 ]
+	}
+]}
