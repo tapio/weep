@@ -110,6 +110,9 @@ RenderDevice::RenderDevice(Resources& resources)
 	if (caps.gles) { // TODO: Should not force disable, but shader extensions / #version require fixing
 		caps.tessellationShaders = false;
 	}
+	int maxVertexTextures = 0, maxFragmentTextures = 0;
+	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &maxVertexTextures);
+	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxFragmentTextures);
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &caps.maxAnisotropy);
 	glGetIntegerv(GL_MAX_COLOR_TEXTURE_SAMPLES, &caps.maxSamples);
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &caps.maxSamplers);
@@ -124,7 +127,8 @@ RenderDevice::RenderDevice(Resources& resources)
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &caps.maxComputeWorkGroupSize.y);
 	glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &caps.maxComputeWorkGroupSize.z);
 	glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, &caps.maxComputeWorkGroupInvocations);
-	logInfo("Max Aniso: %.1f, Max MSAA: %d, Max Samplers: %d, Max Array Texture Layers: %d", caps.maxAnisotropy, caps.maxSamples, caps.maxSamplers, caps.maxArrayTextureLayers);
+	logInfo("Max Aniso: %.1f, Max MSAA: %d, Max Samples: %d, Max Array Texture Layers: %d", caps.maxAnisotropy, caps.maxSamples, caps.maxSamplers, caps.maxArrayTextureLayers);
+	logInfo("Max vertex textures: %d, Max fragment textures: %d", maxVertexTextures, maxFragmentTextures);
 	logInfo("Max UBO: %d, Max SSBO: %d, Max varying vecs: %d", caps.maxUniformBufferBindings, caps.maxShaderStorageBufferBindings, caps.maxVaryingVectors);
 	if (!caps.geometryShaders)
 		logInfo("No geometry shader support.");
@@ -135,6 +139,10 @@ RenderDevice::RenderDevice(Resources& resources)
 	else logInfo("Compute limits: count %d %d %d; size %d %d %d; invocations %d",
 		caps.maxComputeWorkGroupCount.x, caps.maxComputeWorkGroupCount.y, caps.maxComputeWorkGroupCount.z,
 		caps.maxComputeWorkGroupSize.x, caps.maxComputeWorkGroupSize.y, caps.maxComputeWorkGroupSize.z, caps.maxComputeWorkGroupInvocations);
+
+	if (maxFragmentTextures < NUM_TEXTURE_BINDINGS) {
+		logError("Too few texture bindings supported!");
+	}
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glViewport(0, 0, Engine::width(), Engine::height());
@@ -728,7 +736,6 @@ void RenderDevice::useMaterial(Material& mat)
 			if (!tex) continue;
 			glActiveTexture(GL_TEXTURE0 + BINDING_MATERIAL_MAP_START + i);
 			glBindTexture(GL_TEXTURE_2D, tex);
-			//glUniform1i(i, i);
 		}
 
 		m_materialBlock.uniforms.ambient = mat.ambient;

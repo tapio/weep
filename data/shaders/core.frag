@@ -266,6 +266,8 @@ void main()
 
 #ifdef USE_SPECULAR_MAP
 	vec4 specularTex = texture(specularMap, texcoord);
+#elif defined(USE_DIFFUSE_MAP) && defined(USE_PBR)
+	vec4 specularTex = diffuseTex; // Metalness work-flow
 #else
 	vec4 specularTex = vec4(1.0);
 #endif
@@ -275,11 +277,28 @@ void main()
 	emissionComp *= emissionTex.rgb;
 #endif
 
+#ifdef USE_ROUGHNESS_MAP
+	// TODO: Should material.roughness multiply texture?
+	float roughness = texture(roughnessMap, texcoord).r;
+#else
+	float roughness = material.roughness;
+#endif
+
+	//
+	// LIGHTING BEGIN
+	//
 	float sunAmount = 0.0;
 #ifdef USE_LIGHTING
+
+#ifdef USE_METALNESS_MAP
+	float metalness = texture(metalnessMap, texcoord).r;
+#else
+	float metalness = material.metalness;
+#endif
+
 	vec3 albedoColor = material.diffuse * diffuseTex.rgb;
 	vec3 specularColor = material.specular * specularTex.rgb;
-	vec3 F0 = mix(vec3(0.04), albedoColor, material.metalness); // 0.04 is magic value for all dielectrics
+	vec3 F0 = mix(vec3(0.04), specularColor, metalness); // 0.04 is magic value for all dielectrics
 
 	// TODO: Implement this more sanely
 	CONST int count = min(numLights, MAX_LIGHTS);
@@ -347,11 +366,11 @@ void main()
 
 #ifdef USE_PBR
 
-        float NDF = distributionGGX(NdotH, material.roughness);
-        float G = geometrySmith(NdotV, NdotL, material.roughness);
+        float NDF = distributionGGX(NdotH, roughness);
+        float G = geometrySmith(NdotV, NdotL, roughness);
         vec3 kS = fresnelSchlick(HdotV, F0);
         vec3 kD = vec3(1.0) - kS;
-        kD *= 1.0 - material.metalness;
+        kD *= 1.0 - metalness;
 
 		// Cook-Torrance
         vec3 numerator = NDF * G * kS;
@@ -381,6 +400,9 @@ void main()
 #endif
 	}
 #endif // USE_LIGHTING
+	//
+	// LIGHTING END
+	//
 
 #ifdef USE_ENV_MAP
 	vec3 worldNormal = normalize((vec4(normal, 0.0) * viewMatrix).xyz);
@@ -388,6 +410,12 @@ void main()
 	vec3 envRefl = reflect(-worldView, worldNormal);
 	vec4 envTex = texture(envMap, envRefl);
 	float reflStrength = material.reflectivity;
+#ifdef USE_PBR
+ 	// TODO: Just a test
+	reflStrength *= 1.0 - roughness;
+	reflStrength *= metalness;
+	reflStrength *= reflStrength;
+#endif
 #if defined(USE_REFLECTION_MAP)
 	reflStrength *= texture(reflectionMap, texcoord).r;
 #elif defined(USE_SPECULAR_MAP)

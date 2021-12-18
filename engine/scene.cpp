@@ -192,6 +192,10 @@ namespace {
 			material.map[Material::NORMAL_MAP] = resources.getImageAsync(resolvePath(pathContext, def["normalMap"].string_value()));
 		if (!def["heightMap"].is_null())
 			material.map[Material::HEIGHT_MAP] = resources.getImageAsync(resolvePath(pathContext, def["heightMap"].string_value()));
+		if (!def["roughnessMap"].is_null())
+			material.map[Material::ROUGHNESS_MAP] = resources.getImageAsync(resolvePath(pathContext, def["roughnessMap"].string_value()));
+		if (!def["metalnessMap"].is_null())
+			material.map[Material::METALNESS_MAP] = resources.getImageAsync(resolvePath(pathContext, def["metalnessMap"].string_value()));
 		if (!def["aoMap"].is_null())
 			material.map[Material::AO_MAP] = resources.getImageAsync(resolvePath(pathContext, def["aoMap"].string_value()));
 		if (!def["reflectionMap"].is_null())
