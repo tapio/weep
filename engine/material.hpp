@@ -18,6 +18,8 @@ struct Material
 	vec3 diffuse = vec3(1, 1, 1);
 	vec3 specular = vec3(1, 1, 1);
 	vec3 emissive = vec3(0, 0, 0);
+	float metalness = 0.0f;
+	float roughness = 0.5f;
 	float shininess = 32.0f;
 	float reflectivity = 0.f;
 	float parallax = 0.f;

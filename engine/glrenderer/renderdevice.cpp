@@ -725,6 +725,8 @@ void RenderDevice::useMaterial(Material& mat)
 		m_materialBlock.uniforms.ambient = mat.ambient;
 		m_materialBlock.uniforms.diffuse = mat.diffuse;
 		m_materialBlock.uniforms.specular = mat.specular;
+		m_materialBlock.uniforms.metalness = mat.metalness;
+		m_materialBlock.uniforms.roughness = mat.roughness;
 		m_materialBlock.uniforms.shininess = mat.shininess;
 		m_materialBlock.uniforms.reflectivity = mat.reflectivity;
 		m_materialBlock.uniforms.parallax = mat.parallax;

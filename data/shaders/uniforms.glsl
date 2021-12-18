@@ -53,7 +53,7 @@ UBO_PREFIX(UniformMaterialBlock, 3)
 	vec3 specular; float shininess;
 	vec3 emissive; float parallax;
 	vec2 uvOffset; vec2 uvRepeat;
-	vec2 particleSize; vec2 pad2;
+	vec2 particleSize; float metalness; float roughness;
 UBO_SUFFIX(material)
 
 struct UniformLightData {

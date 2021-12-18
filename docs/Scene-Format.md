@@ -88,7 +88,9 @@ Each object (entity) can have the following properties (most are optional):
 	* _"diffuse"_: color
 	* _"specular"_: color
 	* _"emissive"_: color
-	* _"shininess"_: float (default: 32)
+	* _"roughness"_: float, PBR surface roughness, 0 = perfectly smooth, 1 = totally rough
+	* _"metalness"_: float (default: 0), 0 = dielectric, 1 = metallic PBR material
+	* _"shininess"_: float (default: 32), specular exponent in classical phong shading
 	* _"reflectivity"_: float (default: 0), needed to enable reflections
 	* _"parallax"_: float (default: 0), needed to enable parallax mapping
 	* _"uvOffset"_: vec2

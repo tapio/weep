@@ -161,6 +161,8 @@ namespace {
 		setColor(material.diffuse, def["diffuse"]);
 		setColor(material.specular, def["specular"]);
 		setColor(material.emissive, def["emissive"]);
+		setNumber(material.metalness, def["metalness"]);
+		setNumber(material.roughness, def["roughness"]);
 		setNumber(material.shininess, def["shininess"]);
 		setNumber(material.reflectivity, def["reflectivity"]);
 		setNumber(material.parallax, def["parallax"]);
