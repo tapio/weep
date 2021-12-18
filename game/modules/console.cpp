@@ -113,7 +113,9 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 					ss >> cmd >> param;
 
 					if (CVarBase* cvar = CVarBase::getCVar(cmd)) {
-						if (cvar->tryParseFrom(param)) {
+						if (param.empty()) {
+							logInfo("Value of cvar %s: %g", cmd.c_str(), cvar->value);
+						} else if (cvar->tryParseFrom(param)) {
 							logInfo("Set cvar %s to %g", cmd.c_str(), cvar->value);
 							s_consoleOpen = false;
 						} else {
