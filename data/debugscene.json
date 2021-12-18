@@ -146,7 +146,6 @@
 	},{
 		"prefab": "testcube",
 		"material": {
-			"shaderName": "diffusemap",
 			"diffuse": [ 2, 0, 2 ]
 		},
 		"position": [ 6, 0, -7 ],
@@ -154,7 +153,6 @@
 	},{
 		"prefab": "testcube",
 		"material": {
-			"shaderName": "specularmap",
 			"shininess": 48
 		},
 		"position": [ 8, 0, -7 ],

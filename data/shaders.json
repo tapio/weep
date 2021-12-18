@@ -125,33 +125,6 @@
 			"frag": "shaders/core.frag"
 		}
 	},
-	"diffusemap": {
-		"defines": [
-			"USE_FOG",
-			"USE_LIGHTING",
-			"USE_BLINN_PHONG",
-			"USE_DIFFUSE_MAP",
-			"USE_SHADOW_MAP"
-		],
-		"shaders" : {
-			"vert": "shaders/core.vert",
-			"frag": "shaders/core.frag"
-		}
-	},
-	"specularmap": {
-		"defines": [
-			"USE_FOG",
-			"USE_LIGHTING",
-			"USE_BLINN_PHONG",
-			"USE_DIFFUSE_MAP",
-			"USE_SPECULAR_MAP",
-			"USE_SHADOW_MAP"
-		],
-		"shaders" : {
-			"vert": "shaders/core.vert",
-			"frag": "shaders/core.frag"
-		}
-	},
 	"terrain_tess": {
 		"version": "430",
 		"defines": [

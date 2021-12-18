@@ -11,7 +11,7 @@
 			"material": {
 				"reflectionMap": "debug/white.png",
 				"reflectivity": 1.0,
-				"shininess": 0
+				"lightingModel": 0
 			},
 			"geometry": "debug/cube.obj"
 		},
