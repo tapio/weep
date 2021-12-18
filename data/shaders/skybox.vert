@@ -7,7 +7,7 @@ out VertexData {
 
 void main()
 {
-	outData.texcoord = position;
+	outData.texcoord = vec3(-position.x, position.y, position.z);
 #ifdef USE_CUBE_RENDER
 	gl_Position = vec4(position, 1.0);
 #else
