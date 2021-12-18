@@ -28,6 +28,8 @@
 static CVar<bool> cvar_shadows("r.shadows", true);
 static CVar<bool> cvar_cubeShadows("r.cubeShadows", true);
 static CVar<bool> cvar_reflections("r.reflections", true);
+static CVar<float> cvar_sunShadowDistance("r.sunShadowDistance", 25.f);
+static CVar<float> cvar_reflectionDistance("r.reflectionDistance", 50.f);
 #ifndef SHIPPING_BUILD
 static CVar<bool> cvar_freezeCullingFrustum("r.freezeCullingFrustum", false);
 #endif
@@ -209,9 +211,8 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		Light sun;
 		sun.type = Light::DIRECTIONAL_LIGHT;
 		sun.color = m_env.sunColor;
-		sun.position = camPos + normalize(m_env.sunPosition) * 10.f;
-		sun.direction = normalize(camPos - sun.position);
-		sun.shadowDistance = 50.f;
+		sun.direction = -normalize(m_env.sunPosition);
+		sun.shadowDistance = cvar_sunShadowDistance();
 		sun.priority = -10000; // Should always be first
 		lights.emplace_back(sun);
 	}
@@ -311,7 +312,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 				continue;
 			BEGIN_GPU_SAMPLE(ShadowMap)
 			light.shadowIndex = shadowIndex;
-			Camera shadowCam = getShadowCamera(light);
+			Camera shadowCam = getShadowCamera(camera, light);
 			FrustumType shadowFrustum(shadowCam);
 			m_device->setupShadowPass(shadowCam, light);
 			entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
@@ -336,12 +337,12 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 					continue;
 				BEGIN_GPU_SAMPLE(ShadowCube)
 				light.shadowIndex = shadowIndex;
-				Camera shadowCam = getShadowCamera(light);
+				Camera shadowCam = getShadowCamera(camera, light);
 				m_device->setupShadowPass(shadowCam, light);
 				entities.for_each<Model, Transform>([&](Entity e, Model& model, Transform& transform) {
 					if (model.materials.empty() || !model.geometry)
 						return;
-					float maxDist = model.bounds.radius * glm::compMax(transform.scale) + light.distance;
+					float maxDist = model.bounds.radius * glm::compMax(transform.scale) + shadowCam.far;
 					if (glm::distance2(light.position, transform.position) < maxDist * maxDist) {
 						BEGIN_ENTITY_GPU_SAMPLE("Cube shadow", e)
 						m_device->renderShadow(model, transform, e.has<BoneAnimation>() ? &e.get<BoneAnimation>() : nullptr);
@@ -362,7 +363,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	BEGIN_GPU_SAMPLE(ReflectionPass)
 	if (settings.dynamicReflections) {
 		Camera reflCam;
-		reflCam.makePerspective(glm::radians(90.0f), 1.f, 0.1f, 50.f);
+		reflCam.makePerspective(glm::radians(90.0f), 1.f, 0.1f, cvar_reflectionDistance());
 		for (int i = 0; i < reflectionProbes.size(); ++i) { // Already resized to MAX_REFLECTIONS
 			BEGIN_GPU_SAMPLE(ReflectionProbe)
 			vec3 reflCamPos = reflectionProbes[i].pos;
@@ -469,7 +470,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 	stats.times.postprocess = postprocessMs;
 }
 
-Camera RenderSystem::getShadowCamera(const Light& light) const {
+Camera RenderSystem::getShadowCamera(const Camera& mainCamera, const Light& light) const {
 	Camera shadowCam;
 	float near = 0.2f;
 	float far = light.shadowDistance >= 0.f ? light.shadowDistance : light.distance;
@@ -480,11 +481,16 @@ Camera RenderSystem::getShadowCamera(const Light& light) const {
 		shadowCam.makePerspective(glm::radians(light.spotAngles.y * 2), 1.f, near, far);
 		shadowCam.view = glm::lookAt(light.position, light.position + light.direction, up_axis);
 	} else if (light.type == Light::DIRECTIONAL_LIGHT) {
-		float size = 10.f; // TODO: Configure
-		near = 5.f;
-		far = light.shadowDistance > 0.f ? light.shadowDistance : 50.f;
-		shadowCam.makeOrtho(-size, size, -size, size, near, far);
-		shadowCam.view = glm::lookAt(light.position, light.position + light.direction, up_axis);
+		constexpr float shadowSizeFudge = 1.0f; // Make shadow map cover a bit larger area for robustness
+		constexpr float shadowDepthFudge = 2.0f; // Adjust camera depth range (1.0 means depth range equals shadow distance)
+		constexpr float depthPortionAbove = 0.75f; // Dedicate more depth range to things between target and light
+		const float shadowDistance = light.shadowDistance > 0.f ? light.shadowDistance : mainCamera.far;
+		const float center = shadowDistance * 0.5f;
+		const float size = center * shadowSizeFudge;
+		shadowCam.makeOrtho(-size, size, -size, size, near, shadowDistance * shadowDepthFudge);
+		vec3 mainCamFrustumCenter = mainCamera.position() + mainCamera.forward() * center;
+		vec3 shadowCamPos = mainCamFrustumCenter - light.direction * (shadowCam.far * depthPortionAbove);
+		shadowCam.view = glm::lookAt(shadowCamPos, mainCamFrustumCenter, up_axis);
 	} else ASSERT(!"Unsupported light type for shadow camera");
 	return shadowCam;
 }

@@ -174,8 +174,8 @@ private:
 	friend class RenderSystem;
 	friend class RenderDevice;
 
-	vec3 position = vec3();
-	vec3 direction = vec3();
+	vec3 position = vec3(0);
+	vec3 direction = forward_axis;
 	int shadowIndex = -1;
 };
 

@@ -813,7 +813,7 @@ void RenderDevice::setupShadowPass(const Camera& camera, const Light& light)
 	m_commonBlock.uniforms.far = camera.far;
 	m_commonBlock.uniforms.projectionMatrix = m_shadowProj[index];
 	m_commonBlock.uniforms.viewMatrix = m_shadowView[index];
-	m_commonBlock.uniforms.cameraPosition = light.position;
+	m_commonBlock.uniforms.cameraPosition = camera.position();
 	m_commonBlock.upload();
 }
 

@@ -18,7 +18,7 @@ public:
 	void reset(Entities& entities);
 	void destroy(Entity entity) override;
 
-	Camera getShadowCamera(const Light& light) const;
+	Camera getShadowCamera(const Camera& mainCamera, const Light& light) const;
 
 	Environment& env() { return m_env; }
 
