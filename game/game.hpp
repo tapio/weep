@@ -6,8 +6,8 @@
 #include "scene.hpp"
 
 struct Game {
+	Entities& entities;
 	Engine engine = {};
-	Entities entities = {};
 	Resources resources = {};
 	SceneLoader scene = {};
 	string scenePath = "testscene.json";

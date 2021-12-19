@@ -105,18 +105,17 @@ namespace ecs
 	{
 	public:
 		using Id = uint32_t;
-		using Version = uint8_t;
+		using Version = uint16_t;
+		using WorldIndex = uint8_t;
+		static_assert(sizeof(Id) + sizeof(Version) + sizeof(WorldIndex) <= sizeof(uint64_t), "Too large entity data");
 
-		/*
-		Id = index + version (kinda).
-		*/
-		Entity(Id index = 0, Version version = 0) { id = (version << INDEX_BITS) | index; }
-		Entity(Id id_, Entities* entities_) { id = id_; entities = entities_; }
+		Entity(Id index = 0, Version version = 0, WorldIndex world = 0): index(index), version(version), world(world) { }
+		Entity(uint64_t id): id(id) {}
 		Entity(const Entity&) = default;
 		Entity& operator=(const Entity&) = default;
 
 		/*
-		Comparison operators.
+		Comparison operators. TODO: Check World?
 		*/
 		bool operator==(const Entity &e) const { return get_index() == e.get_index(); }
 		bool operator!=(const Entity &e) const { return get_index() != e.get_index(); }
@@ -125,17 +124,17 @@ namespace ecs
 		/*
 		Returns the index part of the id.
 		*/
-		Id get_index() const { return id & INDEX_MASK; }
+		constexpr Id get_index() const { return index; }
 
 		/*
 		Returns the version part of the id.
 		*/
-		Version get_version() const { return (id >> INDEX_BITS) & VERSION_MASK; }
+		constexpr Version get_version() const { return version; }
 
 		/*
 		Returns the id.
 		*/
-		Id get_id() const { return id; }
+		constexpr Id get_id() const { return id; }
 
 		/*
 		Kills the entity (destroyed when the world updates).
@@ -171,18 +170,19 @@ namespace ecs
 		*/
 		std::string to_string() const;
 
+		Entities& entities() const;
+
 	private:
 
-		// Note: we only use 30 bits, as we probably needs two bits for lua lightuserdata in the future?
-		static const uint32_t INDEX_BITS = 22;
-		static const uint32_t INDEX_MASK = (1 << INDEX_BITS) - 1;
-		static const uint32_t VERSION_BITS = 8;
-		static const uint32_t VERSION_MASK = (1 << VERSION_BITS) - 1;
+		union {
+			uint64_t id;
+			struct {
+				Id index;
+				Version version;
+				WorldIndex world;
+			};
+		};
 
-		// Id = index + version (kinda).
-		Id id;
-
-		Entities *entities = nullptr;
 		friend class Entities;
 	};
 
@@ -239,10 +239,7 @@ namespace ecs
 	class Entities
 	{
 	public:
-		/*
-		Creates all the managers.
-		*/
-		Entities();
+		Entities(Entity::WorldIndex worldIndex): world(worldIndex) {}
 
 		/*
 		Updates the systems so that created/deleted entities are removed from the systems' vectors of entities.
@@ -273,6 +270,8 @@ namespace ecs
 
 		bool is_entity_alive(Entity e) const;
 
+		Entity::WorldIndex get_world_index() const { return world; }
+
 		/*
 		Component management.
 		*/
@@ -290,11 +289,9 @@ namespace ecs
 			if (component_id >= component_pools.size()) return;
 			auto component_pool = std::static_pointer_cast<Pool<T>>(component_pools[component_id]);
 			if (!component_pool) return;
-			Entity e;
-			e.entities = this;
 			for (Entity::Id i = 0; i < component_masks.size(); ++i) {
 				if (component_masks[i].test(component_id)) {
-					e.id = (versions[i] << Entity::INDEX_BITS) | i;
+					Entity e(i, versions[i], world);
 					func(e, component_pool->get(i));
 				}
 			}
@@ -311,11 +308,9 @@ namespace ecs
 			auto component_pool2 = std::static_pointer_cast<Pool<T2>>(component_pools[component_id2]);
 			if (!component_pool1 || !component_pool2)
 				return;
-			Entity e;
-			e.entities = this;
 			for (Entity::Id i = 0; i < component_masks.size(); ++i) {
 				if (component_masks[i].test(component_id1) && component_masks[i].test(component_id2)) {
-					e.id = (versions[i] << Entity::INDEX_BITS) | i;
+					Entity e(i, versions[i], world);
 					func(e, component_pool1->get(i), component_pool2->get(i));
 				}
 			}
@@ -335,14 +330,12 @@ namespace ecs
 			auto component_pool3 = std::static_pointer_cast<Pool<T3>>(component_pools[component_id3]);
 			if (!component_pool1 || !component_pool2 || !component_pool3)
 				return;
-			Entity e;
-			e.entities = this;
 			for (Entity::Id i = 0; i < component_masks.size(); ++i) {
 				if (component_masks[i].test(component_id1) &&
 					component_masks[i].test(component_id2) &&
 					component_masks[i].test(component_id3))
 				{
-					e.id = (versions[i] << Entity::INDEX_BITS) | i;
+					Entity e(i, versions[i], world);
 					func(e, component_pool1->get(i), component_pool2->get(i), component_pool3->get(i));
 				}
 			}
@@ -372,6 +365,8 @@ namespace ecs
 
 		template <typename T>
 		std::shared_ptr<Pool<T>> accommodate_component();
+
+		Entity::WorldIndex world = 0;
 
 		// minimum amount of free indices before we reuse one
 		static const std::uint32_t MINIMUM_FREE_IDS = 256;
@@ -528,34 +523,47 @@ namespace ecs
 		return std::static_pointer_cast<Pool<T>>(component_pools[component_id]);
 	}
 
+	struct ECS
+	{
+		static Entities& get(Entity::WorldIndex world) { return worlds[world]; }
+
+		static constexpr uint32_t MAX_WORLDS = 4;
+		static Entities worlds[MAX_WORLDS];
+	};
+
+	inline Entities& Entity::entities() const
+	{
+		return ECS::get(world);
+	}
+
 	template <typename T>
 	T& Entity::add(T component)
 	{
-		return entities->add_component<T>(*this, component);
+		return entities().add_component<T>(*this, component);
 	}
 
 	template <typename T, typename ... Args>
 	T& Entity::add(Args && ... args)
 	{
-		return entities->add_component<T>(*this, std::forward<Args>(args)...);
+		return entities().add_component<T>(*this, std::forward<Args>(args)...);
 	}
 
 	template <typename T>
 	void Entity::remove()
 	{
-		entities->remove_component<T>(*this);
+		entities().remove_component<T>(*this);
 	}
 
 	template <typename T>
 	bool Entity::has() const
 	{
-		return entities->has_component<T>(*this);
+		return entities().has_component<T>(*this);
 	}
 
 	template <typename T>
 	T& Entity::get() const
 	{
-		return entities->get_component<T>(*this);
+		return entities().get_component<T>(*this);
 	}
 
 }

@@ -4,28 +4,30 @@
 namespace ecs
 {
 
+	Entities ECS::worlds[MAX_WORLDS] = {{0}, {1}, {2}, {3}};
+
 	BaseComponent::Id BaseComponent::id_counter = 0;
 
 	// Entity
 
 	void Entity::kill()
 	{
-		entities->kill(*this);
+		entities().kill(*this);
 	}
 
 	bool Entity::is_alive() const
 	{
-		return entities && entities->is_entity_alive(*this);
+		return entities().is_entity_alive(*this);
 	}
 
 	void Entity::tag(const std::string& tag_name)
 	{
-		entities->tag_entity(*this, tag_name);
+		entities().tag_entity(*this, tag_name);
 	}
 
 	void Entity::group(const std::string& group_name)
 	{
-		entities->group_entity(*this, group_name);
+		entities().group_entity(*this, group_name);
 	}
 
 	std::string Entity::to_string() const
@@ -49,10 +51,6 @@ namespace ecs
 	}
 
 	// Entities
-
-	Entities::Entities()
-	{
-	}
 
 	void Entities::update()
 	{
@@ -105,19 +103,13 @@ namespace ecs
 		else {
 			versions.push_back(0);
 			index = (unsigned int)versions.size() - 1;
-			ECS_ASSERT(index < (1 << Entity::INDEX_BITS));
-
 			if (index >= component_masks.size()) {
 				// TODO: grow by doubling?
 				component_masks.resize(index + 1);
 			}
 		}
 
-		ECS_ASSERT(index < versions.size());
-		Entity e(index, versions[index]);
-		e.entities = this;
-
-		return e;
+		return Entity(index, versions[index], world);
 	}
 
 	void Entities::destroy_entity(Entity e)

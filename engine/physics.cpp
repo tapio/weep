@@ -85,8 +85,8 @@ void PhysicsSystem::step(Entities& entities, float dt, bool fixedStep)
 		const btCollisionObject* objB = contactManifold->getBody1();
 		int numContacts = contactManifold->getNumContacts();
 		if (numContacts) {
-			Entity entityA(objA->getUserIndex(), &entities);
-			Entity entityB(objB->getUserIndex(), &entities);
+			Entity entityA((uint64_t)objA->getUserPointer());
+			Entity entityB((uint64_t)objB->getUserPointer());
 			// TODO: Figure out a way to filter what contacts to tracks
 			if (entityA.has<ContactTracker>() && entityB.has<ContactTracker>()) {
 				entityA.get<ContactTracker>().hadContact = true;
@@ -116,7 +116,7 @@ Entity PhysicsSystem::rayCast(Entities& entities, vec3 from_, vec3 to_)
 	btCollisionWorld::ClosestRayResultCallback res(from, to);
 	dynamicsWorld->rayTest(from, to, res);
 	if (res.hasHit()) {
-		return Entity(res.m_collisionObject->getUserIndex(), &entities);
+		return Entity((uint64_t)res.m_collisionObject->getUserPointer());
 	}
 	return {};
 }

@@ -36,7 +36,7 @@ static Transform s_camTransBackup;
 
 void init(Game& game)
 {
-	game.entities = Entities();
+	game.entities = Entities(game.entities.get_world_index());
 	game.entities.add_system<RenderSystem>(game.resources);
 	game.entities.add_system<AnimationSystem>();
 	game.entities.add_system<PhysicsSystem>();
@@ -83,7 +83,7 @@ void init(Game& game)
 int main(int argc, char* argv[])
 {
 	Args args(argc, argv);
-	Game game;
+	Game game { ECS::get(0) };
 	Resources& resources = game.resources;
 	resources.addPath(args.arg<string>(' ', "data", "../data/"));
 	game.engine.init(resources.findPath(args.arg<string>('c', "config", "settings.json")));
