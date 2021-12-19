@@ -1,11 +1,13 @@
 #pragma once
 #include "common.hpp"
+#define ECS_ASSERT ASSERT
+#include <ecs/ecs.hpp>
 
-class TriggerSystem : public System
+class TriggerSystem : public ecs::System
 {
 public:
 	TriggerSystem();
 	~TriggerSystem();
 
-	void update(Entities& entities, float dt);
+	void update(ecs::Entities& entities, float dt);
 };

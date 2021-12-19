@@ -1,5 +1,8 @@
 #pragma once
 #include "common.hpp"
+#define ECS_ASSERT ASSERT
+#include <ecs/ecs.hpp>
+
 
 struct Module {
 	typedef void (*ModuleFunc)(uint msg, void* param);
@@ -17,7 +20,7 @@ struct Module {
 };
 
 
-class ModuleSystem : public System
+class ModuleSystem : public ecs::System
 {
 public:
 	void registerEmbeddedModule(const std::string name, Module::ModuleFunc func); // Only adds it to "search path", does not automatically "load" it so is not callable out-of-the-box (use "load" function as normal)

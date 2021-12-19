@@ -1,6 +1,8 @@
 #pragma once
 #include "common.hpp"
 #include "imgui/imgui.h"
+#define ECS_ASSERT ASSERT
+#include <ecs/ecs.hpp>
 #include <unordered_map>
 
 namespace ImGui {
@@ -10,7 +12,7 @@ namespace ImGui {
 	}
 };
 
-class ImGuiSystem : public System
+class ImGuiSystem : public ecs::System
 {
 public:
 	ImGuiSystem(struct SDL_Window* window, void* gl_context);
@@ -41,7 +43,7 @@ private:
 
 struct ScopedFont
 {
-	ScopedFont(Entities& entities, uint id) {
+	ScopedFont(ecs::Entities& entities, uint id) {
 		ImFont* font = entities.get_system<ImGuiSystem>().getFont(id);
 		ASSERT(font);
 		ImGui::PushFont(font);

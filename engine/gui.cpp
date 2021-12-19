@@ -4,6 +4,7 @@
 #include "imgui/imgui_impl_sdl.h"
 #include <SDL_events.h>
 
+using namespace ecs;
 
 ImGuiSystem::ImGuiSystem(SDL_Window* window, void* gl_context)
 {

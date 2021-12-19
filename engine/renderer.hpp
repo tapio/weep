@@ -2,21 +2,23 @@
 #include "common.hpp"
 #include "environment.hpp"
 #include "camera.hpp"
+#define ECS_ASSERT ASSERT
+#include <ecs/ecs.hpp>
 
 class RenderDevice;
 class Resources;
 struct Transform;
 struct Model;
 
-class RenderSystem : public System
+class RenderSystem : public ecs::System
 {
 public:
 	RenderSystem(Resources& resources);
 	~RenderSystem();
 
-	void render(Entities& entities, Camera& camera, const Transform& camTransform);
-	void reset(Entities& entities);
-	void destroy(Entity entity) override;
+	void render(ecs::Entities& entities, Camera& camera, const Transform& camTransform);
+	void reset(ecs::Entities& entities);
+	void destroy(ecs::Entity entity) override;
 
 	Camera getShadowCamera(const Camera& mainCamera, const Light& light) const;
 

@@ -4,6 +4,10 @@
 #include "resources.hpp"
 #include "module.hpp"
 #include "scene.hpp"
+#define ECS_ASSERT ASSERT
+#include <ecs/ecs.hpp>
+
+using namespace ecs;
 
 struct Game {
 	Entities& entities;

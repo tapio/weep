@@ -1,5 +1,7 @@
 #pragma once
 #include "common.hpp"
+#define ECS_ASSERT ASSERT
+#include <ecs/ecs.hpp>
 
 class Resources;
 
@@ -7,14 +9,14 @@ class SceneLoader
 {
 public:
 	SceneLoader() {}
-	SceneLoader(Entities& entities): world(&entities) {}
+	SceneLoader(ecs::Entities& entities): world(&entities) {}
 
 	void load(const string& path, Resources& resources);
 	void reset();
 
-	Entity instantiate(Json def, Resources& resources, const string& pathContext = "");
+	ecs::Entity instantiate(Json def, Resources& resources, const string& pathContext = "");
 
-	Entities* world = nullptr;
+	ecs::Entities* world = nullptr;
 	std::map<string, Json> prefabs;
 
 private:

@@ -8,6 +8,8 @@
 #include <glm/gtx/component_wise.hpp>
 #include <glm/gtx/intersect.hpp>
 
+using namespace ecs;
+
 #define USE_GRANULAR_GPU_PROFILER 0
 #if defined(USE_PROFILER) && USE_GRANULAR_GPU_PROFILER
 #define BEGIN_ENTITY_GPU_SAMPLE(prefix, ent) \

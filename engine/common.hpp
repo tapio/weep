@@ -13,10 +13,7 @@
 #include <SDL_assert.h>
 #define ASSERT SDL_assert
 #include <SDL_timer.h>
-#define ECS_ASSERT ASSERT
-#include <ecs/ecs.hpp>
 
-using namespace ecs;
 using std::string;
 using json11::Json;
 using glm::vec2;

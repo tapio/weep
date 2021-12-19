@@ -6,6 +6,8 @@
 #include "bullet/btBulletCollisionCommon.h"
 #include "bullet/btBulletDynamicsCommon.h"
 
+using namespace ecs;
+
 PhysicsSystem::PhysicsSystem()
 {
 	collisionConfiguration = new btDefaultCollisionConfiguration();

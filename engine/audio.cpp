@@ -4,6 +4,8 @@
 #include "components.hpp"
 #include <glm/gtc/random.hpp>
 
+using namespace ecs;
+
 static_assert(sizeof(uint) == sizeof(SoLoud::handle), "Audio handle size mismatch!");
 
 

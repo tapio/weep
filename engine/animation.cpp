@@ -2,6 +2,7 @@
 #include "components.hpp"
 #include "geometry.hpp"
 
+using namespace ecs;
 
 AnimationSystem::AnimationSystem()
 {

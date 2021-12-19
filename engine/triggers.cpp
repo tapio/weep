@@ -2,6 +2,8 @@
 #include "components.hpp"
 #include "module.hpp"
 
+using namespace ecs;
+
 TriggerSystem::TriggerSystem()
 {
 }

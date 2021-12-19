@@ -5,6 +5,7 @@
 #include <SDL_loadso.h>
 
 using namespace utils;
+using namespace ecs;
 
 static inline string getPath(const string& moduleName)
 {

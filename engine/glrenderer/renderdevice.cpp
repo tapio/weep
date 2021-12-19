@@ -10,6 +10,7 @@
 #include "environment.hpp"
 #include "image.hpp"
 #include <glm/gtc/matrix_inverse.hpp>
+#include <bitset>
 
 #define DEBUG_REFLECTION 0 // Draws dynamic cubemap to skybox
 

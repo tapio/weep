@@ -3,22 +3,24 @@
 #include "bullet/btBulletCollisionCommon.h"
 #include "bullet/btBulletDynamicsCommon.h"
 #include "bullet/BulletCollision/Gimpact/btGImpactShape.h"
+#define ECS_ASSERT ASSERT
+#include <ecs/ecs.hpp>
 
 struct RigidBody;
 
-class PhysicsSystem : public System
+class PhysicsSystem : public ecs::System
 {
 public:
 	PhysicsSystem();
 	~PhysicsSystem();
 	void reset();
 
-	bool add(Entity entity);
-	void destroy(Entity entity) override;
+	bool add(ecs::Entity entity);
+	void destroy(ecs::Entity entity) override;
 
-	void step(Entities& entities, float dt, bool fixedStep);
+	void step(ecs::Entities& entities, float dt, bool fixedStep);
 
-	Entity rayCast(Entities& entities, vec3 from, vec3 to);
+	ecs::Entity rayCast(ecs::Entities& entities, vec3 from, vec3 to);
 	bool testGroundHit(RigidBody& body);
 
 	btAlignedObjectArray<btCollisionShape*> collisionShapes;

@@ -21,6 +21,7 @@
 #define USE_DEBUG_NAMES
 #endif
 
+using namespace ecs;
 using utils::endsWith;
 
 namespace {
