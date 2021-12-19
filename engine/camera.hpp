@@ -1,6 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include "components.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
 #ifdef _WIN32
 // Windows defines these to nothing for some ancient compat reasons...

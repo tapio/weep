@@ -6,7 +6,6 @@
 #define GLM_FORCE_CXX11
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/norm.hpp>
 #define SDL_ASSERT_LEVEL 2
 #include <SDL_assert.h>
