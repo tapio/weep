@@ -1,6 +1,7 @@
 #include "common.hpp"
 #include "utils.hpp"
 #include <iostream>
+#include <unordered_map>
 #include <SDL.h>
 
 #if !defined(_WIN32) && !defined(WIN32)
