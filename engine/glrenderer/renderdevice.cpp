@@ -10,7 +10,10 @@
 #include "environment.hpp"
 #include "image.hpp"
 #include <glm/gtc/matrix_inverse.hpp>
+#include <json11/json11.hpp>
 #include <bitset>
+
+using json11::Json;
 
 #define DEBUG_REFLECTION 0 // Draws dynamic cubemap to skybox
 

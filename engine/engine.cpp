@@ -7,6 +7,7 @@
 #include "glad/glad.h"
 #endif
 
+using json11::Json;
 Json Engine::settings = Json();
 Engine* Engine::s_singleton = nullptr;
 

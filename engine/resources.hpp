@@ -1,6 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include <thread>
+#include <map>
 
 struct Image;
 struct Geometry;

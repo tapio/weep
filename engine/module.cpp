@@ -1,9 +1,11 @@
 #include "module.hpp"
 #include "utils.hpp"
+#include <json11/json11.hpp>
 #include <chrono>
 #include <thread>
 #include <SDL_loadso.h>
 
+using json11::Json;
 using namespace utils;
 using namespace ecs;
 

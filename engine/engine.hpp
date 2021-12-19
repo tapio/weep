@@ -1,6 +1,8 @@
 #pragma once
 #include "common.hpp"
 #include "threadpool.hpp"
+#include <json11/json11.hpp>
+
 
 class Engine
 {
@@ -39,7 +41,7 @@ public:
 		return s_singleton->m_threadpool;
 	}
 
-	static Json settings;
+	static json11::Json settings;
 
 private:
 	static Engine* s_singleton;

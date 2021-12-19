@@ -22,6 +22,7 @@
 #endif
 
 using namespace ecs;
+using json11::Json;
 using utils::endsWith;
 
 namespace {

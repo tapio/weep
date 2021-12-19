@@ -8,6 +8,7 @@
 #include <sstream>
 #include <fstream>
 #include <cstring>
+#include <map>
 #include "utils.hpp"
 
 namespace {

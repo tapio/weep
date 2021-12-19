@@ -13,6 +13,8 @@
 #include <glm/gtc/random.hpp>
 #include <SDL_events.h>
 
+using json11::Json;
+
 static vec3 startPos = up_axis;
 static vec3 goalPos = vec3(INFINITY, INFINITY, INFINITY);
 static float gameTime = 0;

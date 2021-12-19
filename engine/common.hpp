@@ -3,7 +3,6 @@
 #include <vector>
 #include <string>
 #include <cstdarg>
-#include <json11/json11.hpp>
 #define GLM_FORCE_CXX11
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -15,7 +14,6 @@
 #include <SDL_timer.h>
 
 using std::string;
-using json11::Json;
 using glm::vec2;
 using glm::vec3;
 using glm::vec4;

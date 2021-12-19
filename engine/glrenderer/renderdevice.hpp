@@ -139,7 +139,7 @@ private:
 	std::vector<ShaderProgram> m_shaders;
 	std::unordered_map<uint, int> m_shaderNames;
 	std::unordered_map<uint, int> m_shaderTags;
-	std::map<void*, Texture> m_textures;
+	std::unordered_map<void*, Texture> m_textures;
 	std::vector<GPUGeometry> m_geometries;
 	std::vector<std::vector<ParticleBuffer>> m_particleBuffers;
 	Environment* m_env = nullptr;

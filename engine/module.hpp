@@ -3,6 +3,10 @@
 #define ECS_ASSERT ASSERT
 #include <ecs/ecs.hpp>
 
+namespace json11 {
+	class Json;
+}
+
 
 struct Module {
 	typedef void (*ModuleFunc)(uint msg, void* param);
@@ -24,7 +28,7 @@ class ModuleSystem : public ecs::System
 {
 public:
 	void registerEmbeddedModule(const std::string name, Module::ModuleFunc func); // Only adds it to "search path", does not automatically "load" it so is not callable out-of-the-box (use "load" function as normal)
-	void load(const Json& modules, bool clear = true);
+	void load(const json11::Json& modules, bool clear = true);
 	void reload(uint module);
 	bool autoReload();
 

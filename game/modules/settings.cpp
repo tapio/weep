@@ -7,7 +7,9 @@
 #include "audio.hpp"
 #include "gui.hpp"
 #include "../game.hpp"
+#include <json11/json11.hpp>
 
+using json11::Json;
 
 EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 {
