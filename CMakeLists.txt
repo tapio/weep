@@ -146,9 +146,6 @@ endif()
 set(GAME_MAIN "game/main.cpp")
 list(REMOVE_ITEM GAME_SOURCES "${PROJECT_SOURCE_DIR}/${GAME_MAIN}")
 
-add_library(engine STATIC ${ENGINE_SOURCES})
-add_library(game STATIC ${GAME_SOURCES})
-
 macro(set_game_defs TARGET)
 	if(SHIPPING_BUILD)
 		target_compile_definitions(${TARGET} PRIVATE -DSHIPPING_BUILD=1)
@@ -157,6 +154,11 @@ macro(set_game_defs TARGET)
 		target_compile_definitions(${TARGET} PRIVATE -DEMBED_MODULES=1)
 	endif()
 endmacro()
+
+add_library(engine STATIC ${ENGINE_SOURCES})
+add_library(game STATIC ${GAME_SOURCES})
+set_game_defs(engine)
+set_game_defs(game)
 
 macro(set_props TARGET)
 	set_target_properties(${TARGET} PROPERTIES
@@ -179,7 +181,7 @@ set_game_defs(${EXE_NAME})
 set_target_properties(${EXE_NAME} PROPERTIES ENABLE_EXPORTS ON)
 set_target_properties(${EXE_NAME} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON) # CMake 3.4
 set_target_properties(${EXE_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-target_link_libraries(${EXE_NAME} PRIVATE game engine ${DEPS} ${LIBS})
+target_link_libraries(${EXE_NAME} PUBLIC game engine ${DEPS} ${LIBS})
 install(TARGETS ${EXE_NAME} DESTINATION ${INSTALL_DIR}/bin)
 
 # Game module plugins
@@ -196,14 +198,10 @@ else()
 	foreach(GAME_MODULE_FILE ${MODULES_SOURCES})
 		get_filename_component(GAME_MODULE_NAME ${GAME_MODULE_FILE} NAME_WE)
 		add_library(${GAME_MODULE_NAME} MODULE ${GAME_MODULE_FILE})
+		target_compile_definitions(${GAME_MODULE_NAME} PRIVATE -DMODULE_NAME=${GAME_MODULE_NAME})
 		set_props(${GAME_MODULE_NAME})
 		set_game_defs(${GAME_MODULE_NAME})
-		if(WIN32)
-			# TODO This is very suboptimal...
-			target_link_libraries(${GAME_MODULE_NAME} PRIVATE game engine ${DEPS} ${LIBS})
-		else()
-			target_link_libraries(${GAME_MODULE_NAME} ${EXE_NAME})
-		endif()
+		target_link_libraries(${GAME_MODULE_NAME} ${EXE_NAME})
 		install(TARGETS ${GAME_MODULE_NAME}
 				RUNTIME DESTINATION ${INSTALL_DIR}/bin
 				LIBRARY DESTINATION ${INSTALL_DIR}/bin

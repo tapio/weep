@@ -18,12 +18,16 @@ Messages that the engine sends automatically to all active modules:
 * **INIT**, param: Game*
 	* Sent when the module is loaded
 	* You could e.g. store the Game pointer to a static variable for later use
+* **RELOAD**, param: Game*
+	* Sent when the module code is hotloaded (but not the whole game)
+	* Generally should probably run most of the same stuff as **INIT** (e.g. static variables are reset on reload)
 * **INPUT**, param: SDL_Event*
 	* Sent for each SDL event unless the event was handled at the engine level
 * **UPDATE**, param: Game*
 	* Sent once per frame, after input messages
 * **DEINIT**, param: Game*
-	* Sent when the module is unloaded
+	* Sent when the module is unloaded on game exit or full scene reload
+	* Not sent on module-only reload (see **RELOAD**)
 
 
 Embedded Modules

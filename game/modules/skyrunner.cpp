@@ -107,15 +107,15 @@ static void doMainMenu(Game& game)
 }
 
 
-EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
+MODULE_EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 {
 	Game& game = *static_cast<Game*>(param);
 	switch (msg) {
 		case $id(INIT):
+		case $id(RELOAD):
 		{
-			game.engine.moduleInit();
-			ImGuiSystem& imgui = game.entities.get_system<ImGuiSystem>();
-			imgui.applyInternalState();
+			game.moduleInit();
+
 			gameTime = 0;
 			waitTime = 0;
 			break;

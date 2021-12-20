@@ -527,8 +527,7 @@ namespace ecs
 	{
 		static Entities& get(Entity::WorldIndex world) { return worlds[world]; }
 
-		static constexpr uint32_t MAX_WORLDS = 4;
-		static Entities worlds[MAX_WORLDS];
+		static Entities* worlds;
 	};
 
 	inline Entities& Entity::entities() const

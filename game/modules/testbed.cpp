@@ -6,11 +6,12 @@
 #include "engine.hpp"
 #include "../game.hpp"
 
-EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
+MODULE_EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 {
 	Game& game = *static_cast<Game*>(param);
 	switch (msg) {
 		case $id(INIT):
+		case $id(RELOAD):
 		{
 			game.engine.moduleInit();
 			ASSERT($id(Qwerty#$%) == id::hash("Qwerty#$%"));

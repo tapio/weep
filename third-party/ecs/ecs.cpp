@@ -4,7 +4,7 @@
 namespace ecs
 {
 
-	Entities ECS::worlds[MAX_WORLDS] = {{0}, {1}, {2}, {3}};
+	Entities* ECS::worlds = nullptr;
 
 	BaseComponent::Id BaseComponent::id_counter = 0;
 
@@ -134,8 +134,7 @@ namespace ecs
 	bool Entities::is_entity_alive(Entity e) const
 	{
 		const auto index = e.get_index();
-		ECS_ASSERT(index < versions.size());
-		return versions[index] == e.get_version();
+		return index < versions.size() && versions[index] == e.get_version();
 	}
 
 	const ComponentMask& Entities::get_component_mask(Entity e) const

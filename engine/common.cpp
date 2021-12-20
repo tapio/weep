@@ -119,11 +119,13 @@ void panic(const char* format, ...)
 }
 
 
-
 static std::unordered_map<string, CVarBase*> s_cvars;
 
 void CVarBase::registerCVar(const string& name, CVarBase* cvar)
 {
+#if defined(_WIN32) && !EMBED_MODULES
+	return; // Kludge for DLL crash
+#endif
 	if (name.empty()) { logError("Registering empty cvar!"); return; }
 	if (!cvar) { logError("Registering nullptr cvar!"); return; }
 	string nameLower = utils::tolower(name);

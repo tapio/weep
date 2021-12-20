@@ -7,15 +7,15 @@
 
 static Texture logoTex;
 
-EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
+MODULE_EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 {
 	Game& game = *static_cast<Game*>(param);
 	switch (msg) {
 		case $id(INIT):
+		case $id(RELOAD):
 		{
-			game.engine.moduleInit();
+			game.moduleInit();
 			ImGuiSystem& imgui = game.entities.get_system<ImGuiSystem>();
-			imgui.applyInternalState();
 			imgui.loadFont("logo-font", game.resources.findPath("fonts/Orbitron-Regular.ttf"), 14.f);
 			break;
 		}
@@ -23,6 +23,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 		{
 			if (!logoTex.valid()) {
 				Image* logoImg = game.resources.getImage("logo/weep-logo-32.png");
+				ASSERT(logoImg);
 				logoTex.create();
 				logoTex.upload(*logoImg);
 			}

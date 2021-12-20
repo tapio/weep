@@ -42,6 +42,35 @@ typedef int64_t int64;
 #define left_axis vec3(-1, 0, 0)
 #define right_axis vec3(1, 0, 0)
 
+#define NONCOPYABLE(T) \
+	T(T&&) = default; \
+	T(const T&) = delete; \
+	T& operator=(const T&) = delete
+
+
+#ifndef EMBED_MODULES
+	#define EMBED_MODULES 0
+#endif
+#if EMBED_MODULES
+	#define MODULE_EXPORT
+	#define WEEP_API
+#elif defined(_WIN32)
+	#define MODULE_EXPORT extern "C" __declspec(dllexport)
+	#ifdef MODULE_NAME
+		#define WEEP_API __declspec(dllimport)
+	#else
+		#define WEEP_API __declspec(dllexport)
+	#endif
+#else
+	#define MODULE_EXPORT extern "C"
+	#define WEEP_API
+#endif
+
+#ifndef MODULE_FUNC_NAME
+#define MODULE_FUNC_NAME ModuleFunc
+#endif
+
+
 string vlformat(const char* format, va_list vl);
 
 void logDebug(const char* format, ...);
@@ -92,27 +121,6 @@ struct id
 };
 #define $id(...) id::fnv1a(#__VA_ARGS__)
 
-
-#define NONCOPYABLE(T) \
-	T(T&&) = default; \
-	T(const T&) = delete; \
-	T& operator=(const T&) = delete
-
-
-#ifndef EMBED_MODULES
-#define EMBED_MODULES 0
-#endif
-#if EMBED_MODULES
-#define EXPORT
-#elif defined(_WIN32)
-#define EXPORT extern "C" __declspec(dllexport)
-#else
-#define EXPORT extern "C"
-#endif
-
-#ifndef MODULE_FUNC_NAME
-#define MODULE_FUNC_NAME ModuleFunc
-#endif
 
 #define COMBINE1(X,Y) X##Y
 #define COMBINE(X,Y) COMBINE1(X,Y)

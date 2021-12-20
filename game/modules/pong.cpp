@@ -73,15 +73,14 @@ static void steer(const string& paddleName, int dir) {
 	}
 }
 
-EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
+MODULE_EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 {
 	switch (msg) {
 		case $id(INIT):
+		case $id(RELOAD):
 		{
 			s_game = static_cast<Game*>(param);
-			s_game->engine.moduleInit();
-			ImGuiSystem& imgui = s_game->entities.get_system<ImGuiSystem>();
-			imgui.applyInternalState();
+			s_game->moduleInit();
 
 			reset();
 			break;

@@ -42,15 +42,14 @@ static void reloadShaders(Game& game)
 		s_shaderTimestamps[i] = timestamp(s_shaderFiles[i]);
 }
 
-EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
+MODULE_EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 {
 	Game& game = *static_cast<Game*>(param);
 	switch (msg) {
 		case $id(INIT):
+		case $id(RELOAD):
 		{
-			game.engine.moduleInit();
-			ImGuiSystem& imgui = game.entities.get_system<ImGuiSystem>();
-			imgui.applyInternalState();
+			game.moduleInit();
 			s_sceneTimestamp = timestamp(game.resources.findPath(game.scenePath));
 			s_shaderFiles = game.resources.listFiles("shaders/");
 			s_shaderTimestamps.resize(s_shaderFiles.size());
@@ -179,7 +178,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 						ImGui::Checkbox(it.second.name.c_str(), &it.second.enabled);
 						ImGui::SameLine();
 						if (!it.second.embedded && ImGui::Button(("Reload##" + it.second.name).c_str())) {
-							modules.reload(it.first);
+							modules.reload(it.first, &game); // Calls $id(RELOAD)
 							break; // Must break as iterator will be invalidated
 						}
 						ImGui::SameLine();
@@ -282,7 +281,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 		case $id(FRAME_END):
 		{
 			if (s_autoReloadModules)
-				game.entities.get_system<ModuleSystem>().autoReload();
+				game.entities.get_system<ModuleSystem>().autoReload(&game);
 			// Shader hotload
 			for (uint i = 0; s_autoReloadShaders && i < s_shaderFiles.size(); ++i) {
 				if (timestamp(s_shaderFiles[i]) > s_shaderTimestamps[i]) {
@@ -296,7 +295,7 @@ EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 				uint ts = timestamp(game.resources.findPath(game.scenePath));
 				if (ts > s_sceneTimestamp) {
 					logDebug("Scene change detected, reloading...");
-					sleep(100);
+					sleep(500);
 					s_sceneTimestamp = ts;
 					game.restoreCam = s_preserveCamOnReload;
 					game.reload = true;
