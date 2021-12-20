@@ -1,7 +1,6 @@
 #pragma once
 #include "common.hpp"
 #include "imgui/imgui.h"
-#define ECS_ASSERT ASSERT
 #include <ecs/ecs.hpp>
 #include <unordered_map>
 

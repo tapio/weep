@@ -2,7 +2,6 @@
 #include "common.hpp"
 #include "soloud.h"
 #include "soloud_wav.h"
-#define ECS_ASSERT ASSERT
 #include <ecs/ecs.hpp>
 #include <unordered_map>
 

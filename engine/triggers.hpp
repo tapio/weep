@@ -1,6 +1,5 @@
 #pragma once
 #include "common.hpp"
-#define ECS_ASSERT ASSERT
 #include <ecs/ecs.hpp>
 
 class TriggerSystem : public ecs::System

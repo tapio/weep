@@ -1,7 +1,6 @@
 #pragma once
 #include "common.hpp"
 #include <json11/json11.hpp>
-#define ECS_ASSERT ASSERT
 #include <ecs/ecs.hpp>
 
 class Resources;

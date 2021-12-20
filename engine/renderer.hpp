@@ -2,7 +2,6 @@
 #include "common.hpp"
 #include "environment.hpp"
 #include "camera.hpp"
-#define ECS_ASSERT ASSERT
 #include <ecs/ecs.hpp>
 
 class RenderDevice;

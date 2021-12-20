@@ -12,6 +12,8 @@
 #define ASSERT SDL_assert
 #include <SDL_timer.h>
 
+#define ECS_ASSERT ASSERT
+
 using std::string;
 using glm::vec2;
 using glm::vec3;

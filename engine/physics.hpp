@@ -3,7 +3,6 @@
 #include "bullet/btBulletCollisionCommon.h"
 #include "bullet/btBulletDynamicsCommon.h"
 #include "bullet/BulletCollision/Gimpact/btGImpactShape.h"
-#define ECS_ASSERT ASSERT
 #include <ecs/ecs.hpp>
 
 struct RigidBody;
