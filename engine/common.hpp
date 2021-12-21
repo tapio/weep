@@ -95,6 +95,7 @@ struct CVar: public CVarBase {
 	CVar(const std::string& name, T defaultValue = {}): CVarBase(name, (CVarBase::ValueType)defaultValue) { }
 	T operator()() const { return (T)value; }
 	void operator=(T v) { value = (CVarBase::ValueType)v; }
+	static CVar<T>* getCVar(const string& name) { return static_cast<CVar<T>*>(CVarBase::getCVar(name)); }
 };
 
 

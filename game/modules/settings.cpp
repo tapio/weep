@@ -49,19 +49,16 @@ MODULE_EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 
 			ImGui::SliderInt("Threads", (int*)&game.engine.threads, 0, 8);
 
-			int oldMsaa = Engine::settings["renderer"]["msaa"].number_value();
-			float msaa = log2(oldMsaa);
-			ImGui::SliderFloat("MSAA", &msaa, 0.f, 3.f, "%.0f");
-			int newMsaa = powf(2, msaa);
-			ImGui::SameLine(); ImGui::Text("%dx", newMsaa);
-			if (newMsaa != oldMsaa) {
-				// Aargh, I want mutable Json
-				Json::object settings = Engine::settings.object_items();
-				Json::object rendererSettings = settings["renderer"].object_items();
-				rendererSettings["msaa"] = Json(newMsaa);
-				settings["renderer"] = Json(rendererSettings);
-				Engine::settings = Json(settings);
-				renderer.device().resizeRenderTargets();
+			if (CVar<int>* cvar_msaa = CVar<int>::getCVar("r.msaaSamples")) {
+				int oldMsaa = glm::max((*cvar_msaa)(), 1);
+				float msaa = log2(oldMsaa);
+				ImGui::SliderFloat("MSAA", &msaa, 0.f, 3.f, "%.0f");
+				int newMsaa = powf(2, msaa);
+				ImGui::SameLine(); ImGui::Text("%dx", newMsaa);
+				if (newMsaa != oldMsaa) {
+					cvar_msaa->value = newMsaa;
+					renderer.device().resizeRenderTargets();
+				}
 			}
 
 			bool fxaa = renderer.env().postAA == Environment::POST_AA_FXAA;

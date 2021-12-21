@@ -10,7 +10,7 @@
 		"version": [4, 3],
 		"glslversion": "400 core",
 		"vsync": true,
-		"msaa": 8,
+		"msaaSamples": 4,
 		"shadowMapSize": 2048,
 		"shadowCubeSize": 512,
 		"reflectionCubeSize": 512

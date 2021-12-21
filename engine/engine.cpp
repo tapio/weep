@@ -71,7 +71,7 @@ void Engine::init(const string& configPath)
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	int msaa = settings["renderer"]["msaa"].int_value();
+	int msaa = settings["renderer"]["msaaSamples"].int_value();
 	if (msaa > 1) {
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, msaa);

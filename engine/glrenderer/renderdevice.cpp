@@ -21,6 +21,7 @@ using json11::Json;
 static CVar<int> cvar_shadowMapSize("r.shadowMapSize", 2048);
 static CVar<int> cvar_shadowCubeSize("r.shadowCubeSize", 512);
 static CVar<int> cvar_reflectionCubeSize("r.reflectionCubeSize", 512);
+static CVar<int> cvar_msaaSamples("r.msaaSamples", 1);
 
 static GLenum s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_LOW;
 
@@ -85,6 +86,7 @@ RenderDevice::RenderDevice(Resources& resources)
 	cvar_shadowMapSize.value = Engine::settings["renderer"]["shadowMapSize"].number_value();
 	cvar_shadowCubeSize.value = Engine::settings["renderer"]["shadowCubeSize"].number_value();
 	cvar_reflectionCubeSize.value = Engine::settings["renderer"]["reflectionCubeSize"].number_value();
+	cvar_msaaSamples.value = Engine::settings["renderer"]["msaaSamples"].number_value();
 
 	if (Engine::settings["renderer"]["gldebug"].bool_value()) {
 		s_debugMsgSeverityLevel = GL_DEBUG_SEVERITY_NOTIFICATION;
@@ -242,17 +244,17 @@ void RenderDevice::resizeRenderTargets()
 		if (m_reflectionFbo[i].valid())
 			m_reflectionFbo[i].destroy();
 	// Set up floating point framebuffer to render HDR scene to
-	int samples = Engine::settings["renderer"]["msaa"].number_value();
+	int samples = cvar_msaaSamples();
 	if (caps.gles && samples > 1) {
 		logWarning("MSAA is not currently supported on GLES3.");
 		samples = 0;
 	}
+	m_msaaFbo.samples = cvar_msaaSamples(); // Always match cvar value for change detection
 	if (samples > 1) {
 		m_msaaFbo.width = Engine::width();
 		m_msaaFbo.height = Engine::height();
 		m_msaaFbo.numTextures = 3;
 		m_msaaFbo.depthAttachment = 2;
-		m_msaaFbo.samples = samples;
 		m_msaaFbo.create();
 	}
 	m_fbo.width = Engine::width();
@@ -1189,6 +1191,8 @@ void RenderDevice::postRender()
 	} else if (MAX_SHADOW_CUBES > 0 && m_shadowFbo[MAX_SHADOW_MAPS].width != cvar_shadowCubeSize()) {
 		resizeRenderTargets();
 	} else if (MAX_REFLECTIONS > 0 && m_reflectionFbo[0].width != cvar_reflectionCubeSize()) {
+		resizeRenderTargets();
+	} else if (m_msaaFbo.samples != cvar_msaaSamples()) {
 		resizeRenderTargets();
 	}
 }
