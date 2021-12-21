@@ -501,6 +501,7 @@ Entity SceneLoader::instantiate(Json def, Resources& resources, const string& pa
 		else logError("Unknown light type \"%s\"", lightType.c_str());
 		setColor(light.color, lightDef["color"]);
 		setVec2(light.spotAngles, lightDef["spotAngles"]);
+		setNumber(light.distance, lightDef["intensity"]);
 		setNumber(light.distance, lightDef["distance"]);
 		setNumber(light.shadowDistance, lightDef["shadowDistance"]);
 		setNumber(light.decay, lightDef["decay"]);

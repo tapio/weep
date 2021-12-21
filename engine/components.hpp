@@ -165,8 +165,9 @@ struct Light
 
 	vec3 color = vec3(1, 1, 1);
 	vec2 spotAngles = vec2(10.f, 20.f); // Degrees
+	float intensity = 1.0f;
 	float distance = 1.0f;
-	float shadowDistance = -1.f;
+	float shadowDistance = -1.0f;
 	float decay = 1.0f;
 	float priority = 0.f;
 

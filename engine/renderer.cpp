@@ -235,7 +235,7 @@ void RenderSystem::render(Entities& entities, Camera& camera, const Transform& c
 		}
 		if (light.type == Light::DIRECTIONAL_LIGHT) {
 			light.direction = transform.forward();
-			light.priority = -glm::dot(light.color, vec3(1)); // Dir lights prioritized before anything else, based on intensity
+			light.priority = -glm::dot(light.color, vec3(light.intensity)); // Dir lights prioritized before anything else, based on intensity
 		} else {
 			// TODO: Better prioritizing
 			light.priority = glm::distance2(lightPrioTarget, light.position);

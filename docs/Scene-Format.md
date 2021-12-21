@@ -68,6 +68,7 @@ Each object (entity) can have the following properties (most are optional):
 * _"light"_: light emitter configuration object
 	* _"type"_: string, only "point" supported currently
 	* _"color"_: color
+	* _"intensity"_: float, multiplier for color, default: 1.0
 	* _"distance"_: float
 	* _"shadowDistance"_: float, override shadow distance (defaults to light distance, use 0 to disable shadow)
 	* _"decay"_: float, exponential light decay (1 = linear, 2 = quadratic...)

@@ -922,7 +922,7 @@ void RenderDevice::setupRenderPass(const Camera& camera, const std::vector<Light
 		UniformLightData& uniLight = m_lightBlock.uniforms.lights[i];
 		uniLight.type = (int)light.type;
 		uniLight.shadowIndex = light.shadowIndex;
-		uniLight.color = light.color;
+		uniLight.color = light.color * light.intensity;
 		uniLight.position = light.position;
 		uniLight.direction = light.direction;
 		uniLight.params = vec4(light.distance, light.decay, glm::cos(glm::radians(light.spotAngles.x)), glm::cos(glm::radians(light.spotAngles.y)));
