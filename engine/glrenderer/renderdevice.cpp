@@ -227,68 +227,81 @@ RenderDevice::RenderDevice(Resources& resources)
 	m_postProcessBlock.create();
 }
 
-void RenderDevice::resizeRenderTargets()
+void RenderDevice::resizeRenderTargets(int mask)
 {
 	logDebug("Creating render targets...");
-	if (m_msaaFbo.valid())
-		m_msaaFbo.destroy();
-	if (m_fbo.valid())
-		m_fbo.destroy();
-	for (uint i = 0; i < countof(m_pingPongFbo); ++i)
-		if (m_pingPongFbo[i].valid())
-			m_pingPongFbo[i].destroy();
-	for (uint i = 0; i < countof(m_shadowFbo); ++i)
-		if (m_shadowFbo[i].valid())
-			m_shadowFbo[i].destroy();
-	for (uint i = 0; i < countof(m_reflectionFbo); ++i)
-		if (m_reflectionFbo[i].valid())
-			m_reflectionFbo[i].destroy();
-	// Set up floating point framebuffer to render HDR scene to
-	int samples = cvar_msaaSamples();
-	if (caps.gles && samples > 1) {
-		logWarning("MSAA is not currently supported on GLES3.");
-		samples = 0;
+	if (mask & RENDER_TARGET_SCREEN) {
+		if (m_msaaFbo.valid())
+			m_msaaFbo.destroy();
+		if (m_fbo.valid())
+			m_fbo.destroy();
+		for (uint i = 0; i < countof(m_pingPongFbo); ++i)
+			if (m_pingPongFbo[i].valid())
+				m_pingPongFbo[i].destroy();
+
+		// Set up floating point framebuffer to render HDR scene to
+		int samples = cvar_msaaSamples();
+		if (caps.gles && samples > 1) {
+			logWarning("MSAA is not currently supported on GLES3.");
+			samples = 0;
+		}
+		m_msaaFbo.samples = cvar_msaaSamples(); // Always match cvar value for change detection
+		if (samples > 1) {
+			m_msaaFbo.width = Engine::width();
+			m_msaaFbo.height = Engine::height();
+			m_msaaFbo.numTextures = 3;
+			m_msaaFbo.depthAttachment = 2;
+			m_msaaFbo.create();
+		}
+		m_fbo.width = Engine::width();
+		m_fbo.height = Engine::height();
+		m_fbo.numTextures = 3;
+		m_fbo.depthAttachment = 2;
+		m_fbo.create();
+
+		for (uint i = 0; i < countof(m_pingPongFbo); ++i) {
+			m_pingPongFbo[i].width = Engine::width();
+			m_pingPongFbo[i].height = Engine::height();
+			m_pingPongFbo[i].numTextures = 1;
+			m_pingPongFbo[i].create();
+		}
 	}
-	m_msaaFbo.samples = cvar_msaaSamples(); // Always match cvar value for change detection
-	if (samples > 1) {
-		m_msaaFbo.width = Engine::width();
-		m_msaaFbo.height = Engine::height();
-		m_msaaFbo.numTextures = 3;
-		m_msaaFbo.depthAttachment = 2;
-		m_msaaFbo.create();
+	if (mask & RENDER_TARGET_SHADOW_MAPS) {
+		for (uint i = 0; i < MAX_SHADOW_MAPS; ++i)
+			if (m_shadowFbo[i].valid())
+				m_shadowFbo[i].destroy();
+		for (uint i = 0; i < MAX_SHADOW_MAPS; ++i) {
+			m_shadowFbo[i].width = cvar_shadowMapSize();
+			m_shadowFbo[i].height = m_shadowFbo[i].width;
+			m_shadowFbo[i].depthAttachment = 0;
+			m_shadowFbo[i].cube = false;
+			m_shadowFbo[i].create();
+		}
 	}
-	m_fbo.width = Engine::width();
-	m_fbo.height = Engine::height();
-	m_fbo.numTextures = 3;
-	m_fbo.depthAttachment = 2;
-	m_fbo.create();
-	for (uint i = 0; i < countof(m_pingPongFbo); ++i) {
-		m_pingPongFbo[i].width = Engine::width();
-		m_pingPongFbo[i].height = Engine::height();
-		m_pingPongFbo[i].numTextures = 1;
-		m_pingPongFbo[i].create();
+	if (mask & RENDER_TARGET_SHADOW_CUBES) {
+		for (uint i = MAX_SHADOW_MAPS; i < MAX_SHADOWS; ++i)
+			if (m_shadowFbo[i].valid())
+				m_shadowFbo[i].destroy();
+		for (uint i = MAX_SHADOW_MAPS; i < MAX_SHADOWS; ++i) {
+			m_shadowFbo[i].width = cvar_shadowCubeSize();
+			m_shadowFbo[i].height = m_shadowFbo[i].width;
+			m_shadowFbo[i].depthAttachment = 0;
+			m_shadowFbo[i].cube = true;
+			m_shadowFbo[i].create();
+		}
 	}
-	for (uint i = 0; i < MAX_SHADOW_MAPS; ++i) {
-		m_shadowFbo[i].width = cvar_shadowMapSize();
-		m_shadowFbo[i].height = m_shadowFbo[i].width;
-		m_shadowFbo[i].depthAttachment = 0;
-		m_shadowFbo[i].cube = false;
-		m_shadowFbo[i].create();
-	}
-	for (uint i = MAX_SHADOW_MAPS; i < MAX_SHADOWS; ++i) {
-		m_shadowFbo[i].width = cvar_shadowCubeSize();
-		m_shadowFbo[i].height = m_shadowFbo[i].width;
-		m_shadowFbo[i].depthAttachment = 0;
-		m_shadowFbo[i].cube = true;
-		m_shadowFbo[i].create();
-	}
-	for (uint i = 0; i < countof(m_reflectionFbo); ++i) {
-		m_reflectionFbo[i].width = cvar_reflectionCubeSize();
-		m_reflectionFbo[i].height = m_reflectionFbo[i].width;
-		m_reflectionFbo[i].numTextures = 2;
-		m_reflectionFbo[i].depthAttachment = 1;
-		m_reflectionFbo[i].cube = true;
-		m_reflectionFbo[i].create();
+	if (mask & RENDER_TARGET_REFLECTION_CUBES) {
+		for (uint i = 0; i < countof(m_reflectionFbo); ++i)
+			if (m_reflectionFbo[i].valid())
+				m_reflectionFbo[i].destroy();
+		for (uint i = 0; i < countof(m_reflectionFbo); ++i) {
+			m_reflectionFbo[i].width = cvar_reflectionCubeSize();
+			m_reflectionFbo[i].height = m_reflectionFbo[i].width;
+			m_reflectionFbo[i].numTextures = 2;
+			m_reflectionFbo[i].depthAttachment = 1;
+			m_reflectionFbo[i].cube = true;
+			m_reflectionFbo[i].create();
+		}
 	}
 }
 
@@ -1185,14 +1198,13 @@ void RenderDevice::postRender()
 	glUseProgram(0);
 
 	// Detect changed buffer sizes
-	// TODO: Do smarter updates with only what's needed
 	if (MAX_SHADOW_MAPS > 0 && m_shadowFbo[0].width != cvar_shadowMapSize()) {
-		resizeRenderTargets();
+		resizeRenderTargets(RENDER_TARGET_SHADOW_MAPS);
 	} else if (MAX_SHADOW_CUBES > 0 && m_shadowFbo[MAX_SHADOW_MAPS].width != cvar_shadowCubeSize()) {
-		resizeRenderTargets();
+		resizeRenderTargets(RENDER_TARGET_SHADOW_CUBES);
 	} else if (MAX_REFLECTIONS > 0 && m_reflectionFbo[0].width != cvar_reflectionCubeSize()) {
-		resizeRenderTargets();
+		resizeRenderTargets(RENDER_TARGET_REFLECTION_CUBES);
 	} else if (m_msaaFbo.samples != cvar_msaaSamples()) {
-		resizeRenderTargets();
+		resizeRenderTargets(RENDER_TARGET_SCREEN);
 	}
 }

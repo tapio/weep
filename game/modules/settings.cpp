@@ -38,7 +38,7 @@ MODULE_EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			ImGui::Checkbox("Fullscreen", &fullscreen);
 			if (fullscreen != oldFullscreen) {
 				game.engine.fullscreen(fullscreen);
-				renderer.device().resizeRenderTargets();
+				renderer.device().resizeRenderTargets(RenderDevice::RENDER_TARGET_SCREEN);
 			}
 
 			float volume = audio.soloud->getGlobalVolume();
@@ -57,7 +57,7 @@ MODULE_EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 				ImGui::SameLine(); ImGui::Text("%dx", newMsaa);
 				if (newMsaa != oldMsaa) {
 					cvar_msaa->value = newMsaa;
-					renderer.device().resizeRenderTargets();
+					renderer.device().resizeRenderTargets(RenderDevice::RENDER_TARGET_SCREEN);
 				}
 			}
 

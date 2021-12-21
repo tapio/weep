@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
 
 				if (keysym.sym == SDLK_RETURN && (keysym.mod & (KMOD_LALT | KMOD_RALT))) {
 					game.engine.fullscreen(!game.engine.fullscreen());
-					renderer.device().resizeRenderTargets();
+					renderer.device().resizeRenderTargets(RenderDevice::RENDER_TARGET_SCREEN);
 					continue;
 				}
 				else if (keysym.sym == SDLK_r && (keysym.mod & (KMOD_LCTRL|KMOD_LSHIFT)) == (KMOD_LCTRL|KMOD_LSHIFT)) {

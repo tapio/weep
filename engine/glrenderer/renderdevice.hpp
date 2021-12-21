@@ -45,7 +45,14 @@ public:
 	void beginTransparency();
 	void endTransparency();
 
-	void resizeRenderTargets();
+	enum {
+		RENDER_TARGET_SCREEN = 1,
+		RENDER_TARGET_SHADOW_MAPS = 2,
+		RENDER_TARGET_SHADOW_CUBES = 4,
+		RENDER_TARGET_REFLECTION_CUBES = 8,
+		RENDER_TARGET_ALL = 0xffffffff
+	};
+	void resizeRenderTargets(int mask = RENDER_TARGET_ALL);
 	void toggleWireframe();
 
 	void useMaterial(Material& material);
