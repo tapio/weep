@@ -24,6 +24,7 @@
 DECLARE_MODULE_FUNC(asteroids);
 DECLARE_MODULE_FUNC(console);
 DECLARE_MODULE_FUNC(devtools);
+DECLARE_MODULE_FUNC(fallingsand);
 DECLARE_MODULE_FUNC(logo);
 DECLARE_MODULE_FUNC(pong);
 DECLARE_MODULE_FUNC(settings);
@@ -49,6 +50,7 @@ void init(Game& game)
 	REGISTER_MODULE_FUNC(modules, asteroids);
 	REGISTER_MODULE_FUNC(modules, devtools);
 	REGISTER_MODULE_FUNC(modules, console);
+	REGISTER_MODULE_FUNC(modules, fallingsand);
 	REGISTER_MODULE_FUNC(modules, logo);
 	REGISTER_MODULE_FUNC(modules, pong);
 	REGISTER_MODULE_FUNC(modules, settings);
