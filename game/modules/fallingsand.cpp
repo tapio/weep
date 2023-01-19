@@ -9,7 +9,50 @@
 #include <glm/gtc/random.hpp>
 #include <utility>
 
-static Image worldImg(512, 512, 1);
+enum class MatType {
+	Empty,
+	Static,
+	Powder,
+	Liquid,
+	Gas
+};
+
+struct MatDef {
+	const char* name = "";
+	MatType type = MatType::Powder;
+	uint color = 0xffffffff;
+};
+static MatDef materials[] = {
+	{
+		"Empty",
+		MatType::Empty,
+		0x00000000
+	},
+	{
+		"Ground",
+		MatType::Static,
+		0xff0088cc
+	},
+	{
+		"Sand",
+		MatType::Powder,
+		0xff00ffff
+	},
+	{
+		"Water",
+		MatType::Liquid,
+		0xffff0000
+	},
+	{
+		"Steam",
+		MatType::Gas,
+		0xaaaaaaaa
+	}
+};
+constexpr uint NumMaterials = countof(materials);
+
+static Image worldBuf(512, 512, 1);
+static Image worldImg(worldBuf.width, worldBuf.height, 4);
 static Texture worldTex;
 
 inline unsigned char sample(const Image& img, int x, int y, unsigned char def = 1) {
@@ -18,12 +61,18 @@ inline unsigned char sample(const Image& img, int x, int y, unsigned char def = 
 	return img.data[x + y * img.width];
 }
 
-inline bool tryMove(int x, int y, int dx, int dy) {
+inline bool tryMove(MatType mat, int x, int y, int dx, int dy) {
 	const int newx = x + dx;
 	const int newy = y + dy;
-	if (sample(worldImg, newx, newy))
+	unsigned char targetMatId = sample(worldBuf, newx, newy, 255);
+	if (targetMatId == 255) // Invalid bounds blocks
 		return false;
-	std::swap(worldImg.data[x + y * worldImg.width], worldImg.data[newx + newy * worldImg.width]);
+	MatType targetMat = materials[targetMatId].type;
+	if (targetMat == MatType::Static || targetMat == MatType::Powder) // Static and powder always blocks
+		return false;
+	if (targetMat == mat) // Same material blocks
+		return false;
+	std::swap(worldBuf.data[x + y * worldBuf.width], worldBuf.data[newx + newy * worldBuf.width]);
 	return true;
 }
 
@@ -41,10 +90,11 @@ MODULE_EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 			worldTex.destroy();
 			worldTex.create();
 
-			for (int y = 0; y < worldImg.height; ++y) {
-				for (int x = 0; x < worldImg.width; ++x) {
-					unsigned char pix = glm::linearRand(0.f, 1.f) > 0.75f ? 255 : 0;
-					worldImg.data[x + y * worldImg.width] = pix;
+			// Initialize world
+			for (int y = 0; y < worldBuf.height; ++y) {
+				for (int x = 0; x < worldBuf.width; ++x) {
+					unsigned char matId = glm::linearRand(0u, NumMaterials-1);
+					worldBuf.data[x + y * worldBuf.width] = matId;
 				}
 			}
 			break;
@@ -52,14 +102,50 @@ MODULE_EXPORT void MODULE_FUNC_NAME(uint msg, void* param)
 		case $id(UPDATE):
 		{
 			// Update falling sand simulation
-			for (int y = worldImg.height - 1; y >= 0; --y) {
+			// Bottom to top, alternate between left-right / right-left
+			static bool leftToRight = true;
+			int xStart = leftToRight ? 0 : (worldBuf.width - 1);
+			int xEnd = leftToRight ? worldBuf.width : -1;
+			int xStep = leftToRight ? 1 : -1;
+			int xStep2 = leftToRight ? -1 : 1;
+			leftToRight = !leftToRight;
+			for (int y = worldBuf.height - 1; y >= 0; --y) {
+				for (int x = xStart; x != xEnd; x += xStep) {
+					MatDef mat = materials[sample(worldBuf, x, y, 0)];
+					if (mat.type == MatType::Powder) {
+						if (tryMove(mat.type, x, y, 0, 1))
+							continue;
+						if (tryMove(mat.type, x, y, xStep, 1))
+							continue;
+						if (tryMove(mat.type, x, y, xStep2, 1))
+							continue;
+					}
+					else if (mat.type == MatType::Liquid) {
+						if (tryMove(mat.type, x, y, 0, 1))
+							continue;
+						if (tryMove(mat.type, x, y, xStep, 0))
+							continue;
+						if (tryMove(mat.type, x, y, xStep2, 0))
+							continue;
+					}
+					else if (mat.type == MatType::Gas) {
+						if (tryMove(mat.type, x, y, 0, -1))
+							continue;
+						if (tryMove(mat.type, x, y, xStep, 0))
+							continue;
+						if (tryMove(mat.type, x, y, xStep2, 0))
+							continue;
+					}
+				}
+			}
+
+			// Update image pixels
+			uint rowBytes = worldImg.width * worldImg.channels;
+			for (int y = 0; y < worldImg.height; ++y) {
 				for (int x = 0; x < worldImg.width; ++x) {
-					if (tryMove(x, y, 0, 1))
-						continue;
-					if (tryMove(x, y, -1, 1))
-						continue;
-					if (tryMove(x, y, 1, 1))
-						continue;
+					unsigned char matId = worldBuf.data[x + y * worldBuf.width];
+					uint* pix = (uint*)&worldImg.data[(x * worldImg.channels) + y * rowBytes];
+					*pix = materials[matId].color;
 				}
 			}
 
